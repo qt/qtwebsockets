@@ -3,20 +3,20 @@
 #include <QTcpSocket>
 #include <QtEndian>
 
-class Fragment
+class Frame
 {
 public:
-	Fragment();
-	Fragment(const Fragment &other);
+	Frame();
+	Frame(const Frame &other);
 
-	const Fragment &operator =(const Fragment &other);
+	const Frame &operator =(const Frame &other);
 
 	WebSocketProtocol::CloseCode getCloseCode() const;
 	QString getCloseReason() const;
-	bool isFinalFragment() const;
-	bool isControlFragment() const;
-	bool isDataFragment() const;
-	bool isContinuationFragment() const;
+	bool isFinalFrame() const;
+	bool isControlFrame() const;
+	bool isDataFrame() const;
+	bool isContinuationFrame() const;
 	bool hasMask() const;
 	quint32 getMask() const;    //returns 0 if no mask
 	int getRsv1() const;
@@ -29,13 +29,13 @@ public:
 
 	bool isValid() const;
 
-	static Fragment readFragment(QTcpSocket *pSocket);
+	static Frame readFrame(QTcpSocket *pSocket);
 
 private:
 	//header
 	WebSocketProtocol::CloseCode m_closeCode;
 	QString m_closeReason;
-	bool m_isFinalFragment;
+	bool m_isFinalFrame;
 	quint32 m_mask;
 	int m_rsv1; //reserved field 1
 	int m_rsv2; //reserved field 2
@@ -62,10 +62,10 @@ private:
 	bool checkValidity();
 };
 
-Fragment::Fragment() :
+Frame::Frame() :
 	m_closeCode(WebSocketProtocol::CC_NORMAL),
 	m_closeReason(),
-	m_isFinalFragment(true),
+	m_isFinalFrame(true),
 	m_mask(0),
 	m_rsv1(0),
 	m_rsv2(0),
@@ -77,10 +77,10 @@ Fragment::Fragment() :
 {
 }
 
-Fragment::Fragment(const Fragment &other) :
+Frame::Frame(const Frame &other) :
 	m_closeCode(other.m_closeCode),
 	m_closeReason(other.m_closeReason),
-	m_isFinalFragment(other.m_isFinalFragment),
+	m_isFinalFrame(other.m_isFinalFrame),
 	m_mask(other.m_mask),
 	m_rsv1(other.m_rsv1),
 	m_rsv2(other.m_rsv2),
@@ -92,11 +92,11 @@ Fragment::Fragment(const Fragment &other) :
 {
 }
 
-const Fragment &Fragment::operator =(const Fragment &other)
+const Frame &Frame::operator =(const Frame &other)
 {
 	m_closeCode = other.m_closeCode;
 	m_closeReason = other.m_closeReason;
-	m_isFinalFragment = other.m_isFinalFragment;
+	m_isFinalFrame = other.m_isFinalFrame;
 	m_mask = other.m_mask;
 	m_rsv1 = other.m_rsv1;
 	m_rsv2 = other.m_rsv2;
@@ -109,76 +109,76 @@ const Fragment &Fragment::operator =(const Fragment &other)
 	return *this;
 }
 
-WebSocketProtocol::CloseCode Fragment::getCloseCode() const
+WebSocketProtocol::CloseCode Frame::getCloseCode() const
 {
 	return m_closeCode;
 }
 
-QString Fragment::getCloseReason() const
+QString Frame::getCloseReason() const
 {
 	return m_closeReason;
 }
 
-bool Fragment::isFinalFragment() const
+bool Frame::isFinalFrame() const
 {
-	return m_isFinalFragment;
+	return m_isFinalFrame;
 }
 
-bool Fragment::isControlFragment() const
+bool Frame::isControlFrame() const
 {
 	return (m_opCode & 0x08) == 0x08;
 }
 
-bool Fragment::isDataFragment() const
+bool Frame::isDataFrame() const
 {
-	return !isControlFragment();
+	return !isControlFrame();
 }
 
-bool Fragment::isContinuationFragment() const
+bool Frame::isContinuationFrame() const
 {
-	return isDataFragment() && (m_opCode == WebSocketProtocol::OC_CONTINUE);
+	return isDataFrame() && (m_opCode == WebSocketProtocol::OC_CONTINUE);
 }
 
-bool Fragment::hasMask() const
+bool Frame::hasMask() const
 {
 	return m_mask != 0;
 }
 
-quint32 Fragment::getMask() const
+quint32 Frame::getMask() const
 {
 	return m_mask;
 }
 
-int Fragment::getRsv1() const
+int Frame::getRsv1() const
 {
 	return m_rsv1;
 }
 
-int Fragment::getRsv2() const
+int Frame::getRsv2() const
 {
 	return m_rsv2;
 }
 
-int Fragment::getRsv3() const
+int Frame::getRsv3() const
 {
 	return m_rsv3;
 }
 
-WebSocketProtocol::OpCode Fragment::getOpCode() const
+WebSocketProtocol::OpCode Frame::getOpCode() const
 {
 	return m_opCode;
 }
 
-QByteArray Fragment::getPayload() const
+QByteArray Frame::getPayload() const
 {
 	return m_payload;
 }
 
-void Fragment::clear()
+void Frame::clear()
 {
 	m_closeCode = WebSocketProtocol::CC_NORMAL;
 	m_closeReason.clear();
-	m_isFinalFragment = true;
+	m_isFinalFrame = true;
 	m_mask = 0;
 	m_rsv1 = 0;
 	m_rsv2 =0;
@@ -189,18 +189,18 @@ void Fragment::clear()
 	m_isValid = false;
 }
 
-bool Fragment::isValid() const
+bool Frame::isValid() const
 {
 	return m_isValid;
 }
 
 #define WAIT_FOR_MORE_DATA(dataSizeInBytes)  { returnState = processingState; processingState = PS_WAIT_FOR_MORE_DATA; dataWaitSize = dataSizeInBytes; }
 
-Fragment Fragment::readFragment(QTcpSocket *pSocket)
+Frame Frame::readFrame(QTcpSocket *pSocket)
 {
 	bool isDone = false;
 	qint64 bytesRead = 0;
-	Fragment fragment;
+	Frame frame;
 	ProcessingState processingState = PS_READ_HEADER;
 	ProcessingState returnState = PS_READ_HEADER;
 	quint64 dataWaitSize = 0;
@@ -216,7 +216,7 @@ Fragment Fragment::readFragment(QTcpSocket *pSocket)
 				bool result = pSocket->waitForReadyRead(1000);
 				if (!result)                                      //timeout
 				{
-					fragment.setError(WebSocketProtocol::CC_GOING_AWAY, "Timeout when reading data from socket.");
+					frame.setError(WebSocketProtocol::CC_GOING_AWAY, "Timeout when reading data from socket.");
 					isDone = true;
 				}
 				else
@@ -232,17 +232,17 @@ Fragment Fragment::readFragment(QTcpSocket *pSocket)
 					//FIN, RSV1-3, Opcode
 					char header[2] = {0};
 					bytesRead = pSocket->read(header, 2);
-					fragment.m_isFinalFragment = (header[0] & 0x80) != 0;
-					fragment.m_rsv1 = (header[0] & 0x40);
-					fragment.m_rsv2 = (header[0] & 0x20);
-					fragment.m_rsv3 = (header[0] & 0x10);
-					fragment.m_opCode = static_cast<WebSocketProtocol::OpCode>(header[0] & 0x0F);
+					frame.m_isFinalFrame = (header[0] & 0x80) != 0;
+					frame.m_rsv1 = (header[0] & 0x40);
+					frame.m_rsv2 = (header[0] & 0x20);
+					frame.m_rsv3 = (header[0] & 0x10);
+					frame.m_opCode = static_cast<WebSocketProtocol::OpCode>(header[0] & 0x0F);
 
 					//Mask, PayloadLength
 					hasMask = (header[1] & 0x80) != 0;
-					fragment.m_length = (header[1] & 0x7F);
+					frame.m_length = (header[1] & 0x7F);
 
-					switch (fragment.m_length)
+					switch (frame.m_length)
 					{
 						case 126:
 						{
@@ -256,12 +256,12 @@ Fragment Fragment::readFragment(QTcpSocket *pSocket)
 						}
 						default:
 						{
-							payloadLength = fragment.m_length;
+							payloadLength = frame.m_length;
 							processingState = hasMask ? PS_READ_MASK : PS_READ_PAYLOAD;
 							break;
 						}
 					}
-					if (!fragment.checkValidity())
+					if (!frame.checkValidity())
 					{
 						isDone = true;
 					}
@@ -315,7 +315,7 @@ Fragment Fragment::readFragment(QTcpSocket *pSocket)
 				if (pSocket->bytesAvailable() >= 4)
 				{
 					//TODO: Handle return value
-					bytesRead = pSocket->read(reinterpret_cast<char *>(&fragment.m_mask), sizeof(fragment.m_mask));
+					bytesRead = pSocket->read(reinterpret_cast<char *>(&frame.m_mask), sizeof(frame.m_mask));
 					processingState = PS_READ_PAYLOAD;
 				}
 				else
@@ -337,10 +337,10 @@ Fragment Fragment::readFragment(QTcpSocket *pSocket)
 					quint64 bytesAvailable = static_cast<quint64>(pSocket->bytesAvailable());
 					if (bytesAvailable >= payloadLength)
 					{
-						fragment.m_payload = pSocket->read(payloadLength);
+						frame.m_payload = pSocket->read(payloadLength);
 						if (hasMask)
 						{
-							WebSocketProtocol::mask(&fragment.m_payload, fragment.m_mask);
+							WebSocketProtocol::mask(&frame.m_payload, frame.m_mask);
 						}
 						processingState = PS_DISPATCH_RESULT;
 					}
@@ -363,17 +363,17 @@ Fragment Fragment::readFragment(QTcpSocket *pSocket)
 			{
 				//should not come here
 				qDebug() << "DataProcessor::process: Found invalid state. This should not happen!";
-				fragment.clear();
+				frame.clear();
 				isDone = true;
 				break;
 			}
 		}	//end switch
 	}
 
-	return fragment;
+	return frame;
 }
 
-void Fragment::setError(WebSocketProtocol::CloseCode code, QString closeReason)
+void Frame::setError(WebSocketProtocol::CloseCode code, QString closeReason)
 {
 	clear();
 	m_closeCode = code;
@@ -381,7 +381,7 @@ void Fragment::setError(WebSocketProtocol::CloseCode code, QString closeReason)
 	m_isValid = false;
 }
 
-bool Fragment::checkValidity()
+bool Frame::checkValidity()
 {
 	if (!isValid())
 	{
@@ -393,13 +393,13 @@ bool Fragment::checkValidity()
 		{
 			setError(WebSocketProtocol::CC_PROTOCOL_ERROR, "Used reserved opcode");
 		}
-		else if (isControlFragment())
+		else if (isControlFrame())
 		{
 			if (m_length > 125)
 			{
 				setError(WebSocketProtocol::CC_PROTOCOL_ERROR, "Controle frame is larger than 125 bytes");
 			}
-			else if (!m_isFinalFragment)
+			else if (!m_isFinalFrame)
 			{
 				setError(WebSocketProtocol::CC_PROTOCOL_ERROR, "Controle frames cannot be fragmented");
 			}
@@ -419,13 +419,13 @@ bool Fragment::checkValidity()
 DataProcessor::DataProcessor(QObject *parent) :
 	QObject(parent),
 	m_processingState(PS_READ_HEADER),
-	m_isFinalFragment(false),
+	m_isFinalFrame(false),
 	m_isFragmented(false),
 	m_opCode(WebSocketProtocol::OC_CLOSE),
 	m_isControlFrame(false),
 	m_hasMask(false),
 	m_mask(0),
-	m_frame(),
+	m_message(),
 	m_payloadLength(0)
 {
 }
@@ -440,37 +440,45 @@ void DataProcessor::process(QTcpSocket *pSocket)
 
 	while (!isDone)
 	{
-		Fragment fragment = Fragment::readFragment(pSocket);
-		if (fragment.isValid())
+		Frame frame = Frame::readFrame(pSocket);
+		if (frame.isValid())
 		{
-			if (fragment.isControlFragment())
+			if (frame.isControlFrame())
 			{
-				Q_EMIT frameReceived(fragment.getOpCode(), fragment.getPayload(), true);
+				Q_EMIT frameReceived(frame.getOpCode(), frame.getPayload(), true);
 				isDone = true;  //exit the loop after a control frame, so we can get a chance to close the socket if necessary
 			}
 			else    //we have a dataframe
 			{
-				if (!m_isFragmented && fragment.isContinuationFragment())
+				if (!m_isFragmented && frame.isContinuationFrame())
 				{
 					clear();
 					Q_EMIT errorEncountered(WebSocketProtocol::CC_PROTOCOL_ERROR, "Received Continuation frame /*with FIN=true*/, while there is nothing to continue.");
 					return;
 				}
-				if (m_isFragmented && fragment.isDataFragment() && !fragment.isContinuationFragment())
+				if (m_isFragmented && frame.isDataFrame() && !frame.isContinuationFrame())
 				{
 					clear();
 					Q_EMIT errorEncountered(WebSocketProtocol::CC_PROTOCOL_ERROR, "All data frames after the initial data frame must have opcode 0");
 					return;
 				}
-				if (!fragment.isContinuationFragment())
+				if (!frame.isContinuationFrame())
 				{
-					m_opCode = fragment.getOpCode();
-					m_isFragmented = !fragment.isFinalFragment();
+					m_opCode = frame.getOpCode();
+					m_isFragmented = !frame.isFinalFrame();
 				}
-				m_frame.append(fragment.getPayload());
-				if (fragment.isFinalFragment())
+				Q_EMIT frameReceived(m_opCode, frame.getPayload(), frame.isFinalFrame());
+				m_message.append(frame.getPayload());
+				if (frame.isFinalFrame())
 				{
-					Q_EMIT frameReceived(m_opCode, m_frame, m_isFinalFragment);
+					if (m_opCode == WebSocketProtocol::OC_TEXT)
+					{
+						Q_EMIT textMessageReceived(QString::fromLatin1(m_message));
+					}
+					else
+					{
+						Q_EMIT binaryMessageReceived(m_message);
+					}
 					clear();
 					isDone = true;
 				}
@@ -478,7 +486,7 @@ void DataProcessor::process(QTcpSocket *pSocket)
 		}
 		else
 		{
-			Q_EMIT errorEncountered(fragment.getCloseCode(), fragment.getCloseReason());
+			Q_EMIT errorEncountered(frame.getCloseCode(), frame.getCloseReason());
 			clear();
 			isDone = true;
 		}
@@ -488,11 +496,11 @@ void DataProcessor::process(QTcpSocket *pSocket)
 void DataProcessor::clear()
 {
 	m_processingState = PS_READ_HEADER;
-	m_isFinalFragment = false;
+	m_isFinalFrame = false;
 	m_isFragmented = false;
 	m_opCode = WebSocketProtocol::OC_CLOSE;
 	m_hasMask = false;
 	m_mask = 0;
-	m_frame.clear();
+	m_message.clear();
 	m_payloadLength = 0;
 }

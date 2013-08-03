@@ -16,7 +16,9 @@ public:
 
 Q_SIGNALS:
 	void frameReceived(WebSocketProtocol::OpCode opCode, QByteArray frame, bool lastFrame);
-    void errorEncountered(WebSocketProtocol::CloseCode code, QString description);
+	void textMessageReceived(QString message);
+	void binaryMessageReceived(QByteArray message);
+	void errorEncountered(WebSocketProtocol::CloseCode code, QString description);
 
 public Q_SLOTS:
 	void process(QTcpSocket *pSocket);
@@ -34,13 +36,13 @@ private:
 		PS_DISPATCH_RESULT
 	} m_processingState;
 
-	bool m_isFinalFragment;
-    bool m_isFragmented;
+	bool m_isFinalFrame;
+	bool m_isFragmented;
 	WebSocketProtocol::OpCode m_opCode;
-    bool m_isControlFrame;
+	bool m_isControlFrame;
 	bool m_hasMask;
 	quint32 m_mask;
-	QByteArray m_frame;
+	QByteArray m_message;
 	quint64 m_payloadLength;
 };
 
