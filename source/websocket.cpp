@@ -238,6 +238,8 @@ void WebSocket::makeConnections(const QTcpSocket *pTcpSocket)
 	connect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(processData()));
 
 	connect(&m_dataProcessor, SIGNAL(frameReceived(WebSocketProtocol::OpCode, QByteArray, bool)), this, SLOT(processFrame(WebSocketProtocol::OpCode, QByteArray, bool)));
+	connect(&m_dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)), this, SIGNAL(binaryMessageReceived(QByteArray)));
+	connect(&m_dataProcessor, SIGNAL(textMessageReceived(QString)), this, SIGNAL(textMessageReceived(QString)));
 	connect(&m_dataProcessor, SIGNAL(errorEncountered(WebSocketProtocol::CloseCode,QString)), this, SLOT(close(WebSocketProtocol::CloseCode,QString)));
 }
 
@@ -664,7 +666,6 @@ void WebSocket::processData()
 
 void WebSocket::processFrame(WebSocketProtocol::OpCode opCode, QByteArray frame, bool isLastFrame)
 {
-	//qDebug() << "Processing frame:" << frame << "opcode:" << opCode;
 	switch (opCode)
 	{
 		case WebSocketProtocol::OC_BINARY:
@@ -674,13 +675,11 @@ void WebSocket::processFrame(WebSocketProtocol::OpCode opCode, QByteArray frame,
 		}
 		case WebSocketProtocol::OC_TEXT:
 		{
-		//qDebug() << "Processing text frame:" << frame << "opcode:" << opCode;
 			Q_EMIT textFrameReceived(QString::fromLatin1(frame), isLastFrame);
 			break;
 		}
 		case WebSocketProtocol::OC_PING:
 		{
-		//qDebug() << "Processing ping frame:" << frame;
 			quint32 maskingKey = 0;
 			if (m_mustMask)
 			{
@@ -710,7 +709,6 @@ void WebSocket::processFrame(WebSocketProtocol::OpCode opCode, QByteArray frame,
 			{
 				closeCode = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(frame.constData()));
 				closeReason = QString::fromUtf8(frame.remove(0, 2));
-				//qDebug() << "Received closing handshake with code" << closeCode;
 				if (!WebSocketProtocol::isCloseCodeValid(closeCode))
 				{
 					closeCode = WebSocketProtocol::CC_PROTOCOL_ERROR;
