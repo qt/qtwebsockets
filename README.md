@@ -26,7 +26,6 @@ Missing Features
 * WSS protocol
 * Checks on valid UTF-8 sequences
 * Extensions and sub-protocols
-* Currently only frame-based signals are generated
 
 License
 -------
