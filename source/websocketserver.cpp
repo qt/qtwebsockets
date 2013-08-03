@@ -1,9 +1,6 @@
 #include "websocketserver.h"
 #include <QTcpServer>
-#include <QTextStream>
-#include <QUrl>
 #include <QTcpSocket>
-#include <QDateTime>
 #include <QNetworkProxy>
 #include "websocketprotocol.h"
 #include "handshakerequest.h"

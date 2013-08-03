@@ -19,16 +19,15 @@
 
 #include <QUrl>
 #include <QAbstractSocket>
-#include <QSharedDataPointer>
 #include <QHostAddress>
 #include "websocketprotocol.h"
 #include "dataprocessor.h"
-#include <QTcpSocket>
 #include <QNetworkProxy>
 #include <QTime>
 
 class HandshakeRequest;
 class HandshakeResponse;
+class QTcpSocket;
 
 class WebSocket:public QObject
 {
@@ -67,11 +66,11 @@ public:
 	QString getExtension();
 
 	//WebSocket functionality
-    /**
-     * @brief Sends a text message over the websocket
-     * @param message The message to send
-     * @return The number of bytes that have been sent
-     */
+	/**
+	 * @brief Sends a text message over the websocket
+	 * @param message The message to send
+	 * @return The number of bytes that have been sent
+	 */
 	qint64 send(const char *message);
 	qint64 send(const QString &message);	//send data as text
 	qint64 send(const QByteArray &data);	//send data as binary
