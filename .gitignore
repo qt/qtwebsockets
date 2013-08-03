@@ -1,0 +1,6 @@
+examples/websocketserver/moc_dataprocessor.cpp
+examples/websocketserver/moc_handshakeresponse.cpp
+examples/websocketserver/moc_helloworldserver.cpp
+examples/websocketserver/moc_websocket.cpp
+examples/websocketserver/moc_websocketserver.cpp
+examples/websocketserver/websocketserver
