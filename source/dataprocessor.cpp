@@ -216,7 +216,6 @@ Fragment Fragment::readFragment(QTcpSocket *pSocket)
 				bool result = pSocket->waitForReadyRead(1000);
 				if (!result)                                      //timeout
 				{
-					qDebug() << "Timeout" << dataWaitSize << "bytesAvail" << pSocket->bytesAvailable();
 					fragment.setError(WebSocketProtocol::CC_GOING_AWAY, "Timeout when reading data from socket.");
 					isDone = true;
 				}
@@ -338,7 +337,6 @@ Fragment Fragment::readFragment(QTcpSocket *pSocket)
 					quint64 bytesAvailable = static_cast<quint64>(pSocket->bytesAvailable());
 					if (bytesAvailable >= payloadLength)
 					{
-						//QByteArray payload = pSocket->read(bytesLeftToRead);
 						fragment.m_payload = pSocket->read(payloadLength);
 						if (hasMask)
 						{

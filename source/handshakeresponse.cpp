@@ -8,7 +8,6 @@
 #include <QCryptographicHash>
 #include <QSet>
 #include <QList>
-#include <QDebug>
 
 HandshakeResponse::HandshakeResponse(const HandshakeRequest &request,
 									 const QList<WebSocketProtocol::Version> &supportedVersions,
