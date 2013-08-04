@@ -4,3 +4,10 @@ examples/websocketserver/moc_helloworldserver.cpp
 examples/websocketserver/moc_websocket.cpp
 examples/websocketserver/moc_websocketserver.cpp
 examples/websocketserver/websocketserver
+build-examples-Qt_5_1_0_clang_64_temporary-Debug/websocketserver/moc_dataprocessor.cpp
+build-examples-Qt_5_1_0_clang_64_temporary-Debug/websocketserver/moc_handshakeresponse.cpp
+build-examples-Qt_5_1_0_clang_64_temporary-Debug/websocketserver/moc_helloworldserver.cpp
+build-examples-Qt_5_1_0_clang_64_temporary-Debug/websocketserver/moc_websocket.cpp
+build-examples-Qt_5_1_0_clang_64_temporary-Debug/websocketserver/moc_websocketserver.cpp
+build-examples-Qt_5_1_0_clang_64_temporary-Debug/websocketserver/websocketserver
+examples/examples.pro.user.2.7pre1
