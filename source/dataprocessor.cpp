@@ -2,6 +2,12 @@
 #include "websocketprotocol.h"
 #include <QTcpSocket>
 #include <QtEndian>
+#include <limits.h>
+#include <QTextCodec>
+#include <QTextDecoder>
+
+const quint64 MAX_FRAME_SIZE_IN_BYTES = INT_MAX - 1;
+const quint64 MAX_MESSAGE_SIZE_IN_BYTES = INT_MAX - 1;
 
 class Frame
 {
@@ -32,7 +38,6 @@ public:
 	static Frame readFrame(QTcpSocket *pSocket);
 
 private:
-	//header
 	WebSocketProtocol::CloseCode m_closeCode;
 	QString m_closeReason;
 	bool m_isFinalFrame;
@@ -201,9 +206,9 @@ Frame Frame::readFrame(QTcpSocket *pSocket)
 	bool isDone = false;
 	qint64 bytesRead = 0;
 	Frame frame;
+	quint64 dataWaitSize = 0;
 	ProcessingState processingState = PS_READ_HEADER;
 	ProcessingState returnState = PS_READ_HEADER;
-	quint64 dataWaitSize = 0;
 	bool hasMask = false;
 	quint64 payloadLength = 0;
 
@@ -213,8 +218,8 @@ Frame Frame::readFrame(QTcpSocket *pSocket)
 		{
 			case PS_WAIT_FOR_MORE_DATA:
 			{
-				bool result = pSocket->waitForReadyRead(1000);
-				if (!result)                                      //timeout
+				bool ok = pSocket->waitForReadyRead(5000);
+				if (!ok)
 				{
 					frame.setError(WebSocketProtocol::CC_GOING_AWAY, "Timeout when reading data from socket.");
 					isDone = true;
@@ -327,9 +332,13 @@ Frame Frame::readFrame(QTcpSocket *pSocket)
 
 			case PS_READ_PAYLOAD:
 			{
-				// TODO: Handle large payloads
 				if (!payloadLength)
 				{
+					processingState = PS_DISPATCH_RESULT;
+				}
+				else if (payloadLength > MAX_FRAME_SIZE_IN_BYTES)
+				{
+					frame.setError(WebSocketProtocol::CC_TOO_MUCH_DATA, "Maximum framesize exceeded.");
 					processingState = PS_DISPATCH_RESULT;
 				}
 				else
@@ -425,13 +434,23 @@ DataProcessor::DataProcessor(QObject *parent) :
 	m_isControlFrame(false),
 	m_hasMask(false),
 	m_mask(0),
-	m_message(),
-	m_payloadLength(0)
+	m_binaryMessage(),
+	m_textMessage(),
+	m_payloadLength(0),
+	m_pConverterState(0),
+	m_pTextCodec(QTextCodec::codecForName("UTF-8"))
 {
+	clear();
 }
 
 DataProcessor::~DataProcessor()
 {
+	clear();
+	if (m_pConverterState)
+	{
+		delete m_pConverterState;
+		m_pConverterState = 0;
+	}
 }
 
 void DataProcessor::process(QTcpSocket *pSocket)
@@ -467,17 +486,44 @@ void DataProcessor::process(QTcpSocket *pSocket)
 					m_opCode = frame.getOpCode();
 					m_isFragmented = !frame.isFinalFrame();
 				}
+				quint64 messageLength = (quint64)(m_opCode == WebSocketProtocol::OC_TEXT) ? m_textMessage.length() : m_binaryMessage.length();
+				if ((messageLength + quint64(frame.getPayload().length())) > MAX_MESSAGE_SIZE_IN_BYTES)
+				{
+					clear();
+					Q_EMIT errorEncountered(WebSocketProtocol::CC_TOO_MUCH_DATA, "Received message is too big.");
+					return;
+				}
+
+				if (m_opCode == WebSocketProtocol::OC_TEXT)
+				{
+					QString frameTxt = m_pTextCodec->toUnicode(frame.getPayload().constData(), frame.getPayload().size(), m_pConverterState);
+					bool failed = (m_pConverterState->invalidChars != 0) || (frame.isFinalFrame() && (m_pConverterState->remainingChars != 0));
+					if (failed)
+					{
+						clear();
+						Q_EMIT errorEncountered(WebSocketProtocol::CC_WRONG_DATATYPE, "Invalid UTF-8 code encountered.");
+						return;
+					}
+					else
+					{
+						m_textMessage.append(frameTxt);
+					}
+				}
+				else
+				{
+					m_binaryMessage.append(frame.getPayload());
+				}
 				Q_EMIT frameReceived(m_opCode, frame.getPayload(), frame.isFinalFrame());
-				m_message.append(frame.getPayload());
+
 				if (frame.isFinalFrame())
 				{
 					if (m_opCode == WebSocketProtocol::OC_TEXT)
 					{
-						Q_EMIT textMessageReceived(QString::fromLatin1(m_message));
+						Q_EMIT textMessageReceived(m_textMessage);
 					}
 					else
 					{
-						Q_EMIT binaryMessageReceived(m_message);
+						Q_EMIT binaryMessageReceived(m_binaryMessage);
 					}
 					clear();
 					isDone = true;
@@ -501,6 +547,19 @@ void DataProcessor::clear()
 	m_opCode = WebSocketProtocol::OC_CLOSE;
 	m_hasMask = false;
 	m_mask = 0;
-	m_message.clear();
+	m_binaryMessage.clear();
+	m_textMessage.clear();
 	m_payloadLength = 0;
+	if (m_pConverterState)
+	{
+		if ((m_pConverterState->remainingChars != 0) || (m_pConverterState->invalidChars != 0))
+		{
+			delete m_pConverterState;
+			m_pConverterState = 0;
+		}
+	}
+	if (!m_pConverterState)
+	{
+		m_pConverterState = new QTextCodec::ConverterState(QTextCodec::ConvertInvalidToNull | QTextCodec::IgnoreHeader);
+	}
 }

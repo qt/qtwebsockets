@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QByteArray>
+#include <QString>
+#include <QTextCodec>
 #include "websocketprotocol.h"
 
 class QTcpSocket;
@@ -42,8 +44,11 @@ private:
 	bool m_isControlFrame;
 	bool m_hasMask;
 	quint32 m_mask;
-	QByteArray m_message;
+	QByteArray m_binaryMessage;
+	QString m_textMessage;
 	quint64 m_payloadLength;
+	QTextCodec::ConverterState *m_pConverterState;
+	QTextCodec *m_pTextCodec;
 };
 
 #endif // DATAPROCESSOR_H
