@@ -19,8 +19,7 @@
 	@brief The class WebSocket implements a tcp socket that talks the websocket protocol.
 */
 
-//const int MAX_FRAME_SIZE_IN_BYTES = 512*512*2;	//one CT slice fits perfectly in one frame
-const quint64 MAX_FRAME_SIZE_IN_BYTES = 512 * 512 * 2;	//one CT slice fits perfectly in one frame
+const quint64 FRAME_SIZE_IN_BYTES = 512 * 512 * 2;	//maximum size of a frame when sending a message
 
 /**
  * @brief WebSocket::WebSocket
@@ -82,8 +81,9 @@ WebSocket::~WebSocket()
 {
 	if (state() == QAbstractSocket::ConnectedState)
 	{
-		qDebug() << "GOING_AWAY, connection closed.";
+		//qDebug() << "GOING_AWAY, connection closed.";
 		close(WebSocketProtocol::CC_GOING_AWAY, "Connection closed");
+		releaseConnections(m_pSocket);
 	}
 }
 
@@ -121,7 +121,7 @@ QString WebSocket::errorString() const
  */
 qint64 WebSocket::send(const char *message)
 {
-	return send(QString::fromLatin1(message));
+	return send(QString::fromUtf8(message));
 }
 
 /**
@@ -131,7 +131,7 @@ qint64 WebSocket::send(const char *message)
  */
 qint64 WebSocket::send(const QString &message)
 {
-	return doWriteData(message.toLatin1(), false);
+	return doWriteData(message.toUtf8(), false);
 }
 
 /**
@@ -193,16 +193,13 @@ void WebSocket::close(WebSocketProtocol::CloseCode closeCode, QString reason)
 
 		m_isClosingHandshakeSent = true;
 
-		//qDebug() << "Sent closing handshake";
-
-		setSocketState(QAbstractSocket::ClosingState);
-		//Q_EMIT aboutToClose();
+		//setSocketState(QAbstractSocket::ClosingState);
+		Q_EMIT aboutToClose();
 	}
 	//if (m_isClosingHandshakeSent && m_isClosingHandshakeReceived)
 	{
-		//qDebug() << "Closing tcp socket";
-		setSocketState(QAbstractSocket::UnconnectedState);
 		m_pSocket->close();
+		setSocketState(QAbstractSocket::UnconnectedState);
 		Q_EMIT disconnected();
 	}
 }
@@ -219,7 +216,6 @@ void WebSocket::open(const QUrl &url, bool mask)
 	m_isClosingHandshakeSent = false;
 
 	setRequestUrl(url);
-	//resourcename cannot contain the scheme, host and port for socket.io
 	QString resourceName = url.path() + url.query();
 	if (resourceName.isEmpty())
 	{
@@ -338,15 +334,17 @@ void WebSocket::releaseConnections(const QTcpSocket *pTcpSocket)
 		disconnect(pTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SIGNAL(error(QAbstractSocket::SocketError)));
 		disconnect(pTcpSocket, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)), this, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)));
 		disconnect(pTcpSocket, SIGNAL(readChannelFinished()), this, SIGNAL(readChannelFinished()));
+		disconnect(pTcpSocket, SIGNAL(aboutToClose()), this, SIGNAL(aboutToClose()));
+		//disconnect(pTcpSocket, SIGNAL(bytesWritten(qint64)), this, SIGNAL(bytesWritten(qint64)));
 
 		//catched signals
 		disconnect(pTcpSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(processStateChanged(QAbstractSocket::SocketState)));
 		disconnect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(processData()));
-
-		//disconnect(pTcpSocket, SIGNAL(aboutToClose()), this, SIGNAL(aboutToClose()));
-		//disconnect(pTcpSocket, SIGNAL(bytesWritten(qint64)), this, SIGNAL(bytesWritten(qint64)));
 	}
-	disconnect(&m_dataProcessor, SIGNAL(frameReceived(WebSocketProtocol::OpCode,QByteArray)), this, SLOT(processFrame(WebSocketProtocol::OpCode,QByteArray)));
+	disconnect(&m_dataProcessor, SIGNAL(frameReceived(WebSocketProtocol::OpCode,QByteArray,bool)), this, SLOT(processFrame(WebSocketProtocol::OpCode,QByteArray,bool)));
+	disconnect(&m_dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)), this, SIGNAL(binaryMessageReceived(QByteArray)));
+	disconnect(&m_dataProcessor, SIGNAL(textMessageReceived(QString)), this, SIGNAL(textMessageReceived(QString)));
+	disconnect(&m_dataProcessor, SIGNAL(errorEncountered(WebSocketProtocol::CloseCode,QString)), this, SLOT(close(WebSocketProtocol::CloseCode,QString)));
 }
 
 /**
@@ -451,18 +449,17 @@ qint64 WebSocket::doWriteFrames(const QByteArray &data, bool isBinary)
 {
 	const WebSocketProtocol::OpCode firstOpCode = isBinary ? WebSocketProtocol::OC_BINARY : WebSocketProtocol::OC_TEXT;
 
-	int numFrames = data.size() / MAX_FRAME_SIZE_IN_BYTES;
+	int numFrames = data.size() / FRAME_SIZE_IN_BYTES;
 	QByteArray tmpData(data);
 	tmpData.detach();
 	char *payload = tmpData.data();
-	quint64 sizeLeft = static_cast<quint64>(data.size()) % MAX_FRAME_SIZE_IN_BYTES;
+	quint64 sizeLeft = static_cast<quint64>(data.size()) % FRAME_SIZE_IN_BYTES;
 	if (sizeLeft)
 	{
 		++numFrames;
 	}
 	if (numFrames == 0)     //catch the case where the payload is zero bytes; in that case, we still need to send a frame
 	{
-		//qDebug() << "No data to send";
 		numFrames = 1;
 	}
 	quint64 currentPosition = 0;
@@ -481,8 +478,7 @@ qint64 WebSocket::doWriteFrames(const QByteArray &data, bool isBinary)
 		bool isLastFrame = (i == (numFrames - 1));
 		bool isFirstFrame = (i == 0);
 
-		//quint64 size = isLastFrame ? sizeLeft : MAX_FRAME_SIZE_IN_BYTES;
-		quint64 size = qMin(bytesLeft, MAX_FRAME_SIZE_IN_BYTES);
+		quint64 size = qMin(bytesLeft, FRAME_SIZE_IN_BYTES);
 		WebSocketProtocol::OpCode opcode = isFirstFrame ? firstOpCode : WebSocketProtocol::OC_CONTINUE;
 
 		//write header
@@ -517,7 +513,6 @@ qint64 WebSocket::doWriteFrames(const QByteArray &data, bool isBinary)
 	{
 		qDebug() << "Bytes written" << payloadWritten << "!=" << "data size:" << data.size();
 	}
-	//return bytesWritten;
 	return payloadWritten;
 }
 
@@ -596,7 +591,6 @@ void WebSocket::processHandshake(QTcpSocket *pSocket)
 	bool ok = false;
 	const QString regExpStatusLine("^(HTTP/1.1)\\s([0-9]+)\\s(.*)");
 	const QRegExp regExp(regExpStatusLine);
-	//QString statusLine = textStream.readLine();
 	QString statusLine = readLine(pSocket);
 	QString httpProtocol;
 	int httpStatusCode;
@@ -619,7 +613,6 @@ void WebSocket::processHandshake(QTcpSocket *pSocket)
 	}
 	else
 	{
-		//QString headerLine = textStream.readLine();
 		QString headerLine = readLine(pSocket);
 		QMap<QString, QString> headers;
 		while (!headerLine.isEmpty())
@@ -664,7 +657,7 @@ void WebSocket::processHandshake(QTcpSocket *pSocket)
 				QStringList versions = version.split(", ", QString::SkipEmptyParts);
 				if (!versions.contains("13"))
 				{
-					//if needed to switch protocols, then we are finished here
+					//if needed to switch protocol version, then we are finished here
 					//because we cannot handle other protocols than the RFC one (v13)
 					qDebug() << "WebSocket::processHandshake: Server requests a version that we don't support:" << versions;
 					ok = false;
@@ -699,7 +692,6 @@ void WebSocket::processHandshake(QTcpSocket *pSocket)
 void WebSocket::processStateChanged(QAbstractSocket::SocketState socketState)
 {
 	QAbstractSocket::SocketState webSocketState = this->state();
-	//qDebug() << "State changed to:" << webSocketState << "tpcsocketstate:" << socketState;
 	switch (socketState)
 	{
 		case QAbstractSocket::ConnectedState:
@@ -716,8 +708,8 @@ void WebSocket::processStateChanged(QAbstractSocket::SocketState socketState)
 		{
 			if (webSocketState == QAbstractSocket::ConnectedState)
 			{
-				close(WebSocketProtocol::CC_GOING_AWAY);
 				setSocketState(QAbstractSocket::ClosingState);
+				close(WebSocketProtocol::CC_GOING_AWAY);
 				//Q_EMIT aboutToClose();
 			}
 			break;
@@ -771,6 +763,8 @@ void WebSocket::processData()
 	}
 }
 
+//TODO: implement separate signals for textframereceived and binaryframereceivd
+//in that way the UTF8 can be sent as is from within the dataprocessor
 void WebSocket::processFrame(WebSocketProtocol::OpCode opCode, QByteArray frame, bool isLastFrame)
 {
 	switch (opCode)
@@ -782,7 +776,7 @@ void WebSocket::processFrame(WebSocketProtocol::OpCode opCode, QByteArray frame,
 		}
 		case WebSocketProtocol::OC_TEXT:
 		{
-			Q_EMIT textFrameReceived(QString::fromLatin1(frame), isLastFrame);
+			Q_EMIT textFrameReceived(QString::fromUtf8(frame.constData(), frame.length()), isLastFrame);
 			break;
 		}
 		case WebSocketProtocol::OC_PING:
@@ -812,10 +806,12 @@ void WebSocket::processFrame(WebSocketProtocol::OpCode opCode, QByteArray frame,
 		{
 			quint16 closeCode = WebSocketProtocol::CC_NORMAL;
 			QString closeReason;
-			if (frame.size() > 0)   //close frame can have no close code nor reason
+			if (frame.size() > 0)   //close frame can have a close code and reason
 			{
 				closeCode = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(frame.constData()));
-				closeReason = QString::fromUtf8(frame.remove(0, 2));
+				frame.remove(0, 2);
+				//TODO: check for invalid UTF-8 sequence (see testcase 7.5.1)
+				closeReason = QString::fromUtf8(frame.constData(), frame.length());
 				if (!WebSocketProtocol::isCloseCodeValid(closeCode))
 				{
 					closeCode = WebSocketProtocol::CC_PROTOCOL_ERROR;
@@ -874,8 +870,6 @@ QString WebSocket::createHandShakeRequest(QString resourceName,
 		handshakeRequest << "Sec-WebSocket-Protocol: " + protocols;
 	}
 	handshakeRequest << "\r\n";
-
-	//qDebug() << "WebSocket::createHandshakeRequest: handshake created:" << handshakeRequest.join("\r\n");
 
 	return handshakeRequest.join("\r\n");
 }

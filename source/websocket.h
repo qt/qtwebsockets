@@ -1,15 +1,9 @@
 /**
  * @file websocket.h Contains a WebSocket class.
- * @author Kurt Pattyn (kurt.pattyn@barco.com)
+ * @author Kurt Pattyn (pattyn.kurt@gmail.com)
  * @brief The WebSocket class implements the websocket protocol.
  * Currently, the following versions are supported:
- * - V0
- * - V4
- * - V5
- * - V6
- * - V7
- * - V8
- * - V13
+ * - V13 (RFC6455)
  * Both text and binary websockets are supported.
  * The secure version (wss) is currently not implemented.
  */
