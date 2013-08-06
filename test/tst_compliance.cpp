@@ -75,7 +75,7 @@ void ComplianceTest::runTestCase(int nbr, int total)
 	url.setPath("/runCase?");
 	QUrlQuery query;
 	query.addQueryItem("case", QString::number(nbr + 1));
-	query.addQueryItem("agent", "QWebSockets(optimized)");
+	query.addQueryItem("agent", "QWebSockets");
 	url.setQuery(query);
 	pWebSocket->open(url);
 	spy.wait(60000);
