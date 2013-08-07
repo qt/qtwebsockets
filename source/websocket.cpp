@@ -809,12 +809,25 @@ void WebSocket::processFrame(WebSocketProtocol::OpCode opCode, QByteArray frame,
 			if (frame.size() > 0)   //close frame can have a close code and reason
 			{
 				closeCode = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(frame.constData()));
-				frame.remove(0, 2);
-				//TODO: check for invalid UTF-8 sequence (see testcase 7.5.1)
-				closeReason = QString::fromUtf8(frame.constData(), frame.length());
 				if (!WebSocketProtocol::isCloseCodeValid(closeCode))
 				{
 					closeCode = WebSocketProtocol::CC_PROTOCOL_ERROR;
+					closeReason = QString("Invalid close code %1 detected").arg(closeCode);
+				}
+				else
+				{
+					if (frame.size() > 2)
+					{
+						QTextCodec *tc = QTextCodec::codecForName("UTF-8");
+						QTextCodec::ConverterState state(QTextCodec::ConvertInvalidToNull);
+						closeReason = tc->toUnicode(frame.constData() + 2, frame.size() - 2, &state);
+						bool failed = (state.invalidChars != 0) || (state.remainingChars != 0);
+						if (failed)
+						{
+							closeCode = WebSocketProtocol::CC_WRONG_DATATYPE;
+							closeReason = "Invalid UTF-8 code encountered.";
+						}
+					}
 				}
 				m_isClosingHandshakeReceived = true;
 			}
