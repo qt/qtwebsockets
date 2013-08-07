@@ -23,16 +23,18 @@ const quint64 FRAME_SIZE_IN_BYTES = 512 * 512 * 2;	//maximum size of a frame whe
 
 /**
  * @brief WebSocket::WebSocket
+ * @param origin The origin of the client as specified in http://tools.ietf.org/html/rfc6454
+ *				 (origin is not required for non-web browser clients (see RFC 6455))
  * @param version The version of the protocol to use (currently only V13 is supported)
  * @param parent The parent object
  */
-WebSocket::WebSocket(WebSocketProtocol::Version version, QObject *parent) :
+WebSocket::WebSocket(QString origin, WebSocketProtocol::Version version, QObject *parent) :
 	QObject(parent),
 	m_pSocket(new QTcpSocket(this)),
 	m_version(version),
 	m_resourceName(),
 	m_requestUrl(),
-	m_origin("imagine.barco.com"),
+	m_origin(origin),
 	m_protocol(""),
 	m_extension(""),
 	m_socketState(QAbstractSocket::UnconnectedState),
@@ -867,13 +869,17 @@ QString WebSocket::createHandShakeRequest(QString resourceName,
 										  QByteArray key)
 {
 	QStringList handshakeRequest;
+
 	handshakeRequest << "GET " + resourceName + " HTTP/1.1" <<
 						"Host: " + host <<
 						"Upgrade: websocket" <<
 						"Connection: Upgrade" <<
-						"Sec-WebSocket-Key: " + QString(key) <<
-						"Origin: " + origin <<
-						"Sec-WebSocket-Version: 13";
+						"Sec-WebSocket-Key: " + QString(key);
+	if (!origin.isEmpty())
+	{
+		handshakeRequest << "Origin: " + origin;
+	}
+	handshakeRequest << "Sec-WebSocket-Version: " + QString::number(WebSocketProtocol::getCurrentVersion());
 	if (extensions.length() > 0)
 	{
 		handshakeRequest << "Sec-WebSocket-Extensions: " + extensions;

@@ -28,7 +28,7 @@ class WebSocket:public QObject
 	Q_OBJECT
 
 public:
-	explicit WebSocket(WebSocketProtocol::Version version = WebSocketProtocol::V_LATEST, QObject *parent = 0);
+	explicit WebSocket(QString origin = QString(), WebSocketProtocol::Version version = WebSocketProtocol::V_LATEST, QObject *parent = 0);
 	virtual ~WebSocket();
 
 	void abort();
