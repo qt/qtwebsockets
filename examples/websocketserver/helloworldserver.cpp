@@ -18,29 +18,32 @@ HelloWorldServer::HelloWorldServer(quint16 port, QObject *parent) :
 
 void HelloWorldServer::onNewConnection()
 {
-	qDebug() << "Client connected.";
+	//qDebug() << "Client connected.";
 	WebSocket *pSocket = m_pWebSocketServer->nextPendingConnection();
 
-	connect(pSocket, SIGNAL(textFrameReceived(QString,bool)), this, SLOT(processMessage(QString, bool)));
-	//connect(pSocket, SIGNAL(binaryFrameReceived(QByteArray,bool)), this, SLOT(processBinaryMessage(QByteArray)));
+	connect(pSocket, SIGNAL(textMessageReceived(QString)), this, SLOT(processMessage(QString)));
+	connect(pSocket, SIGNAL(binaryMessageReceived(QByteArray)), this, SLOT(processBinaryMessage(QByteArray)));
 	connect(pSocket, SIGNAL(disconnected()), this, SLOT(socketDisconnected()));
 	//connect(pSocket, SIGNAL(pong(quint64)), this, SLOT(processPong(quint64)));
 
 	m_clients << pSocket;
 }
 
-void HelloWorldServer::processMessage(QString message, bool isLastFrame)
+void HelloWorldServer::processMessage(QString message)
 {
-	Q_UNUSED(isLastFrame);
 	WebSocket *pClient = qobject_cast<WebSocket *>(sender());
 	if (pClient != 0)
 	{
-		QString answer;
-		for (int i = 0; i < message.length(); ++i)
-		{
-			answer.push_front(message[i]);
-		}
-		pClient->send(answer);
+		pClient->send(message);
+	}
+}
+
+void HelloWorldServer::processBinaryMessage(QByteArray message)
+{
+	WebSocket *pClient = qobject_cast<WebSocket *>(sender());
+	if (pClient != 0)
+	{
+		pClient->send(message);
 	}
 }
 
@@ -49,7 +52,7 @@ void HelloWorldServer::socketDisconnected()
 	WebSocket *pClient = qobject_cast<WebSocket *>(sender());
 	if (pClient != 0)
 	{
-		qDebug() << "Client disconnected";
+		//qDebug() << "Client disconnected";
 		m_clients.removeAll(pClient);
 		pClient->deleteLater();
 	}

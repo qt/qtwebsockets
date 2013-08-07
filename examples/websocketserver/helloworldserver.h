@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QList>
+#include <QByteArray>
 
 class WebSocketServer;
 class WebSocket;
@@ -17,7 +18,8 @@ Q_SIGNALS:
 
 private Q_SLOTS:
 	void onNewConnection();
-	void processMessage(QString message, bool isLastFrame);
+	void processMessage(QString message);
+	void processBinaryMessage(QByteArray message);
 	void socketDisconnected();
 
 private:
