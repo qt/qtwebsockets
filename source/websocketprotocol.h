@@ -80,7 +80,7 @@ namespace WebSocketProtocol
 		CC_TOO_MUCH_DATA			= 1009,		//Message too big
 		CC_MISSING_EXTENSION		= 1010,		//Mandatory extension missing
 		CC_BAD_OPERATION			= 1011,		//Internal server error
-        CC_TLS_HANDSHAKE_FAILED		= 1015		//TLS handshake failed
+		CC_TLS_HANDSHAKE_FAILED		= 1015		//TLS handshake failed
 	};
 
 	enum OpCode
@@ -100,25 +100,27 @@ namespace WebSocketProtocol
 		OC_RESERVED_V	= 0xC,
 		OC_RESERVED_D	= 0xD,
 		OC_RESERVED_E	= 0xE,
-        OC_RESERVED_F	= 0xF
+		OC_RESERVED_F	= 0xF
 	};
 
 
-    inline bool isOpCodeReserved(OpCode code)
-    {
-        return ((code > OC_BINARY) && (code < OC_CLOSE)) || (code > OC_PONG);
-    }
-    inline bool isCloseCodeValid(int closeCode)
-    {
-        return  (closeCode > 999) && (closeCode < 5000) &&
-                (closeCode != CC_RESERVED_1004) &&          //see RFC6455 7.4.1
-                (closeCode != CC_MISSING_STATUS_CODE) &&
-                (closeCode != CC_ABNORMAL_DISCONNECTION) &&
-                ((closeCode >= 3000) || (closeCode < 1012));
-    }
+	inline bool isOpCodeReserved(OpCode code)
+	{
+		return ((code > OC_BINARY) && (code < OC_CLOSE)) || (code > OC_PONG);
+	}
+	inline bool isCloseCodeValid(int closeCode)
+	{
+		return  (closeCode > 999) && (closeCode < 5000) &&
+				(closeCode != CC_RESERVED_1004) &&          //see RFC6455 7.4.1
+				(closeCode != CC_MISSING_STATUS_CODE) &&
+				(closeCode != CC_ABNORMAL_DISCONNECTION) &&
+				((closeCode >= 3000) || (closeCode < 1012));
+	}
 
-    void mask(QByteArray *payload, quint32 maskingKey);
+	void mask(QByteArray *payload, quint32 maskingKey);
 	void mask(char *payload, quint64 size, quint32 maskingKey);
+
+	inline Version getCurrentVersion() { return V_LATEST; }
 
 }	//end namespace WebSocketProtocol
 
