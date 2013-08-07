@@ -116,9 +116,8 @@ bool WebSocketServer::waitForNewConnection(int msec, bool *timedOut)
 
 QList<WebSocketProtocol::Version> WebSocketServer::getSupportedVersions() const
 {
-	//we only support V13 for now
 	QList<WebSocketProtocol::Version> supportedVersions;
-	supportedVersions << WebSocketProtocol::V_13;
+	supportedVersions << WebSocketProtocol::getCurrentVersion();	//we only support V13
 	return supportedVersions;
 }
 
