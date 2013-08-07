@@ -58,7 +58,7 @@ WebSocketsTest::WebSocketsTest() :
 
 void WebSocketsTest::initTestCase()
 {
-	m_pWebSocket = new WebSocket(WebSocketProtocol::V_LATEST);
+	m_pWebSocket = new WebSocket();
 	m_pWebSocket->open(m_url, true);
 	QTRY_VERIFY_WITH_TIMEOUT(m_pWebSocket->state() == QAbstractSocket::ConnectedState, 1000);
 	QVERIFY(m_pWebSocket->isValid());
