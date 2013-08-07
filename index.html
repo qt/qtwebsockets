@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>QWebSockets by KurtPattyn</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/KurtPattyn/QWebSockets">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/KurtPattyn/QWebSockets/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/KurtPattyn/QWebSockets/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>QWebSockets</h1>
+          <p>QWebSockets is a pure Qt implementation of WebSockets - both client and server.</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/KurtPattyn">KurtPattyn</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
+        </div>
+
+        <h3>
+<a name="introduction" class="anchor" href="#introduction"><span class="octicon octicon-link"></span></a>Introduction</h3>
+
+<p>QWebSockets is a pure Qt implementation of WebSockets - both client and server.
+It is implemented as a Qt source code module (.pri file), that can easily be embedded into existing Qt projects. It has no other dependencies that Qt.</p>
+
+<h3>
+<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h3>
+
+<ul>
+<li>Text and binary sockets</li>
+<li>Frame-based and message-based signals</li>
+<li>Works through proxies</li>
+<li>Strict Unicode checking</li>
+</ul><h3>
+<a name="restrictions" class="anchor" href="#restrictions"><span class="octicon octicon-link"></span></a>Restrictions</h3>
+
+<p>Non-characters (according <a href="http://www.unicode.org/versions/Unicode6.2.0/">Unicode Standard 6.2</a>) are rejected by QWebSockets, <strong>even if the UTF-8 sequence is valid</strong>.  </p>
+
+<h5>
+<a name="rationale" class="anchor" href="#rationale"><span class="octicon octicon-link"></span></a>Rationale</h5>
+
+<p>The WebSocket specification is talking about <em>Valid UTF-8 codes and sequences</em>. Strictly speaking, UTF-xx encodings are reversible. That means, that the <a href="http://www.unicode.org/faq/private_use.html#noncharacters">66 non-character codes</a> (including <code>U+FFFE</code> and <code>U+FFFF</code>), are valid UTF-8, and hence are perfectly acceptable within WebSocket text messages.<br>
+According to the Unicode standard, they SHOULD NOT be used in information interchange, but a <a href="http://www.unicode.org/versions/corrigendum9.html">recent corrigendum</a> clarifies that non-characters CAN be exchanged.<br>
+However, non-characters are for internal use, and hence, they are implementation specific (e.g. non-characters can be used to carry meta-information). <em>They have to be interpreted.</em><br>
+When used with <code>QString</code>, they are replaced with <code>U+FFFD - REPLACEMENT CHARACTER</code>, and rendered - non-standard - as a question mark (this is the <code>QString</code> rendering of the non-character <code>U+FFFD</code>: �). Browsers keep the control characters untouched (this is the browser rendering of the non-character <code>U+FDD0</code>: ﷐).  </p>
+
+<p>With QWebSockets, text messages are just that: a collection of human-readable characters. Text messages never have to be interpreted to be rendered correctly. In case, you still want to do implementation specific trickery, use binary messages instead. Indeed, if non-characters were allowed in text messages, then every text message has to be parsed, character-per-character, to find out if it contains special control codes, or a protocol should be devised that indicates whether the message contains that kind of control codes. We keep it simple: text is text and nothing more.</p>
+
+<h3>
+<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h3>
+
+<p>Qt 5.x</p>
+
+<h3>
+<a name="compliance" class="anchor" href="#compliance"><span class="octicon octicon-link"></span></a>Compliance</h3>
+
+<p>QWebSockets is compliant with <a href="http://datatracker.ietf.org/doc/rfc6455/?include_text=1">RFC6455</a> and has been tested with the <a href="http://autobahn.ws/testsuite">Autobahn Testsuite</a>.<br>
+Only tests with <strong>invalid Unicode code points</strong> do <strong>not</strong> pass from the Autobahn Testsuite (see <a href="#Restrictions">Restrictions</a>). </p>
+
+<h3>
+<a name="missing-features" class="anchor" href="#missing-features"><span class="octicon octicon-link"></span></a>Missing Features</h3>
+
+<ul>
+<li>WSS protocol</li>
+<li>Extensions and sub-protocols</li>
+</ul><h3>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h3>
+
+<p>This code is licensed under LGPL v3.</p>
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
