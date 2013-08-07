@@ -28,3 +28,4 @@ build-unittests-Qt_5_1_0_clang_64-Release/tst_websockets.moc
 build-unittests-Qt_5_1_0_clang_64-Release/unittests
 examples/.coverity-submit
 
+reports
