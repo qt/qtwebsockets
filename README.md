@@ -23,7 +23,7 @@ Qt 5.x
 
 ### Compliance
 QWebSockets is compliant with [RFC6455](http://datatracker.ietf.org/doc/rfc6455/?include_text=1) and has been tested with the [Autobahn Testsuite](http://autobahn.ws/testsuite).  
-Only tests with **invalid Unicode code points** do **not** pass from the Autobahn Testsuite (see [Restrictions](#Restrictions)). 
+Only tests with **Unicode non-characters** do **not** pass from the Autobahn Testsuite (see [Restrictions](#Restrictions)). 
 
 ### Missing Features
 * WSS protocol
