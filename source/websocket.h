@@ -1,11 +1,11 @@
 /**
- * @file websocket.h Contains a WebSocket class.
+ * @file websocket.h
+ * @brief Defines the WebSocket class.
+ *
+ * \note Currently, only V13 (RFC6455) is supported.
+ * \note Both text and binary websockets are supported.
+ * \note The secure version (wss) is currently not implemented.
  * @author Kurt Pattyn (pattyn.kurt@gmail.com)
- * @brief The WebSocket class implements the websocket protocol.
- * Currently, the following versions are supported:
- * - V13 (RFC6455)
- * Both text and binary websockets are supported.
- * The secure version (wss) is currently not implemented.
  */
 
 #ifndef WEBSOCKET_H

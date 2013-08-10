@@ -15,18 +15,52 @@
 
 #include <limits>
 
-/** @class WebSocket
-	@brief The class WebSocket implements a tcp socket that talks the websocket protocol.
+/*!
+  \fn void WebSocket::connected()
+  \brief Emitted when a connection is successfully established.
+  \sa open(), disconnected()
+*/
+/*!
+  \fn void WebSocket::disconnected()
+  \brief Emitted when the socket is disconnected.
+  \sa close(), connected()
+*/
+/*!
+ \fn void WebSocket::aboutToClose()
+ \brief avddd
+ */
+/*void connected();
+void disconnected();
+void stateChanged(QAbstractSocket::SocketState state);
+void proxyAuthenticationRequired(const QNetworkProxy &proxy, QAuthenticator *pAuthenticator);
+void readChannelFinished();
+void textFrameReceived(QString frame, bool isLastFrame);
+void binaryFrameReceived(QByteArray frame, bool isLastFrame);
+void textMessageReceived(QString message);
+void binaryMessageReceived(QByteArray message);
+void error(QAbstractSocket::SocketError error);
+void pong(quint64 elapsedTime);*/
+
+
+//http://tools.ietf.org/html/rfc6455
+
+/*!
+	\class WebSocket
+	\brief The class WebSocket implements a TCP socket that talks the websocket protocol.
+
+	WebSockets is a web technology providing full-duplex communications channels over a single TCP connection.
+	The WebSocket protocol was standardized by the IETF as RFC 6455 in 2011.
+	It can both be used in a client application and server application.
 */
 
 const quint64 FRAME_SIZE_IN_BYTES = 512 * 512 * 2;	//maximum size of a frame when sending a message
 
-/**
- * @brief WebSocket::WebSocket
- * @param origin The origin of the client as specified in http://tools.ietf.org/html/rfc6454
- *				 (origin is not required for non-web browser clients (see RFC 6455))
- * @param version The version of the protocol to use (currently only V13 is supported)
- * @param parent The parent object
+/*!
+ * \brief Creates a new WebSocket with the given \a origin, the \a version of the protocol to use and \a parent.
+ *
+ * The \a origin of the client is as specified in http://tools.ietf.org/html/rfc6454.
+ * (The \a origin is not required for non-web browser clients (see RFC 6455)).
+ * \note Currently only V13 (RFC 6455) is supported
  */
 WebSocket::WebSocket(QString origin, WebSocketProtocol::Version version, QObject *parent) :
 	QObject(parent),
@@ -50,12 +84,14 @@ WebSocket::WebSocket(QString origin, WebSocketProtocol::Version version, QObject
 }
 
 //only called by upgradeFrom
-/**
- * @brief Constructor used for the server implementation. Should never be called directly.
- * @param pTcpSocket The tcp socket to use for this websocket
- * @param version The version of the protocol to speak (currently only V13 is supported)
- * @param parent The parent object of the WebSocket object
- */
+/*!
+	\internal
+	Constructor used for the server implementation. Should never be called directly.
+
+	pTcpSocket The tcp socket to use for this websocket
+	version The version of the protocol to speak (currently only V13 is supported)
+	parent The parent object of the WebSocket object
+*/
 WebSocket::WebSocket(QTcpSocket *pTcpSocket, WebSocketProtocol::Version version, QObject *parent) :
 	QObject(parent),
 	m_pSocket(pTcpSocket),
@@ -76,8 +112,8 @@ WebSocket::WebSocket(QTcpSocket *pTcpSocket, WebSocketProtocol::Version version,
 	makeConnections(m_pSocket);
 }
 
-/**
- * @brief WebSocket::~WebSocket
+/*!
+ * \brief WebSocket::~WebSocket
  */
 WebSocket::~WebSocket()
 {
@@ -89,37 +125,35 @@ WebSocket::~WebSocket()
 	}
 }
 
-/**
- * @brief Aborts the current socket and resets the socket. Unlike disconnectFromHost(), this function immediately closes the socket, discarding any pending data in the write buffer.
+/*!
+ * \brief Aborts the current socket and resets the socket. Unlike close(), this function immediately closes the socket, discarding any pending data in the write buffer.
  */
 void WebSocket::abort()
 {
 	m_pSocket->abort();
 }
 
-/**
- * @brief Returns the type of error that last occurred
- * @return QAbstractSocket::SocketError
+/*!
+ * Returns the type of error that last occurred
  */
 QAbstractSocket::SocketError WebSocket::error() const
 {
 	return m_pSocket->error();
 }
 
-/**
- * @brief Returns a human-readable description of the last error that occurred
- * @return QString
+/*!
+ * Returns a human-readable description of the last error that occurred
  */
 QString WebSocket::errorString() const
 {
 	return m_pSocket->errorString();
 }
 
-/**
- * @brief Sends the given string over the socket as a text message
- * @param message '\0' terminated string to be sent
- * @return The number of bytes actually sent
- * @see WebSocket::send(const QString &message)
+/*!
+ * Sends the given \a message over the socket as a text message and returns the number of bytes actually sent.
+ * \param message Text message to be sent. Must be '\0' terminated.
+ * \return The number of bytes actually sent.
+ * \sa send(const QString &message)
  */
 qint64 WebSocket::send(const char *message)
 {
@@ -127,9 +161,9 @@ qint64 WebSocket::send(const char *message)
 }
 
 /**
- * @brief Sends the given string over the socket as a text message
+ * @brief Sends the given \a message over the socket as a text message and returns the number of bytes actually sent.
  * @param message The message to be sent
- * @return The number of bytes actually sent
+ * @return The number of bytes actually sent.
  */
 qint64 WebSocket::send(const QString &message)
 {
@@ -137,15 +171,18 @@ qint64 WebSocket::send(const QString &message)
 }
 
 /**
- * @brief Sends the given bytearray over the socket as a binary message
- * @param data The binary data to be sent
- * @return The number of bytes actually sent
+ * @brief Sends the given \a data over the socket as a binary message and returns the number of bytes actually sent.
+ * @param data The binary data to be sent.
+ * @return The number of bytes actually sent.
  */
 qint64 WebSocket::send(const QByteArray &data)
 {
 	return doWriteData(data, true);
 }
 
+/*!
+  \internal
+ */
 WebSocket *WebSocket::upgradeFrom(QTcpSocket *pTcpSocket,
 								  const HandshakeRequest &request,
 								  const HandshakeResponse &response,
@@ -162,10 +199,10 @@ WebSocket *WebSocket::upgradeFrom(QTcpSocket *pTcpSocket,
 	return pWebSocket;
 }
 
-/**
- * @brief Gracefully loses the socket with the given close code and reason. Any data in the write buffer is flushed before the socket is closed.
- * @param closeCode
- * @param reason
+/*!
+ * \brief Gracefully closes the socket with the given \a closeCode and \a reason. Any data in the write buffer is flushed before the socket is closed.
+ * \param closeCode The WebSocketProtocol::CloseCode indicating the reason to close.
+ * \param reason A string describing the error more in detail
  */
 void WebSocket::close(WebSocketProtocol::CloseCode closeCode, QString reason)
 {
@@ -206,10 +243,12 @@ void WebSocket::close(WebSocketProtocol::CloseCode closeCode, QString reason)
 	}
 }
 
-/**
- * @brief Opens a websocket connection using the given URL.
- * @param url
- * @param mask If true, all frames will be masked; this is only necessary for client side sockets; servers should never mask
+/*!
+ * \brief Opens a websocket connection using the given \a url.
+ * If \a mask is true, all frames will be masked; this is only necessary for client side sockets; servers should never mask
+ * \param url The url to connect to
+ * \param mask When true, all frames are masked
+ * \note A client socket must *always* mask its frames; servers may *never* mask its frames
  */
 void WebSocket::open(const QUrl &url, bool mask)
 {
@@ -231,8 +270,8 @@ void WebSocket::open(const QUrl &url, bool mask)
 	m_pSocket->connectToHost(url.host(), url.port(80));
 }
 
-/**
- * @brief Pings the server to indicate that the connection is still alive.
+/*!
+ * \brief Pings the server to indicate that the connection is still alive.
  */
 void WebSocket::ping()
 {
@@ -241,74 +280,75 @@ void WebSocket::ping()
 	writeFrame(pingFrame);
 }
 
-/**
- * @brief Sets the version to use for the websocket protocol; this must be set before the socket is opened.
- * @param version Currently only V13 is supported
- */
+/*!
+  \internal
+	Sets the version to use for the websocket protocol; this must be set before the socket is opened.
+*/
 void WebSocket::setVersion(WebSocketProtocol::Version version)
 {
 	m_version = version;
 }
 
-/**
- * @brief Sets the resource name of the connection; must be set before the socket is openend
- * @param resourceName
- */
+/*!
+	\internal
+	Sets the resource name of the connection; must be set before the socket is openend
+*/
 void WebSocket::setResourceName(QString resourceName)
 {
 	m_resourceName = resourceName;
 }
 
-/**
- * @brief WebSocket::setRequestUrl
- * @param requestUrl
+/*!
+  \internal
  */
 void WebSocket::setRequestUrl(QUrl requestUrl)
 {
 	m_requestUrl = requestUrl;
 }
 
-/**
- * @brief WebSocket::setOrigin
- * @param origin
+/*!
+  \internal
  */
 void WebSocket::setOrigin(QString origin)
 {
 	m_origin = origin;
 }
 
-/**
- * @brief WebSocket::setProtocol
- * @param protocol
+/*!
+  \internal
  */
 void WebSocket::setProtocol(QString protocol)
 {
 	m_protocol = protocol;
 }
 
-/**
- * @brief WebSocket::setExtension
- * @param extension
+/*!
+  \internal
  */
 void WebSocket::setExtension(QString extension)
 {
 	m_extension = extension;
 }
 
-/**
- * @brief WebSocket::enableMasking
- * @param enable
+/*!
+  \internal
  */
 void WebSocket::enableMasking(bool enable)
 {
 	m_mustMask = enable;
 }
 
+/*!
+ * \internal
+ */
 qint64 WebSocket::doWriteData(const QByteArray &data, bool isBinary)
 {
 	return doWriteFrames(data, isBinary);
 }
 
+/*!
+ * \internal
+ */
 void WebSocket::makeConnections(const QTcpSocket *pTcpSocket)
 {
 	//pass through signals
@@ -328,6 +368,9 @@ void WebSocket::makeConnections(const QTcpSocket *pTcpSocket)
 	connect(&m_dataProcessor, SIGNAL(errorEncountered(WebSocketProtocol::CloseCode,QString)), this, SLOT(close(WebSocketProtocol::CloseCode,QString)));
 }
 
+/*!
+ * \internal
+ */
 void WebSocket::releaseConnections(const QTcpSocket *pTcpSocket)
 {
 	if (pTcpSocket)
@@ -349,9 +392,8 @@ void WebSocket::releaseConnections(const QTcpSocket *pTcpSocket)
 	disconnect(&m_dataProcessor, SIGNAL(errorEncountered(WebSocketProtocol::CloseCode,QString)), this, SLOT(close(WebSocketProtocol::CloseCode,QString)));
 }
 
-/**
- * @brief WebSocket::getVersion
- * @return
+/*!
+ * \brief Returns the version the socket is currently using
  */
 WebSocketProtocol::Version WebSocket::getVersion()
 {
@@ -359,41 +401,48 @@ WebSocketProtocol::Version WebSocket::getVersion()
 }
 
 /**
- * @brief WebSocket::getRequestUrl
- * @return
+ * @brief Returns the name of the resource currently accessed.
+ */
+QString WebSocket::getResourceName()
+{
+	return m_resourceName;
+}
+
+/*!
+ * \brief Returns the url the socket is connected to or will connect to.
  */
 QUrl WebSocket::getRequestUrl()
 {
 	return m_requestUrl;
 }
 
-/**
- * @brief WebSocket::getOrigin
- * @return
+/*!
+  Returns the current origin
  */
 QString WebSocket::getOrigin()
 {
 	return m_origin;
 }
 
-/**
- * @brief WebSocket::getProtocol
- * @return
+/*!
+  Returns the currently used protocol.
  */
 QString WebSocket::getProtocol()
 {
 	return m_protocol;
 }
 
-/**
- * @brief WebSocket::getExtension
- * @return
+/*!
+  Returns the currently used extension.
  */
 QString WebSocket::getExtension()
 {
 	return m_extension;
 }
 
+/*!
+ * \internal
+ */
 QByteArray WebSocket::getFrameHeader(WebSocketProtocol::OpCode opCode, quint64 payloadLength, quint32 maskingKey, bool lastFrame) const
 {
 	QByteArray header;
@@ -447,6 +496,9 @@ QByteArray WebSocket::getFrameHeader(WebSocketProtocol::OpCode opCode, quint64 p
 	return header;
 }
 
+/*!
+ * \internal
+ */
 qint64 WebSocket::doWriteFrames(const QByteArray &data, bool isBinary)
 {
 	const WebSocketProtocol::OpCode firstOpCode = isBinary ? WebSocketProtocol::OC_BINARY : WebSocketProtocol::OC_TEXT;
@@ -518,16 +570,25 @@ qint64 WebSocket::doWriteFrames(const QByteArray &data, bool isBinary)
 	return payloadWritten;
 }
 
+/*!
+ * \internal
+ */
 quint32 WebSocket::generateRandomNumber() const
 {
 	return static_cast<quint32>((static_cast<double>(qrand()) / RAND_MAX) * std::numeric_limits<quint32>::max());
 }
 
+/*!
+	\internal
+ */
 quint32 WebSocket::generateMaskingKey() const
 {
 	return generateRandomNumber();
 }
 
+/*!
+	\internal
+ */
 QByteArray WebSocket::generateKey() const
 {
 	QByteArray key;
@@ -541,6 +602,10 @@ QByteArray WebSocket::generateKey() const
 	return key.toBase64();
 }
 
+
+/*!
+	\internal
+ */
 QString WebSocket::calculateAcceptKey(const QString &key) const
 {
 	QString tmpKey = key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
@@ -548,6 +613,9 @@ QString WebSocket::calculateAcceptKey(const QString &key) const
 	return QString(hash.toBase64());
 }
 
+/*!
+	\internal
+ */
 qint64 WebSocket::writeFrames(const QList<QByteArray> &frames)
 {
 	qint64 written = 0;
@@ -558,11 +626,17 @@ qint64 WebSocket::writeFrames(const QList<QByteArray> &frames)
 	return written;
 }
 
+/*!
+	\internal
+ */
 qint64 WebSocket::writeFrame(const QByteArray &frame)
 {
 	return m_pSocket->write(frame);
 }
 
+/*!
+	\internal
+ */
 QString readLine(QTcpSocket *pSocket)
 {
 	QString line;
@@ -583,6 +657,9 @@ QString readLine(QTcpSocket *pSocket)
 }
 
 //called for a server handshake response
+/*!
+	\internal
+ */
 void WebSocket::processHandshake(QTcpSocket *pSocket)
 {
 	if (pSocket == 0)
@@ -691,6 +768,9 @@ void WebSocket::processHandshake(QTcpSocket *pSocket)
 	}
 }
 
+/*!
+	\internal
+ */
 void WebSocket::processStateChanged(QAbstractSocket::SocketState socketState)
 {
 	QAbstractSocket::SocketState webSocketState = this->state();
@@ -750,6 +830,9 @@ void WebSocket::processStateChanged(QAbstractSocket::SocketState socketState)
 //we have received data from the server (response to handshake), and that we
 //should "upgrade" our socket to a websocket (connected state)
 //if our socket was already upgraded, then we need to process websocket data
+/*!
+ \internal
+ */
 void WebSocket::processData()
 {
 	while (m_pSocket->bytesAvailable())
@@ -767,6 +850,9 @@ void WebSocket::processData()
 
 //TODO: implement separate signals for textframereceived and binaryframereceivd
 //in that way the UTF8 can be sent as is from within the dataprocessor
+/*!
+	\internal
+ */
 void WebSocket::processFrame(WebSocketProtocol::OpCode opCode, QByteArray frame, bool isLastFrame)
 {
 	switch (opCode)
@@ -861,6 +947,9 @@ void WebSocket::processFrame(WebSocketProtocol::OpCode opCode, QByteArray frame,
 	}
 }
 
+/*!
+	\internal
+ */
 QString WebSocket::createHandShakeRequest(QString resourceName,
 										  QString host,
 										  QString origin,
@@ -893,9 +982,8 @@ QString WebSocket::createHandShakeRequest(QString resourceName,
 	return handshakeRequest.join("\r\n");
 }
 
-/**
- * @brief WebSocket::state
- * @return
+/*!
+  Returns the current state of the socket
  */
 QAbstractSocket::SocketState WebSocket::state() const
 {
@@ -903,9 +991,22 @@ QAbstractSocket::SocketState WebSocket::state() const
 }
 
 /**
- * @brief WebSocket::waitForConnected
- * @param msecs
- * @return
+	@brief Waits until the socket is connected, up to \a msecs milliseconds. If the connection has been established, this function returns true; otherwise it returns false. In the case where it returns false, you can call error() to determine the cause of the error.
+	The following example waits up to one second for a connection to be established:
+
+	~~~{.cpp}
+	socket->connectToHost("imap", 143);
+	if (socket->waitForConnected(1000))
+		qDebug("Connected!");
+	~~~
+
+	If \a msecs is -1, this function will not time out.
+	@note This function may wait slightly longer than msecs, depending on the time it takes to complete the host lookup.
+	@note Multiple calls to this functions do not accumulate the time. If the function times out, the connecting process will be aborted.
+
+	\param msecs The number of milliseconds to wait before a time out occurs; when -1, this function will block until the socket is connected.
+
+	\sa connected(), open(), state()
  */
 bool WebSocket::waitForConnected(int msecs)
 {
@@ -917,11 +1018,15 @@ bool WebSocket::waitForConnected(int msecs)
 	return retVal;
 }
 
-/**
- * @brief WebSocket::waitForDisconnected
- * @param msecs
- * @return
- */
+/*!
+  Waits \a msecs for the socket to be disconnected.
+  If the socket was successfully disconnected within time, this method returns true.
+  Otherwise false is returned.
+
+  \param msecs The number of milliseconds to wait before a time out occurs; when -1, this function will block until the socket is disconnected.
+
+  \sa close(), state()
+*/
 bool WebSocket::waitForDisconnected(int msecs)
 {
 	bool retVal = true;
@@ -932,6 +1037,10 @@ bool WebSocket::waitForDisconnected(int msecs)
 	return retVal;
 }
 
+/*!
+ \internal
+ Sets the internal socket state
+*/
 void WebSocket::setSocketState(QAbstractSocket::SocketState state)
 {
 	if (m_socketState != state)
@@ -941,9 +1050,8 @@ void WebSocket::setSocketState(QAbstractSocket::SocketState state)
 	}
 }
 
-/**
- * @brief WebSocket::localAddress
- * @return
+/*!
+  Returns the local address
  */
 QHostAddress WebSocket::localAddress() const
 {
@@ -955,9 +1063,8 @@ QHostAddress WebSocket::localAddress() const
 	return address;
 }
 
-/**
- * @brief WebSocket::localPort
- * @return
+/*!
+  Returns the local port
  */
 quint16 WebSocket::localPort() const
 {
@@ -969,9 +1076,8 @@ quint16 WebSocket::localPort() const
 	return port;
 }
 
-/**
- * @brief WebSocket::peerAddress
- * @return
+/*!
+  Returns the peer address
  */
 QHostAddress WebSocket::peerAddress() const
 {
@@ -983,9 +1089,8 @@ QHostAddress WebSocket::peerAddress() const
 	return peer;
 }
 
-/**
- * @brief WebSocket::peerName
- * @return
+/*!
+  Returns the peerName
  */
 QString WebSocket::peerName() const
 {
@@ -997,9 +1102,8 @@ QString WebSocket::peerName() const
 	return name;
 }
 
-/**
- * @brief WebSocket::peerPort
- * @return
+/*!
+  Returns the peerport
  */
 quint16 WebSocket::peerPort() const
 {
@@ -1011,9 +1115,8 @@ quint16 WebSocket::peerPort() const
 	return port;
 }
 
-/**
- * @brief WebSocket::proxy
- * @return
+/*!
+  * Returns the currently configured proxy
  */
 QNetworkProxy WebSocket::proxy() const
 {
@@ -1025,9 +1128,8 @@ QNetworkProxy WebSocket::proxy() const
 	return proxy;
 }
 
-/**
- * @brief WebSocket::readBufferSize
- * @return
+/*!
+ * Returns the size in bytes of the readbuffer that is used by the socket.
  */
 qint64 WebSocket::readBufferSize() const
 {
@@ -1039,9 +1141,8 @@ qint64 WebSocket::readBufferSize() const
 	return readBuffer;
 }
 
-/**
- * @brief WebSocket::setProxy
- * @param networkProxy
+/*!
+  Sets the proxy to \a networkProxy
  */
 void WebSocket::setProxy(const QNetworkProxy &networkProxy)
 {
@@ -1051,9 +1152,8 @@ void WebSocket::setProxy(const QNetworkProxy &networkProxy)
 	}
 }
 
-/**
- * @brief WebSocket::isValid
- * @return
+/*!
+  Returns true if the WebSocket is valid.
  */
 bool WebSocket::isValid()
 {

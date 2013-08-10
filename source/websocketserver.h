@@ -1,3 +1,9 @@
+/**
+ * @file websocketserver.h
+ * @author Kurt Pattyn (pattyn.kurt@gmail.com)
+ * @brief Defines the WebSocketServer class.
+ */
+
 #ifndef WEBSOCKETSERVER_H
 #define WEBSOCKETSERVER_H
 

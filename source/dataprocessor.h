@@ -9,6 +9,10 @@
 
 class QTcpSocket;
 
+/**
+ * @internal
+ * @brief The DataProcessor class
+ */
 class DataProcessor: public QObject
 {
 	Q_OBJECT
