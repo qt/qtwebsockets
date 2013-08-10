@@ -5,7 +5,6 @@
 #include <QUrl>
 #include <QList>
 #include <QStringList>
-
 #include "websocketprotocol.h"
 
 HandshakeRequest::HandshakeRequest(int port, bool isSecure) :
@@ -146,7 +145,13 @@ QTextStream &HandshakeRequest::readFromStream(QTextStream &textStream)
 		qStableSort(m_versions.begin(), m_versions.end(), qGreater<WebSocketProtocol::Version>());	//sort in descending order
 		m_key = m_headers.value("Sec-WebSocket-Key", "");
 		QString upgrade = m_headers.value("Upgrade", ""); //must be equal to "websocket", case-insensitive
-		QString connection = m_headers.value("Connection", "");	//must be equal to "Upgrade", case-insensitive
+		QString connection = m_headers.value("Connection", "");	//must contain "Upgrade", case-insensitive
+		QStringList connectionLine = connection.split(",", QString::SkipEmptyParts);
+		QStringList connectionValues;
+		Q_FOREACH(QString connection, connectionLine)
+		{
+			connectionValues << connection.trimmed();
+		}
 
 		//optional headers
 		m_origin = m_headers.value("Sec-WebSocket-Origin", "");
@@ -177,7 +182,8 @@ QTextStream &HandshakeRequest::readFromStream(QTextStream &textStream)
 					  (verb != "GET") ||
 					  (httpProtocol != "HTTP/1.1") ||
 					  (upgrade.toLower() != "websocket") ||
-					  (connection.toLower() != "upgrade"));
+					  (!connectionValues.contains("upgrade", Qt::CaseInsensitive)));
+					  //(connection.toLower() != "upgrade"));
 	}
 	return textStream;
 }
