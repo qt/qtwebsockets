@@ -29,3 +29,4 @@ build-unittests-Qt_5_1_0_clang_64-Release/unittests
 examples/.coverity-submit
 
 reports
+doc/html
