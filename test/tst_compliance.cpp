@@ -100,8 +100,6 @@ void ComplianceTest::autobahnTest()
 	QObject::connect(pWebSocket, &WebSocket::textMessageReceived, [&](QString message) {
 		numberOfTestCases = message.toInt();
 	});
-//	QObject::connect(pWebSocket, &WebSocket::disconnected, [=]() {
-//	});
 
 	url.setPath("/getCaseCount");
 	pWebSocket->open(url);
@@ -110,11 +108,7 @@ void ComplianceTest::autobahnTest()
 
 	QObject::disconnect(pWebSocket, &WebSocket::textMessageReceived, 0, 0);
 
-	//runTestCases(64 + 7, 64+141);	//141
-	//runTestCases(64 + 33, 64+33 + 2);	//141
-	//runTestCases(73, 77);	//testcase 6.4.1 - 6.4.4
 	runTestCases(0, numberOfTestCases);
-	//runTestCases(78, 79);	//testcase 6.6.1
 
 	url.setPath("/updateReports?");
 	QUrlQuery query;
