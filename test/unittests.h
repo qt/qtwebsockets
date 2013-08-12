@@ -53,6 +53,7 @@ inline int run(int argc, char *argv[])
 	{
 		ret += QTest::qExec(test, argc, argv);
 	}
+	testList().clear();
 	return ret;
 }
 
@@ -77,8 +78,8 @@ public:
 int main(int argc, char *argv[]) \
 { \
 	QCoreApplication app(argc, argv); \
-    int ret = AutoTest::run(argc, argv); \
-    return ret; \
+	int ret = AutoTest::run(argc, argv); \
+	return ret; \
 }
 //return app.exec();
 
