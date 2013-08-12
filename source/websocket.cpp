@@ -119,10 +119,11 @@ WebSocket::~WebSocket()
 {
 	if (state() == QAbstractSocket::ConnectedState)
 	{
-		//qDebug() << "GOING_AWAY, connection closed.";
 		close(WebSocketProtocol::CC_GOING_AWAY, "Connection closed");
-		releaseConnections(m_pSocket);
 	}
+	releaseConnections(m_pSocket);
+	m_pSocket->deleteLater();
+	m_pSocket = 0;
 }
 
 /*!

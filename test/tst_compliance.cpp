@@ -79,8 +79,9 @@ void ComplianceTest::runTestCase(int nbr, int total)
 	url.setQuery(query);
 	pWebSocket->open(url);
 	spy.wait(60000);
-	//pWebSocket->close();
-	//delete pWebSocket;
+	pWebSocket->close();
+	delete pWebSocket;
+	pWebSocket = 0;
 	runTestCase(nbr + 1, total);
 }
 
@@ -121,7 +122,8 @@ void ComplianceTest::autobahnTest()
 	url.setQuery(query);
 	pWebSocket->open(url);
 	spy.wait(60000);
-	//delete pWebSocket;
+	delete pWebSocket;
+	pWebSocket = 0;
 }
 
 DECLARE_TEST(ComplianceTest)

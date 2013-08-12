@@ -18,6 +18,12 @@ WebSocketServer::WebSocketServer(QObject *parent) :
 
 WebSocketServer::~WebSocketServer()
 {
+	while (!m_pendingConnections.isEmpty())
+	{
+		WebSocket *pWebSocket = m_pendingConnections.dequeue();
+		pWebSocket->close(WebSocketProtocol::CC_GOING_AWAY, "Server closed.");
+		pWebSocket->deleteLater();
+	}
 	m_pTcpServer->deleteLater();
 }
 
