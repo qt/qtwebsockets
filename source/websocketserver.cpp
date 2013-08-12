@@ -169,6 +169,7 @@ void WebSocketServer::handshakeReceived()
 		{
 			QTextStream httpStream(pTcpSocket);
 			httpStream << response;
+			httpStream.flush();
 
 			if (response.canUpgrade())
 			{
