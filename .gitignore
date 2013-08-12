@@ -30,3 +30,4 @@ examples/.coverity-submit
 
 reports
 doc/html
+build-examples-Qt_5_1_0_clang_64_temporary-Debug
