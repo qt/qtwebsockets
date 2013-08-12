@@ -719,7 +719,7 @@ void WebSocket::processHandshake(QTcpSocket *pSocket)
 
 		if (httpStatusCode == 101)	//HTTP/1.1 101 Switching Protocols
 		{
-			//do not check the httpStatusText right now
+			//TODO: do not check the httpStatusText right now
 			ok = !(acceptKey.isEmpty() ||
 				   (httpProtocol.toLower() != "http/1.1") ||
 				   (upgrade.toLower() != "websocket") ||
@@ -857,7 +857,7 @@ void WebSocket::processData()
 	}
 }
 
-//TODO: implement separate signals for textframereceived and binaryframereceivd
+//TODO: implement separate signals for textframereceived and binaryframereceived in dataprocessor
 //in that way the UTF8 can be sent as is from within the dataprocessor
 /*!
 	\internal
