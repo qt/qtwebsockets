@@ -358,7 +358,7 @@ void WebSocket::makeConnections(const QTcpSocket *pTcpSocket)
 	connect(pTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SIGNAL(error(QAbstractSocket::SocketError)));
 	connect(pTcpSocket, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)), this, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)));
 	connect(pTcpSocket, SIGNAL(readChannelFinished()), this, SIGNAL(readChannelFinished()));
-	connect(pTcpSocket, SIGNAL(aboutToClose()), this, SIGNAL(aboutToClose()));
+	//connect(pTcpSocket, SIGNAL(aboutToClose()), this, SIGNAL(aboutToClose()));
 	//connect(pTcpSocket, SIGNAL(bytesWritten(qint64)), this, SIGNAL(bytesWritten(qint64)));
 
 	//catch signals
@@ -382,7 +382,7 @@ void WebSocket::releaseConnections(const QTcpSocket *pTcpSocket)
 		disconnect(pTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SIGNAL(error(QAbstractSocket::SocketError)));
 		disconnect(pTcpSocket, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)), this, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)));
 		disconnect(pTcpSocket, SIGNAL(readChannelFinished()), this, SIGNAL(readChannelFinished()));
-		disconnect(pTcpSocket, SIGNAL(aboutToClose()), this, SIGNAL(aboutToClose()));
+		//disconnect(pTcpSocket, SIGNAL(aboutToClose()), this, SIGNAL(aboutToClose()));
 		//disconnect(pTcpSocket, SIGNAL(bytesWritten(qint64)), this, SIGNAL(bytesWritten(qint64)));
 
 		//catched signals
