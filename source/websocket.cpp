@@ -150,6 +150,15 @@ QString WebSocket::errorString() const
 }
 
 /*!
+ * \brief Flushed
+ * \return
+ */
+bool WebSocket::flush()
+{
+	return m_pSocket->flush();
+}
+
+/*!
  * Sends the given \a message over the socket as a text message and returns the number of bytes actually sent.
  * \param message Text message to be sent. Must be '\0' terminated.
  * \return The number of bytes actually sent.
@@ -1150,6 +1159,32 @@ void WebSocket::setProxy(const QNetworkProxy &networkProxy)
 	{
 		m_pSocket->setProxy(networkProxy);
 	}
+}
+
+void WebSocket::setReadBufferSize(qint64 size)
+{
+	if (m_pSocket)
+	{
+		m_pSocket->setReadBufferSize(size);
+	}
+}
+
+void WebSocket::setSocketOption(QAbstractSocket::SocketOption option, const QVariant &value)
+{
+	if (m_pSocket)
+	{
+		m_pSocket->setSocketOption(option, value);
+	}
+}
+
+QVariant WebSocket::socketOption(QAbstractSocket::SocketOption option)
+{
+	QVariant result;
+	if (m_pSocket)
+	{
+		result = m_pSocket->socketOption(option);
+	}
+	return result;
 }
 
 /*!
