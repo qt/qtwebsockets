@@ -1,11 +1,4 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2013-08-03T19:04:16
-#
-#-------------------------------------------------
-
 QT       += core
-
 QT       -= gui
 
 TARGET = websocketclient
@@ -17,7 +10,7 @@ TEMPLATE = app
 include(../../source/websocket.pri)
 
 SOURCES += main.cpp \
-    websocketclient.cpp
+	websocketclient.cpp
 
 HEADERS += \
-    websocketclient.h
+	websocketclient.h
