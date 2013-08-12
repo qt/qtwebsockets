@@ -218,8 +218,6 @@ void WebSocket::close(WebSocketProtocol::CloseCode closeCode, QString reason)
 {
 	if (!m_isClosingHandshakeSent)
 	{
-		m_pSocket->flush();
-
 		quint32 maskingKey = 0;
 		if (m_mustMask)
 		{
@@ -239,18 +237,13 @@ void WebSocket::close(WebSocketProtocol::CloseCode closeCode, QString reason)
 		QByteArray frame = getFrameHeader(WebSocketProtocol::OC_CLOSE, payload.size(), maskingKey, true);
 		frame.append(payload);
 		m_pSocket->write(frame);
+		m_pSocket->flush();
 
 		m_isClosingHandshakeSent = true;
 
-		//setSocketState(QAbstractSocket::ClosingState);
 		Q_EMIT aboutToClose();
 	}
-	//if (m_isClosingHandshakeSent && m_isClosingHandshakeReceived)
-	{
 		m_pSocket->close();
-		setSocketState(QAbstractSocket::UnconnectedState);
-		Q_EMIT disconnected();
-	}
 }
 
 /*!
@@ -801,8 +794,6 @@ void WebSocket::processStateChanged(QAbstractSocket::SocketState socketState)
 			if (webSocketState == QAbstractSocket::ConnectedState)
 			{
 				setSocketState(QAbstractSocket::ClosingState);
-				close(WebSocketProtocol::CC_GOING_AWAY);
-				//Q_EMIT aboutToClose();
 			}
 			break;
 		}
@@ -927,8 +918,8 @@ void WebSocket::processFrame(WebSocketProtocol::OpCode opCode, QByteArray frame,
 						}
 					}
 				}
-				m_isClosingHandshakeReceived = true;
 			}
+			m_isClosingHandshakeReceived = true;
 			close(static_cast<WebSocketProtocol::CloseCode>(closeCode), closeReason);
 			break;
 		}
