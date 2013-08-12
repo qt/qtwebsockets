@@ -1,4 +1,4 @@
 TEMPLATE = subdirs
 
 SUBDIRS =	websocketclient \
-			websocketserver
+			echoserver

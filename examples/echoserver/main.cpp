@@ -1,10 +1,10 @@
 #include <QCoreApplication>
-#include "helloworldserver.h"
+#include "echoserver.h"
 
 int main(int argc, char *argv[])
 {
 	QCoreApplication a(argc, argv);
-	HelloWorldServer server(1234);
+	EchoServer server(1234);
 
 	Q_UNUSED(server);
 

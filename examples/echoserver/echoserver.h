@@ -1,5 +1,5 @@
-#ifndef HELLOWORLDSERVER_H
-#define HELLOWORLDSERVER_H
+#ifndef ECHOSERVER_H
+#define ECHOSERVER_H
 
 #include <QObject>
 #include <QList>
@@ -8,11 +8,11 @@
 class WebSocketServer;
 class WebSocket;
 
-class HelloWorldServer : public QObject
+class EchoServer : public QObject
 {
 	Q_OBJECT
 public:
-	explicit HelloWorldServer(quint16 port, QObject *parent = 0);
+	explicit EchoServer(quint16 port, QObject *parent = 0);
 
 Q_SIGNALS:
 
@@ -27,4 +27,4 @@ private:
 	QList<WebSocket *> m_clients;
 };
 
-#endif // HELLOWORLDSERVER_H
+#endif //ECHOSERVER_H
