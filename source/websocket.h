@@ -84,7 +84,7 @@ Q_SIGNALS:
 
 private Q_SLOTS:
 	void processData();
-	void processFrame(WebSocketProtocol::OpCode opCode, QByteArray frame, bool isLastFrame);
+	void processControlFrame(WebSocketProtocol::OpCode opCode, QByteArray frame);
 	void processHandshake(QTcpSocket *pSocket);
 	void processStateChanged(QAbstractSocket::SocketState socketState);
 

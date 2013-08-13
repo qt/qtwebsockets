@@ -481,7 +481,9 @@ void WebSocket::makeConnections(const QTcpSocket *pTcpSocket)
 	connect(pTcpSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(processStateChanged(QAbstractSocket::SocketState)));
 	connect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(processData()));
 
-	connect(&m_dataProcessor, SIGNAL(frameReceived(WebSocketProtocol::OpCode, QByteArray, bool)), this, SLOT(processFrame(WebSocketProtocol::OpCode, QByteArray, bool)));
+	connect(&m_dataProcessor, SIGNAL(controlFrameReceived(WebSocketProtocol::OpCode, QByteArray)), this, SLOT(processControlFrame(WebSocketProtocol::OpCode, QByteArray)));
+	connect(&m_dataProcessor, SIGNAL(textFrameReceived(QString,bool)), this, SIGNAL(textFrameReceived(QString,bool)));
+	connect(&m_dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)), this, SIGNAL(binaryFrameReceived(QByteArray,bool)));
 	connect(&m_dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)), this, SIGNAL(binaryMessageReceived(QByteArray)));
 	connect(&m_dataProcessor, SIGNAL(textMessageReceived(QString)), this, SIGNAL(textMessageReceived(QString)));
 	connect(&m_dataProcessor, SIGNAL(errorEncountered(WebSocketProtocol::CloseCode,QString)), this, SLOT(close(WebSocketProtocol::CloseCode,QString)));
@@ -505,7 +507,9 @@ void WebSocket::releaseConnections(const QTcpSocket *pTcpSocket)
 		disconnect(pTcpSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(processStateChanged(QAbstractSocket::SocketState)));
 		disconnect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(processData()));
 	}
-	disconnect(&m_dataProcessor, SIGNAL(frameReceived(WebSocketProtocol::OpCode,QByteArray,bool)), this, SLOT(processFrame(WebSocketProtocol::OpCode,QByteArray,bool)));
+	disconnect(&m_dataProcessor, SIGNAL(controlFrameReceived(WebSocketProtocol::OpCode,QByteArray)), this, SLOT(processControlFrame(WebSocketProtocol::OpCode,QByteArray)));
+	disconnect(&m_dataProcessor, SIGNAL(textFrameReceived(QString,bool)), this, SIGNAL(textFrameReceived(QString,bool)));
+	disconnect(&m_dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)), this, SIGNAL(binaryFrameReceived(QByteArray,bool)));
 	disconnect(&m_dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)), this, SIGNAL(binaryMessageReceived(QByteArray)));
 	disconnect(&m_dataProcessor, SIGNAL(textMessageReceived(QString)), this, SIGNAL(textMessageReceived(QString)));
 	disconnect(&m_dataProcessor, SIGNAL(errorEncountered(WebSocketProtocol::CloseCode,QString)), this, SLOT(close(WebSocketProtocol::CloseCode,QString)));
@@ -965,25 +969,13 @@ void WebSocket::processData()
 	}
 }
 
-//TODO: implement separate signals for textframereceived and binaryframereceived in dataprocessor
-//in that way the UTF8 can be sent as is from within the dataprocessor
 /*!
 	\internal
  */
-void WebSocket::processFrame(WebSocketProtocol::OpCode opCode, QByteArray frame, bool isLastFrame)
+void WebSocket::processControlFrame(WebSocketProtocol::OpCode opCode, QByteArray frame)
 {
 	switch (opCode)
 	{
-		case WebSocketProtocol::OC_BINARY:
-		{
-			Q_EMIT binaryFrameReceived(frame, isLastFrame);
-			break;
-		}
-		case WebSocketProtocol::OC_TEXT:
-		{
-			Q_EMIT textFrameReceived(QString::fromUtf8(frame.constData(), frame.length()), isLastFrame);
-			break;
-		}
 		case WebSocketProtocol::OC_PING:
 		{
 			quint32 maskingKey = 0;
@@ -1040,6 +1032,8 @@ void WebSocket::processFrame(WebSocketProtocol::OpCode opCode, QByteArray frame,
 			break;
 		}
 		case WebSocketProtocol::OC_CONTINUE:
+		case WebSocketProtocol::OC_BINARY:
+		case WebSocketProtocol::OC_TEXT:
 		case WebSocketProtocol::OC_RESERVED_3:
 		case WebSocketProtocol::OC_RESERVED_4:
 		case WebSocketProtocol::OC_RESERVED_5:

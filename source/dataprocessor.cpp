@@ -464,10 +464,10 @@ void DataProcessor::process(QTcpSocket *pSocket)
 		{
 			if (frame.isControlFrame())
 			{
-				Q_EMIT frameReceived(frame.getOpCode(), frame.getPayload(), true);
+				Q_EMIT controlFrameReceived(frame.getOpCode(), frame.getPayload());
 				isDone = true;  //exit the loop after a control frame, so we can get a chance to close the socket if necessary
 			}
-			else    //we have a dataframe
+			else    //we have a dataframe; opcode can be OC_CONTINUE, OC_TEXT or OC_BINARY
 			{
 				if (!m_isFragmented && frame.isContinuationFrame())
 				{
@@ -478,7 +478,7 @@ void DataProcessor::process(QTcpSocket *pSocket)
 				if (m_isFragmented && frame.isDataFrame() && !frame.isContinuationFrame())
 				{
 					clear();
-					Q_EMIT errorEncountered(WebSocketProtocol::CC_PROTOCOL_ERROR, "All data frames after the initial data frame must have opcode 0");
+					Q_EMIT errorEncountered(WebSocketProtocol::CC_PROTOCOL_ERROR, "All data frames after the initial data frame must have opcode 0 (continuation).");
 					return;
 				}
 				if (!frame.isContinuationFrame())
@@ -507,13 +507,14 @@ void DataProcessor::process(QTcpSocket *pSocket)
 					else
 					{
 						m_textMessage.append(frameTxt);
+						Q_EMIT textFrameReceived(frameTxt, frame.isFinalFrame());
 					}
 				}
 				else
 				{
 					m_binaryMessage.append(frame.getPayload());
+					Q_EMIT binaryFrameReceived(frame.getPayload(), frame.isFinalFrame());
 				}
-				Q_EMIT frameReceived(m_opCode, frame.getPayload(), frame.isFinalFrame());
 
 				if (frame.isFinalFrame())
 				{

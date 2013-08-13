@@ -21,7 +21,9 @@ public:
 	virtual ~DataProcessor();
 
 Q_SIGNALS:
-	void frameReceived(WebSocketProtocol::OpCode opCode, QByteArray frame, bool lastFrame);
+	void controlFrameReceived(WebSocketProtocol::OpCode opCode, QByteArray frame);
+	void textFrameReceived(QString frame, bool lastFrame);
+	void binaryFrameReceived(QByteArray frame, bool lastFrame);
 	void textMessageReceived(QString message);
 	void binaryMessageReceived(QByteArray message);
 	void errorEncountered(WebSocketProtocol::CloseCode code, QString description);
