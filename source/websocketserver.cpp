@@ -33,7 +33,7 @@
 */
 
 /*!
-  \page echoserver WebSocketServer example
+  \page echoserver WebSocket server example
   \brief A sample websocket server echoing back messages sent to it.
 
   \section Description

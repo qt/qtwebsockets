@@ -16,6 +16,40 @@
 #include <limits>
 
 /*!
+	\class WebSocket
+	\brief The class WebSocket implements a TCP socket that talks the websocket protocol.
+
+	WebSockets is a web technology providing full-duplex communications channels over a single TCP connection.
+	The WebSocket protocol was standardized by the IETF as RFC 6455 in 2011 (see http://tools.ietf.org/html/rfc6455).
+	It can both be used in a client application and server application.
+
+	This class was modeled after QAbstractSocket.
+
+	\ref echoclient
+
+	\author Kurt Pattyn (pattyn.kurt@gmail.com)
+*/
+/*!
+  \page echoclient WebSocket client example
+  \brief A sample websocket client that sends a message and displays the message that it receives back.
+
+  \section Description
+  The EchoClient example implements a web socket client that sends a message to a websocket server and dumps the answer that it gets back.
+  This example should ideally be used with the EchoServer example.
+  \section Code
+  We start by connecting to the `connected()` signal.
+  \snippet echoclient.cpp constructor
+  After the connection, we open the socket to the given \a url.
+
+  \snippet echoclient.cpp onConnected
+  When the client is connected successfully, we connect to the `onTextMessageReceived()` signal, and send out "Hello, world!".
+  If connected with the EchoServer, we will receive the same message back.
+
+  \snippet echoclient.cpp onTextMessageReceived
+  Whenever a message is received, we write it out.
+*/
+
+/*!
   \fn void WebSocket::connected()
   \brief Emitted when a connection is successfully established.
   \sa open(), disconnected()
@@ -26,32 +60,103 @@
   \sa close(), connected()
 */
 /*!
- \fn void WebSocket::aboutToClose()
- \brief avddd
+	\fn void WebSocket::aboutToClose()
+
+	This signal is emitted when the socket is about to close.
+	Connect this signal if you have operations that need to be performed before the socket closes
+	(e.g., if you have data in a separate buffer that needs to be written to the device).
+
+	\sa close()
  */
-/*void connected();
-void disconnected();
-void stateChanged(QAbstractSocket::SocketState state);
-void proxyAuthenticationRequired(const QNetworkProxy &proxy, QAuthenticator *pAuthenticator);
-void readChannelFinished();
-void textFrameReceived(QString frame, bool isLastFrame);
-void binaryFrameReceived(QByteArray frame, bool isLastFrame);
-void textMessageReceived(QString message);
-void binaryMessageReceived(QByteArray message);
-void error(QAbstractSocket::SocketError error);
-void pong(quint64 elapsedTime);*/
+/*!
+\fn void WebSocket::proxyAuthenticationRequired(const QNetworkProxy &proxy, QAuthenticator *authenticator)
 
+This signal can be emitted when a \a proxy that requires
+authentication is used. The \a authenticator object can then be
+filled in with the required details to allow authentication and
+continue the connection.
 
-//http://tools.ietf.org/html/rfc6455
+\note It is not possible to use a QueuedConnection to connect to
+this signal, as the connection will fail if the authenticator has
+not been filled in with new information when the signal returns.
+
+\sa QAuthenticator, QNetworkProxy
+*/
+/*!
+	\fn void WebSocket::stateChanged(QAbstractSocket::SocketState state);
+
+	This signal is emitted whenever WebSocket's state changes.
+	The \a socketState parameter is the new state.
+
+	QAbstractSocket::SocketState is not a registered metatype, so for queued
+	connections, you will have to register it with Q_REGISTER_METATYPE() and
+	qRegisterMetaType().
+
+	\sa state()
+*/
+/*!
+	\fn void WebSocket::readChannelFinished()
+
+	This signal is emitted when the input (reading) stream is closed in this device. It is emitted as soon as the closing is detected.
+
+	\sa close()
+*/
 
 /*!
-	\class WebSocket
-	\brief The class WebSocket implements a TCP socket that talks the websocket protocol.
+	\fn void WebSocket::textFrameReceived(QString frame, bool isLastFrame);
 
-	WebSockets is a web technology providing full-duplex communications channels over a single TCP connection.
-	The WebSocket protocol was standardized by the IETF as RFC 6455 in 2011.
-	It can both be used in a client application and server application.
+	This signal is emitted whenever a text frame is received. The \a frame contains the data and
+	\a isLastFrame indicates whether this is the last frame of the complete message.
+
+	This signal can be used to process large messages frame by frame, instead of waiting for the complete
+	message to arrive.
+
+	\sa binaryFrameReceived(QByteArray, bool), textMessageReceived(QString)
 */
+/*!
+	\fn void WebSocket::binaryFrameReceived(QByteArray frame, bool isLastFrame);
+
+	This signal is emitted whenever a binary frame is received. The \a frame contains the data and
+	\a isLastFrame indicates whether this is the last frame of the complete message.
+
+	This signal can be used to process large messages frame by frame, instead of waiting for the complete
+	message to arrive.
+
+	\sa textFrameReceived(QString, bool), binaryMessageReceived(QByteArray)
+*/
+/*!
+	\fn void WebSocket::textMessageReceived(QString message);
+
+	This signal is emitted whenever a text message is received. The \a message contains the received text.
+
+	\sa textFrameReceived(QString, bool), binaryMessageReceived(QByteArray)
+*/
+/*!
+	\fn void WebSocket::binaryMessageReceived(QByteArray message);
+
+	This signal is emitted whenever a binary message is received. The \a message contains the received bytes.
+
+	\sa binaryFrameReceived(QByteArray, bool), textMessageReceived(QString)
+*/
+/*!
+	\fn void WebSocket::error(QAbstractSocket::SocketError error);
+
+	This signal is emitted after an error occurred. The \a socketError
+	parameter describes the type of error that occurred.
+
+	QAbstractSocket::SocketError is not a registered metatype, so for queued
+	connections, you will have to register it with Q_DECLARE_METATYPE() and
+	qRegisterMetaType().
+
+	\sa error(), errorString()
+*/
+/*!
+  \fn void WebSocket::pong(quint64 elapsedTime)
+
+  Emitted when a pong message is received in reply to a previous ping.
+
+  \sa ping()
+  */
 
 const quint64 FRAME_SIZE_IN_BYTES = 512 * 512 * 2;	//maximum size of a frame when sending a message
 
@@ -113,7 +218,7 @@ WebSocket::WebSocket(QTcpSocket *pTcpSocket, WebSocketProtocol::Version version,
 }
 
 /*!
- * \brief WebSocket::~WebSocket
+ * \brief Destroys the WebSocket. Closes the socket if it is still open, and releases any used resources.
  */
 WebSocket::~WebSocket()
 {
@@ -136,6 +241,7 @@ void WebSocket::abort()
 
 /*!
  * Returns the type of error that last occurred
+ * \sa errorString()
  */
 QAbstractSocket::SocketError WebSocket::error() const
 {
@@ -144,6 +250,8 @@ QAbstractSocket::SocketError WebSocket::error() const
 
 /*!
  * Returns a human-readable description of the last error that occurred
+ *
+ * \sa error()
  */
 QString WebSocket::errorString() const
 {
@@ -151,9 +259,15 @@ QString WebSocket::errorString() const
 }
 
 /*!
- * \brief Flushed
- * \return
- */
+	This function writes as much as possible from the internal write buffer to the underlying network socket, without blocking.
+	If any data was written, this function returns true; otherwise false is returned.
+	Call this function if you need WebSocket to start sending buffered data immediately.
+	The number of bytes successfully written depends on the operating system.
+	In most cases, you do not need to call this function, because WebSocket will start sending data automatically once control goes back to the event loop.
+	In the absence of an event loop, call waitForBytesWritten() instead.
+
+	\sa send() and waitForBytesWritten().
+*/
 bool WebSocket::flush()
 {
 	return m_pSocket->flush();
@@ -243,7 +357,7 @@ void WebSocket::close(WebSocketProtocol::CloseCode closeCode, QString reason)
 
 		Q_EMIT aboutToClose();
 	}
-		m_pSocket->close();
+	m_pSocket->close();
 }
 
 /*!
@@ -275,6 +389,8 @@ void WebSocket::open(const QUrl &url, bool mask)
 
 /*!
  * \brief Pings the server to indicate that the connection is still alive.
+ *
+ * \sa pong()
  */
 void WebSocket::ping()
 {
@@ -996,9 +1112,11 @@ QAbstractSocket::SocketState WebSocket::state() const
 	The following example waits up to one second for a connection to be established:
 
 	~~~{.cpp}
-	socket->connectToHost("imap", 143);
+	socket->open("ws://localhost:1234", false);
 	if (socket->waitForConnected(1000))
+	{
 		qDebug("Connected!");
+	}
 	~~~
 
 	If \a msecs is -1, this function will not time out.
@@ -1153,6 +1271,13 @@ void WebSocket::setProxy(const QNetworkProxy &networkProxy)
 	}
 }
 
+/**
+	Sets the size of WebSocket's internal read buffer to be size bytes.
+	If the buffer size is limited to a certain size, WebSocket won't buffer more than this size of data.
+	Exceptionally, a buffer size of 0 means that the read buffer is unlimited and all incoming data is buffered. This is the default.
+	This option is useful if you only read the data at certain points in time (e.g., in a real-time streaming application) or if you want to protect your socket against receiving too much data, which may eventually cause your application to run out of memory.
+	\sa readBufferSize() and read().
+*/
 void WebSocket::setReadBufferSize(qint64 size)
 {
 	if (m_pSocket)
@@ -1161,6 +1286,10 @@ void WebSocket::setReadBufferSize(qint64 size)
 	}
 }
 
+/*!
+	Sets the given \a option to the value described by \a value.
+	\sa socketOption().
+*/
 void WebSocket::setSocketOption(QAbstractSocket::SocketOption option, const QVariant &value)
 {
 	if (m_pSocket)
@@ -1169,6 +1298,10 @@ void WebSocket::setSocketOption(QAbstractSocket::SocketOption option, const QVar
 	}
 }
 
+/*!
+	Returns the value of the option \a option.
+	\sa setSocketOption().
+*/
 QVariant WebSocket::socketOption(QAbstractSocket::SocketOption option)
 {
 	QVariant result;
