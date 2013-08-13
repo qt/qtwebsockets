@@ -1,11 +1,10 @@
 #include <QCoreApplication>
-#include "websocketclient.h"
+#include "echoclient.h"
 
 int main(int argc, char *argv[])
 {
 	QCoreApplication a(argc, argv);
-
-	WebSocketClient client;
+	EchoClient client(QUrl("ws://localhost:1234"));
 
 	Q_UNUSED(client);
 

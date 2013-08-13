@@ -1,7 +1,7 @@
 QT       += core
 QT       -= gui
 
-TARGET = websocketclient
+TARGET = echoclient
 CONFIG   += console
 CONFIG   -= app_bundle
 
@@ -10,7 +10,7 @@ TEMPLATE = app
 include(../../source/websocket.pri)
 
 SOURCES += main.cpp \
-	websocketclient.cpp
+	echoclient.cpp
 
 HEADERS += \
-	websocketclient.h
+	echoclient.h

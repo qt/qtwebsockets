@@ -1,14 +1,14 @@
-#ifndef WEBSOCKETCLIENT_H
-#define WEBSOCKETCLIENT_H
+#ifndef ECHOCLIENT_H
+#define ECHOCLIENT_H
 
 #include <QObject>
 #include "websocket.h"
 
-class WebSocketClient : public QObject
+class EchoClient : public QObject
 {
 	Q_OBJECT
 public:
-	explicit WebSocketClient(QObject *parent = 0);
+	explicit EchoClient(const QUrl &url, QObject *parent = 0);
 
 Q_SIGNALS:
 
@@ -22,4 +22,4 @@ private:
 	WebSocket m_webSocket;
 };
 
-#endif // WEBSOCKETCLIENT_H
+#endif // ECHOCLIENT_H
