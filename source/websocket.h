@@ -63,9 +63,6 @@ public:
 	qint64 send(const QString &message);	//send data as text
 	qint64 send(const QByteArray &data);	//send data as binary
 
-protected:
-	void setSocketState(QAbstractSocket::SocketState state);
-
 public Q_SLOTS:
 	virtual void close(WebSocketProtocol::CloseCode closeCode = WebSocketProtocol::CC_NORMAL, QString reason = QString());
 	virtual void open(const QUrl &url, bool mask = true);
@@ -102,6 +99,7 @@ private:
 	void setProtocol(QString protocol);
 	void setExtension(QString extension);
 	void enableMasking(bool enable);
+	void setSocketState(QAbstractSocket::SocketState state);
 
 	qint64 doWriteData(const QByteArray &data, bool isBinary);
 	qint64 doWriteFrames(const QByteArray &data, bool isBinary);
