@@ -3,6 +3,7 @@
 #include "websocket.h"
 #include <QDebug>
 
+//! [constructor]
 EchoServer::EchoServer(quint16 port, QObject *parent) :
 	QObject(parent),
 	m_pWebSocketServer(0),
@@ -15,7 +16,9 @@ EchoServer::EchoServer(quint16 port, QObject *parent) :
 		connect(m_pWebSocketServer, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
 	}
 }
+//! [constructor]
 
+//! [onNewConnection]
 void EchoServer::onNewConnection()
 {
 	WebSocket *pSocket = m_pWebSocketServer->nextPendingConnection();
@@ -27,7 +30,9 @@ void EchoServer::onNewConnection()
 
 	m_clients << pSocket;
 }
+//! [onNewConnection]
 
+//! [processMessage]
 void EchoServer::processMessage(QString message)
 {
 	WebSocket *pClient = qobject_cast<WebSocket *>(sender());
@@ -36,7 +41,9 @@ void EchoServer::processMessage(QString message)
 		pClient->send(message);
 	}
 }
+//! [processMessage]
 
+//! [processBinaryMessage]
 void EchoServer::processBinaryMessage(QByteArray message)
 {
 	WebSocket *pClient = qobject_cast<WebSocket *>(sender());
@@ -45,7 +52,9 @@ void EchoServer::processBinaryMessage(QByteArray message)
 		pClient->send(message);
 	}
 }
+//! [processBinaryMessage]
 
+//! [socketDisconnected]
 void EchoServer::socketDisconnected()
 {
 	WebSocket *pClient = qobject_cast<WebSocket *>(sender());
@@ -55,3 +64,4 @@ void EchoServer::socketDisconnected()
 		pClient->deleteLater();
 	}
 }
+//! [socketDisconnected]
