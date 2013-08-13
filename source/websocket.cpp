@@ -170,6 +170,7 @@ const quint64 FRAME_SIZE_IN_BYTES = 512 * 512 * 2;	//maximum size of a frame whe
 WebSocket::WebSocket(QString origin, WebSocketProtocol::Version version, QObject *parent) :
 	QObject(parent),
 	m_pSocket(new QTcpSocket(this)),
+	m_errorString(),
 	m_version(version),
 	m_resourceName(),
 	m_requestUrl(),
@@ -200,6 +201,7 @@ WebSocket::WebSocket(QString origin, WebSocketProtocol::Version version, QObject
 WebSocket::WebSocket(QTcpSocket *pTcpSocket, WebSocketProtocol::Version version, QObject *parent) :
 	QObject(parent),
 	m_pSocket(pTcpSocket),
+	m_errorString(pTcpSocket->errorString()),
 	m_version(version),
 	m_resourceName(),
 	m_requestUrl(),
@@ -255,7 +257,14 @@ QAbstractSocket::SocketError WebSocket::error() const
  */
 QString WebSocket::errorString() const
 {
-	return m_pSocket->errorString();
+	if (!m_errorString.isEmpty())
+	{
+		return m_errorString;
+	}
+	else
+	{
+		return m_pSocket->errorString();
+	}
 }
 
 /*!
@@ -613,6 +622,8 @@ QByteArray WebSocket::getFrameHeader(WebSocketProtocol::OpCode opCode, quint64 p
 	}
 	else
 	{
+		//setErrorString("WebSocket::getHeader: payload too big!");
+		//Q_EMIT error(QAbstractSocket::DatagramTooLargeError);
 		qDebug() << "WebSocket::getHeader: payload too big!";
 	}
 
@@ -667,7 +678,6 @@ qint64 WebSocket::doWriteFrames(const QByteArray &data, bool isBinary)
 			char *currentData = payload + currentPosition;
 			if (m_mustMask)
 			{
-				//WARNING: currentData is written over
 				WebSocketProtocol::mask(currentData, size, maskingKey);
 			}
 			qint64 written = m_pSocket->write(currentData, static_cast<qint64>(size));
@@ -678,8 +688,10 @@ qint64 WebSocket::doWriteFrames(const QByteArray &data, bool isBinary)
 			}
 			else
 			{
-				qDebug() << "WebSocket::doWriteFrames: Error writing bytes to socket:" << m_pSocket->errorString();
+				setErrorString("WebSocket::doWriteFrames: Error writing bytes to socket: " + m_pSocket->errorString());
+				qDebug() << errorString();
 				m_pSocket->flush();
+				Q_EMIT error(QAbstractSocket::NetworkError);
 				break;
 			}
 		}
@@ -688,7 +700,9 @@ qint64 WebSocket::doWriteFrames(const QByteArray &data, bool isBinary)
 	}
 	if (payloadWritten != data.size())
 	{
-		qDebug() << "Bytes written" << payloadWritten << "!=" << "data size:" << data.size();
+		setErrorString("Bytes written " + QString::number(payloadWritten) + " != " + QString::number(data.size()));
+		qDebug() << errorString();
+		Q_EMIT error(QAbstractSocket::NetworkError);
 	}
 	return payloadWritten;
 }
@@ -791,6 +805,8 @@ void WebSocket::processHandshake(QTcpSocket *pSocket)
 	}
 
 	bool ok = false;
+	QString errorDescription;
+
 	const QString regExpStatusLine("^(HTTP/1.1)\\s([0-9]+)\\s(.*)");
 	const QRegExp regExp(regExpStatusLine);
 	QString statusLine = readLine(pSocket);
@@ -811,7 +827,7 @@ void WebSocket::processHandshake(QTcpSocket *pSocket)
 	}
 	if (!ok)
 	{
-		qDebug() << "WebSocket::processHandshake: Invalid statusline in response:" << statusLine;
+		errorDescription = "WebSocket::processHandshake: Invalid statusline in response: " + statusLine;
 	}
 	else
 	{
@@ -844,12 +860,12 @@ void WebSocket::processHandshake(QTcpSocket *pSocket)
 				ok = (accept == acceptKey);
 				if (!ok)
 				{
-					qDebug() << "WebSocket::processHandshake: Accept-Key received from server" << qPrintable(acceptKey) << "does not match the client key" << qPrintable(accept);
+					errorDescription = "WebSocket::processHandshake: Accept-Key received from server " + acceptKey + " does not match the client key " + accept;
 				}
 			}
 			else
 			{
-				qDebug() << "WebSocket::processHandshake: Invalid statusline in response:" << statusLine;
+				errorDescription = "WebSocket::processHandshake: Invalid statusline in response: " + statusLine;
 			}
 		}
 		else if (httpStatusCode == 400)	//HTTP/1.1 400 Bad Request
@@ -861,25 +877,27 @@ void WebSocket::processHandshake(QTcpSocket *pSocket)
 				{
 					//if needed to switch protocol version, then we are finished here
 					//because we cannot handle other protocols than the RFC one (v13)
-					qDebug() << "WebSocket::processHandshake: Server requests a version that we don't support:" << versions;
+					errorDescription = "WebSocket::processHandshake: Server requests a version that we don't support: " + versions.join(", ");
 					ok = false;
 				}
 				else
 				{
 					//we tried v13, but something different went wrong
-					qDebug() << "WebSocket::processHandshake: Unknown error condition encountered. Aborting connection.";
+					errorDescription = "WebSocket::processHandshake: Unknown error condition encountered. Aborting connection.";
 					ok = false;
 				}
 			}
 		}
 		else
 		{
-			qDebug() << "WebSocket::processHandshake: Unhandled http status code" << httpStatusCode;
+			errorDescription = "WebSocket::processHandshake: Unhandled http status code " + QString::number(httpStatusCode);
 			ok = false;
 		}
 
 		if (!ok)
 		{
+			qDebug() << errorDescription;
+			setErrorString(errorDescription);
 			Q_EMIT error(QAbstractSocket::ConnectionRefusedError);
 		}
 		else
@@ -1161,6 +1179,16 @@ void WebSocket::setSocketState(QAbstractSocket::SocketState state)
 		m_socketState = state;
 		Q_EMIT stateChanged(m_socketState);
 	}
+}
+
+/*!
+  \internal
+  Sets the error string.
+  Only used internally.
+*/
+void WebSocket::setErrorString(QString errorString)
+{
+	m_errorString = errorString;
 }
 
 /*!

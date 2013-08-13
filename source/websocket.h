@@ -100,6 +100,7 @@ private:
 	void setExtension(QString extension);
 	void enableMasking(bool enable);
 	void setSocketState(QAbstractSocket::SocketState state);
+	void setErrorString(QString errorString);
 
 	qint64 doWriteData(const QByteArray &data, bool isBinary);
 	qint64 doWriteFrames(const QByteArray &data, bool isBinary);
@@ -129,6 +130,7 @@ private:
 	friend class WebSocketServer;
 
 	QTcpSocket *m_pSocket;
+	QString m_errorString;
 	WebSocketProtocol::Version m_version;
 	QUrl m_resource;
 	QString m_resourceName;
