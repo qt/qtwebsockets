@@ -10,10 +10,6 @@ class QString;
 class QByteArray;
 #include <qglobal.h>
 
-/**
- * @brief Contains constants related to the WebSocket standard.
- *
- */
 namespace WebSocketProtocol
 {
 	enum Version

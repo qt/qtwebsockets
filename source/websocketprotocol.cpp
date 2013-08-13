@@ -121,8 +121,33 @@
 	Refers to the latest know version to QWebSockets.
 */
 
+/*!
+  \fn WebSocketProtocol::isOpCodeReserved(OpCode code)
+  Checks if \a code is a valid OpCode
+  \internal
+*/
+
+/*!
+  \fn WebSocketProtocol::isCloseCodeValid(int closeCode)
+  Checks if \a closeCode is a valid web socket close code
+  \internal
+*/
+
+/*!
+  \fn WebSocketProtocol::getCurrentVersion()
+  Returns the latest version that WebSocket is supporting
+  \internal
+*/
+
+/**
+ * @brief Contains constants related to the WebSocket standard.
+ */
 namespace WebSocketProtocol
 {
+	/*!
+		Parses the \a versionString and converts it to a Version value
+		\internal
+	*/
 	Version versionFromString(const QString &versionString)
 	{
 		bool ok = false;
@@ -140,6 +165,10 @@ namespace WebSocketProtocol
 		return version;
 	}
 
+	/*!
+	  Mask the \a payload with the given \a maskingKey and stores the result back in \a payload.
+	  \internal
+	*/
 	void mask(QByteArray *payload, quint32 maskingKey)
 	{
 		quint32 *payloadData = reinterpret_cast<quint32 *>(payload->data());
@@ -162,6 +191,10 @@ namespace WebSocketProtocol
 		}
 	}
 
+	/*!
+	  Masks the \a payload of length \a size with the given \a maskingKey and stores the result back in \a payload.
+	  \internal
+	*/
 	void mask(char *payload, quint64 size, quint32 maskingKey)
 	{
 		quint32 *payloadData = reinterpret_cast<quint32 *>(payload);
