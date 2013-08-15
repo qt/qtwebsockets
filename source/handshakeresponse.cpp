@@ -45,7 +45,7 @@ QString HandshakeResponse::getAcceptedProtocol() const
 
 QString HandshakeResponse::calculateAcceptKey(const QString &key) const
 {
-	QString tmpKey = key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+	QString tmpKey = key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";	//the UID comes from RFC6455
 	QByteArray hash = QCryptographicHash::hash(tmpKey.toLatin1(), QCryptographicHash::Sha1);
 	return QString(hash.toBase64());
 }
