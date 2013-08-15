@@ -97,6 +97,7 @@ QString HandshakeResponse::getHandshakeResponse(const HandshakeRequest &request,
 						"Date: " + QDateTime::currentDateTimeUtc().toString("ddd, dd MMM yyyy hh:mm:ss 'GMT'");
 
 			m_acceptedVersion = WebSocketProtocol::V_13;
+			m_acceptedVersion = WebSocketProtocol::getCurrentVersion();
 			m_canUpgrade = true;
 		}
 	}
