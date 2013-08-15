@@ -90,13 +90,13 @@ QString HandshakeResponse::getHandshakeResponse(const HandshakeRequest &request,
 			{
 				origin = "*";
 			}
+			//TODO: header values should be configurable; i.e. Server, Allow-Credentials, Allow-Headers
 			response << "Server: Imagine Delivery Server" <<
 						"Access-Control-Allow-Credentials: true" <<
 						"Access-Control-Allow-Headers: content-type" <<
 						"Access-Control-Allow-Origin: " + origin <<
 						"Date: " + QDateTime::currentDateTimeUtc().toString("ddd, dd MMM yyyy hh:mm:ss 'GMT'");
 
-			m_acceptedVersion = WebSocketProtocol::V_13;
 			m_acceptedVersion = WebSocketProtocol::getCurrentVersion();
 			m_canUpgrade = true;
 		}
