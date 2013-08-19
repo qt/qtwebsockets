@@ -21,6 +21,12 @@ With QWebSockets, text messages are just that: a collection of human-readable ch
 ### Requirements
 Qt 5.x
 
+### Usage
+Include the .pri file into your Qt project  
+~~~
+include (websocket.pri)
+~~~
+
 ### Compliance
 QWebSockets is compliant with [RFC6455](http://datatracker.ietf.org/doc/rfc6455/?include_text=1) and has been tested with the [Autobahn Testsuite](http://autobahn.ws/testsuite).  
 Only tests with **Unicode non-characters** do **not** pass from the Autobahn Testsuite (see [Restrictions](#Restrictions)). 
