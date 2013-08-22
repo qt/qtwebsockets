@@ -527,7 +527,7 @@ void WebSocket::releaseConnections(const QTcpSocket *pTcpSocket)
 /*!
  * \brief Returns the version the socket is currently using
  */
-WebSocketProtocol::Version WebSocket::getVersion()
+WebSocketProtocol::Version WebSocket::version()
 {
 	return m_version;
 }
@@ -535,7 +535,7 @@ WebSocketProtocol::Version WebSocket::getVersion()
 /**
  * @brief Returns the name of the resource currently accessed.
  */
-QString WebSocket::getResourceName()
+QString WebSocket::resourceName()
 {
 	return m_resourceName;
 }
@@ -543,7 +543,7 @@ QString WebSocket::getResourceName()
 /*!
  * \brief Returns the url the socket is connected to or will connect to.
  */
-QUrl WebSocket::getRequestUrl()
+QUrl WebSocket::requestUrl()
 {
 	return m_requestUrl;
 }
@@ -551,7 +551,7 @@ QUrl WebSocket::getRequestUrl()
 /*!
   Returns the current origin
  */
-QString WebSocket::getOrigin()
+QString WebSocket::origin()
 {
 	return m_origin;
 }
@@ -559,7 +559,7 @@ QString WebSocket::getOrigin()
 /*!
   Returns the currently used protocol.
  */
-QString WebSocket::getProtocol()
+QString WebSocket::protocol()
 {
 	return m_protocol;
 }
@@ -567,7 +567,7 @@ QString WebSocket::getProtocol()
 /*!
   Returns the currently used extension.
  */
-QString WebSocket::getExtension()
+QString WebSocket::extension()
 {
 	return m_extension;
 }
@@ -923,7 +923,7 @@ void WebSocket::processStateChanged(QAbstractSocket::SocketState socketState)
 			if (webSocketState == QAbstractSocket::ConnectingState)
 			{
 				m_key = generateKey();
-				QString handshake = createHandShakeRequest(m_resourceName, m_requestUrl.host() + ":" + QString::number(m_requestUrl.port(80)), getOrigin(), "", "", m_key);
+				QString handshake = createHandShakeRequest(m_resourceName, m_requestUrl.host() + ":" + QString::number(m_requestUrl.port(80)), origin(), "", "", m_key);
 				m_pSocket->write(handshake.toLatin1());
 			}
 			break;

@@ -52,12 +52,12 @@ public:
 	bool waitForConnected(int msecs = 30000);
 	bool waitForDisconnected(int msecs = 30000);
 
-	WebSocketProtocol::Version getVersion();
-	QString getResourceName();
-	QUrl getRequestUrl();
-	QString getOrigin();
-	QString getProtocol();
-	QString getExtension();
+	WebSocketProtocol::Version version();
+	QString resourceName();
+	QUrl requestUrl();
+	QString origin();
+	QString protocol();
+	QString extension();
 
 	qint64 send(const char *message);
 	qint64 send(const QString &message);	//send data as text
