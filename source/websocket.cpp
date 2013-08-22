@@ -807,7 +807,7 @@ void WebSocket::processHandshake(QTcpSocket *pSocket)
 	bool ok = false;
 	QString errorDescription;
 
-	const QString regExpStatusLine("^(HTTP/1.1)\\s([0-9]+)\\s(.*)");
+	const QString regExpStatusLine("^(HTTP/[0-9]+\\.[0-9]+)\\s([0-9]+)\\s(.*)");
 	const QRegularExpression regExp(regExpStatusLine);
 	QString statusLine = readLine(pSocket);
 	QString httpProtocol;
@@ -850,9 +850,11 @@ void WebSocket::processHandshake(QTcpSocket *pSocket)
 
 		if (httpStatusCode == 101)	//HTTP/1.1 101 Switching Protocols
 		{
+			bool conversionOk = false;
+			float version = httpProtocol.midRef(5).toFloat(&conversionOk);
 			//TODO: do not check the httpStatusText right now
 			ok = !(acceptKey.isEmpty() ||
-				   (httpProtocol.toLower() != "http/1.1") ||
+				   (!conversionOk || (version < 1.1f)) ||
 				   (upgrade.toLower() != "websocket") ||
 				   (connection.toLower() != "upgrade"));
 			if (ok)
