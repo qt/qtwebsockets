@@ -1,6 +1,6 @@
 #include "websocket.h"
-#include "handshakerequest.h"
-#include "handshakeresponse.h"
+#include "handshakerequest_p.h"
+#include "handshakeresponse_p.h"
 #include <QUrl>
 #include <QTcpSocket>
 #include <QByteArray>

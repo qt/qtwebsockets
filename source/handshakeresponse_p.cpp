@@ -1,5 +1,5 @@
-#include "handshakeresponse.h"
-#include "handshakerequest.h"
+#include "handshakeresponse_p.h"
+#include "handshakerequest_p.h"
 #include <QString>
 #include <QTextStream>
 #include <QByteArray>

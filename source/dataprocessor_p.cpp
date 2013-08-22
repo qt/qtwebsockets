@@ -1,4 +1,4 @@
-#include "dataprocessor.h"
+#include "dataprocessor_p.h"
 #include "websocketprotocol.h"
 #include <QTcpSocket>
 #include <QtEndian>

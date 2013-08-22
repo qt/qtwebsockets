@@ -3,8 +3,8 @@
 #include <QTcpSocket>
 #include <QNetworkProxy>
 #include "websocketprotocol.h"
-#include "handshakerequest.h"
-#include "handshakeresponse.h"
+#include "handshakerequest_p.h"
+#include "handshakeresponse_p.h"
 #include "websocket.h"
 
 /*!

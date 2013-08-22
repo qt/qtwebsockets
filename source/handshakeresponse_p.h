@@ -1,5 +1,5 @@
-#ifndef HANDSHAKERESPONSE_H
-#define HANDSHAKERESPONSE_H
+#ifndef HANDSHAKERESPONSE_P_H
+#define HANDSHAKERESPONSE_P_H
 
 #include <QObject>
 #include "websocketprotocol.h"
@@ -48,4 +48,4 @@ private:
 	friend QTextStream &operator <<(QTextStream &stream, const HandshakeResponse &response);
 };
 
-#endif // HANDSHAKERESPONSE_H
+#endif // HANDSHAKERESPONSE_P_H

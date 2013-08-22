@@ -1,5 +1,5 @@
-#ifndef HANDSHAKEREQUEST_H
-#define HANDSHAKEREQUEST_H
+#ifndef HANDSHAKEREQUEST_P_H
+#define HANDSHAKEREQUEST_P_H
 
 #include <QObject>
 #include <QMap>
@@ -51,4 +51,4 @@ private:
 
 QTextStream &operator >>(QTextStream &stream, HandshakeRequest &request);
 
-#endif // HANDSHAKEREQUEST_H
+#endif // HANDSHAKEREQUEST_P_H

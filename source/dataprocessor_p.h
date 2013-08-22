@@ -1,5 +1,5 @@
-#ifndef DATAPROCESSOR_H
-#define DATAPROCESSOR_H
+#ifndef DATAPROCESSOR_P_H
+#define DATAPROCESSOR_P_H
 
 #include <QObject>
 #include <QByteArray>
@@ -57,4 +57,4 @@ private:
 	QTextCodec *m_pTextCodec;
 };
 
-#endif // DATAPROCESSOR_H
+#endif // DATAPROCESSOR_P_H

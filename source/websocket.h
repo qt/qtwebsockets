@@ -15,7 +15,7 @@
 #include <QAbstractSocket>
 #include <QHostAddress>
 #include "websocketprotocol.h"
-#include "dataprocessor.h"
+#include "dataprocessor_p.h"
 #include <QNetworkProxy>
 #include <QTime>
 
