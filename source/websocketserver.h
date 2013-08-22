@@ -42,9 +42,9 @@ public:
 	int socketDescriptor() const;
 	bool waitForNewConnection(int msec = 0, bool *timedOut = 0);
 
-	QList<WebSocketProtocol::Version> getSupportedVersions() const;
-	QList<QString> getSupportedProtocols() const;
-	QList<QString> getSupportedExtensions() const;
+	QList<WebSocketProtocol::Version> supportedVersions() const;
+	QList<QString> supportedProtocols() const;
+	QList<QString> supportedExtensions() const;
 
 Q_SIGNALS:
 	void newConnection();

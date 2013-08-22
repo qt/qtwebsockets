@@ -304,7 +304,7 @@ bool WebSocketServer::waitForNewConnection(int msec, bool *timedOut)
 /*!
   Returns a list of websocket versions that this server is supporting.
  */
-QList<WebSocketProtocol::Version> WebSocketServer::getSupportedVersions() const
+QList<WebSocketProtocol::Version> WebSocketServer::supportedVersions() const
 {
 	QList<WebSocketProtocol::Version> supportedVersions;
 	supportedVersions << WebSocketProtocol::getCurrentVersion();	//we only support V13
@@ -314,7 +314,7 @@ QList<WebSocketProtocol::Version> WebSocketServer::getSupportedVersions() const
 /*!
   Returns a list of websocket subprotocols that this server supports.
  */
-QList<QString> WebSocketServer::getSupportedProtocols() const
+QList<QString> WebSocketServer::supportedProtocols() const
 {
 	QList<QString> supportedProtocols;
 	return supportedProtocols;	//no protocols are currently supported
@@ -323,7 +323,7 @@ QList<QString> WebSocketServer::getSupportedProtocols() const
 /*!
   Returns a list of websocket extensions that this server supports.
  */
-QList<QString> WebSocketServer::getSupportedExtensions() const
+QList<QString> WebSocketServer::supportedExtensions() const
 {
 	QList<QString> supportedExtensions;
 	return supportedExtensions;	//no extensions are currently supported
@@ -356,9 +356,9 @@ void WebSocketServer::handshakeReceived()
 		textStream >> request;
 
 		HandshakeResponse response(request,
-								   getSupportedVersions(),
-								   getSupportedProtocols(),
-								   getSupportedExtensions());
+								   supportedVersions(),
+								   supportedProtocols(),
+								   supportedExtensions());
 		disconnect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(handshakeReceived()));
 
 		if (response.isValid())
