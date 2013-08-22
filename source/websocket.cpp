@@ -877,7 +877,6 @@ void WebSocket::processHandshake(QTcpSocket *pSocket)
 			if (!version.isEmpty())
 			{
 				QStringList versions = version.split(", ", QString::SkipEmptyParts);
-				//if (!versions.contains("13"))
 				if (!versions.contains(QString::number(WebSocketProtocol::currentVersion())))
 				{
 					//if needed to switch protocol version, then we are finished here
