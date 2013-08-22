@@ -1,9 +1,3 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2011-06-13T16:50:36
-#
-#-------------------------------------------------
-
 # Determine the platform: if using a cross-compiler -> add it to the config flags.
 !contains(QMAKE_CXX, g++) {
 		CONFIG += embedded
@@ -30,7 +24,7 @@ include(../source/websocket.pri)
 # Remove the main.cpp file from the sources.
 S = $$SOURCES
 SOURCES = \
-    tst_compliance.cpp
+	tst_compliance.cpp
 for(F, S) {
 	M = $$find(F, main.cpp)
 	count(M, 0) {
@@ -39,7 +33,7 @@ for(F, S) {
 }
 
 SOURCES += \
-        main.cpp \
+		main.cpp \
 	tst_websockets.cpp
 
 HEADERS += \
