@@ -844,8 +844,9 @@ void WebSocket::processHandshake(QTcpSocket *pSocket)
 		QString acceptKey = headers.value("Sec-WebSocket-Accept", "");
 		QString upgrade = headers.value("Upgrade", "");
 		QString connection = headers.value("Connection", "");
-		QString extensions = headers.value("Sec-WebSocket-Extensions", "");
-		QString protocol = headers.value("Sec-WebSocket-Protocol", "");
+		//unused for the moment
+		//QString extensions = headers.value("Sec-WebSocket-Extensions", "");
+		//QString protocol = headers.value("Sec-WebSocket-Protocol", "");
 		QString version = headers.value("Sec-WebSocket-Version", "");
 
 		if (httpStatusCode == 101)	//HTTP/x.y 101 Switching Protocols
@@ -876,7 +877,8 @@ void WebSocket::processHandshake(QTcpSocket *pSocket)
 			if (!version.isEmpty())
 			{
 				QStringList versions = version.split(", ", QString::SkipEmptyParts);
-				if (!versions.contains("13"))
+				//if (!versions.contains("13"))
+				if (!versions.contains(QString::number(WebSocketProtocol::currentVersion())))
 				{
 					//if needed to switch protocol version, then we are finished here
 					//because we cannot handle other protocols than the RFC one (v13)
