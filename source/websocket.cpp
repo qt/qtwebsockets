@@ -1098,7 +1098,7 @@ QString WebSocket::createHandShakeRequest(QString resourceName,
 	{
 		handshakeRequest << "Origin: " + origin;
 	}
-	handshakeRequest << "Sec-WebSocket-Version: " + QString::number(WebSocketProtocol::getCurrentVersion());
+	handshakeRequest << "Sec-WebSocket-Version: " + QString::number(WebSocketProtocol::currentVersion());
 	if (extensions.length() > 0)
 	{
 		handshakeRequest << "Sec-WebSocket-Extensions: " + extensions;

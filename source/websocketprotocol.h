@@ -82,7 +82,7 @@ namespace WebSocketProtocol
 	void mask(QByteArray *payload, quint32 maskingKey);
 	void mask(char *payload, quint64 size, quint32 maskingKey);
 
-	inline Version getCurrentVersion() { return V_LATEST; }
+	inline Version currentVersion() { return V_LATEST; }
 
 }	//end namespace WebSocketProtocol
 
