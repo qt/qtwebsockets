@@ -793,7 +793,7 @@ QString readLine(QTcpSocket *pSocket)
 	return line;
 }
 
-//called for a server handshake response
+//called on the client for a server handshake response
 /*!
 	\internal
  */
@@ -848,7 +848,7 @@ void WebSocket::processHandshake(QTcpSocket *pSocket)
 		QString protocol = headers.value("Sec-WebSocket-Protocol", "");
 		QString version = headers.value("Sec-WebSocket-Version", "");
 
-		if (httpStatusCode == 101)	//HTTP/1.1 101 Switching Protocols
+		if (httpStatusCode == 101)	//HTTP/x.y 101 Switching Protocols
 		{
 			bool conversionOk = false;
 			float version = httpProtocol.midRef(5).toFloat(&conversionOk);
