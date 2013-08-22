@@ -6,7 +6,7 @@
 #include <QByteArray>
 #include <QtEndian>
 #include <QCryptographicHash>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QStringList>
 #include <QHostAddress>
 #include <QNetworkProxy>
@@ -808,14 +808,15 @@ void WebSocket::processHandshake(QTcpSocket *pSocket)
 	QString errorDescription;
 
 	const QString regExpStatusLine("^(HTTP/1.1)\\s([0-9]+)\\s(.*)");
-	const QRegExp regExp(regExpStatusLine);
+	const QRegularExpression regExp(regExpStatusLine);
 	QString statusLine = readLine(pSocket);
 	QString httpProtocol;
 	int httpStatusCode;
 	QString httpStatusMessage;
-	if (regExp.indexIn(statusLine) != -1)
+	QRegularExpressionMatch match = regExp.match(statusLine);
+	if (match.hasMatch())
 	{
-		QStringList tokens = regExp.capturedTexts();
+		QStringList tokens = match.capturedTexts();
 		tokens.removeFirst();	//remove the search string
 		if (tokens.length() == 3)
 		{
