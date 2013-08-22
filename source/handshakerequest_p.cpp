@@ -110,6 +110,8 @@ QTextStream &HandshakeRequest::readFromStream(QTextStream &textStream)
 		QString verb = tokens[0];
 		QString resourceName = tokens[1];
 		QString httpProtocol = tokens[2];
+		bool conversionOk = false;
+		float httpVersion = httpProtocol.midRef(5).toFloat(&conversionOk);
 
 		QString headerLine = textStream.readLine();
 		m_headers.clear();
@@ -180,10 +182,9 @@ QTextStream &HandshakeRequest::readFromStream(QTextStream &textStream)
 					  m_versions.isEmpty() ||
 					  m_key.isEmpty() ||
 					  (verb != "GET") ||
-					  (httpProtocol != "HTTP/1.1") ||
+					  (!conversionOk || (httpVersion < 1.1f)) ||
 					  (upgrade.toLower() != "websocket") ||
 					  (!connectionValues.contains("upgrade", Qt::CaseInsensitive)));
-					  //(connection.toLower() != "upgrade"));
 	}
 	return textStream;
 }
