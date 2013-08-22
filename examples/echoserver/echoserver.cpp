@@ -9,7 +9,7 @@ EchoServer::EchoServer(quint16 port, QObject *parent) :
 	m_pWebSocketServer(0),
 	m_clients()
 {
-	m_pWebSocketServer = new WebSocketServer(this);
+	m_pWebSocketServer = new WebSocketServer("Echo Server", this);
 	if (m_pWebSocketServer->listen(QHostAddress::Any, port))
 	{
 		qDebug() << "Echoserver listening on port" << port;
