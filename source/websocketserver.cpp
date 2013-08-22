@@ -72,9 +72,10 @@
 
 	\a parent is passed to the QObject constructor.
  */
-WebSocketServer::WebSocketServer(QObject *parent) :
+WebSocketServer::WebSocketServer(const QString &serverName, QObject *parent) :
 	QObject(parent),
 	m_pTcpServer(0),
+	m_serverName(serverName),
 	m_pendingConnections()
 {
 	m_pTcpServer = new QTcpServer(this);
@@ -329,6 +330,16 @@ QList<QString> WebSocketServer::supportedExtensions() const
 	return supportedExtensions;	//no extensions are currently supported
 }
 
+//Checking on the origin does not make much sense when the server is accessed
+//via a non-browser client, as that client can set whatever origin header it likes
+//In case of a browser client, the server SHOULD check the validity of the origin
+//see http://tools.ietf.org/html/rfc6455#section-10
+bool WebSocketServer::isOriginAllowed(const QString &origin) const
+{
+	Q_UNUSED(origin)
+	return true;
+}
+
 void WebSocketServer::onNewConnection()
 {
 	QTcpSocket *pTcpSocket = m_pTcpServer->nextPendingConnection();
@@ -356,6 +367,8 @@ void WebSocketServer::handshakeReceived()
 		textStream >> request;
 
 		HandshakeResponse response(request,
+								   m_serverName,
+								   isOriginAllowed(request.getOrigin()),
 								   supportedVersions(),
 								   supportedProtocols(),
 								   supportedExtensions());
@@ -379,26 +392,26 @@ void WebSocketServer::handshakeReceived()
 				}
 				else
 				{
-					qDebug() << "WebSocketServer::dataReceived: Upgrading to WebSocket failed.";
+					qDebug() << "WebSocketServer::handshakeReceived: Upgrading to WebSocket failed.";
 				}
 			}
 			else
 			{
-				qDebug() << "WebSocketServer::dataReceived: Cannot upgrade to websocket.";
+				qDebug() << "WebSocketServer::handshakeReceived: Cannot upgrade to websocket.";
 			}
 		}
 		else
 		{
-			qDebug() << "WebSocketServer::dataReceived: Invalid response. This should not happen!!!";
+			qDebug() << "WebSocketServer::handshakeReceived: Invalid response. This should not happen!!!";
 		}
 		if (!success)
 		{
-			qDebug() << "WebSocketServer::dataReceived: Closing socket because of invalid or unsupported request";
+			qDebug() << "WebSocketServer::handshakeReceived: Closing socket because of invalid or unsupported request";
 			pTcpSocket->close();
 		}
 	}
 	else
 	{
-		qDebug() << "WebSocketServerImp::dataReceived: Sender socket is NULL. This should not happen!!!";
+		qDebug() << "WebSocketServerImp::handshakeReceived: Sender socket is NULL. This should not happen!!!";
 	}
 }

@@ -20,7 +20,7 @@ class WebSocketServer : public QObject
 	Q_OBJECT
 
 public:
-	explicit WebSocketServer(QObject *parent = 0);
+	explicit WebSocketServer(const QString &serverName, QObject *parent = 0);
 	virtual ~WebSocketServer();
 
 	void close();
@@ -44,6 +44,9 @@ public:
 	QList<QString> supportedProtocols() const;
 	QList<QString> supportedExtensions() const;
 
+protected:
+	virtual bool isOriginAllowed(const QString &origin) const;
+
 Q_SIGNALS:
 	void newConnection();
 
@@ -56,6 +59,7 @@ private:
 	Q_DISABLE_COPY(WebSocketServer)
 
 	QTcpServer *m_pTcpServer;
+	QString m_serverName;
 	QQueue<WebSocket *> m_pendingConnections;
 
 	void addPendingConnection(WebSocket *pWebSocket);

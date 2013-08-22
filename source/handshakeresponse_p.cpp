@@ -10,6 +10,8 @@
 #include <QList>
 
 HandshakeResponse::HandshakeResponse(const HandshakeRequest &request,
+									 const QString &serverName,
+									 bool isOriginAllowed,
 									 const QList<WebSocketProtocol::Version> &supportedVersions,
 									 const QList<QString> &supportedProtocols,
 									 const QList<QString> &supportedExtensions) :
@@ -20,7 +22,7 @@ HandshakeResponse::HandshakeResponse(const HandshakeRequest &request,
 	m_acceptedExtension(),
 	m_acceptedVersion(WebSocketProtocol::V_Unknow)
 {
-	m_response = getHandshakeResponse(request, supportedVersions, supportedProtocols, supportedExtensions);
+	m_response = getHandshakeResponse(request, serverName, isOriginAllowed, supportedVersions, supportedProtocols, supportedExtensions);
 	m_isValid = true;
 }
 
@@ -51,69 +53,83 @@ QString HandshakeResponse::calculateAcceptKey(const QString &key) const
 }
 
 QString HandshakeResponse::getHandshakeResponse(const HandshakeRequest &request,
+												const QString &serverName,
+												bool isOriginAllowed,
 												const QList<WebSocketProtocol::Version> &supportedVersions,
 												const QList<QString> &supportedProtocols,
 												const QList<QString> &supportedExtensions)
 {
 	QStringList response;
 	m_canUpgrade = false;
-	if (request.isValid())
+
+	if (!isOriginAllowed)
 	{
-		QString acceptKey = calculateAcceptKey(request.getKey());
-		QList<QString> matchingProtocols = supportedProtocols.toSet().intersect(request.getProtocols().toSet()).toList();
-		QList<QString> matchingExtensions = supportedExtensions.toSet().intersect(request.getExtensions().toSet()).toList();
-		QList<WebSocketProtocol::Version> matchingVersions = request.getVersions().toSet().intersect(supportedVersions.toSet()).toList();
-		qStableSort(matchingVersions.begin(), matchingVersions.end(), qGreater<WebSocketProtocol::Version>());	//sort in descending order
-
-		if (matchingVersions.isEmpty())
+		if (!m_canUpgrade)
 		{
-			m_canUpgrade = false;
-		}
-		else
-		{
-			response << "HTTP/1.1 101 Switching Protocols" <<
-						"Upgrade: websocket" <<
-						"Connection: Upgrade" <<
-						"Sec-WebSocket-Accept: " + acceptKey;
-			if (!matchingProtocols.isEmpty())
-			{
-				m_acceptedProtocol = matchingProtocols.first();
-				response << "Sec-WebSocket-Protocol: " + m_acceptedProtocol;
-			}
-			if (!matchingExtensions.isEmpty())
-			{
-				m_acceptedExtension = matchingExtensions.first();
-				response << "Sec-WebSocket-Extensions: " + m_acceptedExtension;
-			}
-			QString origin = request.getOrigin().trimmed();
-			if (origin.isEmpty())
-			{
-				origin = "*";
-			}
-			//TODO: header values should be configurable; i.e. Server, Allow-Credentials, Allow-Headers
-			response << "Server: Imagine Delivery Server" <<
-						"Access-Control-Allow-Credentials: true" <<
-						"Access-Control-Allow-Headers: content-type" <<
-						"Access-Control-Allow-Origin: " + origin <<
-						"Date: " + QDateTime::currentDateTimeUtc().toString("ddd, dd MMM yyyy hh:mm:ss 'GMT'");
-
-			m_acceptedVersion = WebSocketProtocol::currentVersion();
-			m_canUpgrade = true;
+			response << "HTTP/1.1 403 Access Forbidden";
 		}
 	}
 	else
 	{
-		m_canUpgrade = false;
-	}
-	if (!m_canUpgrade)
-	{
-		response << "HTTP/1.1 400 Bad Request";
-		QStringList versions;
-		Q_FOREACH(WebSocketProtocol::Version version, supportedVersions)
+		if (request.isValid())
 		{
-			versions << QString::number(static_cast<int>(version));
+			QString acceptKey = calculateAcceptKey(request.getKey());
+			QList<QString> matchingProtocols = supportedProtocols.toSet().intersect(request.getProtocols().toSet()).toList();
+			QList<QString> matchingExtensions = supportedExtensions.toSet().intersect(request.getExtensions().toSet()).toList();
+			QList<WebSocketProtocol::Version> matchingVersions = request.getVersions().toSet().intersect(supportedVersions.toSet()).toList();
+			qStableSort(matchingVersions.begin(), matchingVersions.end(), qGreater<WebSocketProtocol::Version>());	//sort in descending order
+
+			if (matchingVersions.isEmpty())
+			{
+				m_canUpgrade = false;
+			}
+			else
+			{
+				response << "HTTP/1.1 101 Switching Protocols" <<
+							"Upgrade: websocket" <<
+							"Connection: Upgrade" <<
+							"Sec-WebSocket-Accept: " + acceptKey;
+				if (!matchingProtocols.isEmpty())
+				{
+					m_acceptedProtocol = matchingProtocols.first();
+					response << "Sec-WebSocket-Protocol: " + m_acceptedProtocol;
+				}
+				if (!matchingExtensions.isEmpty())
+				{
+					m_acceptedExtension = matchingExtensions.first();
+					response << "Sec-WebSocket-Extensions: " + m_acceptedExtension;
+				}
+				QString origin = request.getOrigin().trimmed();
+				if (origin.isEmpty())
+				{
+					origin = "*";
+				}
+				//TODO: header values should be configurable; i.e. Server, Allow-Credentials, Allow-Headers
+				response << "Server: " + serverName <<
+							"Access-Control-Allow-Credentials: false"		<<	//do not allow credentialed request (containing cookies)
+							"Access-Control-Allow-Methods: GET"				<<	//only GET is allowed during handshaking
+							"Access-Control-Allow-Headers: content-type"	<<	//this is OK to be fixed; only the content-type header is allowed, no other headers are accepted
+							"Access-Control-Allow-Origin: " + origin		<<
+							"Date: " + QDateTime::currentDateTimeUtc().toString("ddd, dd MMM yyyy hh:mm:ss 'GMT'");
+
+				m_acceptedVersion = WebSocketProtocol::currentVersion();
+				m_canUpgrade = true;
+			}
 		}
-		response << "Sec-WebSocket-Version: " + versions.join(", ");
+		else
+		{
+			m_canUpgrade = false;
+		}
+		if (!m_canUpgrade)
+		{
+			response << "HTTP/1.1 400 Bad Request";
+			QStringList versions;
+			Q_FOREACH(WebSocketProtocol::Version version, supportedVersions)
+			{
+				versions << QString::number(static_cast<int>(version));
+			}
+			response << "Sec-WebSocket-Version: " + versions.join(", ");
+		}
 	}
 	response << "\r\n";	//append empty line at end of header
 	return response.join("\r\n");

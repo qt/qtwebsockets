@@ -13,6 +13,8 @@ class HandshakeResponse:public QObject
 	Q_OBJECT
 public:
 	HandshakeResponse(const HandshakeRequest &request,
+					  const QString &serverName,
+					  bool isOriginAllowed,
 					  const QList<WebSocketProtocol::Version> &supportedVersions,
 					  const QList<QString> &supportedProtocols,
 					  const QList<QString> &supportedExtensions);
@@ -40,6 +42,8 @@ private:
 
 	QString calculateAcceptKey(const QString &key) const;
 	QString getHandshakeResponse(const HandshakeRequest &request,
+								 const QString &serverName,
+								 bool isOriginAllowed,
 								 const QList<WebSocketProtocol::Version> &supportedVersions,
 								 const QList<QString> &supportedProtocols,
 								 const QList<QString> &supportedExtensions);
