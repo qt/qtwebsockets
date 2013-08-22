@@ -15,8 +15,6 @@
 
 class QTcpServer;
 
-class WebSocketServerImp;
-
 class WebSocketServer : public QObject
 {
 	Q_OBJECT
