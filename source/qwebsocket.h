@@ -128,7 +128,7 @@ private:
 								  const HandshakeRequest &request,
 								  const HandshakeResponse &response,
 								  QObject *parent = 0);
-	friend class QWebSocketServer;
+	friend class QWebSocketServerPrivate;
 
 	QTcpSocket *m_pSocket;
 	QString m_errorString;

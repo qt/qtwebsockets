@@ -1,28 +1,28 @@
 /**
- * @file websocketserver.h
+ * @file websocketserver_p.h
  * @author Kurt Pattyn (pattyn.kurt@gmail.com)
- * @brief Defines the WebSocketServer class.
+ * @brief Defines the private WebSocketServerPrivate class.
  */
 
-#ifndef QWEBSOCKETSERVER_H
-#define QWEBSOCKETSERVER_H
+#ifndef QWEBSOCKETSERVER_P_H
+#define QWEBSOCKETSERVER_P_H
 
 #include <QObject>
+#include <QQueue>
 #include <QString>
 #include <QHostAddress>
-#include "qwebsocketsglobal.h"
-#include "qwebsocketprotocol.h"
+#include "qwebsocket.h"
 
-class QWebSocketServerPrivate;
-class QWebSocket;
+class QTcpServer;
+class QWebSocketServer;
 
-class Q_WEBSOCKETS_EXPORT QWebSocketServer : public QObject
+class QWebSocketServerPrivate : public QObject
 {
 	Q_OBJECT
 
 public:
-	explicit QWebSocketServer(const QString &serverName, QObject *parent = 0);
-	virtual ~QWebSocketServer();
+	explicit QWebSocketServerPrivate(const QString &serverName, QWebSocketServer * const pWebSocketServer, QObject *parent = 0);
+	virtual ~QWebSocketServerPrivate();
 
 	void close();
 	QString errorString() const;
@@ -45,16 +45,22 @@ public:
 	QList<QString> supportedProtocols() const;
 	QList<QString> supportedExtensions() const;
 
-protected:
-	virtual bool isOriginAllowed(const QString &origin) const;
-
 Q_SIGNALS:
 	void newConnection();
 
+private Q_SLOTS:
+	void onNewConnection();
+	void onCloseConnection();
+	void handshakeReceived();
+
 private:
-	Q_DISABLE_COPY(QWebSocketServer)
-	QWebSocketServerPrivate * const d_ptr;
-	friend class QWebSocketServerPrivate;
+	QWebSocketServer * const q_ptr;
+
+	QTcpServer *m_pTcpServer;
+	QString m_serverName;
+	QQueue<QWebSocket *> m_pendingConnections;
+
+	void addPendingConnection(QWebSocket *pWebSocket);
 };
 
-#endif // QWEBSOCKETSERVER_H
+#endif // QWEBSOCKETSERVER_P_H
