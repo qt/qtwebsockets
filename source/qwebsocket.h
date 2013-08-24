@@ -18,11 +18,9 @@
 #include <QTime>
 #include "qwebsocketsglobal.h"
 #include "qwebsocketprotocol.h"
-#include "dataprocessor_p.h"
 
-class HandshakeRequest;
-class HandshakeResponse;
 class QTcpSocket;
+class QWebSocketPrivate;
 
 class Q_WEBSOCKETS_EXPORT QWebSocket:public QObject
 {
@@ -83,74 +81,12 @@ Q_SIGNALS:
 	void error(QAbstractSocket::SocketError error);
 	void pong(quint64 elapsedTime);
 
-private Q_SLOTS:
-	void processData();
-	void processControlFrame(QWebSocketProtocol::OpCode opCode, QByteArray frame);
-	void processHandshake(QTcpSocket *pSocket);
-	void processStateChanged(QAbstractSocket::SocketState socketState);
-
 private:
 	Q_DISABLE_COPY(QWebSocket)
-
 	QWebSocket(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version, QObject *parent = 0);
-	void setVersion(QWebSocketProtocol::Version version);
-	void setResourceName(QString resourceName);
-	void setRequestUrl(QUrl requestUrl);
-	void setOrigin(QString origin);
-	void setProtocol(QString protocol);
-	void setExtension(QString extension);
-	void enableMasking(bool enable);
-	void setSocketState(QAbstractSocket::SocketState state);
-	void setErrorString(QString errorString);
+	QWebSocketPrivate * const d_ptr;
 
-	qint64 doWriteData(const QByteArray &data, bool isBinary);
-	qint64 doWriteFrames(const QByteArray &data, bool isBinary);
-
-	void makeConnections(const QTcpSocket *pTcpSocket);
-	void releaseConnections(const QTcpSocket *pTcpSocket);
-
-	QByteArray getFrameHeader(QWebSocketProtocol::OpCode opCode, quint64 payloadLength, quint32 maskingKey, bool lastFrame) const;
-	QString calculateAcceptKey(const QString &key) const;
-	QString createHandShakeRequest(QString resourceName,
-								   QString host,
-								   QString origin,
-								   QString extensions,
-								   QString protocols,
-								   QByteArray key);
-
-	quint32 generateMaskingKey() const;
-	QByteArray generateKey() const;
-	quint32 generateRandomNumber() const;
-	qint64 writeFrames(const QList<QByteArray> &frames);
-	qint64 writeFrame(const QByteArray &frame);
-
-	static QWebSocket *upgradeFrom(QTcpSocket *tcpSocket,
-								  const HandshakeRequest &request,
-								  const HandshakeResponse &response,
-								  QObject *parent = 0);
-	friend class QWebSocketServerPrivate;
-
-	QTcpSocket *m_pSocket;
-	QString m_errorString;
-	QWebSocketProtocol::Version m_version;
-	QUrl m_resource;
-	QString m_resourceName;
-	QUrl m_requestUrl;
-	QString m_origin;
-	QString m_protocol;
-	QString m_extension;
-	QAbstractSocket::SocketState m_socketState;
-
-	QByteArray m_key;	//identification key used in handshake requests
-
-	bool m_mustMask;	//a server must not mask the frames it sends
-
-	bool m_isClosingHandshakeSent;
-	bool m_isClosingHandshakeReceived;
-
-	QTime m_pingTimer;
-
-	DataProcessor m_dataProcessor;
+	friend class QWebSocketPrivate;
 };
 
 #endif // QWEBSOCKET_H

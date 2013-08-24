@@ -1,6 +1,8 @@
 QT       *= network
 
-SOURCES += $$PWD/qwebsocket.cpp \
+SOURCES += \
+	$$PWD/qwebsocket.cpp \
+	$$PWD/qwebsocket_p.cpp \
 	$$PWD/qwebsocketserver.cpp \
 	$$PWD/qwebsocketserver_p.cpp \
 	$$PWD/qwebsocketprotocol.cpp \
@@ -8,7 +10,9 @@ SOURCES += $$PWD/qwebsocket.cpp \
 	$$PWD/handshakeresponse_p.cpp \
 	$$PWD/dataprocessor_p.cpp
 
-HEADERS += $$PWD/qwebsocket.h \
+HEADERS += \
+	$$PWD/qwebsocket.h \
+	$$PWD/qwebsocket_p.h \
 	$$PWD/qwebsocketserver.h \
 	$$PWD/qwebsocketserver_p.h \
 	$$PWD/qwebsocketprotocol.h \

@@ -7,6 +7,7 @@
 #include "handshakerequest_p.h"
 #include "handshakeresponse_p.h"
 #include "qwebsocket.h"
+#include "qwebsocket_p.h"
 
 QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName, QWebSocketServer * const pWebSocketServer, QObject *parent) :
 	QObject(parent),
@@ -185,7 +186,7 @@ void QWebSocketServerPrivate::handshakeReceived()
 
 			if (response.canUpgrade())
 			{
-				QWebSocket *pWebSocket = QWebSocket::upgradeFrom(pTcpSocket, request, response);
+				QWebSocket *pWebSocket = QWebSocketPrivate::upgradeFrom(pTcpSocket, request, response);
 				if (pWebSocket)
 				{
 					pWebSocket->setParent(this);
