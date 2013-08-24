@@ -7,7 +7,7 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-include(../../source/websocket.pri)
+include(../../src/websocket.pri)
 
 SOURCES += main.cpp \
 	echoclient.cpp
