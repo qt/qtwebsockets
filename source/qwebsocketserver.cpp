@@ -2,8 +2,6 @@
 #include <QTcpSocket>
 #include <QNetworkProxy>
 #include "qwebsocketprotocol.h"
-#include "handshakerequest_p.h"
-#include "handshakeresponse_p.h"
 #include "qwebsocket.h"
 #include "qwebsocketserver.h"
 #include "qwebsocketserver_p.h"
