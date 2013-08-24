@@ -14,16 +14,17 @@
 #include <QUrl>
 #include <QAbstractSocket>
 #include <QHostAddress>
-#include "qwebsocketprotocol.h"
-#include "dataprocessor_p.h"
 #include <QNetworkProxy>
 #include <QTime>
+#include "qwebsocketsglobal.h"
+#include "qwebsocketprotocol.h"
+#include "dataprocessor_p.h"
 
 class HandshakeRequest;
 class HandshakeResponse;
 class QTcpSocket;
 
-class QWebSocket:public QObject
+class Q_WEBSOCKETS_EXPORT QWebSocket:public QObject
 {
 	Q_OBJECT
 

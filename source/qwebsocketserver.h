@@ -11,11 +11,12 @@
 #include <QQueue>
 #include <QString>
 #include <QHostAddress>
+#include "qwebsocketsglobal.h"
 #include "qwebsocket.h"
 
 class QTcpServer;
 
-class QWebSocketServer : public QObject
+class Q_WEBSOCKETS_EXPORT QWebSocketServer : public QObject
 {
 	Q_OBJECT
 
