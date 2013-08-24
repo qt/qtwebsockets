@@ -3,7 +3,7 @@
 #include <QSignalSpy>
 #include <QHostInfo>
 #include <QDebug>
-#include "websocket.h"
+#include "qwebsocket.h"
 #include "unittests.h"
 
 class ComplianceTest : public QObject
@@ -57,16 +57,16 @@ void ComplianceTest::runTestCase(int nbr, int total)
 	{
 		return;
 	}
-	WebSocket *pWebSocket = new WebSocket;
+	QWebSocket *pWebSocket = new QWebSocket;
 	QSignalSpy spy(pWebSocket, SIGNAL(disconnected()));
 
 	//next for every case, connect to url
 	//ws://ipaddress:port/runCase?case=<number>&agent=<agentname>
 	//where agent name will be QWebSocket
-	QObject::connect(pWebSocket, &WebSocket::textMessageReceived, [=](QString message) {
+	QObject::connect(pWebSocket, &QWebSocket::textMessageReceived, [=](QString message) {
 		pWebSocket->send(message);
 	});
-	QObject::connect(pWebSocket, &WebSocket::binaryMessageReceived, [=](QByteArray message) {
+	QObject::connect(pWebSocket, &QWebSocket::binaryMessageReceived, [=](QByteArray message) {
 		pWebSocket->send(message);
 	});
 
@@ -93,11 +93,11 @@ void ComplianceTest::runTestCases(int startNbr, int stopNbr)
 void ComplianceTest::autobahnTest()
 {
 	//connect to autobahn server at url ws://ipaddress:port/getCaseCount
-	WebSocket *pWebSocket = new WebSocket;
+	QWebSocket *pWebSocket = new QWebSocket;
 	QUrl url = m_url;
 	int numberOfTestCases = 0;
 	QSignalSpy spy(pWebSocket, SIGNAL(disconnected()));
-	QObject::connect(pWebSocket, &WebSocket::textMessageReceived, [&](QString message) {
+	QObject::connect(pWebSocket, &QWebSocket::textMessageReceived, [&](QString message) {
 		numberOfTestCases = message.toInt();
 	});
 
@@ -106,7 +106,7 @@ void ComplianceTest::autobahnTest()
 	spy.wait(60000);
 	QVERIFY(numberOfTestCases > 0);
 
-	QObject::disconnect(pWebSocket, &WebSocket::textMessageReceived, 0, 0);
+	QObject::disconnect(pWebSocket, &QWebSocket::textMessageReceived, 0, 0);
 
 	runTestCases(0, numberOfTestCases);
 

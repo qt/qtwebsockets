@@ -5,8 +5,8 @@
 #include <QList>
 #include <QByteArray>
 
-class WebSocketServer;
-class WebSocket;
+class QWebSocketServer;
+class QWebSocket;
 
 class EchoServer : public QObject
 {
@@ -23,8 +23,8 @@ private Q_SLOTS:
 	void socketDisconnected();
 
 private:
-	WebSocketServer *m_pWebSocketServer;
-	QList<WebSocket *> m_clients;
+	QWebSocketServer *m_pWebSocketServer;
+	QList<QWebSocket *> m_clients;
 };
 
 #endif //ECHOSERVER_H

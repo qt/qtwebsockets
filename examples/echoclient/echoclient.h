@@ -2,7 +2,7 @@
 #define ECHOCLIENT_H
 
 #include <QObject>
-#include "websocket.h"
+#include "qwebsocket.h"
 
 class EchoClient : public QObject
 {
@@ -19,7 +19,7 @@ private Q_SLOTS:
 	void onTextMessageReceived(QString message);
 
 private:
-	WebSocket m_webSocket;
+	QWebSocket m_webSocket;
 };
 
 #endif // ECHOCLIENT_H

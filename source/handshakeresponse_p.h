@@ -2,7 +2,7 @@
 #define HANDSHAKERESPONSE_P_H
 
 #include <QObject>
-#include "websocketprotocol.h"
+#include "qwebsocketprotocol.h"
 
 class HandshakeRequest;
 class QString;
@@ -15,7 +15,7 @@ public:
 	HandshakeResponse(const HandshakeRequest &request,
 					  const QString &serverName,
 					  bool isOriginAllowed,
-					  const QList<WebSocketProtocol::Version> &supportedVersions,
+					  const QList<QWebSocketProtocol::Version> &supportedVersions,
 					  const QList<QString> &supportedProtocols,
 					  const QList<QString> &supportedExtensions);
 
@@ -25,7 +25,7 @@ public:
 	bool canUpgrade() const;
 	QString getAcceptedProtocol() const;
 	QString getAcceptedExtension() const;
-	WebSocketProtocol::Version getAcceptedVersion() const;
+	QWebSocketProtocol::Version getAcceptedVersion() const;
 
 public Q_SLOTS:
 
@@ -38,13 +38,13 @@ private:
 	QString m_response;
 	QString m_acceptedProtocol;
 	QString m_acceptedExtension;
-	WebSocketProtocol::Version m_acceptedVersion;
+	QWebSocketProtocol::Version m_acceptedVersion;
 
 	QString calculateAcceptKey(const QString &key) const;
 	QString getHandshakeResponse(const HandshakeRequest &request,
 								 const QString &serverName,
 								 bool isOriginAllowed,
-								 const QList<WebSocketProtocol::Version> &supportedVersions,
+								 const QList<QWebSocketProtocol::Version> &supportedVersions,
 								 const QList<QString> &supportedProtocols,
 								 const QList<QString> &supportedExtensions);
 

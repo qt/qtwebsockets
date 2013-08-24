@@ -7,7 +7,7 @@
 #include <QUrl>
 #include <QSet>
 
-#include "websocketprotocol.h"
+#include "qwebsocketprotocol.h"
 
 class QTextStream;
 
@@ -23,7 +23,7 @@ public:
 	bool isSecure() const;
 	bool isValid() const;
 	QMap<QString, QString> getHeaders() const;
-	QList<WebSocketProtocol::Version> getVersions() const;
+	QList<QWebSocketProtocol::Version> getVersions() const;
 	QString getKey() const;
 	QString getOrigin() const;
 	QList<QString> getProtocols() const;
@@ -41,7 +41,7 @@ private:
 	bool m_isSecure;
 	bool m_isValid;
 	QMap<QString, QString> m_headers;
-	QList<WebSocketProtocol::Version> m_versions;
+	QList<QWebSocketProtocol::Version> m_versions;
 	QString m_key;
 	QString m_origin;
 	QList<QString> m_protocols;

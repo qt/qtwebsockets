@@ -1,4 +1,4 @@
-#include "websocketprotocol.h"
+#include "qwebsocketprotocol.h"
 #include <QString>
 #include <QSet>
 #include <QtEndian>
@@ -142,7 +142,7 @@
 /**
  * @brief Contains constants related to the WebSocket standard.
  */
-namespace WebSocketProtocol
+namespace QWebSocketProtocol
 {
 	/*!
 		Parses the \a versionString and converts it to a Version value

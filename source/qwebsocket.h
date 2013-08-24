@@ -8,13 +8,13 @@
  * @author Kurt Pattyn (pattyn.kurt@gmail.com)
  */
 
-#ifndef WEBSOCKET_H
-#define WEBSOCKET_H
+#ifndef QWEBSOCKET_H
+#define QWEBSOCKET_H
 
 #include <QUrl>
 #include <QAbstractSocket>
 #include <QHostAddress>
-#include "websocketprotocol.h"
+#include "qwebsocketprotocol.h"
 #include "dataprocessor_p.h"
 #include <QNetworkProxy>
 #include <QTime>
@@ -23,13 +23,13 @@ class HandshakeRequest;
 class HandshakeResponse;
 class QTcpSocket;
 
-class WebSocket:public QObject
+class QWebSocket:public QObject
 {
 	Q_OBJECT
 
 public:
-	explicit WebSocket(QString origin = QString(), WebSocketProtocol::Version version = WebSocketProtocol::V_LATEST, QObject *parent = 0);
-	virtual ~WebSocket();
+	explicit QWebSocket(QString origin = QString(), QWebSocketProtocol::Version version = QWebSocketProtocol::V_LATEST, QObject *parent = 0);
+	virtual ~QWebSocket();
 
 	void abort();
 	QAbstractSocket::SocketError error() const;
@@ -52,7 +52,7 @@ public:
 	bool waitForConnected(int msecs = 30000);
 	bool waitForDisconnected(int msecs = 30000);
 
-	WebSocketProtocol::Version version();
+	QWebSocketProtocol::Version version();
 	QString resourceName();
 	QUrl requestUrl();
 	QString origin();
@@ -64,7 +64,7 @@ public:
 	qint64 send(const QByteArray &data);	//send data as binary
 
 public Q_SLOTS:
-	virtual void close(WebSocketProtocol::CloseCode closeCode = WebSocketProtocol::CC_NORMAL, QString reason = QString());
+	virtual void close(QWebSocketProtocol::CloseCode closeCode = QWebSocketProtocol::CC_NORMAL, QString reason = QString());
 	virtual void open(const QUrl &url, bool mask = true);
 	void ping();
 
@@ -84,15 +84,15 @@ Q_SIGNALS:
 
 private Q_SLOTS:
 	void processData();
-	void processControlFrame(WebSocketProtocol::OpCode opCode, QByteArray frame);
+	void processControlFrame(QWebSocketProtocol::OpCode opCode, QByteArray frame);
 	void processHandshake(QTcpSocket *pSocket);
 	void processStateChanged(QAbstractSocket::SocketState socketState);
 
 private:
-	Q_DISABLE_COPY(WebSocket)
+	Q_DISABLE_COPY(QWebSocket)
 
-	WebSocket(QTcpSocket *pTcpSocket, WebSocketProtocol::Version version, QObject *parent = 0);
-	void setVersion(WebSocketProtocol::Version version);
+	QWebSocket(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version, QObject *parent = 0);
+	void setVersion(QWebSocketProtocol::Version version);
 	void setResourceName(QString resourceName);
 	void setRequestUrl(QUrl requestUrl);
 	void setOrigin(QString origin);
@@ -108,7 +108,7 @@ private:
 	void makeConnections(const QTcpSocket *pTcpSocket);
 	void releaseConnections(const QTcpSocket *pTcpSocket);
 
-	QByteArray getFrameHeader(WebSocketProtocol::OpCode opCode, quint64 payloadLength, quint32 maskingKey, bool lastFrame) const;
+	QByteArray getFrameHeader(QWebSocketProtocol::OpCode opCode, quint64 payloadLength, quint32 maskingKey, bool lastFrame) const;
 	QString calculateAcceptKey(const QString &key) const;
 	QString createHandShakeRequest(QString resourceName,
 								   QString host,
@@ -123,15 +123,15 @@ private:
 	qint64 writeFrames(const QList<QByteArray> &frames);
 	qint64 writeFrame(const QByteArray &frame);
 
-	static WebSocket *upgradeFrom(QTcpSocket *tcpSocket,
+	static QWebSocket *upgradeFrom(QTcpSocket *tcpSocket,
 								  const HandshakeRequest &request,
 								  const HandshakeResponse &response,
 								  QObject *parent = 0);
-	friend class WebSocketServer;
+	friend class QWebSocketServer;
 
 	QTcpSocket *m_pSocket;
 	QString m_errorString;
-	WebSocketProtocol::Version m_version;
+	QWebSocketProtocol::Version m_version;
 	QUrl m_resource;
 	QString m_resourceName;
 	QUrl m_requestUrl;
@@ -152,4 +152,4 @@ private:
 	DataProcessor m_dataProcessor;
 };
 
-#endif // WEBSOCKET_H
+#endif // QWEBSOCKET_H

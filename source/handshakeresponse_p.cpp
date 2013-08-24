@@ -12,7 +12,7 @@
 HandshakeResponse::HandshakeResponse(const HandshakeRequest &request,
 									 const QString &serverName,
 									 bool isOriginAllowed,
-									 const QList<WebSocketProtocol::Version> &supportedVersions,
+									 const QList<QWebSocketProtocol::Version> &supportedVersions,
 									 const QList<QString> &supportedProtocols,
 									 const QList<QString> &supportedExtensions) :
 	m_isValid(false),
@@ -20,7 +20,7 @@ HandshakeResponse::HandshakeResponse(const HandshakeRequest &request,
 	m_response(),
 	m_acceptedProtocol(),
 	m_acceptedExtension(),
-	m_acceptedVersion(WebSocketProtocol::V_Unknow)
+	m_acceptedVersion(QWebSocketProtocol::V_Unknow)
 {
 	m_response = getHandshakeResponse(request, serverName, isOriginAllowed, supportedVersions, supportedProtocols, supportedExtensions);
 	m_isValid = true;
@@ -55,7 +55,7 @@ QString HandshakeResponse::calculateAcceptKey(const QString &key) const
 QString HandshakeResponse::getHandshakeResponse(const HandshakeRequest &request,
 												const QString &serverName,
 												bool isOriginAllowed,
-												const QList<WebSocketProtocol::Version> &supportedVersions,
+												const QList<QWebSocketProtocol::Version> &supportedVersions,
 												const QList<QString> &supportedProtocols,
 												const QList<QString> &supportedExtensions)
 {
@@ -76,8 +76,8 @@ QString HandshakeResponse::getHandshakeResponse(const HandshakeRequest &request,
 			QString acceptKey = calculateAcceptKey(request.getKey());
 			QList<QString> matchingProtocols = supportedProtocols.toSet().intersect(request.getProtocols().toSet()).toList();
 			QList<QString> matchingExtensions = supportedExtensions.toSet().intersect(request.getExtensions().toSet()).toList();
-			QList<WebSocketProtocol::Version> matchingVersions = request.getVersions().toSet().intersect(supportedVersions.toSet()).toList();
-			qStableSort(matchingVersions.begin(), matchingVersions.end(), qGreater<WebSocketProtocol::Version>());	//sort in descending order
+			QList<QWebSocketProtocol::Version> matchingVersions = request.getVersions().toSet().intersect(supportedVersions.toSet()).toList();
+			qStableSort(matchingVersions.begin(), matchingVersions.end(), qGreater<QWebSocketProtocol::Version>());	//sort in descending order
 
 			if (matchingVersions.isEmpty())
 			{
@@ -112,7 +112,7 @@ QString HandshakeResponse::getHandshakeResponse(const HandshakeRequest &request,
 							"Access-Control-Allow-Origin: " + origin		<<
 							"Date: " + QDateTime::currentDateTimeUtc().toString("ddd, dd MMM yyyy hh:mm:ss 'GMT'");
 
-				m_acceptedVersion = WebSocketProtocol::currentVersion();
+				m_acceptedVersion = QWebSocketProtocol::currentVersion();
 				m_canUpgrade = true;
 			}
 		}
@@ -124,7 +124,7 @@ QString HandshakeResponse::getHandshakeResponse(const HandshakeRequest &request,
 		{
 			response << "HTTP/1.1 400 Bad Request";
 			QStringList versions;
-			Q_FOREACH(WebSocketProtocol::Version version, supportedVersions)
+			Q_FOREACH(QWebSocketProtocol::Version version, supportedVersions)
 			{
 				versions << QString::number(static_cast<int>(version));
 			}
@@ -153,7 +153,7 @@ QTextStream &operator <<(QTextStream &stream, const HandshakeResponse &response)
 	return response.writeToStream(stream);
 }
 
-WebSocketProtocol::Version HandshakeResponse::getAcceptedVersion() const
+QWebSocketProtocol::Version HandshakeResponse::getAcceptedVersion() const
 {
 	return m_acceptedVersion;
 }

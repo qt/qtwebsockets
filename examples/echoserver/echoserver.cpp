@@ -1,6 +1,6 @@
 #include "echoserver.h"
-#include "websocketserver.h"
-#include "websocket.h"
+#include "qwebsocketserver.h"
+#include "qwebsocket.h"
 #include <QDebug>
 
 //! [constructor]
@@ -9,7 +9,7 @@ EchoServer::EchoServer(quint16 port, QObject *parent) :
 	m_pWebSocketServer(0),
 	m_clients()
 {
-	m_pWebSocketServer = new WebSocketServer("Echo Server", this);
+	m_pWebSocketServer = new QWebSocketServer("Echo Server", this);
 	if (m_pWebSocketServer->listen(QHostAddress::Any, port))
 	{
 		qDebug() << "Echoserver listening on port" << port;
@@ -21,7 +21,7 @@ EchoServer::EchoServer(quint16 port, QObject *parent) :
 //! [onNewConnection]
 void EchoServer::onNewConnection()
 {
-	WebSocket *pSocket = m_pWebSocketServer->nextPendingConnection();
+	QWebSocket *pSocket = m_pWebSocketServer->nextPendingConnection();
 
 	connect(pSocket, SIGNAL(textMessageReceived(QString)), this, SLOT(processMessage(QString)));
 	connect(pSocket, SIGNAL(binaryMessageReceived(QByteArray)), this, SLOT(processBinaryMessage(QByteArray)));
@@ -35,7 +35,7 @@ void EchoServer::onNewConnection()
 //! [processMessage]
 void EchoServer::processMessage(QString message)
 {
-	WebSocket *pClient = qobject_cast<WebSocket *>(sender());
+	QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
 	if (pClient != 0)
 	{
 		pClient->send(message);
@@ -46,7 +46,7 @@ void EchoServer::processMessage(QString message)
 //! [processBinaryMessage]
 void EchoServer::processBinaryMessage(QByteArray message)
 {
-	WebSocket *pClient = qobject_cast<WebSocket *>(sender());
+	QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
 	if (pClient != 0)
 	{
 		pClient->send(message);
@@ -57,7 +57,7 @@ void EchoServer::processBinaryMessage(QByteArray message)
 //! [socketDisconnected]
 void EchoServer::socketDisconnected()
 {
-	WebSocket *pClient = qobject_cast<WebSocket *>(sender());
+	QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
 	if (pClient != 0)
 	{
 		m_clients.removeAll(pClient);

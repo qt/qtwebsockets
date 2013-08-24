@@ -4,24 +4,24 @@
  * @brief Defines the WebSocketServer class.
  */
 
-#ifndef WEBSOCKETSERVER_H
-#define WEBSOCKETSERVER_H
+#ifndef QWEBSOCKETSERVER_H
+#define QWEBSOCKETSERVER_H
 
 #include <QObject>
 #include <QQueue>
 #include <QString>
 #include <QHostAddress>
-#include "websocket.h"
+#include "qwebsocket.h"
 
 class QTcpServer;
 
-class WebSocketServer : public QObject
+class QWebSocketServer : public QObject
 {
 	Q_OBJECT
 
 public:
-	explicit WebSocketServer(const QString &serverName, QObject *parent = 0);
-	virtual ~WebSocketServer();
+	explicit QWebSocketServer(const QString &serverName, QObject *parent = 0);
+	virtual ~QWebSocketServer();
 
 	void close();
 	QString errorString() const;
@@ -29,7 +29,7 @@ public:
 	bool isListening() const;
 	bool listen(const QHostAddress &address = QHostAddress::Any, quint16 port = 0);
 	int maxPendingConnections() const;
-	virtual WebSocket *nextPendingConnection();
+	virtual QWebSocket *nextPendingConnection();
 	QNetworkProxy proxy() const;
 	QHostAddress serverAddress() const;
 	QAbstractSocket::SocketError serverError() const;
@@ -40,7 +40,7 @@ public:
 	int socketDescriptor() const;
 	bool waitForNewConnection(int msec = 0, bool *timedOut = 0);
 
-	QList<WebSocketProtocol::Version> supportedVersions() const;
+	QList<QWebSocketProtocol::Version> supportedVersions() const;
 	QList<QString> supportedProtocols() const;
 	QList<QString> supportedExtensions() const;
 
@@ -56,13 +56,13 @@ private Q_SLOTS:
 	void handshakeReceived();
 
 private:
-	Q_DISABLE_COPY(WebSocketServer)
+	Q_DISABLE_COPY(QWebSocketServer)
 
 	QTcpServer *m_pTcpServer;
 	QString m_serverName;
-	QQueue<WebSocket *> m_pendingConnections;
+	QQueue<QWebSocket *> m_pendingConnections;
 
-	void addPendingConnection(WebSocket *pWebSocket);
+	void addPendingConnection(QWebSocket *pWebSocket);
 };
 
-#endif // WEBSOCKETSERVER_H
+#endif // QWEBSOCKETSERVER_H

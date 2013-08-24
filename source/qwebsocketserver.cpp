@@ -1,11 +1,11 @@
-#include "websocketserver.h"
+#include "qwebsocketserver.h"
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QNetworkProxy>
-#include "websocketprotocol.h"
+#include "qwebsocketprotocol.h"
 #include "handshakerequest_p.h"
 #include "handshakeresponse_p.h"
-#include "websocket.h"
+#include "qwebsocket.h"
 
 /*!
 	\class WebSocketServer
@@ -72,7 +72,7 @@
 
 	\a parent is passed to the QObject constructor.
  */
-WebSocketServer::WebSocketServer(const QString &serverName, QObject *parent) :
+QWebSocketServer::QWebSocketServer(const QString &serverName, QObject *parent) :
 	QObject(parent),
 	m_pTcpServer(0),
 	m_serverName(serverName),
@@ -88,12 +88,12 @@ WebSocketServer::WebSocketServer(const QString &serverName, QObject *parent) :
 
 	\sa close()
  */
-WebSocketServer::~WebSocketServer()
+QWebSocketServer::~QWebSocketServer()
 {
 	while (!m_pendingConnections.isEmpty())
 	{
-		WebSocket *pWebSocket = m_pendingConnections.dequeue();
-		pWebSocket->close(WebSocketProtocol::CC_GOING_AWAY, "Server closed.");
+		QWebSocket *pWebSocket = m_pendingConnections.dequeue();
+		pWebSocket->close(QWebSocketProtocol::CC_GOING_AWAY, "Server closed.");
 		pWebSocket->deleteLater();
 	}
 	m_pTcpServer->deleteLater();
@@ -102,7 +102,7 @@ WebSocketServer::~WebSocketServer()
 /*!
   Closes the server. The server will no longer listen for incoming connections.
  */
-void WebSocketServer::close()
+void QWebSocketServer::close()
 {
 	m_pTcpServer->close();
 }
@@ -112,7 +112,7 @@ void WebSocketServer::close()
 
 	\sa serverError().
 */
-QString WebSocketServer::errorString() const
+QString QWebSocketServer::errorString() const
 {
 	return m_pTcpServer->errorString();
 }
@@ -122,7 +122,7 @@ QString WebSocketServer::errorString() const
 
 	\sa nextPendingConnection() and setMaxPendingConnections().
  */
-bool WebSocketServer::hasPendingConnections() const
+bool QWebSocketServer::hasPendingConnections() const
 {
 	return !m_pendingConnections.isEmpty();
 }
@@ -132,7 +132,7 @@ bool WebSocketServer::hasPendingConnections() const
 
 	\sa listen().
  */
-bool WebSocketServer::isListening() const
+bool QWebSocketServer::isListening() const
 {
 	return m_pTcpServer->isListening();
 }
@@ -146,7 +146,7 @@ bool WebSocketServer::isListening() const
 
 	\sa isListening().
  */
-bool WebSocketServer::listen(const QHostAddress &address, quint16 port)
+bool QWebSocketServer::listen(const QHostAddress &address, quint16 port)
 {
 	return m_pTcpServer->listen(address, port);
 }
@@ -156,7 +156,7 @@ bool WebSocketServer::listen(const QHostAddress &address, quint16 port)
 
 	\sa setMaxPendingConnections() and hasPendingConnections().
  */
-int WebSocketServer::maxPendingConnections() const
+int QWebSocketServer::maxPendingConnections() const
 {
 	return m_pTcpServer->maxPendingConnections();
 }
@@ -166,7 +166,7 @@ int WebSocketServer::maxPendingConnections() const
 
 	\sa nextPendingConnection() and hasPendingConnections()
 */
-void WebSocketServer::addPendingConnection(WebSocket *pWebSocket)
+void QWebSocketServer::addPendingConnection(QWebSocket *pWebSocket)
 {
 	if (m_pendingConnections.size() < maxPendingConnections())
 	{
@@ -183,9 +183,9 @@ void WebSocketServer::addPendingConnection(WebSocket *pWebSocket)
 
 	\sa hasPendingConnections().
 */
-WebSocket *WebSocketServer::nextPendingConnection()
+QWebSocket *QWebSocketServer::nextPendingConnection()
 {
-	WebSocket *pWebSocket = 0;
+	QWebSocket *pWebSocket = 0;
 	if (!m_pendingConnections.isEmpty())
 	{
 		pWebSocket = m_pendingConnections.dequeue();
@@ -198,7 +198,7 @@ WebSocket *WebSocketServer::nextPendingConnection()
 
 	\sa setProxy().
 */
-QNetworkProxy WebSocketServer::proxy() const
+QNetworkProxy QWebSocketServer::proxy() const
 {
 	return m_pTcpServer->proxy();
 }
@@ -208,7 +208,7 @@ QNetworkProxy WebSocketServer::proxy() const
 
 	\sa serverPort() and listen().
  */
-QHostAddress WebSocketServer::serverAddress() const
+QHostAddress QWebSocketServer::serverAddress() const
 {
 	return m_pTcpServer->serverAddress();
 }
@@ -217,7 +217,7 @@ QHostAddress WebSocketServer::serverAddress() const
 	Returns an error code for the last error that occurred.
 	\sa errorString().
  */
-QAbstractSocket::SocketError WebSocketServer::serverError() const
+QAbstractSocket::SocketError QWebSocketServer::serverError() const
 {
 	return m_pTcpServer->serverError();
 }
@@ -226,7 +226,7 @@ QAbstractSocket::SocketError WebSocketServer::serverError() const
 	Returns the server's port if the server is listening for connections; otherwise returns 0.
 	\sa serverAddress() and listen().
  */
-quint16 WebSocketServer::serverPort() const
+quint16 QWebSocketServer::serverPort() const
 {
 	return m_pTcpServer->serverPort();
 }
@@ -239,7 +239,7 @@ quint16 WebSocketServer::serverPort() const
 	Clients may still able to connect after the server has reached its maximum number of pending connections (i.e., WebSocket can still emit the connected() signal). WebSocketServer will stop accepting the new connections, but the operating system may still keep them in queue.
 	\sa maxPendingConnections() and hasPendingConnections().
  */
-void WebSocketServer::setMaxPendingConnections(int numConnections)
+void QWebSocketServer::setMaxPendingConnections(int numConnections)
 {
 	m_pTcpServer->setMaxPendingConnections(numConnections);
 }
@@ -255,7 +255,7 @@ void WebSocketServer::setMaxPendingConnections(int numConnections)
 
 	\sa proxy().
 */
-void WebSocketServer::setProxy(const QNetworkProxy &networkProxy)
+void QWebSocketServer::setProxy(const QNetworkProxy &networkProxy)
 {
 	m_pTcpServer->setProxy(networkProxy);
 }
@@ -268,7 +268,7 @@ void WebSocketServer::setProxy(const QNetworkProxy &networkProxy)
 
 	\sa socketDescriptor() and isListening().
  */
-bool WebSocketServer::setSocketDescriptor(int socketDescriptor)
+bool QWebSocketServer::setSocketDescriptor(int socketDescriptor)
 {
 	return m_pTcpServer->setSocketDescriptor(socketDescriptor);
 }
@@ -279,7 +279,7 @@ bool WebSocketServer::setSocketDescriptor(int socketDescriptor)
 
 	\sa setSocketDescriptor() and isListening().
  */
-int WebSocketServer::socketDescriptor() const
+int QWebSocketServer::socketDescriptor() const
 {
 	return m_pTcpServer->socketDescriptor();
 }
@@ -297,7 +297,7 @@ int WebSocketServer::socketDescriptor() const
 
 	\sa hasPendingConnections() and nextPendingConnection().
 */
-bool WebSocketServer::waitForNewConnection(int msec, bool *timedOut)
+bool QWebSocketServer::waitForNewConnection(int msec, bool *timedOut)
 {
 	return m_pTcpServer->waitForNewConnection(msec, timedOut);
 }
@@ -305,17 +305,17 @@ bool WebSocketServer::waitForNewConnection(int msec, bool *timedOut)
 /*!
   Returns a list of websocket versions that this server is supporting.
  */
-QList<WebSocketProtocol::Version> WebSocketServer::supportedVersions() const
+QList<QWebSocketProtocol::Version> QWebSocketServer::supportedVersions() const
 {
-	QList<WebSocketProtocol::Version> supportedVersions;
-	supportedVersions << WebSocketProtocol::currentVersion();	//we only support V13
+	QList<QWebSocketProtocol::Version> supportedVersions;
+	supportedVersions << QWebSocketProtocol::currentVersion();	//we only support V13
 	return supportedVersions;
 }
 
 /*!
   Returns a list of websocket subprotocols that this server supports.
  */
-QList<QString> WebSocketServer::supportedProtocols() const
+QList<QString> QWebSocketServer::supportedProtocols() const
 {
 	QList<QString> supportedProtocols;
 	return supportedProtocols;	//no protocols are currently supported
@@ -324,7 +324,7 @@ QList<QString> WebSocketServer::supportedProtocols() const
 /*!
   Returns a list of websocket extensions that this server supports.
  */
-QList<QString> WebSocketServer::supportedExtensions() const
+QList<QString> QWebSocketServer::supportedExtensions() const
 {
 	QList<QString> supportedExtensions;
 	return supportedExtensions;	//no extensions are currently supported
@@ -334,19 +334,19 @@ QList<QString> WebSocketServer::supportedExtensions() const
 //via a non-browser client, as that client can set whatever origin header it likes
 //In case of a browser client, the server SHOULD check the validity of the origin
 //see http://tools.ietf.org/html/rfc6455#section-10
-bool WebSocketServer::isOriginAllowed(const QString &origin) const
+bool QWebSocketServer::isOriginAllowed(const QString &origin) const
 {
 	Q_UNUSED(origin)
 	return true;
 }
 
-void WebSocketServer::onNewConnection()
+void QWebSocketServer::onNewConnection()
 {
 	QTcpSocket *pTcpSocket = m_pTcpServer->nextPendingConnection();
 	connect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(handshakeReceived()));
 }
 
-void WebSocketServer::onCloseConnection()
+void QWebSocketServer::onCloseConnection()
 {
 	QTcpSocket *pTcpSocket = qobject_cast<QTcpSocket*>(sender());
 	if (pTcpSocket != 0)
@@ -355,7 +355,7 @@ void WebSocketServer::onCloseConnection()
 	}
 }
 
-void WebSocketServer::handshakeReceived()
+void QWebSocketServer::handshakeReceived()
 {
 	QTcpSocket *pTcpSocket = qobject_cast<QTcpSocket*>(sender());
 	if (pTcpSocket != 0)
@@ -382,7 +382,7 @@ void WebSocketServer::handshakeReceived()
 
 			if (response.canUpgrade())
 			{
-				WebSocket *pWebSocket = WebSocket::upgradeFrom(pTcpSocket, request, response);
+				QWebSocket *pWebSocket = QWebSocket::upgradeFrom(pTcpSocket, request, response);
 				if (pWebSocket)
 				{
 					pWebSocket->setParent(this);

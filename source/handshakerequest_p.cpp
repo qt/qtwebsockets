@@ -5,7 +5,7 @@
 #include <QUrl>
 #include <QList>
 #include <QStringList>
-#include "websocketprotocol.h"
+#include "qwebsocketprotocol.h"
 
 HandshakeRequest::HandshakeRequest(int port, bool isSecure) :
 	m_port(port),
@@ -59,7 +59,7 @@ QMap<QString, QString> HandshakeRequest::getHeaders() const
 	return m_headers;
 }
 
-QList<WebSocketProtocol::Version> HandshakeRequest::getVersions() const
+QList<QWebSocketProtocol::Version> HandshakeRequest::getVersions() const
 {
 	return m_versions;
 }
@@ -140,11 +140,11 @@ QTextStream &HandshakeRequest::readFromStream(QTextStream &textStream)
 			QStringList versions = versionLine.split(",", QString::SkipEmptyParts);
 			Q_FOREACH(QString version, versions)
 			{
-				WebSocketProtocol::Version ver = WebSocketProtocol::versionFromString(version.trimmed());
+				QWebSocketProtocol::Version ver = QWebSocketProtocol::versionFromString(version.trimmed());
 				m_versions << ver;
 			}
 		}
-		qStableSort(m_versions.begin(), m_versions.end(), qGreater<WebSocketProtocol::Version>());	//sort in descending order
+		qStableSort(m_versions.begin(), m_versions.end(), qGreater<QWebSocketProtocol::Version>());	//sort in descending order
 		m_key = m_headers.value("Sec-WebSocket-Key", "");
 		QString upgrade = m_headers.value("Upgrade", ""); //must be equal to "websocket", case-insensitive
 		QString connection = m_headers.value("Connection", "");	//must contain "Upgrade", case-insensitive

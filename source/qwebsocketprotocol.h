@@ -3,14 +3,14 @@
  * @brief Contains constants related to the WebSocket standard.
  * @author Kurt Pattyn (pattyn.kurt@gmail.com)
  */
-#ifndef WEBSOCKETPROTOCOL_H
-#define WEBSOCKETPROTOCOL_H
+#ifndef QWEBSOCKETPROTOCOL_H
+#define QWEBSOCKETPROTOCOL_H
 
 class QString;
 class QByteArray;
 #include <qglobal.h>
 
-namespace WebSocketProtocol
+namespace QWebSocketProtocol
 {
 	enum Version
 	{
@@ -84,6 +84,6 @@ namespace WebSocketProtocol
 
 	inline Version currentVersion() { return V_LATEST; }
 
-}	//end namespace WebSocketProtocol
+}	//end namespace QWebSocketProtocol
 
-#endif // WEBSOCKETPROTOCOL_H
+#endif // QWEBSOCKETPROTOCOL_H

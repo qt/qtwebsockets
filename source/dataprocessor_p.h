@@ -5,7 +5,7 @@
 #include <QByteArray>
 #include <QString>
 #include <QTextCodec>
-#include "websocketprotocol.h"
+#include "qwebsocketprotocol.h"
 
 class QTcpSocket;
 
@@ -21,12 +21,12 @@ public:
 	virtual ~DataProcessor();
 
 Q_SIGNALS:
-	void controlFrameReceived(WebSocketProtocol::OpCode opCode, QByteArray frame);
+	void controlFrameReceived(QWebSocketProtocol::OpCode opCode, QByteArray frame);
 	void textFrameReceived(QString frame, bool lastFrame);
 	void binaryFrameReceived(QByteArray frame, bool lastFrame);
 	void textMessageReceived(QString message);
 	void binaryMessageReceived(QByteArray message);
-	void errorEncountered(WebSocketProtocol::CloseCode code, QString description);
+	void errorEncountered(QWebSocketProtocol::CloseCode code, QString description);
 
 public Q_SLOTS:
 	void process(QTcpSocket *pSocket);
@@ -46,7 +46,7 @@ private:
 
 	bool m_isFinalFrame;
 	bool m_isFragmented;
-	WebSocketProtocol::OpCode m_opCode;
+	QWebSocketProtocol::OpCode m_opCode;
 	bool m_isControlFrame;
 	bool m_hasMask;
 	quint32 m_mask;

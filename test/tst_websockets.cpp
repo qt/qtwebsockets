@@ -3,7 +3,7 @@
 #include <QSignalSpy>
 #include <QHostInfo>
 #include <QDebug>
-#include "websocket.h"
+#include "qwebsocket.h"
 #include "unittests.h"
 
 class WebSocketsTest : public QObject
@@ -46,7 +46,7 @@ private Q_SLOTS:
 	//void autobahnTest();
 
 private:
-	WebSocket *m_pWebSocket;
+	QWebSocket *m_pWebSocket;
 	QUrl m_url;
 };
 
@@ -58,7 +58,7 @@ WebSocketsTest::WebSocketsTest() :
 
 void WebSocketsTest::initTestCase()
 {
-	m_pWebSocket = new WebSocket();
+	m_pWebSocket = new QWebSocket();
 	m_pWebSocket->open(m_url, true);
 	QTRY_VERIFY_WITH_TIMEOUT(m_pWebSocket->state() == QAbstractSocket::ConnectedState, 1000);
 	QVERIFY(m_pWebSocket->isValid());
