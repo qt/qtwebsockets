@@ -1,3 +1,4 @@
+cache()
 # Determine the platform: if using a cross-compiler -> add it to the config flags.
 !contains(QMAKE_CXX, g++) {
 		CONFIG += embedded
