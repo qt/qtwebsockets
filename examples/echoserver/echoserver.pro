@@ -9,7 +9,8 @@ TEMPLATE = app
 
 include(../../src/qwebsocket.pri)
 
-SOURCES += main.cpp \
+SOURCES += \
+	main.cpp \
 	echoserver.cpp
 
 HEADERS += \

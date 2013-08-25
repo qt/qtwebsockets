@@ -1,26 +1,15 @@
 cache()
-# Determine the platform: if using a cross-compiler -> add it to the config flags.
-!contains(QMAKE_CXX, g++) {
-		CONFIG += embedded
-}
 
 QT += core network
-CONFIG += c++11
 
-embedded { # Vanilla Qt libraries are differently deployed then the dev libraries of Debian.
-		QT += multimedia
-}
-CONFIG += mobility
-MOBILITY = multimedia
+TARGET	= unittests
+CONFIG  += console
+CONFIG	+= c++11
+CONFIG  -= app_bundle
 
-unix:!macx {
-		QT += dbus
-}
-
+TEMPLATE = app
 
 include(../src/qwebsocket.pri)
-
-#include(../source/buildsystem/buildsystem.pri)
 
 # Remove the main.cpp file from the sources.
 S = $$SOURCES
@@ -35,7 +24,7 @@ for(F, S) {
 
 SOURCES += \
 		main.cpp \
-	tst_websockets.cpp
+		tst_websockets.cpp
 
 HEADERS += \
 	unittests.h
@@ -44,11 +33,5 @@ INCLUDEPATH +=
 DEPENDPATH +=
 
 QT += testlib
-
-TARGET = unittests
-CONFIG   += console
-CONFIG   -= app_bundle
-
-TEMPLATE = app
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
