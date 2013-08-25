@@ -1,42 +1,44 @@
 /*!
-	\class WebSocketServer
+	\class QWebSocketServer
 
-	The WebSocketServer class provides a websocket-based server.
-	It is modeled after QTcpServer, and behaves the same. So, if you know how to use QTcpServer, you know how to use WebSocketServer.\n
-	This class makes it possible to accept incoming websocket connections.\n
-	You can specify the port or have WebSocketServer pick one automatically.\n
-	You can listen on a specific address or on all the machine's addresses.\n
-	Call listen() to have the server listen for incoming connections.\n
+	\inmodule QWebSockets
 
-	The newConnection() signal is then emitted each time a client connects to the server.\n
-	Call nextPendingConnection() to accept the pending connection as a connected WebSocket.
-	The function returns a pointer to a WebSocket in QAbstractSocket::ConnectedState that you can use for communicating with the client.\n
-	If an error occurs, serverError() returns the type of error, and errorString() can be called to get a human readable description of what happened.\n
-	When listening for connections, the address and port on which the server is listening are available as serverAddress() and serverPort().\n
-	Calling close() makes WebSocketServer stop listening for incoming connections.\n
-	Although WebSocketServer is mostly designed for use with an event loop, it's possible to use it without one. In that case, you must use waitForNewConnection(), which blocks until either a connection is available or a timeout expires.
+	\brief Implements a websocket-based server.
 
-	\ref echoserver
+	It is modeled after QTcpServer, and behaves the same. So, if you know how to use QTcpServer, you know how to use QWebSocketServer.
+	This class makes it possible to accept incoming websocket connections.
+	You can specify the port or have QWebSocketServer pick one automatically.
+	You can listen on a specific address or on all the machine's addresses.
+	Call listen() to have the server listen for incoming connections.
 
-	\author Kurt Pattyn (pattyn.kurt@gmail.com)
+	The newConnection() signal is then emitted each time a client connects to the server.
+	Call nextPendingConnection() to accept the pending connection as a connected QWebSocket.
+	The function returns a pointer to a QWebSocket in QAbstractSocket::ConnectedState that you can use for communicating with the client.
+	If an error occurs, serverError() returns the type of error, and errorString() can be called to get a human readable description of what happened.
+	When listening for connections, the address and port on which the server is listening are available as serverAddress() and serverPort().
+	Calling close() makes QWebSocketServer stop listening for incoming connections.
+	Although QWebSocketServer is mostly designed for use with an event loop, it's possible to use it without one. In that case, you must use waitForNewConnection(), which blocks until either a connection is available or a timeout expires.
 
-	\sa WebSocket
+	\sa echoserver.html
+
+	\sa QWebSocket
 */
 
 /*!
-  \page echoserver WebSocket server example
+  \page echoserver.html example
+  \title WebSocket server example
   \brief A sample websocket server echoing back messages sent to it.
 
-  \section Description
+  \section1 Description
   The echoserver example implements a web socket server that echoes back everything that is sent to it.
-  \section Code
-  We start by creating a WebSocketServer (`new WebSocketServer()`). After the creation, we listen on all local network interfaces (`QHostAddress::Any`) on the specified \a port.
+  \section1 Code
+  We start by creating a QWebSocketServer (`new QWebSocketServer()`). After the creation, we listen on all local network interfaces (`QHostAddress::Any`) on the specified \a port.
   \snippet echoserver.cpp constructor
   If listening is successful, we connect the `newConnection()` signal to the slot `onNewConnection()`.
   The `newConnection()` signal will be thrown whenever a new web socket client is connected to our server.
 
   \snippet echoserver.cpp onNewConnection
-  When a new connection is received, the client WebSocket is retrieved (`nextPendingConnection()`), and the signals we are interested in
+  When a new connection is received, the client QWebSocket is retrieved (`nextPendingConnection()`), and the signals we are interested in
   are connected to our slots (`textMessageReceived()`, `binaryMessageReceived()` and `disconnected()`).
   The client socket is remembered in a list, in case we would like to use it later (in this example, nothing is done with it).
 
@@ -52,18 +54,18 @@
 */
 
 /*!
-	\fn void WebSocketServer::acceptError(QAbstractSocket::SocketError socketError)
+	\fn void QWebSocketServer::acceptError(QAbstractSocket::SocketError socketError)
 	This signal is emitted when accepting a new connection results in an error.
 	The \a socketError parameter describes the type of error that occurred
 
-	\sa pauseAccepting() and resumeAccepting().
+	\sa pauseAccepting(), resumeAccepting()
 */
 
 /*!
-	\fn void WebSocketServer::newConnection()
+	\fn void QWebSocketServer::newConnection()
 	This signal is emitted every time a new connection is available.
 
-	\sa hasPendingConnections() and nextPendingConnection().
+	\sa hasPendingConnections(), nextPendingConnection()
 */
 
 #include <QTcpServer>
@@ -77,7 +79,8 @@
 QT_BEGIN_NAMESPACE
 
 /*!
-	Constructs a new WebSocketServer.
+	Constructs a new WebSocketServer with the given \a serverName.
+	The \a serverName will be used in the http handshake phase to identify the server.
 
 	\a parent is passed to the QObject constructor.
  */
@@ -109,7 +112,7 @@ void QWebSocketServer::close()
 /*!
 	Returns a human readable description of the last error that occurred.
 
-	\sa serverError().
+	\sa serverError()
 */
 QString QWebSocketServer::errorString() const
 {
@@ -119,7 +122,7 @@ QString QWebSocketServer::errorString() const
 /*!
 	Returns true if the server has pending connections; otherwise returns false.
 
-	\sa nextPendingConnection() and setMaxPendingConnections().
+	\sa nextPendingConnection(), setMaxPendingConnections()
  */
 bool QWebSocketServer::hasPendingConnections() const
 {
@@ -129,7 +132,7 @@ bool QWebSocketServer::hasPendingConnections() const
 /*!
 	Returns true if the server is currently listening for incoming connections; otherwise returns false.
 
-	\sa listen().
+	\sa listen()
  */
 bool QWebSocketServer::isListening() const
 {
@@ -138,12 +141,12 @@ bool QWebSocketServer::isListening() const
 
 /*!
 	Tells the server to listen for incoming connections on address \a address and port \a port.
-	If \a port is 0, a port is chosen automatically.\n
+	If \a port is 0, a port is chosen automatically.
 	If \a address is QHostAddress::Any, the server will listen on all network interfaces.
 
 	Returns true on success; otherwise returns false.
 
-	\sa isListening().
+	\sa isListening()
  */
 bool QWebSocketServer::listen(const QHostAddress &address, quint16 port)
 {
@@ -153,7 +156,7 @@ bool QWebSocketServer::listen(const QHostAddress &address, quint16 port)
 /*!
 	Returns the maximum number of pending accepted connections. The default is 30.
 
-	\sa setMaxPendingConnections() and hasPendingConnections().
+	\sa setMaxPendingConnections(), hasPendingConnections()
  */
 int QWebSocketServer::maxPendingConnections() const
 {
@@ -167,7 +170,7 @@ int QWebSocketServer::maxPendingConnections() const
 
 	Note: The returned WebSocket object cannot be used from another thread..
 
-	\sa hasPendingConnections().
+	\sa hasPendingConnections()
 */
 QWebSocket *QWebSocketServer::nextPendingConnection()
 {
@@ -187,7 +190,7 @@ void QWebSocketServer::pauseAccepting()
 /*!
 	Returns the network proxy for this socket. By default QNetworkProxy::DefaultProxy is used.
 
-	\sa setProxy().
+	\sa setProxy()
 */
 QNetworkProxy QWebSocketServer::proxy() const
 {
@@ -203,7 +206,7 @@ QNetworkProxy QWebSocketServer::proxy() const
 		server->setProxy(QNetworkProxy::NoProxy);
 	\endcode
 
-	\sa proxy().
+	\sa proxy()
 */
 void QWebSocketServer::setProxy(const QNetworkProxy &networkProxy)
 {
@@ -222,7 +225,7 @@ void QWebSocketServer::resumeAccepting()
 /*!
 	Returns the server's address if the server is listening for connections; otherwise returns QHostAddress::Null.
 
-	\sa serverPort() and listen().
+	\sa serverPort(), listen()
  */
 QHostAddress QWebSocketServer::serverAddress() const
 {
@@ -231,7 +234,7 @@ QHostAddress QWebSocketServer::serverAddress() const
 
 /*!
 	Returns an error code for the last error that occurred.
-	\sa errorString().
+	\sa errorString()
  */
 QAbstractSocket::SocketError QWebSocketServer::serverError() const
 {
@@ -240,7 +243,7 @@ QAbstractSocket::SocketError QWebSocketServer::serverError() const
 
 /*!
 	Returns the server's port if the server is listening for connections; otherwise returns 0.
-	\sa serverAddress() and listen().
+	\sa serverAddress(), listen()
  */
 quint16 QWebSocketServer::serverPort() const
 {
@@ -249,11 +252,11 @@ quint16 QWebSocketServer::serverPort() const
 
 /*!
 	Sets the maximum number of pending accepted connections to \a numConnections.
-	WebSocketServer will accept no more than \a numConnections incoming connections before nextPendingConnection() is called.\n
+	WebSocketServer will accept no more than \a numConnections incoming connections before nextPendingConnection() is called.
 	By default, the limit is 30 pending connections.
 
 	Clients may still able to connect after the server has reached its maximum number of pending connections (i.e., WebSocket can still emit the connected() signal). WebSocketServer will stop accepting the new connections, but the operating system may still keep them in queue.
-	\sa maxPendingConnections() and hasPendingConnections().
+	\sa maxPendingConnections(), hasPendingConnections()
  */
 void QWebSocketServer::setMaxPendingConnections(int numConnections)
 {
@@ -263,10 +266,10 @@ void QWebSocketServer::setMaxPendingConnections(int numConnections)
 /*!
 	Sets the socket descriptor this server should use when listening for incoming connections to \a socketDescriptor.
 
-	Returns true if the socket is set successfully; otherwise returns false.\n
+	Returns true if the socket is set successfully; otherwise returns false.
 	The socket is assumed to be in listening state.
 
-	\sa socketDescriptor() and isListening().
+	\sa socketDescriptor(), isListening()
  */
 bool QWebSocketServer::setSocketDescriptor(int socketDescriptor)
 {
@@ -277,7 +280,7 @@ bool QWebSocketServer::setSocketDescriptor(int socketDescriptor)
 	Returns the native socket descriptor the server uses to listen for incoming instructions, or -1 if the server is not listening.
 	If the server is using QNetworkProxy, the returned descriptor may not be usable with native socket functions.
 
-	\sa setSocketDescriptor() and isListening().
+	\sa setSocketDescriptor(), isListening()
  */
 int QWebSocketServer::socketDescriptor() const
 {
@@ -287,7 +290,7 @@ int QWebSocketServer::socketDescriptor() const
 /*!
 	Waits for at most \a msec milliseconds or until an incoming connection is available.
 	Returns true if a connection is available; otherwise returns false.
-	If the operation timed out and \a timedOut is not 0, \a *timedOut will be set to true.
+	If the operation timed out and \a timedOut is not 0, \a timedOut will be set to true.
 
 	\note This is a blocking function call.
 	\note Its use is disadvised in a single-threaded GUI application, since the whole application will stop responding until the function returns. waitForNewConnection() is mostly useful when there is no event loop available.
@@ -295,7 +298,7 @@ int QWebSocketServer::socketDescriptor() const
 
 	If \a msec is -1, this function will not time out.
 
-	\sa hasPendingConnections() and nextPendingConnection().
+	\sa hasPendingConnections(), nextPendingConnection()
 */
 bool QWebSocketServer::waitForNewConnection(int msec, bool *timedOut)
 {
@@ -326,10 +329,16 @@ QList<QString> QWebSocketServer::supportedExtensions() const
 	return d_ptr->supportedExtensions();
 }
 
-//Checking on the origin does not make much sense when the server is accessed
-//via a non-browser client, as that client can set whatever origin header it likes
-//In case of a browser client, the server SHOULD check the validity of the origin
-//see http://tools.ietf.org/html/rfc6455#section-10
+/*!
+	This method checks if the given \a origin is allowed; it returns true when the \a origin is allowed, otherwise false.
+	It is supposed to be overriden by a subclass to filter out unwanted origins.
+	By default, every origin is accepted.
+
+	\note Checking on the origin does not make much sense when the server is accessed
+via a non-browser client, as that client can set whatever origin header it likes
+In case of a browser client, the server SHOULD check the validity of the origin.
+\sa http://tools.ietf.org/html/rfc6455#section-10
+*/
 bool QWebSocketServer::isOriginAllowed(const QString &origin) const
 {
 	Q_UNUSED(origin)
