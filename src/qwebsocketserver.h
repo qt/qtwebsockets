@@ -26,22 +26,30 @@ public:
 	explicit QWebSocketServer(const QString &serverName, QObject *parent = 0);
 	virtual ~QWebSocketServer();
 
-	void close();
-	QString errorString() const;
-	bool hasPendingConnections() const;
-	bool isListening() const;
 	bool listen(const QHostAddress &address = QHostAddress::Any, quint16 port = 0);
-	int maxPendingConnections() const;
-	virtual QWebSocket *nextPendingConnection();
-	QNetworkProxy proxy() const;
-	QHostAddress serverAddress() const;
-	QAbstractSocket::SocketError serverError() const;
-	quint16 serverPort() const;
+	void close();
+
+	bool isListening() const;
+
 	void setMaxPendingConnections(int numConnections);
-	void setProxy(const QNetworkProxy &networkProxy);
+	int maxPendingConnections() const;
+
+	quint16 serverPort() const;
+	QHostAddress serverAddress() const;
+
 	bool setSocketDescriptor(int socketDescriptor);
 	int socketDescriptor() const;
+
 	bool waitForNewConnection(int msec = 0, bool *timedOut = 0);
+	bool hasPendingConnections() const;
+	virtual QWebSocket *nextPendingConnection();
+
+	QAbstractSocket::SocketError serverError() const;
+	QString errorString() const;
+
+	void pauseAccepting();
+	void resumeAccepting();
+
 #ifndef QT_NO_NETWORKPROXY
 	void setProxy(const QNetworkProxy &networkProxy);
 	QNetworkProxy proxy() const;

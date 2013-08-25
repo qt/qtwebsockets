@@ -23,6 +23,7 @@ QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName, QWeb
 {
 	Q_ASSERT(pWebSocketServer != 0);
 	m_pTcpServer = new QTcpServer(this);
+	connect(m_pTcpServer, SIGNAL(acceptError(QAbstractSocket::SocketError)), q_ptr, SIGNAL(acceptError(QAbstractSocket::SocketError)));
 	connect(m_pTcpServer, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
 }
 
