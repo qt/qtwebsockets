@@ -112,6 +112,14 @@ QWebSocket *QWebSocketServerPrivate::nextPendingConnection()
 	return pWebSocket;
 }
 
+/*!
+	\internal
+ */
+void QWebSocketServerPrivate::pauseAccepting()
+{
+	m_pTcpServer->pauseAccepting();
+}
+
 #ifndef QT_NO_NETWORKPROXY
 /*!
 	\internal
@@ -129,6 +137,14 @@ void QWebSocketServerPrivate::setProxy(const QNetworkProxy &networkProxy)
 	m_pTcpServer->setProxy(networkProxy);
 }
 #endif
+/*!
+	\internal
+ */
+void QWebSocketServerPrivate::resumeAccepting()
+{
+	m_pTcpServer->resumeAccepting();
+}
+
 /*!
 	\internal
  */

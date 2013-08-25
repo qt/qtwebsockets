@@ -55,6 +55,7 @@ protected:
 	virtual bool isOriginAllowed(const QString &origin) const;
 
 Q_SIGNALS:
+	void acceptError(QAbstractSocket::SocketError socketError);
 	void newConnection();
 
 private:

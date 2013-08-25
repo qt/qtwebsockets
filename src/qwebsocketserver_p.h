@@ -43,10 +43,12 @@ public:
 	bool listen(const QHostAddress &address = QHostAddress::Any, quint16 port = 0);
 	int maxPendingConnections() const;
 	virtual QWebSocket *nextPendingConnection();
+	void pauseAccepting();
 #ifndef QT_NO_NETWORKPROXY
 	QNetworkProxy proxy() const;
 	void setProxy(const QNetworkProxy &networkProxy);
 #endif
+	void resumeAccepting();
 	QHostAddress serverAddress() const;
 	QAbstractSocket::SocketError serverError() const;
 	quint16 serverPort() const;

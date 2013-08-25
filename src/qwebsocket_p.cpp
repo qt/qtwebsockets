@@ -1037,6 +1037,19 @@ quint16 QWebSocketPrivate::localPort() const
 /*!
 	\internal
  */
+QAbstractSocket::PauseModes QWebSocketPrivate::pauseMode() const
+{
+	QAbstractSocket::PauseModes mode = QAbstractSocket::PauseNever;
+	if (m_pSocket)
+	{
+		mode = m_pSocket->pauseMode();
+	}
+	return mode;
+}
+
+/*!
+	\internal
+ */
 QHostAddress QWebSocketPrivate::peerAddress() const
 {
 	QHostAddress peer;
@@ -1097,6 +1110,28 @@ qint64 QWebSocketPrivate::readBufferSize() const
 		readBuffer = m_pSocket->readBufferSize();
 	}
 	return readBuffer;
+}
+
+/*!
+	\internal
+ */
+void QWebSocketPrivate::resume()
+{
+	if (m_pSocket)
+	{
+		m_pSocket->resume();
+	}
+}
+
+/*!
+  \internal
+ */
+void QWebSocketPrivate::setPauseMode(QAbstractSocket::PauseModes pauseMode)
+{
+	if (m_pSocket)
+	{
+		m_pSocket->setPauseMode(pauseMode);
+	}
 }
 
 /*!

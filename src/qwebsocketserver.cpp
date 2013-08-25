@@ -52,6 +52,14 @@
 */
 
 /*!
+	\fn void WebSocketServer::acceptError(QAbstractSocket::SocketError socketError)
+	This signal is emitted when accepting a new connection results in an error.
+	The \a socketError parameter describes the type of error that occurred
+
+	\sa pauseAccepting() and resumeAccepting().
+*/
+
+/*!
 	\fn void WebSocketServer::newConnection()
 	This signal is emitted every time a new connection is available.
 
@@ -167,6 +175,14 @@ QWebSocket *QWebSocketServer::nextPendingConnection()
 }
 
 /*!
+	Pauses incoming new connections. Queued connections will remain in queue.
+	\sa resumeAccepting()
+ */
+void QWebSocketServer::pauseAccepting()
+{
+	d_ptr->pauseAccepting();
+}
+
 #ifndef QT_NO_NETWORKPROXY
 /*!
 	Returns the network proxy for this socket. By default QNetworkProxy::DefaultProxy is used.
@@ -194,6 +210,16 @@ void QWebSocketServer::setProxy(const QNetworkProxy &networkProxy)
 	d_ptr->setProxy(networkProxy);
 }
 #endif
+/*!
+	Resumes accepting new connections.
+	\sa pauseAccepting()
+ */
+void QWebSocketServer::resumeAccepting()
+{
+	d_ptr->resumeAccepting();
+}
+
+/*!
 	Returns the server's address if the server is listening for connections; otherwise returns QHostAddress::Null.
 
 	\sa serverPort() and listen().

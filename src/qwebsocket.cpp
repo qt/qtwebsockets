@@ -416,6 +416,14 @@ quint16 QWebSocket::localPort() const
 }
 
 /*!
+  Returns the pause mode of this socket
+ */
+QAbstractSocket::PauseModes QWebSocket::pauseMode() const
+{
+	return d_ptr->pauseMode();
+}
+
+/*!
   Returns the peer address
  */
 QHostAddress QWebSocket::peerAddress() const
@@ -466,11 +474,32 @@ qint64 QWebSocket::readBufferSize() const
 }
 
 /*!
-  Sets the proxy to \a networkProxy
+	Continues data transfer on the socket. This method should only be used after the socket
+	has been set to pause upon notifications and a notification has been received.
+	The only notification currently supported is sslErrors().
+	Calling this method if the socket is not paused results in undefined behavior.
+
+	\sa pauseMode() and setPauseMode()
  */
-void QWebSocket::setProxy(const QNetworkProxy &networkProxy)
+void QWebSocket::resume()
 {
-	d_ptr->setProxy(networkProxy);
+	d_ptr->resume();
+}
+
+/*!
+  Controls whether to pause upon receiving a notification. The \a pauseMode parameter specifies
+  the conditions in which the socket should be paused.
+  The only notification currently supported is sslErrors().
+  If set to PauseOnSslErrors, data transfer on the socket will be paused
+  and needs to be enabled explicitly again by calling resume().
+  By default, this option is set to PauseNever. This option must be called
+  before connecting to the server, otherwise it will result in undefined behavior.
+
+  \sa pauseMode() and resume()
+ */
+void QWebSocket::setPauseMode(QAbstractSocket::PauseModes pauseMode)
+{
+	d_ptr->setPauseMode(pauseMode);
 }
 
 /**

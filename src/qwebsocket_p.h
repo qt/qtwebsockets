@@ -57,6 +57,7 @@ public:
 	bool isValid();
 	QHostAddress localAddress() const;
 	quint16 localPort() const;
+	QAbstractSocket::PauseModes pauseMode() const;
 	QHostAddress peerAddress() const;
 	QString peerName() const;
 	quint16 peerPort() const;
@@ -65,6 +66,8 @@ public:
 	void setProxy(const QNetworkProxy &networkProxy);
 #endif
 	qint64 readBufferSize() const;
+	void resume();
+	void setPauseMode(QAbstractSocket::PauseModes pauseMode);
 	void setReadBufferSize(qint64 size);
 	void setSocketOption(QAbstractSocket::SocketOption option, const QVariant &value);
 	QVariant socketOption(QAbstractSocket::SocketOption option);
