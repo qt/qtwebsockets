@@ -31,307 +31,307 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 QT_BEGIN_NAMESPACE
 
 /*!
-	\internal
+    \internal
  */
 QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName, QWebSocketServer * const pWebSocketServer, QObject *parent) :
-	QObject(parent),
-	q_ptr(pWebSocketServer),
-	m_pTcpServer(0),
-	m_serverName(serverName),
-	m_pendingConnections()
+    QObject(parent),
+    q_ptr(pWebSocketServer),
+    m_pTcpServer(0),
+    m_serverName(serverName),
+    m_pendingConnections()
 {
-	Q_ASSERT(pWebSocketServer != 0);
-	m_pTcpServer = new QTcpServer(this);
-	connect(m_pTcpServer, SIGNAL(acceptError(QAbstractSocket::SocketError)), q_ptr, SIGNAL(acceptError(QAbstractSocket::SocketError)));
-	connect(m_pTcpServer, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
+    Q_ASSERT(pWebSocketServer != 0);
+    m_pTcpServer = new QTcpServer(this);
+    connect(m_pTcpServer, SIGNAL(acceptError(QAbstractSocket::SocketError)), q_ptr, SIGNAL(acceptError(QAbstractSocket::SocketError)));
+    connect(m_pTcpServer, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
 }
 
 /*!
-	\internal
+    \internal
  */
 QWebSocketServerPrivate::~QWebSocketServerPrivate()
 {
-	while (!m_pendingConnections.isEmpty())
-	{
-		QWebSocket *pWebSocket = m_pendingConnections.dequeue();
-		pWebSocket->close(QWebSocketProtocol::CC_GOING_AWAY, "Server closed.");
-		pWebSocket->deleteLater();
-	}
-	m_pTcpServer->deleteLater();
+    while (!m_pendingConnections.isEmpty())
+    {
+        QWebSocket *pWebSocket = m_pendingConnections.dequeue();
+        pWebSocket->close(QWebSocketProtocol::CC_GOING_AWAY, "Server closed.");
+        pWebSocket->deleteLater();
+    }
+    m_pTcpServer->deleteLater();
 }
 
 /*!
-	\internal
+    \internal
  */
 void QWebSocketServerPrivate::close()
 {
-	m_pTcpServer->close();
+    m_pTcpServer->close();
 }
 
 /*!
-	\internal
+    \internal
  */
 QString QWebSocketServerPrivate::errorString() const
 {
-	return m_pTcpServer->errorString();
+    return m_pTcpServer->errorString();
 }
 
 /*!
-	\internal
+    \internal
  */
 bool QWebSocketServerPrivate::hasPendingConnections() const
 {
-	return !m_pendingConnections.isEmpty();
+    return !m_pendingConnections.isEmpty();
 }
 
 /*!
-	\internal
+    \internal
  */
 bool QWebSocketServerPrivate::isListening() const
 {
-	return m_pTcpServer->isListening();
+    return m_pTcpServer->isListening();
 }
 
 /*!
-	\internal
+    \internal
  */
 bool QWebSocketServerPrivate::listen(const QHostAddress &address, quint16 port)
 {
-	return m_pTcpServer->listen(address, port);
+    return m_pTcpServer->listen(address, port);
 }
 
 /*!
-	\internal
+    \internal
  */
 int QWebSocketServerPrivate::maxPendingConnections() const
 {
-	return m_pTcpServer->maxPendingConnections();
+    return m_pTcpServer->maxPendingConnections();
 }
 
 /*!
-	\internal
+    \internal
  */
 void QWebSocketServerPrivate::addPendingConnection(QWebSocket *pWebSocket)
 {
-	if (m_pendingConnections.size() < maxPendingConnections())
-	{
-		m_pendingConnections.enqueue(pWebSocket);
-	}
+    if (m_pendingConnections.size() < maxPendingConnections())
+    {
+        m_pendingConnections.enqueue(pWebSocket);
+    }
 }
 
 /*!
-	\internal
+    \internal
  */
 QWebSocket *QWebSocketServerPrivate::nextPendingConnection()
 {
-	QWebSocket *pWebSocket = 0;
-	if (!m_pendingConnections.isEmpty())
-	{
-		pWebSocket = m_pendingConnections.dequeue();
-	}
-	return pWebSocket;
+    QWebSocket *pWebSocket = 0;
+    if (!m_pendingConnections.isEmpty())
+    {
+        pWebSocket = m_pendingConnections.dequeue();
+    }
+    return pWebSocket;
 }
 
 /*!
-	\internal
+    \internal
  */
 void QWebSocketServerPrivate::pauseAccepting()
 {
-	m_pTcpServer->pauseAccepting();
+    m_pTcpServer->pauseAccepting();
 }
 
 #ifndef QT_NO_NETWORKPROXY
 /*!
-	\internal
+    \internal
  */
 QNetworkProxy QWebSocketServerPrivate::proxy() const
 {
-	return m_pTcpServer->proxy();
+    return m_pTcpServer->proxy();
 }
 
 /*!
-	\internal
+    \internal
  */
 void QWebSocketServerPrivate::setProxy(const QNetworkProxy &networkProxy)
 {
-	m_pTcpServer->setProxy(networkProxy);
+    m_pTcpServer->setProxy(networkProxy);
 }
 #endif
 /*!
-	\internal
+    \internal
  */
 void QWebSocketServerPrivate::resumeAccepting()
 {
-	m_pTcpServer->resumeAccepting();
+    m_pTcpServer->resumeAccepting();
 }
 
 /*!
-	\internal
+    \internal
  */
 QHostAddress QWebSocketServerPrivate::serverAddress() const
 {
-	return m_pTcpServer->serverAddress();
+    return m_pTcpServer->serverAddress();
 }
 
 /*!
-	\internal
+    \internal
  */
 QAbstractSocket::SocketError QWebSocketServerPrivate::serverError() const
 {
-	return m_pTcpServer->serverError();
+    return m_pTcpServer->serverError();
 }
 
 /*!
-	\internal
+    \internal
  */
 quint16 QWebSocketServerPrivate::serverPort() const
 {
-	return m_pTcpServer->serverPort();
+    return m_pTcpServer->serverPort();
 }
 
 /*!
-	\internal
+    \internal
  */
 void QWebSocketServerPrivate::setMaxPendingConnections(int numConnections)
 {
-	m_pTcpServer->setMaxPendingConnections(numConnections);
+    m_pTcpServer->setMaxPendingConnections(numConnections);
 }
 
 /*!
-	\internal
+    \internal
  */
 bool QWebSocketServerPrivate::setSocketDescriptor(int socketDescriptor)
 {
-	return m_pTcpServer->setSocketDescriptor(socketDescriptor);
+    return m_pTcpServer->setSocketDescriptor(socketDescriptor);
 }
 
 /*!
-	\internal
+    \internal
  */
 int QWebSocketServerPrivate::socketDescriptor() const
 {
-	return m_pTcpServer->socketDescriptor();
+    return m_pTcpServer->socketDescriptor();
 }
 
 /*!
-	\internal
+    \internal
  */
 bool QWebSocketServerPrivate::waitForNewConnection(int msec, bool *timedOut)
 {
-	return m_pTcpServer->waitForNewConnection(msec, timedOut);
+    return m_pTcpServer->waitForNewConnection(msec, timedOut);
 }
 
 /*!
-	\internal
+    \internal
  */
 QList<QWebSocketProtocol::Version> QWebSocketServerPrivate::supportedVersions() const
 {
-	QList<QWebSocketProtocol::Version> supportedVersions;
-	supportedVersions << QWebSocketProtocol::currentVersion();	//we only support V13
-	return supportedVersions;
+    QList<QWebSocketProtocol::Version> supportedVersions;
+    supportedVersions << QWebSocketProtocol::currentVersion();	//we only support V13
+    return supportedVersions;
 }
 
 /*!
-	\internal
+    \internal
  */
 QList<QString> QWebSocketServerPrivate::supportedProtocols() const
 {
-	QList<QString> supportedProtocols;
-	return supportedProtocols;	//no protocols are currently supported
+    QList<QString> supportedProtocols;
+    return supportedProtocols;	//no protocols are currently supported
 }
 
 /*!
-	\internal
+    \internal
  */
 QList<QString> QWebSocketServerPrivate::supportedExtensions() const
 {
-	QList<QString> supportedExtensions;
-	return supportedExtensions;	//no extensions are currently supported
+    QList<QString> supportedExtensions;
+    return supportedExtensions;	//no extensions are currently supported
 }
 
 /*!
-	\internal
+    \internal
  */
 void QWebSocketServerPrivate::onNewConnection()
 {
-	QTcpSocket *pTcpSocket = m_pTcpServer->nextPendingConnection();
-	connect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(handshakeReceived()));
+    QTcpSocket *pTcpSocket = m_pTcpServer->nextPendingConnection();
+    connect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(handshakeReceived()));
 }
 
 /*!
-	\internal
+    \internal
  */
 void QWebSocketServerPrivate::onCloseConnection()
 {
-	QTcpSocket *pTcpSocket = qobject_cast<QTcpSocket*>(sender());
-	if (pTcpSocket != 0)
-	{
-		pTcpSocket->close();
-	}
+    QTcpSocket *pTcpSocket = qobject_cast<QTcpSocket*>(sender());
+    if (pTcpSocket != 0)
+    {
+        pTcpSocket->close();
+    }
 }
 
 /*!
-	\internal
+    \internal
  */
 void QWebSocketServerPrivate::handshakeReceived()
 {
-	QTcpSocket *pTcpSocket = qobject_cast<QTcpSocket*>(sender());
-	if (pTcpSocket != 0)
-	{
-		bool success = false;
-		bool isSecure = false;
-		HandshakeRequest request(pTcpSocket->peerPort(), isSecure);
-		QTextStream textStream(pTcpSocket);
-		textStream >> request;
+    QTcpSocket *pTcpSocket = qobject_cast<QTcpSocket*>(sender());
+    if (pTcpSocket != 0)
+    {
+        bool success = false;
+        bool isSecure = false;
+        HandshakeRequest request(pTcpSocket->peerPort(), isSecure);
+        QTextStream textStream(pTcpSocket);
+        textStream >> request;
 
-		HandshakeResponse response(request,
-								   m_serverName,
-								   q_ptr->isOriginAllowed(request.getOrigin()),
-								   supportedVersions(),
-								   supportedProtocols(),
-								   supportedExtensions());
-		disconnect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(handshakeReceived()));
+        HandshakeResponse response(request,
+                                   m_serverName,
+                                   q_ptr->isOriginAllowed(request.getOrigin()),
+                                   supportedVersions(),
+                                   supportedProtocols(),
+                                   supportedExtensions());
+        disconnect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(handshakeReceived()));
 
-		if (response.isValid())
-		{
-			QTextStream httpStream(pTcpSocket);
-			httpStream << response;
-			httpStream.flush();
+        if (response.isValid())
+        {
+            QTextStream httpStream(pTcpSocket);
+            httpStream << response;
+            httpStream.flush();
 
-			if (response.canUpgrade())
-			{
-				QWebSocket *pWebSocket = QWebSocketPrivate::upgradeFrom(pTcpSocket, request, response);
-				if (pWebSocket)
-				{
-					pWebSocket->setParent(this);
-					addPendingConnection(pWebSocket);
-					Q_EMIT q_ptr->newConnection();
-					success = true;
-				}
-				else
-				{
-					qDebug() << "QWebSocketServerPrivate::handshakeReceived: Upgrading to WebSocket failed.";
-				}
-			}
-			else
-			{
-				qDebug() << "QWebSocketServerPrivate::handshakeReceived: Cannot upgrade to websocket.";
-			}
-		}
-		else
-		{
-			qDebug() << "QWebSocketServerPrivate::handshakeReceived: Invalid response. This should not happen!!!";
-		}
-		if (!success)
-		{
-			qDebug() << "QWebSocketServerPrivate::handshakeReceived: Closing socket because of invalid or unsupported request";
-			pTcpSocket->close();
-		}
-	}
-	else
-	{
-		qDebug() << "WebSocketServerPrivate::handshakeReceived: Sender socket is NULL. This should not happen!!!";
-	}
+            if (response.canUpgrade())
+            {
+                QWebSocket *pWebSocket = QWebSocketPrivate::upgradeFrom(pTcpSocket, request, response);
+                if (pWebSocket)
+                {
+                    pWebSocket->setParent(this);
+                    addPendingConnection(pWebSocket);
+                    Q_EMIT q_ptr->newConnection();
+                    success = true;
+                }
+                else
+                {
+                    qDebug() << "QWebSocketServerPrivate::handshakeReceived: Upgrading to WebSocket failed.";
+                }
+            }
+            else
+            {
+                qDebug() << "QWebSocketServerPrivate::handshakeReceived: Cannot upgrade to websocket.";
+            }
+        }
+        else
+        {
+            qDebug() << "QWebSocketServerPrivate::handshakeReceived: Invalid response. This should not happen!!!";
+        }
+        if (!success)
+        {
+            qDebug() << "QWebSocketServerPrivate::handshakeReceived: Closing socket because of invalid or unsupported request";
+            pTcpSocket->close();
+        }
+    }
+    else
+    {
+        qDebug() << "WebSocketServerPrivate::handshakeReceived: Sender socket is NULL. This should not happen!!!";
+    }
 }
 
 QT_END_NAMESPACE

@@ -43,53 +43,53 @@ class QWebSocketServer;
 
 class QWebSocketServerPrivate : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit QWebSocketServerPrivate(const QString &serverName, QWebSocketServer * const pWebSocketServer, QObject *parent = 0);
-	virtual ~QWebSocketServerPrivate();
+    explicit QWebSocketServerPrivate(const QString &serverName, QWebSocketServer * const pWebSocketServer, QObject *parent = 0);
+    virtual ~QWebSocketServerPrivate();
 
-	void close();
-	QString errorString() const;
-	bool hasPendingConnections() const;
-	bool isListening() const;
-	bool listen(const QHostAddress &address = QHostAddress::Any, quint16 port = 0);
-	int maxPendingConnections() const;
-	virtual QWebSocket *nextPendingConnection();
-	void pauseAccepting();
+    void close();
+    QString errorString() const;
+    bool hasPendingConnections() const;
+    bool isListening() const;
+    bool listen(const QHostAddress &address = QHostAddress::Any, quint16 port = 0);
+    int maxPendingConnections() const;
+    virtual QWebSocket *nextPendingConnection();
+    void pauseAccepting();
 #ifndef QT_NO_NETWORKPROXY
-	QNetworkProxy proxy() const;
-	void setProxy(const QNetworkProxy &networkProxy);
+    QNetworkProxy proxy() const;
+    void setProxy(const QNetworkProxy &networkProxy);
 #endif
-	void resumeAccepting();
-	QHostAddress serverAddress() const;
-	QAbstractSocket::SocketError serverError() const;
-	quint16 serverPort() const;
-	void setMaxPendingConnections(int numConnections);
-	bool setSocketDescriptor(int socketDescriptor);
-	int socketDescriptor() const;
-	bool waitForNewConnection(int msec = 0, bool *timedOut = 0);
+    void resumeAccepting();
+    QHostAddress serverAddress() const;
+    QAbstractSocket::SocketError serverError() const;
+    quint16 serverPort() const;
+    void setMaxPendingConnections(int numConnections);
+    bool setSocketDescriptor(int socketDescriptor);
+    int socketDescriptor() const;
+    bool waitForNewConnection(int msec = 0, bool *timedOut = 0);
 
-	QList<QWebSocketProtocol::Version> supportedVersions() const;
-	QList<QString> supportedProtocols() const;
-	QList<QString> supportedExtensions() const;
+    QList<QWebSocketProtocol::Version> supportedVersions() const;
+    QList<QString> supportedProtocols() const;
+    QList<QString> supportedExtensions() const;
 
 Q_SIGNALS:
-	void newConnection();
+    void newConnection();
 
 private Q_SLOTS:
-	void onNewConnection();
-	void onCloseConnection();
-	void handshakeReceived();
+    void onNewConnection();
+    void onCloseConnection();
+    void handshakeReceived();
 
 private:
-	QWebSocketServer * const q_ptr;
+    QWebSocketServer * const q_ptr;
 
-	QTcpServer *m_pTcpServer;
-	QString m_serverName;
-	QQueue<QWebSocket *> m_pendingConnections;
+    QTcpServer *m_pTcpServer;
+    QString m_serverName;
+    QQueue<QWebSocket *> m_pendingConnections;
 
-	void addPendingConnection(QWebSocket *pWebSocket);
+    void addPendingConnection(QWebSocket *pWebSocket);
 };
 
 QT_END_NAMESPACE

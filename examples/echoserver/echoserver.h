@@ -10,21 +10,21 @@ class QWebSocket;
 
 class EchoServer : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	explicit EchoServer(quint16 port, QObject *parent = 0);
+    explicit EchoServer(quint16 port, QObject *parent = 0);
 
 Q_SIGNALS:
 
 private Q_SLOTS:
-	void onNewConnection();
-	void processMessage(QString message);
-	void processBinaryMessage(QByteArray message);
-	void socketDisconnected();
+    void onNewConnection();
+    void processMessage(QString message);
+    void processBinaryMessage(QByteArray message);
+    void socketDisconnected();
 
 private:
-	QWebSocketServer *m_pWebSocketServer;
-	QList<QWebSocket *> m_clients;
+    QWebSocketServer *m_pWebSocketServer;
+    QList<QWebSocket *> m_clients;
 };
 
 #endif //ECHOSERVER_H

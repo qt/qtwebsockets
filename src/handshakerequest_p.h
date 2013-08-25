@@ -45,39 +45,39 @@ class QTextStream;
 class HandshakeRequest
 {
 public:
-	HandshakeRequest(int port, bool isSecure);
-	virtual ~HandshakeRequest();
+    HandshakeRequest(int port, bool isSecure);
+    virtual ~HandshakeRequest();
 
-	void clear();
+    void clear();
 
-	int getPort() const;
-	bool isSecure() const;
-	bool isValid() const;
-	QMap<QString, QString> getHeaders() const;
-	QList<QWebSocketProtocol::Version> getVersions() const;
-	QString getKey() const;
-	QString getOrigin() const;
-	QList<QString> getProtocols() const;
-	QList<QString> getExtensions() const;
-	QUrl getRequestUrl() const;
-	QString getResourceName() const;
-	QString getHost() const;
+    int getPort() const;
+    bool isSecure() const;
+    bool isValid() const;
+    QMap<QString, QString> getHeaders() const;
+    QList<QWebSocketProtocol::Version> getVersions() const;
+    QString getKey() const;
+    QString getOrigin() const;
+    QList<QString> getProtocols() const;
+    QList<QString> getExtensions() const;
+    QUrl getRequestUrl() const;
+    QString getResourceName() const;
+    QString getHost() const;
 
 private:
-	Q_DISABLE_COPY(HandshakeRequest)
-	QTextStream &readFromStream(QTextStream &textStream);
-	friend QTextStream &operator >>(QTextStream &stream, HandshakeRequest &request);
+    Q_DISABLE_COPY(HandshakeRequest)
+    QTextStream &readFromStream(QTextStream &textStream);
+    friend QTextStream &operator >>(QTextStream &stream, HandshakeRequest &request);
 
-	int m_port;
-	bool m_isSecure;
-	bool m_isValid;
-	QMap<QString, QString> m_headers;
-	QList<QWebSocketProtocol::Version> m_versions;
-	QString m_key;
-	QString m_origin;
-	QList<QString> m_protocols;
-	QList<QString> m_extensions;
-	QUrl m_requestUrl;
+    int m_port;
+    bool m_isSecure;
+    bool m_isValid;
+    QMap<QString, QString> m_headers;
+    QList<QWebSocketProtocol::Version> m_versions;
+    QString m_key;
+    QString m_origin;
+    QList<QString> m_protocols;
+    QList<QString> m_extensions;
+    QUrl m_requestUrl;
 };
 
 QTextStream &operator >>(QTextStream &stream, HandshakeRequest &request);
