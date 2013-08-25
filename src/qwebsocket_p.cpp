@@ -16,6 +16,8 @@
 
 #include <limits>
 
+QT_BEGIN_NAMESPACE
+
 const quint64 FRAME_SIZE_IN_BYTES = 512 * 512 * 2;	//maximum size of a frame when sending a message
 
 /*!
@@ -1153,3 +1155,5 @@ bool QWebSocketPrivate::isValid()
 	}
 	return valid;
 }
+
+QT_END_NAMESPACE

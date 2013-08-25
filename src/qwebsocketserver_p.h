@@ -23,6 +23,8 @@
 #include <QHostAddress>
 #include "qwebsocket.h"
 
+QT_BEGIN_NAMESPACE
+
 class QTcpServer;
 class QWebSocketServer;
 
@@ -72,5 +74,7 @@ private:
 
 	void addPendingConnection(QWebSocket *pWebSocket);
 };
+
+QT_END_NAMESPACE
 
 #endif // QWEBSOCKETSERVER_P_H

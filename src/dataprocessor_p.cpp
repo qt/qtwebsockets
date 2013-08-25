@@ -6,9 +6,14 @@
 #include <QTextCodec>
 #include <QTextDecoder>
 
+QT_BEGIN_NAMESPACE
+
 const quint64 MAX_FRAME_SIZE_IN_BYTES = INT_MAX - 1;
 const quint64 MAX_MESSAGE_SIZE_IN_BYTES = INT_MAX - 1;
 
+/*!
+	\internal
+ */
 class Frame
 {
 public:
@@ -67,6 +72,9 @@ private:
 	bool checkValidity();
 };
 
+/*!
+	\internal
+ */
 Frame::Frame() :
 	m_closeCode(QWebSocketProtocol::CC_NORMAL),
 	m_closeReason(),
@@ -82,6 +90,9 @@ Frame::Frame() :
 {
 }
 
+/*!
+	\internal
+ */
 Frame::Frame(const Frame &other) :
 	m_closeCode(other.m_closeCode),
 	m_closeReason(other.m_closeReason),
@@ -97,6 +108,9 @@ Frame::Frame(const Frame &other) :
 {
 }
 
+/*!
+	\internal
+ */
 const Frame &Frame::operator =(const Frame &other)
 {
 	m_closeCode = other.m_closeCode;
@@ -114,71 +128,113 @@ const Frame &Frame::operator =(const Frame &other)
 	return *this;
 }
 
+/*!
+	\internal
+ */
 QWebSocketProtocol::CloseCode Frame::getCloseCode() const
 {
 	return m_closeCode;
 }
 
+/*!
+	\internal
+ */
 QString Frame::getCloseReason() const
 {
 	return m_closeReason;
 }
 
+/*!
+	\internal
+ */
 bool Frame::isFinalFrame() const
 {
 	return m_isFinalFrame;
 }
 
+/*!
+	\internal
+ */
 bool Frame::isControlFrame() const
 {
 	return (m_opCode & 0x08) == 0x08;
 }
 
+/*!
+	\internal
+ */
 bool Frame::isDataFrame() const
 {
 	return !isControlFrame();
 }
 
+/*!
+	\internal
+ */
 bool Frame::isContinuationFrame() const
 {
 	return isDataFrame() && (m_opCode == QWebSocketProtocol::OC_CONTINUE);
 }
 
+/*!
+	\internal
+ */
 bool Frame::hasMask() const
 {
 	return m_mask != 0;
 }
 
+/*!
+	\internal
+ */
 quint32 Frame::getMask() const
 {
 	return m_mask;
 }
 
+/*!
+	\internal
+ */
 int Frame::getRsv1() const
 {
 	return m_rsv1;
 }
 
+/*!
+	\internal
+ */
 int Frame::getRsv2() const
 {
 	return m_rsv2;
 }
 
+/*!
+	\internal
+ */
 int Frame::getRsv3() const
 {
 	return m_rsv3;
 }
 
+/*!
+	\internal
+ */
 QWebSocketProtocol::OpCode Frame::getOpCode() const
 {
 	return m_opCode;
 }
 
+/*!
+	\internal
+ */
 QByteArray Frame::getPayload() const
 {
 	return m_payload;
 }
 
+/*!
+	\internal
+ */
 void Frame::clear()
 {
 	m_closeCode = QWebSocketProtocol::CC_NORMAL;
@@ -194,6 +250,9 @@ void Frame::clear()
 	m_isValid = false;
 }
 
+/*!
+	\internal
+ */
 bool Frame::isValid() const
 {
 	return m_isValid;
@@ -201,6 +260,9 @@ bool Frame::isValid() const
 
 #define WAIT_FOR_MORE_DATA(dataSizeInBytes)  { returnState = processingState; processingState = PS_WAIT_FOR_MORE_DATA; dataWaitSize = dataSizeInBytes; }
 
+/*!
+	\internal
+ */
 Frame Frame::readFrame(QTcpSocket *pSocket)
 {
 	bool isDone = false;
@@ -382,6 +444,9 @@ Frame Frame::readFrame(QTcpSocket *pSocket)
 	return frame;
 }
 
+/*!
+	\internal
+ */
 void Frame::setError(QWebSocketProtocol::CloseCode code, QString closeReason)
 {
 	clear();
@@ -390,6 +455,9 @@ void Frame::setError(QWebSocketProtocol::CloseCode code, QString closeReason)
 	m_isValid = false;
 }
 
+/*!
+	\internal
+ */
 bool Frame::checkValidity()
 {
 	if (!isValid())
@@ -425,6 +493,9 @@ bool Frame::checkValidity()
 	return m_isValid;
 }
 
+/*!
+	\internal
+ */
 DataProcessor::DataProcessor(QObject *parent) :
 	QObject(parent),
 	m_processingState(PS_READ_HEADER),
@@ -443,6 +514,9 @@ DataProcessor::DataProcessor(QObject *parent) :
 	clear();
 }
 
+/*!
+	\internal
+ */
 DataProcessor::~DataProcessor()
 {
 	clear();
@@ -453,6 +527,9 @@ DataProcessor::~DataProcessor()
 	}
 }
 
+/*!
+	\internal
+ */
 void DataProcessor::process(QTcpSocket *pSocket)
 {
 	bool isDone = false;
@@ -540,6 +617,9 @@ void DataProcessor::process(QTcpSocket *pSocket)
 	}
 }
 
+/*!
+	\internal
+ */
 void DataProcessor::clear()
 {
 	m_processingState = PS_READ_HEADER;
@@ -564,3 +644,5 @@ void DataProcessor::clear()
 		m_pConverterState = new QTextCodec::ConverterState(QTextCodec::ConvertInvalidToNull | QTextCodec::IgnoreHeader);
 	}
 }
+
+QT_END_NAMESPACE

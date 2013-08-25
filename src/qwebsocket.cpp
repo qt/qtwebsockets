@@ -1,14 +1,3 @@
-#include "qwebsocket.h"
-#include "qwebsocket_p.h"
-#include <QUrl>
-#include <QTcpSocket>
-#include <QByteArray>
-#include <QHostAddress>
-
-#include <QDebug>
-
-#include <limits>
-
 /*!
 	\class QWebSocket
 	\brief The class QWebSocket implements a TCP socket that talks the websocket protocol.
@@ -151,6 +140,18 @@ not been filled in with new information when the signal returns.
 
   \sa ping()
   */
+#include "qwebsocket.h"
+#include "qwebsocket_p.h"
+#include <QUrl>
+#include <QTcpSocket>
+#include <QByteArray>
+#include <QHostAddress>
+
+#include <QDebug>
+
+#include <limits>
+
+QT_BEGIN_NAMESPACE
 
 const quint64 FRAME_SIZE_IN_BYTES = 512 * 512 * 2;	//maximum size of a frame when sending a message
 
@@ -499,3 +500,5 @@ bool QWebSocket::isValid()
 {
 	return d_ptr->isValid();
 }
+
+QT_END_NAMESPACE

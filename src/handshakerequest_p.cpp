@@ -7,6 +7,11 @@
 #include <QStringList>
 #include "qwebsocketprotocol.h"
 
+QT_BEGIN_NAMESPACE
+
+/*!
+	\internal
+ */
 HandshakeRequest::HandshakeRequest(int port, bool isSecure) :
 	m_port(port),
 	m_isSecure(isSecure),
@@ -21,10 +26,16 @@ HandshakeRequest::HandshakeRequest(int port, bool isSecure) :
 {
 }
 
+/*!
+	\internal
+ */
 HandshakeRequest::~HandshakeRequest()
 {
 }
 
+/*!
+	\internal
+ */
 void HandshakeRequest::clear()
 {
 	m_port = -1;
@@ -39,66 +50,105 @@ void HandshakeRequest::clear()
 	m_requestUrl.clear();
 }
 
+/*!
+	\internal
+ */
 int HandshakeRequest::getPort() const
 {
 	return m_requestUrl.port(m_port);
 }
 
+/*!
+	\internal
+ */
 bool HandshakeRequest::isSecure() const
 {
 	return m_isSecure;
 }
 
+/*!
+	\internal
+ */
 bool HandshakeRequest::isValid() const
 {
 	return m_isValid;
 }
 
+/*!
+	\internal
+ */
 QMap<QString, QString> HandshakeRequest::getHeaders() const
 {
 	return m_headers;
 }
 
+/*!
+	\internal
+ */
 QList<QWebSocketProtocol::Version> HandshakeRequest::getVersions() const
 {
 	return m_versions;
 }
 
+/*!
+	\internal
+ */
 QString HandshakeRequest::getResourceName() const
 {
 	return m_requestUrl.path();
 }
 
+/*!
+	\internal
+ */
 QString HandshakeRequest::getKey() const
 {
 	return m_key;
 }
 
+/*!
+	\internal
+ */
 QString HandshakeRequest::getHost() const
 {
 	return m_requestUrl.host();
 }
 
+/*!
+	\internal
+ */
 QString HandshakeRequest::getOrigin() const
 {
 	return m_origin;
 }
 
+/*!
+	\internal
+ */
 QList<QString> HandshakeRequest::getProtocols() const
 {
 	return m_protocols;
 }
 
+/*!
+	\internal
+ */
 QList<QString> HandshakeRequest::getExtensions() const
 {
 	return m_extensions;
 }
 
+/*!
+	\internal
+ */
 QUrl HandshakeRequest::getRequestUrl() const
 {
 	return m_requestUrl;
 }
 
+/*!
+	\internal
+ */
 QTextStream &HandshakeRequest::readFromStream(QTextStream &textStream)
 {
 	m_isValid = false;
@@ -189,7 +239,12 @@ QTextStream &HandshakeRequest::readFromStream(QTextStream &textStream)
 	return textStream;
 }
 
+/*!
+	\internal
+ */
 QTextStream &operator >>(QTextStream &stream, HandshakeRequest &request)
 {
 	return request.readFromStream(stream);
 }
+
+QT_END_NAMESPACE

@@ -13,6 +13,8 @@
 #include "qwebsocketsglobal.h"
 #include "qwebsocketprotocol.h"
 
+QT_BEGIN_NAMESPACE
+
 class QWebSocketServerPrivate;
 class QWebSocket;
 
@@ -56,5 +58,7 @@ private:
 	QWebSocketServerPrivate * const d_ptr;
 	friend class QWebSocketServerPrivate;
 };
+
+QT_END_NAMESPACE
 
 #endif // QWEBSOCKETSERVER_H

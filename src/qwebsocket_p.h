@@ -30,6 +30,8 @@
 #include "qwebsocketprotocol.h"
 #include "dataprocessor_p.h"
 
+QT_BEGIN_NAMESPACE
+
 class HandshakeRequest;
 class HandshakeResponse;
 class QTcpSocket;
@@ -172,5 +174,7 @@ private:
 	friend class QWebSocketServerPrivate;
 	friend class QWebSocket;
 };
+
+QT_END_NAMESPACE
 
 #endif // QWEBSOCKET_H

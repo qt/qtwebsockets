@@ -9,6 +9,11 @@
 #include <QSet>
 #include <QList>
 
+QT_BEGIN_NAMESPACE
+
+/*!
+	\internal
+ */
 HandshakeResponse::HandshakeResponse(const HandshakeRequest &request,
 									 const QString &serverName,
 									 bool isOriginAllowed,
@@ -26,25 +31,40 @@ HandshakeResponse::HandshakeResponse(const HandshakeRequest &request,
 	m_isValid = true;
 }
 
+/*!
+	\internal
+ */
 HandshakeResponse::~HandshakeResponse()
 {
 }
 
+/*!
+	\internal
+ */
 bool HandshakeResponse::isValid() const
 {
 	return m_isValid;
 }
 
+/*!
+	\internal
+ */
 bool HandshakeResponse::canUpgrade() const
 {
 	return m_isValid && m_canUpgrade;
 }
 
+/*!
+	\internal
+ */
 QString HandshakeResponse::getAcceptedProtocol() const
 {
 	return m_acceptedProtocol;
 }
 
+/*!
+	\internal
+ */
 QString HandshakeResponse::calculateAcceptKey(const QString &key) const
 {
 	QString tmpKey = key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";	//the UID comes from RFC6455
@@ -52,6 +72,9 @@ QString HandshakeResponse::calculateAcceptKey(const QString &key) const
 	return QString(hash.toBase64());
 }
 
+/*!
+	\internal
+ */
 QString HandshakeResponse::getHandshakeResponse(const HandshakeRequest &request,
 												const QString &serverName,
 												bool isOriginAllowed,
@@ -135,6 +158,9 @@ QString HandshakeResponse::getHandshakeResponse(const HandshakeRequest &request,
 	return response.join("\r\n");
 }
 
+/*!
+	\internal
+ */
 QTextStream &HandshakeResponse::writeToStream(QTextStream &textStream) const
 {
 	if (!m_response.isEmpty())
@@ -148,17 +174,28 @@ QTextStream &HandshakeResponse::writeToStream(QTextStream &textStream) const
 	return textStream;
 }
 
+/*!
+	\internal
+ */
 QTextStream &operator <<(QTextStream &stream, const HandshakeResponse &response)
 {
 	return response.writeToStream(stream);
 }
 
+/*!
+	\internal
+ */
 QWebSocketProtocol::Version HandshakeResponse::getAcceptedVersion() const
 {
 	return m_acceptedVersion;
 }
 
+/*!
+	\internal
+ */
 QString HandshakeResponse::getAcceptedExtension() const
 {
 	return m_acceptedExtension;
 }
+
+QT_END_NAMESPACE

@@ -139,6 +139,8 @@
   \internal
 */
 
+QT_BEGIN_NAMESPACE
+
 /**
  * @brief Contains constants related to the WebSocket standard.
  */
@@ -216,3 +218,5 @@ namespace QWebSocketProtocol
 		}
 	}
 }	//end namespace WebSocketProtocol
+
+QT_END_NAMESPACE

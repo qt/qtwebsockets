@@ -14,6 +14,8 @@
 #include <QObject>
 #include "qwebsocketprotocol.h"
 
+QT_BEGIN_NAMESPACE
+
 class HandshakeRequest;
 class QString;
 class QTextStream;
@@ -61,5 +63,7 @@ private:
 	QTextStream &writeToStream(QTextStream &textStream) const;
 	friend QTextStream &operator <<(QTextStream &stream, const HandshakeResponse &response);
 };
+
+QT_END_NAMESPACE
 
 #endif // HANDSHAKERESPONSE_P_H

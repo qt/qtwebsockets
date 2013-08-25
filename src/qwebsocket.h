@@ -19,6 +19,8 @@
 #include "qwebsocketsglobal.h"
 #include "qwebsocketprotocol.h"
 
+QT_BEGIN_NAMESPACE
+
 class QTcpSocket;
 class QWebSocketPrivate;
 
@@ -89,5 +91,7 @@ private:
 
 	friend class QWebSocketPrivate;
 };
+
+QT_END_NAMESPACE
 
 #endif // QWEBSOCKET_H

@@ -18,6 +18,8 @@
 #include <QTextCodec>
 #include "qwebsocketprotocol.h"
 
+QT_BEGIN_NAMESPACE
+
 class QTcpSocket;
 
 /**
@@ -67,5 +69,7 @@ private:
 	QTextCodec::ConverterState *m_pConverterState;
 	QTextCodec *m_pTextCodec;
 };
+
+QT_END_NAMESPACE
 
 #endif // DATAPROCESSOR_P_H

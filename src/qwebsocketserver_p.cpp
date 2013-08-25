@@ -9,6 +9,11 @@
 #include "qwebsocket.h"
 #include "qwebsocket_p.h"
 
+QT_BEGIN_NAMESPACE
+
+/*!
+	\internal
+ */
 QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName, QWebSocketServer * const pWebSocketServer, QObject *parent) :
 	QObject(parent),
 	q_ptr(pWebSocketServer),
@@ -21,6 +26,9 @@ QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName, QWeb
 	connect(m_pTcpServer, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
 }
 
+/*!
+	\internal
+ */
 QWebSocketServerPrivate::~QWebSocketServerPrivate()
 {
 	while (!m_pendingConnections.isEmpty())
@@ -32,36 +40,57 @@ QWebSocketServerPrivate::~QWebSocketServerPrivate()
 	m_pTcpServer->deleteLater();
 }
 
+/*!
+	\internal
+ */
 void QWebSocketServerPrivate::close()
 {
 	m_pTcpServer->close();
 }
 
+/*!
+	\internal
+ */
 QString QWebSocketServerPrivate::errorString() const
 {
 	return m_pTcpServer->errorString();
 }
 
+/*!
+	\internal
+ */
 bool QWebSocketServerPrivate::hasPendingConnections() const
 {
 	return !m_pendingConnections.isEmpty();
 }
 
+/*!
+	\internal
+ */
 bool QWebSocketServerPrivate::isListening() const
 {
 	return m_pTcpServer->isListening();
 }
 
+/*!
+	\internal
+ */
 bool QWebSocketServerPrivate::listen(const QHostAddress &address, quint16 port)
 {
 	return m_pTcpServer->listen(address, port);
 }
 
+/*!
+	\internal
+ */
 int QWebSocketServerPrivate::maxPendingConnections() const
 {
 	return m_pTcpServer->maxPendingConnections();
 }
 
+/*!
+	\internal
+ */
 void QWebSocketServerPrivate::addPendingConnection(QWebSocket *pWebSocket)
 {
 	if (m_pendingConnections.size() < maxPendingConnections())
@@ -70,6 +99,9 @@ void QWebSocketServerPrivate::addPendingConnection(QWebSocket *pWebSocket)
 	}
 }
 
+/*!
+	\internal
+ */
 QWebSocket *QWebSocketServerPrivate::nextPendingConnection()
 {
 	QWebSocket *pWebSocket = 0;
@@ -85,21 +117,36 @@ QNetworkProxy QWebSocketServerPrivate::proxy() const
 	return m_pTcpServer->proxy();
 }
 
+/*!
+	\internal
+ */
+/*!
+	\internal
+ */
 QHostAddress QWebSocketServerPrivate::serverAddress() const
 {
 	return m_pTcpServer->serverAddress();
 }
 
+/*!
+	\internal
+ */
 QAbstractSocket::SocketError QWebSocketServerPrivate::serverError() const
 {
 	return m_pTcpServer->serverError();
 }
 
+/*!
+	\internal
+ */
 quint16 QWebSocketServerPrivate::serverPort() const
 {
 	return m_pTcpServer->serverPort();
 }
 
+/*!
+	\internal
+ */
 void QWebSocketServerPrivate::setMaxPendingConnections(int numConnections)
 {
 	m_pTcpServer->setMaxPendingConnections(numConnections);
@@ -110,21 +157,33 @@ void QWebSocketServerPrivate::setProxy(const QNetworkProxy &networkProxy)
 	m_pTcpServer->setProxy(networkProxy);
 }
 
+/*!
+	\internal
+ */
 bool QWebSocketServerPrivate::setSocketDescriptor(int socketDescriptor)
 {
 	return m_pTcpServer->setSocketDescriptor(socketDescriptor);
 }
 
+/*!
+	\internal
+ */
 int QWebSocketServerPrivate::socketDescriptor() const
 {
 	return m_pTcpServer->socketDescriptor();
 }
 
+/*!
+	\internal
+ */
 bool QWebSocketServerPrivate::waitForNewConnection(int msec, bool *timedOut)
 {
 	return m_pTcpServer->waitForNewConnection(msec, timedOut);
 }
 
+/*!
+	\internal
+ */
 QList<QWebSocketProtocol::Version> QWebSocketServerPrivate::supportedVersions() const
 {
 	QList<QWebSocketProtocol::Version> supportedVersions;
@@ -132,24 +191,36 @@ QList<QWebSocketProtocol::Version> QWebSocketServerPrivate::supportedVersions() 
 	return supportedVersions;
 }
 
+/*!
+	\internal
+ */
 QList<QString> QWebSocketServerPrivate::supportedProtocols() const
 {
 	QList<QString> supportedProtocols;
 	return supportedProtocols;	//no protocols are currently supported
 }
 
+/*!
+	\internal
+ */
 QList<QString> QWebSocketServerPrivate::supportedExtensions() const
 {
 	QList<QString> supportedExtensions;
 	return supportedExtensions;	//no extensions are currently supported
 }
 
+/*!
+	\internal
+ */
 void QWebSocketServerPrivate::onNewConnection()
 {
 	QTcpSocket *pTcpSocket = m_pTcpServer->nextPendingConnection();
 	connect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(handshakeReceived()));
 }
 
+/*!
+	\internal
+ */
 void QWebSocketServerPrivate::onCloseConnection()
 {
 	QTcpSocket *pTcpSocket = qobject_cast<QTcpSocket*>(sender());
@@ -159,6 +230,9 @@ void QWebSocketServerPrivate::onCloseConnection()
 	}
 }
 
+/*!
+	\internal
+ */
 void QWebSocketServerPrivate::handshakeReceived()
 {
 	QTcpSocket *pTcpSocket = qobject_cast<QTcpSocket*>(sender());
@@ -219,3 +293,5 @@ void QWebSocketServerPrivate::handshakeReceived()
 		qDebug() << "WebSocketServerPrivate::handshakeReceived: Sender socket is NULL. This should not happen!!!";
 	}
 }
+
+QT_END_NAMESPACE

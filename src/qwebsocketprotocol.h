@@ -6,9 +6,12 @@
 #ifndef QWEBSOCKETPROTOCOL_H
 #define QWEBSOCKETPROTOCOL_H
 
+#include <qglobal.h>
+
+QT_BEGIN_NAMESPACE
+
 class QString;
 class QByteArray;
-#include <qglobal.h>
 
 namespace QWebSocketProtocol
 {
@@ -85,5 +88,7 @@ namespace QWebSocketProtocol
 	inline Version currentVersion() { return V_LATEST; }
 
 }	//end namespace QWebSocketProtocol
+
+QT_END_NAMESPACE
 
 #endif // QWEBSOCKETPROTOCOL_H

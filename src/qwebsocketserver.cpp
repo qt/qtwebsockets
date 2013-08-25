@@ -1,11 +1,3 @@
-#include <QTcpServer>
-#include <QTcpSocket>
-#include <QNetworkProxy>
-#include "qwebsocketprotocol.h"
-#include "qwebsocket.h"
-#include "qwebsocketserver.h"
-#include "qwebsocketserver_p.h"
-
 /*!
 	\class WebSocketServer
 
@@ -65,6 +57,16 @@
 
 	\sa hasPendingConnections() and nextPendingConnection().
 */
+
+#include <QTcpServer>
+#include <QTcpSocket>
+#include <QNetworkProxy>
+#include "qwebsocketprotocol.h"
+#include "qwebsocket.h"
+#include "qwebsocketserver.h"
+#include "qwebsocketserver_p.h"
+
+QT_BEGIN_NAMESPACE
 
 /*!
 	Constructs a new WebSocketServer.
@@ -306,3 +308,5 @@ bool QWebSocketServer::isOriginAllowed(const QString &origin) const
 	Q_UNUSED(origin)
 	return true;
 }
+
+QT_END_NAMESPACE
