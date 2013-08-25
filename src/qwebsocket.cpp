@@ -232,21 +232,33 @@ bool QWebSocket::flush()
  * Sends the given \a message over the socket as a text message and returns the number of bytes actually sent.
  * \param message Text message to be sent. Must be '\0' terminated.
  * \return The number of bytes actually sent.
- * \sa send(const QString &message)
+ * \sa write(const QString &message) and write(const char *message, qint64 maxSize)
  */
-qint64 QWebSocket::send(const char *message)
+qint64 QWebSocket::write(const char *message)
 {
-	return d_ptr->send(message);
+	return d_ptr->write(message);
 }
 
-/**
- * @brief Sends the given \a message over the socket as a text message and returns the number of bytes actually sent.
- * @param message The message to be sent
- * @return The number of bytes actually sent.
+/*!
+ * Sends the most \a maxSize bytes of the given \a message over the socket as a text message and returns the number of bytes actually sent.
+ * \param message Text message to be sent.
+ * \return The number of bytes actually sent.
+ * \sa write(const QString &message) and write(const char *message)
  */
-qint64 QWebSocket::send(const QString &message)
+qint64 QWebSocket::write(const char *message, qint64 maxSize)
 {
-	return d_ptr->send(message);
+	return d_ptr->write(message, maxSize);
+}
+
+/*!
+	\brief Sends the given \a message over the socket as a text message and returns the number of bytes actually sent.
+	\param message The message to be sent
+	\return The number of bytes actually sent.
+	\sa write(const char *message) and write(const char *message, qint64 maxSize)
+ */
+qint64 QWebSocket::write(const QString &message)
+{
+	return d_ptr->write(message);
 }
 
 /**
@@ -254,9 +266,9 @@ qint64 QWebSocket::send(const QString &message)
  * @param data The binary data to be sent.
  * @return The number of bytes actually sent.
  */
-qint64 QWebSocket::send(const QByteArray &data)
+qint64 QWebSocket::write(const QByteArray &data)
 {
-	return d_ptr->send(data);
+	return d_ptr->write(data);
 }
 
 /*!

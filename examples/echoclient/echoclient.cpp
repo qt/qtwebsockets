@@ -16,7 +16,7 @@ void EchoClient::onConnected()
 {
 	qDebug() << "Websocket connected";
 	connect(&m_webSocket, SIGNAL(textMessageReceived(QString)), this, SLOT(onTextMessageReceived(QString)));
-	m_webSocket.send("Hello, world!");
+	m_webSocket.write("Hello, world!");
 }
 //! [onConnected]
 

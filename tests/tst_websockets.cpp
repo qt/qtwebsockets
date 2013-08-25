@@ -89,7 +89,7 @@ void WebSocketsTest::testTextMessage()
 
 	QSignalSpy spy(m_pWebSocket, SIGNAL(textMessageReceived(QString)));
 
-	QCOMPARE(m_pWebSocket->send(message), (qint64)strlen(message));
+	QCOMPARE(m_pWebSocket->write(message), (qint64)strlen(message));
 
 	QTRY_VERIFY_WITH_TIMEOUT(spy.count() != 0, 1000);
 	QCOMPARE(spy.count(), 1);
@@ -98,7 +98,7 @@ void WebSocketsTest::testTextMessage()
 
 	spy.clear();
 	QString qMessage(message);
-	QCOMPARE(m_pWebSocket->send(qMessage), (qint64)qMessage.length());
+	QCOMPARE(m_pWebSocket->write(qMessage), (qint64)qMessage.length());
 	QTRY_VERIFY_WITH_TIMEOUT(spy.count() != 0, 1000);
 	QCOMPARE(spy.count(), 1);
 	QCOMPARE(spy.at(0).count(), 1);
@@ -111,7 +111,7 @@ void WebSocketsTest::testBinaryMessage()
 
 	QByteArray data("Hello world!");
 
-	QCOMPARE(m_pWebSocket->send(data), (qint64)data.size());
+	QCOMPARE(m_pWebSocket->write(data), (qint64)data.size());
 
 	QTRY_VERIFY_WITH_TIMEOUT(spy.count() != 0, 1000);
 	QCOMPARE(spy.count(), 1);

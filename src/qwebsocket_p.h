@@ -74,9 +74,10 @@ public:
 	QString protocol();
 	QString extension();
 
-	qint64 send(const char *message);
-	qint64 send(const QString &message);	//send data as text
-	qint64 send(const QByteArray &data);	//send data as binary
+	qint64 write(const char *message);		//send data as text
+	qint64 write(const char *message, qint64 maxSize);		//send data as text
+	qint64 write(const QString &message);	//send data as text
+	qint64 write(const QByteArray &data);	//send data as binary
 
 public Q_SLOTS:
 	virtual void close(QWebSocketProtocol::CloseCode closeCode = QWebSocketProtocol::CC_NORMAL, QString reason = QString());

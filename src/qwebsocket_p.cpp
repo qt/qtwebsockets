@@ -127,15 +127,23 @@ bool QWebSocketPrivate::flush()
 /*!
 	\internal
  */
-qint64 QWebSocketPrivate::send(const char *message)
+qint64 QWebSocketPrivate::write(const char *message)
 {
-	return send(QString::fromUtf8(message));
+	return write(QString::fromUtf8(message));
 }
 
 /*!
 	\internal
  */
-qint64 QWebSocketPrivate::send(const QString &message)
+qint64 QWebSocketPrivate::write(const char *message, qint64 maxSize)
+{
+	return write(QString::fromUtf8(message, static_cast<int>(maxSize)));
+}
+
+/*!
+	\internal
+ */
+qint64 QWebSocketPrivate::write(const QString &message)
 {
 	return doWriteData(message.toUtf8(), false);
 }
@@ -143,7 +151,7 @@ qint64 QWebSocketPrivate::send(const QString &message)
 /*!
 	\internal
  */
-qint64 QWebSocketPrivate::send(const QByteArray &data)
+qint64 QWebSocketPrivate::write(const QByteArray &data)
 {
 	return doWriteData(data, true);
 }
