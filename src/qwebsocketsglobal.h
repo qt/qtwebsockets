@@ -1,4 +1,4 @@
-/*!
+/*
 QWebSockets implements the WebSocket protocol as defined in RFC 6455.
 Copyright (C) 2013 Kurt Pattyn (pattyn.kurt@gmail.com)
 
