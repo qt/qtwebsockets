@@ -7,7 +7,7 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-include(../../src/websocket.pri)
+include(../../src/qwebsocket.pri)
 
 SOURCES += main.cpp \
 	echoserver.cpp

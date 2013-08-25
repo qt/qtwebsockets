@@ -18,7 +18,7 @@ unix:!macx {
 }
 
 
-include(../src/websocket.pri)
+include(../src/qwebsocket.pri)
 
 #include(../source/buildsystem/buildsystem.pri)
 
