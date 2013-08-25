@@ -322,7 +322,7 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
 	connect(pTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), q_ptr, SIGNAL(error(QAbstractSocket::SocketError)));
 	connect(pTcpSocket, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)), q_ptr, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)));
 	connect(pTcpSocket, SIGNAL(readChannelFinished()), q_ptr, SIGNAL(readChannelFinished()));
-	//connect(pTcpSocket, SIGNAL(aboutToClose()), q_ptr, SIGNAL(aboutToClose()));
+	connect(pTcpSocket, SIGNAL(aboutToClose()), q_ptr, SIGNAL(aboutToClose()));
 	//connect(pTcpSocket, SIGNAL(bytesWritten(qint64)), q_ptr, SIGNAL(bytesWritten(qint64)));
 
 	//catch signals

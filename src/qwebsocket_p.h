@@ -93,20 +93,6 @@ public Q_SLOTS:
 	virtual void open(const QUrl &url, bool mask = true);
 	void ping();
 
-Q_SIGNALS:
-	void aboutToClose();
-	void connected();
-	void disconnected();
-	void stateChanged(QAbstractSocket::SocketState state);
-	void proxyAuthenticationRequired(const QNetworkProxy &proxy, QAuthenticator *pAuthenticator);
-	void readChannelFinished();
-	void textFrameReceived(QString frame, bool isLastFrame);
-	void binaryFrameReceived(QByteArray frame, bool isLastFrame);
-	void textMessageReceived(QString message);
-	void binaryMessageReceived(QByteArray message);
-	void error(QAbstractSocket::SocketError error);
-	void pong(quint64 elapsedTime);
-
 private Q_SLOTS:
 	void processData();
 	void processControlFrame(QWebSocketProtocol::OpCode opCode, QByteArray frame);
