@@ -36,4 +36,4 @@ Only tests with **Unicode non-characters** do **not** pass from the Autobahn Tes
 * Extensions and sub-protocols
 
 ### License
-This code is licensed under LGPL v3.
+This code is licensed under LGPL v2.1.
