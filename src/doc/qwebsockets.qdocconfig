@@ -1,22 +1,23 @@
-#include(compat.qdocconf)
+include($QT_INSTALL_DOCS/global/qt-module-defaults.qdocconf)
 
 project				=	QWebSockets
-description			=	QWebSockets is ...
+description			=	QWebSockets Reference Documentation
 
 outputdir			=	html
-outputformats		=	HTML
 
-headerdirs			=	../
-headers				=	../qwebsocket.h  \
+headerdirs			+=	..
+headers				+=	../qwebsocket.h  \
 						../qwebsocketserver.h
 
-sourcedirs			=	../
-sources				=	../qwebsocket.cpp \
+sourcedirs			+=	..
+sources				+=	../qwebsocket.cpp \
 						../qwebsocketserver.cpp \
 						qwebsockets.qdoc
 
-exampledirs			=	../../examples/ \
+exampledirs			+=	../../examples/ \
 						../../examples/echoclient \
 						../../examples/echoserver
 
-#imagedirs			=	./images
+#imagedirs			+=	./images
+
+depends				+=	qtdoc qtnetwork qtcore
