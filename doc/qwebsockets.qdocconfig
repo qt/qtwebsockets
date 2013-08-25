@@ -1,0 +1,23 @@
+#include(compat.qdocconf)
+
+project				=	QWebSockets
+description			=	QWebSockets is ...
+
+outputdir			=	html
+outputformats		=	HTML
+
+headerdirs			=	../src/
+headers				=	../src/qwebsocket.h  \
+						../src/qwebsocketserver.h
+
+sourcedirs			=	../src/ \
+						src/
+sources				=	../src/qwebsocket.cpp \
+						../src/qwebsocketserver.cpp \
+						src/QWebSockets.qdoc
+
+exampledirs			=	../examples/ \
+						../examples/echoclient \
+						../examples/echoserver
+
+imagedirs			=	./images
