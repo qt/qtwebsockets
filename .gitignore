@@ -32,3 +32,4 @@ reports
 doc/html
 build-examples-Qt_5_1_0_clang_64_temporary-Debug
 build-unittests-Qt_5_1_0_clang_64-Release
+src/doc/html
