@@ -7,7 +7,7 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-include(../../src/qwebsocket.pri)
+include(../../src/qwebsockets.pri)
 
 SOURCES += \
 	main.cpp \
