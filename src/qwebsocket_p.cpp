@@ -10,7 +10,9 @@
 #include <QRegularExpression>
 #include <QStringList>
 #include <QHostAddress>
+#ifndef QT_NONETWORKPROXY
 #include <QNetworkProxy>
+#endif
 
 #include <QDebug>
 

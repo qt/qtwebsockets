@@ -112,6 +112,10 @@ QWebSocket *QWebSocketServerPrivate::nextPendingConnection()
 	return pWebSocket;
 }
 
+#ifndef QT_NO_NETWORKPROXY
+/*!
+	\internal
+ */
 QNetworkProxy QWebSocketServerPrivate::proxy() const
 {
 	return m_pTcpServer->proxy();
@@ -120,6 +124,11 @@ QNetworkProxy QWebSocketServerPrivate::proxy() const
 /*!
 	\internal
  */
+void QWebSocketServerPrivate::setProxy(const QNetworkProxy &networkProxy)
+{
+	m_pTcpServer->setProxy(networkProxy);
+}
+#endif
 /*!
 	\internal
  */
@@ -150,11 +159,6 @@ quint16 QWebSocketServerPrivate::serverPort() const
 void QWebSocketServerPrivate::setMaxPendingConnections(int numConnections)
 {
 	m_pTcpServer->setMaxPendingConnections(numConnections);
-}
-
-void QWebSocketServerPrivate::setProxy(const QNetworkProxy &networkProxy)
-{
-	m_pTcpServer->setProxy(networkProxy);
 }
 
 /*!

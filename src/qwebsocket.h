@@ -14,7 +14,9 @@
 #include <QUrl>
 #include <QAbstractSocket>
 #include <QHostAddress>
+#ifndef QT_NO_NETWORKPROXY
 #include <QNetworkProxy>
+#endif
 #include <QTime>
 #include "qwebsocketsglobal.h"
 #include "qwebsocketprotocol.h"
@@ -42,9 +44,11 @@ public:
 	QHostAddress peerAddress() const;
 	QString peerName() const;
 	quint16 peerPort() const;
+#ifndef QT_NO_NETWORKPROXY
 	QNetworkProxy proxy() const;
-	qint64 readBufferSize() const;
 	void setProxy(const QNetworkProxy &networkProxy);
+#endif
+	qint64 readBufferSize() const;
 	void setReadBufferSize(qint64 size);
 	void setSocketOption(QAbstractSocket::SocketOption option, const QVariant &value);
 	QVariant socketOption(QAbstractSocket::SocketOption option);
@@ -75,7 +79,9 @@ Q_SIGNALS:
 	void connected();
 	void disconnected();
 	void stateChanged(QAbstractSocket::SocketState state);
+#ifndef QT_NO_NETWORKPROXY
 	void proxyAuthenticationRequired(const QNetworkProxy &proxy, QAuthenticator *pAuthenticator);
+#endif
 	void readChannelFinished();
 	void textFrameReceived(QString frame, bool isLastFrame);
 	void binaryFrameReceived(QByteArray frame, bool isLastFrame);

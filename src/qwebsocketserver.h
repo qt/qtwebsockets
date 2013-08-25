@@ -42,6 +42,10 @@ public:
 	bool setSocketDescriptor(int socketDescriptor);
 	int socketDescriptor() const;
 	bool waitForNewConnection(int msec = 0, bool *timedOut = 0);
+#ifndef QT_NO_NETWORKPROXY
+	void setProxy(const QNetworkProxy &networkProxy);
+	QNetworkProxy proxy() const;
+#endif
 
 	QList<QWebSocketProtocol::Version> supportedVersions() const;
 	QList<QString> supportedProtocols() const;

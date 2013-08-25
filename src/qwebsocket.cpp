@@ -439,6 +439,7 @@ quint16 QWebSocket::peerPort() const
 	return d_ptr->peerPort();
 }
 
+#ifndef QT_NO_NETWORKPROXY
 /*!
   * Returns the currently configured proxy
  */
@@ -446,6 +447,15 @@ QNetworkProxy QWebSocket::proxy() const
 {
 	return d_ptr->proxy();
 }
+
+/*!
+  Sets the proxy to \a networkProxy
+ */
+void QWebSocket::setProxy(const QNetworkProxy &networkProxy)
+{
+	d_ptr->setProxy(networkProxy);
+}
+#endif
 
 /*!
  * Returns the size in bytes of the readbuffer that is used by the socket.

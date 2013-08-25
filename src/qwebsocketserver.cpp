@@ -167,6 +167,8 @@ QWebSocket *QWebSocketServer::nextPendingConnection()
 }
 
 /*!
+#ifndef QT_NO_NETWORKPROXY
+/*!
 	Returns the network proxy for this socket. By default QNetworkProxy::DefaultProxy is used.
 
 	\sa setProxy().
@@ -177,6 +179,21 @@ QNetworkProxy QWebSocketServer::proxy() const
 }
 
 /*!
+	\brief Sets the explicit network proxy for this socket to \a networkProxy.
+
+	To disable the use of a proxy for this socket, use the QNetworkProxy::NoProxy proxy type:
+
+	\code
+		server->setProxy(QNetworkProxy::NoProxy);
+	\endcode
+
+	\sa proxy().
+*/
+void QWebSocketServer::setProxy(const QNetworkProxy &networkProxy)
+{
+	d_ptr->setProxy(networkProxy);
+}
+#endif
 	Returns the server's address if the server is listening for connections; otherwise returns QHostAddress::Null.
 
 	\sa serverPort() and listen().
@@ -215,22 +232,6 @@ quint16 QWebSocketServer::serverPort() const
 void QWebSocketServer::setMaxPendingConnections(int numConnections)
 {
 	d_ptr->setMaxPendingConnections(numConnections);
-}
-
-/*!
-	\brief Sets the explicit network proxy for this socket to \a networkProxy.
-
-	To disable the use of a proxy for this socket, use the QNetworkProxy::NoProxy proxy type:
-
-	\code
-		server->setProxy(QNetworkProxy::NoProxy);
-	\endcode
-
-	\sa proxy().
-*/
-void QWebSocketServer::setProxy(const QNetworkProxy &networkProxy)
-{
-	d_ptr->setProxy(networkProxy);
 }
 
 /*!
