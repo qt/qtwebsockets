@@ -103,7 +103,7 @@ Frame::Frame() :
     m_rsv1(0),
     m_rsv2(0),
     m_rsv3(0),
-    m_opCode(QWebSocketProtocol::OC_RESERVED_V),
+    m_opCode(QWebSocketProtocol::OC_RESERVED_C),
     m_length(0),
     m_payload(),
     m_isValid(false)
@@ -264,7 +264,7 @@ void Frame::clear()
     m_rsv1 = 0;
     m_rsv2 =0;
     m_rsv3 = 0;
-    m_opCode = QWebSocketProtocol::OC_RESERVED_V;
+    m_opCode = QWebSocketProtocol::OC_RESERVED_C;
     m_length = 0;
     m_payload.clear();
     m_isValid = false;

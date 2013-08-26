@@ -76,7 +76,7 @@ enum OpCode
     OC_PING			= 0x9,
     OC_PONG			= 0xA,
     OC_RESERVED_B	= 0xB,
-    OC_RESERVED_V	= 0xC,
+    OC_RESERVED_C	= 0xC,
     OC_RESERVED_D	= 0xD,
     OC_RESERVED_E	= 0xE,
     OC_RESERVED_F	= 0xF

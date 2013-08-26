@@ -927,11 +927,11 @@ void QWebSocketPrivate::processControlFrame(QWebSocketProtocol::OpCode opCode, Q
     case QWebSocketProtocol::OC_RESERVED_5:
     case QWebSocketProtocol::OC_RESERVED_6:
     case QWebSocketProtocol::OC_RESERVED_7:
+    case QWebSocketProtocol::OC_RESERVED_C:
     case QWebSocketProtocol::OC_RESERVED_B:
     case QWebSocketProtocol::OC_RESERVED_D:
     case QWebSocketProtocol::OC_RESERVED_E:
     case QWebSocketProtocol::OC_RESERVED_F:
-    case QWebSocketProtocol::OC_RESERVED_V:
     {
         //do nothing
         //case added to make C++ compiler happy
