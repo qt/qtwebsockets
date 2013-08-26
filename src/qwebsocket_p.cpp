@@ -189,12 +189,12 @@ QWebSocket *QWebSocketPrivate::upgradeFrom(QTcpSocket *pTcpSocket,
                                            QObject *parent)
 {
     QWebSocket *pWebSocket = new QWebSocket(pTcpSocket, response.getAcceptedVersion(), parent);
-    pWebSocket->d_ptr->setExtension(response.getAcceptedExtension());
-    pWebSocket->d_ptr->setOrigin(request.getOrigin());
-    pWebSocket->d_ptr->setRequestUrl(request.getRequestUrl());
-    pWebSocket->d_ptr->setProtocol(response.getAcceptedProtocol());
-    pWebSocket->d_ptr->setResourceName(request.getRequestUrl().toString(QUrl::RemoveUserInfo));
-    pWebSocket->d_ptr->enableMasking(false);	//a server should not send masked frames
+    pWebSocket->d_func()->setExtension(response.getAcceptedExtension());
+    pWebSocket->d_func()->setOrigin(request.getOrigin());
+    pWebSocket->d_func()->setRequestUrl(request.getRequestUrl());
+    pWebSocket->d_func()->setProtocol(response.getAcceptedProtocol());
+    pWebSocket->d_func()->setResourceName(request.getRequestUrl().toString(QUrl::RemoveUserInfo));
+    pWebSocket->d_func()->enableMasking(false);	//a server should not send masked frames
 
     return pWebSocket;
 }
@@ -204,6 +204,7 @@ QWebSocket *QWebSocketPrivate::upgradeFrom(QTcpSocket *pTcpSocket,
  */
 void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString reason)
 {
+    Q_Q(QWebSocket);
     if (!m_isClosingHandshakeSent)
     {
         quint32 maskingKey = 0;
@@ -229,7 +230,7 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
 
         m_isClosingHandshakeSent = true;
 
-        Q_EMIT q_ptr->aboutToClose();
+        Q_EMIT q->aboutToClose();
     }
     m_pSocket->close();
 }
@@ -338,22 +339,23 @@ qint64 QWebSocketPrivate::doWriteData(const QByteArray &data, bool isBinary)
  */
 void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
 {
+    Q_Q(QWebSocket);
     //pass through signals
-    connect(pTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), q_ptr, SIGNAL(error(QAbstractSocket::SocketError)));
-    connect(pTcpSocket, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)), q_ptr, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)));
-    connect(pTcpSocket, SIGNAL(readChannelFinished()), q_ptr, SIGNAL(readChannelFinished()));
-    connect(pTcpSocket, SIGNAL(aboutToClose()), q_ptr, SIGNAL(aboutToClose()));
-    //connect(pTcpSocket, SIGNAL(bytesWritten(qint64)), q_ptr, SIGNAL(bytesWritten(qint64)));
+    connect(pTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), q, SIGNAL(error(QAbstractSocket::SocketError)));
+    connect(pTcpSocket, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)), q, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)));
+    connect(pTcpSocket, SIGNAL(readChannelFinished()), q, SIGNAL(readChannelFinished()));
+    connect(pTcpSocket, SIGNAL(aboutToClose()), q, SIGNAL(aboutToClose()));
+    //connect(pTcpSocket, SIGNAL(bytesWritten(qint64)), q, SIGNAL(bytesWritten(qint64)));
 
     //catch signals
     connect(pTcpSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(processStateChanged(QAbstractSocket::SocketState)));
     connect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(processData()));
 
     connect(&m_dataProcessor, SIGNAL(controlFrameReceived(QWebSocketProtocol::OpCode, QByteArray)), this, SLOT(processControlFrame(QWebSocketProtocol::OpCode, QByteArray)));
-    connect(&m_dataProcessor, SIGNAL(textFrameReceived(QString,bool)), q_ptr, SIGNAL(textFrameReceived(QString,bool)));
-    connect(&m_dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)), q_ptr, SIGNAL(binaryFrameReceived(QByteArray,bool)));
-    connect(&m_dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)), q_ptr, SIGNAL(binaryMessageReceived(QByteArray)));
-    connect(&m_dataProcessor, SIGNAL(textMessageReceived(QString)), q_ptr, SIGNAL(textMessageReceived(QString)));
+    connect(&m_dataProcessor, SIGNAL(textFrameReceived(QString,bool)), q, SIGNAL(textFrameReceived(QString,bool)));
+    connect(&m_dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)), q, SIGNAL(binaryFrameReceived(QByteArray,bool)));
+    connect(&m_dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)), q, SIGNAL(binaryMessageReceived(QByteArray)));
+    connect(&m_dataProcessor, SIGNAL(textMessageReceived(QString)), q, SIGNAL(textMessageReceived(QString)));
     connect(&m_dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)), this, SLOT(close(QWebSocketProtocol::CloseCode,QString)));
 }
 
@@ -362,24 +364,25 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
  */
 void QWebSocketPrivate::releaseConnections(const QTcpSocket *pTcpSocket)
 {
+    Q_Q(QWebSocket);
     if (pTcpSocket)
     {
         //pass through signals
-        disconnect(pTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), q_ptr, SIGNAL(error(QAbstractSocket::SocketError)));
-        disconnect(pTcpSocket, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)), q_ptr, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)));
-        disconnect(pTcpSocket, SIGNAL(readChannelFinished()), q_ptr, SIGNAL(readChannelFinished()));
-        disconnect(pTcpSocket, SIGNAL(aboutToClose()), q_ptr, SIGNAL(aboutToClose()));
-        //disconnect(pTcpSocket, SIGNAL(bytesWritten(qint64)), q_ptr, SIGNAL(bytesWritten(qint64)));
+        disconnect(pTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), q, SIGNAL(error(QAbstractSocket::SocketError)));
+        disconnect(pTcpSocket, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)), q, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)));
+        disconnect(pTcpSocket, SIGNAL(readChannelFinished()), q, SIGNAL(readChannelFinished()));
+        disconnect(pTcpSocket, SIGNAL(aboutToClose()), q, SIGNAL(aboutToClose()));
+        //disconnect(pTcpSocket, SIGNAL(bytesWritten(qint64)), q, SIGNAL(bytesWritten(qint64)));
 
         //catched signals
         disconnect(pTcpSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(processStateChanged(QAbstractSocket::SocketState)));
         disconnect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(processData()));
     }
     disconnect(&m_dataProcessor, SIGNAL(controlFrameReceived(QWebSocketProtocol::OpCode,QByteArray)), this, SLOT(processControlFrame(QWebSocketProtocol::OpCode,QByteArray)));
-    disconnect(&m_dataProcessor, SIGNAL(textFrameReceived(QString,bool)), q_ptr, SIGNAL(textFrameReceived(QString,bool)));
-    disconnect(&m_dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)), q_ptr, SIGNAL(binaryFrameReceived(QByteArray,bool)));
-    disconnect(&m_dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)), q_ptr, SIGNAL(binaryMessageReceived(QByteArray)));
-    disconnect(&m_dataProcessor, SIGNAL(textMessageReceived(QString)), q_ptr, SIGNAL(textMessageReceived(QString)));
+    disconnect(&m_dataProcessor, SIGNAL(textFrameReceived(QString,bool)), q, SIGNAL(textFrameReceived(QString,bool)));
+    disconnect(&m_dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)), q, SIGNAL(binaryFrameReceived(QByteArray,bool)));
+    disconnect(&m_dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)), q, SIGNAL(binaryMessageReceived(QByteArray)));
+    disconnect(&m_dataProcessor, SIGNAL(textMessageReceived(QString)), q, SIGNAL(textMessageReceived(QString)));
     disconnect(&m_dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)), this, SLOT(close(QWebSocketProtocol::CloseCode,QString)));
 }
 
@@ -494,6 +497,7 @@ QByteArray QWebSocketPrivate::getFrameHeader(QWebSocketProtocol::OpCode opCode, 
  */
 qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
 {
+    Q_Q(QWebSocket);
     const QWebSocketProtocol::OpCode firstOpCode = isBinary ? QWebSocketProtocol::OC_BINARY : QWebSocketProtocol::OC_TEXT;
 
     int numFrames = data.size() / FRAME_SIZE_IN_BYTES;
@@ -550,7 +554,7 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
                 setErrorString(QWebSocket::tr("Error writing bytes to socket: %1.").arg(m_pSocket->errorString()));
                 qDebug() << errorString();
                 m_pSocket->flush();
-                Q_EMIT q_ptr->error(QAbstractSocket::NetworkError);
+                Q_EMIT q->error(QAbstractSocket::NetworkError);
                 break;
             }
         }
@@ -561,7 +565,7 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
     {
         setErrorString(QWebSocket::tr("Bytes written %1 != %2.").arg(payloadWritten).arg(data.size()));
         qDebug() << errorString();
-        Q_EMIT q_ptr->error(QAbstractSocket::NetworkError);
+        Q_EMIT q->error(QAbstractSocket::NetworkError);
     }
     return payloadWritten;
 }
@@ -658,6 +662,7 @@ QString readLine(QTcpSocket *pSocket)
  */
 void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
 {
+    Q_Q(QWebSocket);
     if (pSocket == 0)
     {
         return;
@@ -761,13 +766,13 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
         {
             qDebug() << errorDescription;
             setErrorString(errorDescription);
-            Q_EMIT q_ptr->error(QAbstractSocket::ConnectionRefusedError);
+            Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
         }
         else
         {
             //handshake succeeded
             setSocketState(QAbstractSocket::ConnectedState);
-            Q_EMIT q_ptr->connected();
+            Q_EMIT q->connected();
         }
     }
 }
@@ -777,6 +782,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
  */
 void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketState)
 {
+    Q_Q(QWebSocket);
     QAbstractSocket::SocketState webSocketState = this->state();
     switch (socketState)
     {
@@ -803,7 +809,7 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
             if (webSocketState != QAbstractSocket::UnconnectedState)
             {
                 setSocketState(QAbstractSocket::UnconnectedState);
-                Q_EMIT q_ptr->disconnected();
+                Q_EMIT q->disconnected();
             }
             break;
         }
@@ -855,6 +861,7 @@ void QWebSocketPrivate::processData()
  */
 void QWebSocketPrivate::processControlFrame(QWebSocketProtocol::OpCode opCode, QByteArray frame)
 {
+    Q_Q(QWebSocket);
     switch (opCode)
     {
         case QWebSocketProtocol::OC_PING:
@@ -877,7 +884,7 @@ void QWebSocketPrivate::processControlFrame(QWebSocketProtocol::OpCode opCode, Q
         }
         case QWebSocketProtocol::OC_PONG:
         {
-            Q_EMIT q_ptr->pong(static_cast<quint64>(m_pingTimer.elapsed()));
+            Q_EMIT q->pong(static_cast<quint64>(m_pingTimer.elapsed()));
             break;
         }
         case QWebSocketProtocol::OC_CLOSE:
@@ -987,12 +994,7 @@ QAbstractSocket::SocketState QWebSocketPrivate::state() const
  */
 bool QWebSocketPrivate::waitForConnected(int msecs)
 {
-    bool retVal = false;
-    if (m_pSocket)
-    {
-        retVal = m_pSocket->waitForConnected(msecs);
-    }
-    return retVal;
+    return m_pSocket->waitForConnected(msecs);
 }
 
 /*!
@@ -1000,12 +1002,7 @@ bool QWebSocketPrivate::waitForConnected(int msecs)
  */
 bool QWebSocketPrivate::waitForDisconnected(int msecs)
 {
-    bool retVal = true;
-    if (m_pSocket)
-    {
-        retVal = m_pSocket->waitForDisconnected(msecs);
-    }
-    return retVal;
+    return m_pSocket->waitForDisconnected(msecs);
 }
 
 /*!
@@ -1013,10 +1010,11 @@ bool QWebSocketPrivate::waitForDisconnected(int msecs)
  */
 void QWebSocketPrivate::setSocketState(QAbstractSocket::SocketState state)
 {
+    Q_Q(QWebSocket);
     if (m_socketState != state)
     {
         m_socketState = state;
-        Q_EMIT q_ptr->stateChanged(m_socketState);
+        Q_EMIT q->stateChanged(m_socketState);
     }
 }
 
@@ -1033,12 +1031,7 @@ void QWebSocketPrivate::setErrorString(QString errorString)
  */
 QHostAddress QWebSocketPrivate::localAddress() const
 {
-    QHostAddress address;
-    if (m_pSocket)
-    {
-        address = m_pSocket->localAddress();
-    }
-    return address;
+    return m_pSocket->localAddress();
 }
 
 /*!
@@ -1046,12 +1039,7 @@ QHostAddress QWebSocketPrivate::localAddress() const
  */
 quint16 QWebSocketPrivate::localPort() const
 {
-    quint16 port = 0;
-    if (m_pSocket)
-    {
-        port = m_pSocket->localPort();
-    }
-    return port;
+    return m_pSocket->localPort();
 }
 
 /*!
@@ -1059,12 +1047,7 @@ quint16 QWebSocketPrivate::localPort() const
  */
 QAbstractSocket::PauseModes QWebSocketPrivate::pauseMode() const
 {
-    QAbstractSocket::PauseModes mode = QAbstractSocket::PauseNever;
-    if (m_pSocket)
-    {
-        mode = m_pSocket->pauseMode();
-    }
-    return mode;
+    return m_pSocket->pauseMode();
 }
 
 /*!
@@ -1072,12 +1055,7 @@ QAbstractSocket::PauseModes QWebSocketPrivate::pauseMode() const
  */
 QHostAddress QWebSocketPrivate::peerAddress() const
 {
-    QHostAddress peer;
-    if (m_pSocket)
-    {
-        peer = m_pSocket->peerAddress();
-    }
-    return peer;
+    return m_pSocket->peerAddress();
 }
 
 /*!
@@ -1085,12 +1063,7 @@ QHostAddress QWebSocketPrivate::peerAddress() const
  */
 QString QWebSocketPrivate::peerName() const
 {
-    QString name;
-    if (m_pSocket)
-    {
-        name = m_pSocket->peerName();
-    }
-    return name;
+    return m_pSocket->peerName();
 }
 
 /*!
@@ -1098,12 +1071,7 @@ QString QWebSocketPrivate::peerName() const
  */
 quint16 QWebSocketPrivate::peerPort() const
 {
-    quint16 port = 0;
-    if (m_pSocket)
-    {
-        port = m_pSocket->peerPort();
-    }
-    return port;
+    return m_pSocket->peerPort();
 }
 
 /*!
@@ -1111,12 +1079,7 @@ quint16 QWebSocketPrivate::peerPort() const
  */
 QNetworkProxy QWebSocketPrivate::proxy() const
 {
-    QNetworkProxy proxy;
-    if (m_pSocket)
-    {
-        proxy = m_pSocket->proxy();
-    }
-    return proxy;
+    return m_pSocket->proxy();
 }
 
 /*!
@@ -1124,12 +1087,7 @@ QNetworkProxy QWebSocketPrivate::proxy() const
  */
 qint64 QWebSocketPrivate::readBufferSize() const
 {
-    qint64 readBuffer = 0;
-    if (m_pSocket)
-    {
-        readBuffer = m_pSocket->readBufferSize();
-    }
-    return readBuffer;
+    return m_pSocket->readBufferSize();
 }
 
 /*!
@@ -1137,10 +1095,7 @@ qint64 QWebSocketPrivate::readBufferSize() const
  */
 void QWebSocketPrivate::resume()
 {
-    if (m_pSocket)
-    {
-        m_pSocket->resume();
-    }
+    m_pSocket->resume();
 }
 
 /*!
@@ -1148,10 +1103,7 @@ void QWebSocketPrivate::resume()
  */
 void QWebSocketPrivate::setPauseMode(QAbstractSocket::PauseModes pauseMode)
 {
-    if (m_pSocket)
-    {
-        m_pSocket->setPauseMode(pauseMode);
-    }
+    m_pSocket->setPauseMode(pauseMode);
 }
 
 /*!
@@ -1159,10 +1111,7 @@ void QWebSocketPrivate::setPauseMode(QAbstractSocket::PauseModes pauseMode)
  */
 void QWebSocketPrivate::setProxy(const QNetworkProxy &networkProxy)
 {
-    if (m_pSocket)
-    {
-        m_pSocket->setProxy(networkProxy);
-    }
+    m_pSocket->setProxy(networkProxy);
 }
 
 /*!
@@ -1170,10 +1119,7 @@ void QWebSocketPrivate::setProxy(const QNetworkProxy &networkProxy)
  */
 void QWebSocketPrivate::setReadBufferSize(qint64 size)
 {
-    if (m_pSocket)
-    {
-        m_pSocket->setReadBufferSize(size);
-    }
+    m_pSocket->setReadBufferSize(size);
 }
 
 /*!
@@ -1181,10 +1127,7 @@ void QWebSocketPrivate::setReadBufferSize(qint64 size)
  */
 void QWebSocketPrivate::setSocketOption(QAbstractSocket::SocketOption option, const QVariant &value)
 {
-    if (m_pSocket)
-    {
-        m_pSocket->setSocketOption(option, value);
-    }
+    m_pSocket->setSocketOption(option, value);
 }
 
 /*!
@@ -1192,12 +1135,7 @@ void QWebSocketPrivate::setSocketOption(QAbstractSocket::SocketOption option, co
  */
 QVariant QWebSocketPrivate::socketOption(QAbstractSocket::SocketOption option)
 {
-    QVariant result;
-    if (m_pSocket)
-    {
-        result = m_pSocket->socketOption(option);
-    }
-    return result;
+    return m_pSocket->socketOption(option);
 }
 
 /*!
@@ -1205,12 +1143,7 @@ QVariant QWebSocketPrivate::socketOption(QAbstractSocket::SocketOption option)
  */
 bool QWebSocketPrivate::isValid() const
 {
-    bool valid = false;
-    if (m_pSocket)
-    {
-        valid = m_pSocket->isValid();
-    }
-    return valid;
+    return m_pSocket->isValid();
 }
 
 QT_END_NAMESPACE

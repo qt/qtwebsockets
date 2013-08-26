@@ -110,6 +110,7 @@ private Q_SLOTS:
 
 private:
     Q_DISABLE_COPY(QWebSocketPrivate)
+    Q_DECLARE_PUBLIC(QWebSocket)
 
     QWebSocket * const q_ptr;
 

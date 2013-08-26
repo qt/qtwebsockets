@@ -106,6 +106,7 @@ Q_SIGNALS:
 
 private:
     Q_DISABLE_COPY(QWebSocket)
+    Q_DECLARE_PRIVATE(QWebSocket)
     QWebSocket(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version, QObject *parent = 0);
     QWebSocketPrivate * const d_ptr;
 
