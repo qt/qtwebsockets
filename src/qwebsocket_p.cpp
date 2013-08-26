@@ -368,7 +368,7 @@ void QWebSocketPrivate::releaseConnections(const QTcpSocket *pTcpSocket)
         disconnect(pTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), q_ptr, SIGNAL(error(QAbstractSocket::SocketError)));
         disconnect(pTcpSocket, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)), q_ptr, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)));
         disconnect(pTcpSocket, SIGNAL(readChannelFinished()), q_ptr, SIGNAL(readChannelFinished()));
-        //disconnect(pTcpSocket, SIGNAL(aboutToClose()), q_ptr, SIGNAL(aboutToClose()));
+        disconnect(pTcpSocket, SIGNAL(aboutToClose()), q_ptr, SIGNAL(aboutToClose()));
         //disconnect(pTcpSocket, SIGNAL(bytesWritten(qint64)), q_ptr, SIGNAL(bytesWritten(qint64)));
 
         //catched signals
