@@ -109,8 +109,6 @@ private:
     Q_DECLARE_PRIVATE(QWebSocket)
     QWebSocket(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version, QObject *parent = 0);
     QWebSocketPrivate * const d_ptr;
-
-    friend class QWebSocketPrivate;
 };
 
 QT_END_NAMESPACE
