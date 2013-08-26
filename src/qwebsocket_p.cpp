@@ -101,7 +101,7 @@ QWebSocketPrivate::~QWebSocketPrivate()
 {
     if (state() == QAbstractSocket::ConnectedState)
     {
-        close(QWebSocketProtocol::CC_GOING_AWAY, "Connection closed");
+        close(QWebSocketProtocol::CC_GOING_AWAY, QWebSocket::tr("Connection closed"));
     }
     releaseConnections(m_pSocket);
     m_pSocket->deleteLater();
@@ -546,7 +546,7 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
             }
             else
             {
-                setErrorString("WebSocket::doWriteFrames: Error writing bytes to socket: " + m_pSocket->errorString());
+                setErrorString(QWebSocket::tr("Error writing bytes to socket: %1.").arg(m_pSocket->errorString()));
                 qDebug() << errorString();
                 m_pSocket->flush();
                 Q_EMIT q_ptr->error(QAbstractSocket::NetworkError);
@@ -558,7 +558,7 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
     }
     if (payloadWritten != data.size())
     {
-        setErrorString("Bytes written " + QString::number(payloadWritten) + " != " + QString::number(data.size()));
+        setErrorString(QWebSocket::tr("Bytes written %1 != %2.").arg(payloadWritten).arg(data.size()));
         qDebug() << errorString();
         Q_EMIT q_ptr->error(QAbstractSocket::NetworkError);
     }
@@ -686,7 +686,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
     }
     if (!ok)
     {
-        errorDescription = "WebSocket::processHandshake: Invalid statusline in response: " + statusLine;
+        errorDescription = QWebSocket::tr("Invalid statusline in response: %1.").arg(statusLine);
     }
     else
     {
@@ -722,12 +722,12 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
                 ok = (accept == acceptKey);
                 if (!ok)
                 {
-                    errorDescription = "WebSocket::processHandshake: Accept-Key received from server " + acceptKey + " does not match the client key " + accept;
+                    errorDescription = QWebSocket::tr("Accept-Key received from server %1 does not match the client key %2.").arg(acceptKey).arg(accept);
                 }
             }
             else
             {
-                errorDescription = "WebSocket::processHandshake: Invalid statusline in response: " + statusLine;
+                errorDescription = QWebSocket::tr("Invalid statusline in response: %1.").arg(statusLine);
             }
         }
         else if (httpStatusCode == 400)	//HTTP/1.1 400 Bad Request
@@ -739,20 +739,20 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
                 {
                     //if needed to switch protocol version, then we are finished here
                     //because we cannot handle other protocols than the RFC one (v13)
-                    errorDescription = "WebSocket::processHandshake: Server requests a version that we don't support: " + versions.join(", ");
+                    errorDescription = QWebSocket::tr("Handshake: Server requests a version that we don't support: %1.").arg(versions.join(", "));
                     ok = false;
                 }
                 else
                 {
                     //we tried v13, but something different went wrong
-                    errorDescription = "WebSocket::processHandshake: Unknown error condition encountered. Aborting connection.";
+                    errorDescription = QWebSocket::tr("Unknown error condition encountered. Aborting connection.");
                     ok = false;
                 }
             }
         }
         else
         {
-            errorDescription = "WebSocket::processHandshake: Unhandled http status code " + QString::number(httpStatusCode);
+            errorDescription = QWebSocket::tr("Unhandled http status code: %1.").arg(httpStatusCode);
             ok = false;
         }
 
@@ -889,7 +889,7 @@ void QWebSocketPrivate::processControlFrame(QWebSocketProtocol::OpCode opCode, Q
                 if (!QWebSocketProtocol::isCloseCodeValid(closeCode))
                 {
                     closeCode = QWebSocketProtocol::CC_PROTOCOL_ERROR;
-                    closeReason = QString("Invalid close code %1 detected").arg(closeCode);
+                    closeReason = QWebSocket::tr("Invalid close code %1 detected.").arg(closeCode);
                 }
                 else
                 {
@@ -902,7 +902,7 @@ void QWebSocketPrivate::processControlFrame(QWebSocketProtocol::OpCode opCode, Q
                         if (failed)
                         {
                             closeCode = QWebSocketProtocol::CC_WRONG_DATATYPE;
-                            closeReason = "Invalid UTF-8 code encountered.";
+                            closeReason = QWebSocket::tr("Invalid UTF-8 code encountered.");
                         }
                     }
                 }

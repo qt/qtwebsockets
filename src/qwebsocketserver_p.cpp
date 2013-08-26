@@ -54,7 +54,7 @@ QWebSocketServerPrivate::~QWebSocketServerPrivate()
     while (!m_pendingConnections.isEmpty())
     {
         QWebSocket *pWebSocket = m_pendingConnections.dequeue();
-        pWebSocket->close(QWebSocketProtocol::CC_GOING_AWAY, "Server closed.");
+        pWebSocket->close(QWebSocketProtocol::CC_GOING_AWAY, QWebSocketServer::tr("Server closed."));
         pWebSocket->deleteLater();
     }
     m_pTcpServer->deleteLater();
@@ -310,27 +310,31 @@ void QWebSocketServerPrivate::handshakeReceived()
                 }
                 else
                 {
-                    qDebug() << "QWebSocketServerPrivate::handshakeReceived: Upgrading to WebSocket failed.";
+                    //TODO: should set or emit error
+                    qDebug() << QWebSocketServer::tr("Upgrading to websocket failed.");
                 }
             }
             else
             {
-                qDebug() << "QWebSocketServerPrivate::handshakeReceived: Cannot upgrade to websocket.";
+                //TODO: should set or emit error
+                qDebug() << QWebSocketServer::tr("Cannot upgrade to websocket.");
             }
         }
         else
         {
-            qDebug() << "QWebSocketServerPrivate::handshakeReceived: Invalid response. This should not happen!!!";
+            //TODO: should set or emit error
+            qDebug() << QWebSocketServer::tr("Invalid response received.");
         }
         if (!success)
         {
-            qDebug() << "QWebSocketServerPrivate::handshakeReceived: Closing socket because of invalid or unsupported request";
+            //TODO: should set or emit error
+            qDebug() << QWebSocketServer::tr("Closing socket because of invalid or unsupported request.");
             pTcpSocket->close();
         }
     }
     else
     {
-        qDebug() << "WebSocketServerPrivate::handshakeReceived: Sender socket is NULL. This should not happen!!!";
+        qWarning() << "Sender socket is NULL. This should not happen, otherwise it is a Qt bug!!!";
     }
 }
 

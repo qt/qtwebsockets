@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "dataprocessor_p.h"
 #include "qwebsocketprotocol.h"
+#include "qwebsocket.h"
 #include <QTcpSocket>
 #include <QtEndian>
 #include <limits.h>
@@ -302,7 +303,7 @@ Frame Frame::readFrame(QTcpSocket *pSocket)
                 bool ok = pSocket->waitForReadyRead(5000);
                 if (!ok)
                 {
-                    frame.setError(QWebSocketProtocol::CC_GOING_AWAY, "Timeout when reading data from socket.");
+                    frame.setError(QWebSocketProtocol::CC_GOING_AWAY, QWebSocket::tr("Timeout when reading data from socket."));
                     isDone = true;
                 }
                 else
@@ -419,7 +420,7 @@ Frame Frame::readFrame(QTcpSocket *pSocket)
                 }
                 else if (payloadLength > MAX_FRAME_SIZE_IN_BYTES)
                 {
-                    frame.setError(QWebSocketProtocol::CC_TOO_MUCH_DATA, "Maximum framesize exceeded.");
+                    frame.setError(QWebSocketProtocol::CC_TOO_MUCH_DATA, QWebSocket::tr("Maximum framesize exceeded."));
                     processingState = PS_DISPATCH_RESULT;
                 }
                 else
@@ -483,21 +484,21 @@ bool Frame::checkValidity()
     {
         if (m_rsv1 || m_rsv2 || m_rsv3)
         {
-            setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, "Rsv field is non-zero");
+            setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, QWebSocket::tr("Rsv field is non-zero"));
         }
         else if (QWebSocketProtocol::isOpCodeReserved(m_opCode))
         {
-            setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, "Used reserved opcode");
+            setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, QWebSocket::tr("Used reserved opcode"));
         }
         else if (isControlFrame())
         {
             if (m_length > 125)
             {
-                setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, "Controle frame is larger than 125 bytes");
+                setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, QWebSocket::tr("Controle frame is larger than 125 bytes"));
             }
             else if (!m_isFinalFrame)
             {
-                setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, "Controle frames cannot be fragmented");
+                setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, QWebSocket::tr("Controle frames cannot be fragmented"));
             }
             else
             {
@@ -568,13 +569,13 @@ void DataProcessor::process(QTcpSocket *pSocket)
                 if (!m_isFragmented && frame.isContinuationFrame())
                 {
                     clear();
-                    Q_EMIT errorEncountered(QWebSocketProtocol::CC_PROTOCOL_ERROR, "Received Continuation frame /*with FIN=true*/, while there is nothing to continue.");
+                    Q_EMIT errorEncountered(QWebSocketProtocol::CC_PROTOCOL_ERROR, QWebSocket::tr("Received Continuation frame /*with FIN=true*/, while there is nothing to continue."));
                     return;
                 }
                 if (m_isFragmented && frame.isDataFrame() && !frame.isContinuationFrame())
                 {
                     clear();
-                    Q_EMIT errorEncountered(QWebSocketProtocol::CC_PROTOCOL_ERROR, "All data frames after the initial data frame must have opcode 0 (continuation).");
+                    Q_EMIT errorEncountered(QWebSocketProtocol::CC_PROTOCOL_ERROR, QWebSocket::tr("All data frames after the initial data frame must have opcode 0 (continuation)."));
                     return;
                 }
                 if (!frame.isContinuationFrame())
@@ -586,7 +587,7 @@ void DataProcessor::process(QTcpSocket *pSocket)
                 if ((messageLength + quint64(frame.getPayload().length())) > MAX_MESSAGE_SIZE_IN_BYTES)
                 {
                     clear();
-                    Q_EMIT errorEncountered(QWebSocketProtocol::CC_TOO_MUCH_DATA, "Received message is too big.");
+                    Q_EMIT errorEncountered(QWebSocketProtocol::CC_TOO_MUCH_DATA, QWebSocket::tr("Received message is too big."));
                     return;
                 }
 
@@ -597,7 +598,7 @@ void DataProcessor::process(QTcpSocket *pSocket)
                     if (failed)
                     {
                         clear();
-                        Q_EMIT errorEncountered(QWebSocketProtocol::CC_WRONG_DATATYPE, "Invalid UTF-8 code encountered.");
+                        Q_EMIT errorEncountered(QWebSocketProtocol::CC_WRONG_DATATYPE, QWebSocket::tr("Invalid UTF-8 code encountered."));
                         return;
                     }
                     else
