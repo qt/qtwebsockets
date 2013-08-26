@@ -250,6 +250,22 @@ QList<QString> QWebSocketServerPrivate::supportedExtensions() const
 }
 
 /*!
+  \internal
+ */
+void QWebSocketServerPrivate::setServerName(const QString &serverName)
+{
+    m_serverName = serverName;
+}
+
+/*!
+  \internal
+ */
+QString QWebSocketServerPrivate::serverName() const
+{
+    return m_serverName;
+}
+
+/*!
     \internal
  */
 void QWebSocketServerPrivate::onNewConnection()

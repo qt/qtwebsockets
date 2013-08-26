@@ -74,6 +74,9 @@ public:
     QList<QString> supportedProtocols() const;
     QList<QString> supportedExtensions() const;
 
+    void setServerName(const QString &serverName);
+    QString serverName() const;
+
 Q_SIGNALS:
     void newConnection();
 

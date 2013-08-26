@@ -253,6 +253,26 @@ void QWebSocketServer::resumeAccepting()
 }
 
 /*!
+    Sets the server name that will be used during the http handshake phase to the given \a serverName.
+    Existing connected clients will not be notified of this change, only newly connecting clients
+    will see this new name.
+ */
+void QWebSocketServer::setServerName(const QString &serverName)
+{
+    Q_D(QWebSocketServer);
+    d->setServerName(serverName);
+}
+
+/*!
+    Returns the server name that is used during the http handshake phase.
+ */
+QString QWebSocketServer::serverName() const
+{
+    Q_D(const QWebSocketServer);
+    return d->serverName();
+}
+
+/*!
     Returns the server's address if the server is listening for connections; otherwise returns QHostAddress::Null.
 
     \sa serverPort(), listen()

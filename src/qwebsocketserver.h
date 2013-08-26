@@ -63,6 +63,9 @@ public:
     void pauseAccepting();
     void resumeAccepting();
 
+    void setServerName(const QString &serverName);
+    QString serverName() const;
+
 #ifndef QT_NO_NETWORKPROXY
     void setProxy(const QNetworkProxy &networkProxy);
     QNetworkProxy proxy() const;
