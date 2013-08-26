@@ -26,59 +26,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
     \enum WebSocketProtocol::CloseCode
 
     The close codes supported by WebSockets V13
-    \sa WebSocket::close()
-*/
-/*!
-    \var WebSocketProtocol::CloseCode::CC_NORMAL
-    Normal closure
-*/
-/*!
-    \var WebSocketProtocol::CloseCode::CC_GOING_AWAY
-    Going away
-*/
-/*!
-    \var WebSocketProtocol::CloseCode::CC_PROTOCOL_ERROR
-    Protocol error
-*/
-/*!
-    \var WebSocketProtocol::CloseCode::CC_DATATYPE_NOT_SUPPORTED
-    Unsupported data
-*/
-/*!
-    \var WebSocketProtocol::CloseCode::CC_RESERVED_1004
-    Reserved
-*/
-/*!
-    \var WebSocketProtocol::CloseCode::CC_MISSING_STATUS_CODE
-    No status received
-*/
-/*!
-    \var WebSocketProtocol::CloseCode::CC_ABNORMAL_DISCONNECTION
-    Abnormal closure
-*/
-/*!
-    \var WebSocketProtocol::CloseCode::CC_WRONG_DATATYPE
-    Invalid frame payload data
-*/
-/*!
-    \var WebSocketProtocol::CloseCode::CC_POLICY_VIOLATED
-    Policy violation
-*/
-/*!
-    \var WebSocketProtocol::CloseCode::CC_TOO_MUCH_DATA
-    Message too big
-*/
-/*!
-    \var WebSocketProtocol::CloseCode::CC_MISSING_EXTENSION
-    Mandatory extension missing
-*/
-/*!
-    \var WebSocketProtocol::CloseCode::CC_BAD_OPERATION
-    Internal server error
-*/
-/*!
-    \var WebSocketProtocol::CloseCode::CC_TLS_HANDSHAKE_FAILED
-    TLS handshake failed
+
+    \value CC_NORMAL                    Normal closure
+    \value CC_GOING_AWAY                Going away
+    \value CC_PROTOCOL_ERROR            Protocol error
+    \value CC_DATATYPE_NOT_SUPPORTED    Unsupported data
+    \value CC_RESERVED_1004             Reserved
+    \value CC_MISSING_STATUS_CODE       No status received
+    \value CC_ABNORMAL_DISCONNECTION    Abnormal closure
+    \value CC_WRONG_DATATYPE            Invalid frame payload data
+    \value CC_POLICY_VIOLATED           Policy violation
+    \value CC_TOO_MUCH_DATA             Message too big
+    \value CC_MISSING_EXTENSION         Mandatory extension missing
+    \value CC_BAD_OPERATION             Internal server error
+    \value CC_TLS_HANDSHAKE_FAILED      TLS handshake failed
+
+    \sa \l{QWebSocket::} {close()}
 */
 /*!
     \enum WebSocketProtocol::Version
@@ -87,57 +50,32 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
     For an overview of the differences between the different protocols, see
     <http://code.google.com/p/pywebsocket/wiki/WebSocketProtocolSpec>
-*/
-/*!
-    \var WebSocketProtocol::Version::V_Unknow
-*/
-/*!
-    \var WebSocketProtocol::Version::V_0
-    hixie76: http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76 & hybi-00: http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-00.
-    Works with key1, key2 and a key in the payload.\n
-    Attribute: Sec-WebSocket-Draft value 0.
-*/
-/*!
-    \var WebSocketProtocol::Version::V_4
-    hybi-04: http://tools.ietf.org/id/draft-ietf-hybi-thewebsocketprotocol-04.txt.
-    Changed handshake: key1, key2, key3 ==> Sec-WebSocket-Key, Sec-WebSocket-Nonce, Sec-WebSocket-Accept\n
-    Sec-WebSocket-Draft renamed to Sec-WebSocket-Version\n
-    Sec-WebSocket-Version = 4
-*/
-/*!
-    \var WebSocketProtocol::Version::V_5
-    hybi-05: http://tools.ietf.org/id/draft-ietf-hybi-thewebsocketprotocol-05.txt.
-    Sec-WebSocket-Version = 5\n
-    Removed Sec-WebSocket-Nonce\n
-    Added Sec-WebSocket-Accept\n
-*/
-/*!
-    \var WebSocketProtocol::Version::V_6
-    Sec-WebSocket-Version = 6.
-*/
-/*!
-    \var WebSocketProtocol::Version::V_7
-    hybi-07: http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-07.
-    Sec-WebSocket-Version = 7
-*/
-/*!
-    \var WebSocketProtocol::Version::V_8
-    hybi-8, hybi-9, hybi-10, hybi-11 and hybi-12.
-    Status codes 1005 and 1006 are added and all codes are now unsigned\n
-    Internal error results in 1006
-*/
-/*!
-    \var WebSocketProtocol::Version::V_13
-    hybi-13, hybi14, hybi-15, hybi-16, hybi-17 and RFC 6455.
-    Sec-WebSocket-Version = 13\n
-    Status code 1004 is now reserved\n
-    Added 1008, 1009 and 1010\n
-    Must support TLS\n
-    Clarify multiple version support
-*/
-/*!
-    \var WebSocketProtocol::Version::V_LATEST
-    Refers to the latest know version to QWebSockets.
+
+    \value V_Unknow
+    \value V_0          hixie76: http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76 & hybi-00: http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-00.
+                        Works with key1, key2 and a key in the payload.
+                        Attribute: Sec-WebSocket-Draft value 0.
+    \value V_4          hybi-04: http://tools.ietf.org/id/draft-ietf-hybi-thewebsocketprotocol-04.txt.
+                        Changed handshake: key1, key2, key3 ==> Sec-WebSocket-Key, Sec-WebSocket-Nonce, Sec-WebSocket-Accept
+                        Sec-WebSocket-Draft renamed to Sec-WebSocket-Version
+                        Sec-WebSocket-Version = 4
+    \value V_5          hybi-05: http://tools.ietf.org/id/draft-ietf-hybi-thewebsocketprotocol-05.txt.
+                        Sec-WebSocket-Version = 5
+                        Removed Sec-WebSocket-Nonce
+                        Added Sec-WebSocket-Accept
+    \value V_6          Sec-WebSocket-Version = 6.
+    \value V_7          hybi-07: http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-07.
+                        Sec-WebSocket-Version = 7
+    \value V_8          hybi-8, hybi-9, hybi-10, hybi-11 and hybi-12.
+                        Status codes 1005 and 1006 are added and all codes are now unsigned
+                        Internal error results in 1006
+    \value V_13         hybi-13, hybi14, hybi-15, hybi-16, hybi-17 and RFC 6455.
+                        Sec-WebSocket-Version = 13
+                        Status code 1004 is now reserved
+                        Added 1008, 1009 and 1010
+                        Must support TLS
+                        Clarify multiple version support
+    \value V_LATEST     Refers to the latest know version to QWebSockets.
 */
 
 /*!
