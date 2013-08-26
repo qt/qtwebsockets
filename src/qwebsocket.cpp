@@ -186,7 +186,7 @@ const quint64 FRAME_SIZE_IN_BYTES = 512 * 512 * 2;	//maximum size of a frame whe
  * (The \a origin is not required for non-web browser clients (see RFC 6455)).
  * \note Currently only V13 (RFC 6455) is supported
  */
-QWebSocket::QWebSocket(QString origin, QWebSocketProtocol::Version version, QObject *parent) :
+QWebSocket::QWebSocket(const QString &origin, QWebSocketProtocol::Version version, QObject *parent) :
     QObject(parent),
     d_ptr(new QWebSocketPrivate(origin, version, this, this))
 {
@@ -317,7 +317,7 @@ void QWebSocket::ping()
 /*!
     \brief Returns the version the socket is currently using
  */
-QWebSocketProtocol::Version QWebSocket::version()
+QWebSocketProtocol::Version QWebSocket::version() const
 {
     return d_ptr->version();
 }
@@ -325,7 +325,7 @@ QWebSocketProtocol::Version QWebSocket::version()
 /*!
     \brief Returns the name of the resource currently accessed.
  */
-QString QWebSocket::resourceName()
+QString QWebSocket::resourceName() const
 {
     return d_ptr->resourceName();
 }
@@ -333,7 +333,7 @@ QString QWebSocket::resourceName()
 /*!
     \brief Returns the url the socket is connected to or will connect to.
  */
-QUrl QWebSocket::requestUrl()
+QUrl QWebSocket::requestUrl() const
 {
     return d_ptr->requestUrl();
 }
@@ -341,7 +341,7 @@ QUrl QWebSocket::requestUrl()
 /*!
     \brief Returns the current origin
  */
-QString QWebSocket::origin()
+QString QWebSocket::origin() const
 {
     return d_ptr->origin();
 }
@@ -349,7 +349,7 @@ QString QWebSocket::origin()
 /*!
     \brief Returns the currently used protocol.
  */
-QString QWebSocket::protocol()
+QString QWebSocket::protocol() const
 {
     return d_ptr->protocol();
 }
@@ -357,7 +357,7 @@ QString QWebSocket::protocol()
 /*!
     \brief Returns the currently used extension.
  */
-QString QWebSocket::extension()
+QString QWebSocket::extension() const
 {
     return d_ptr->extension();
 }
@@ -542,7 +542,7 @@ QVariant QWebSocket::socketOption(QAbstractSocket::SocketOption option)
 /*!
     Returns true if the QWebSocket is valid.
  */
-bool QWebSocket::isValid()
+bool QWebSocket::isValid() const
 {
     return d_ptr->isValid();
 }

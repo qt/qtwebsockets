@@ -45,7 +45,7 @@ const quint64 FRAME_SIZE_IN_BYTES = 512 * 512 * 2;	//maximum size of a frame whe
 /*!
     \internal
 */
-QWebSocketPrivate::QWebSocketPrivate(QString origin, QWebSocketProtocol::Version version, QWebSocket *pWebSocket, QObject *parent) :
+QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::Version version, QWebSocket *pWebSocket, QObject *parent) :
     QObject(parent),
     q_ptr(pWebSocket),
     m_pSocket(new QTcpSocket(this)),
@@ -386,7 +386,7 @@ void QWebSocketPrivate::releaseConnections(const QTcpSocket *pTcpSocket)
 /*!
     \internal
  */
-QWebSocketProtocol::Version QWebSocketPrivate::version()
+QWebSocketProtocol::Version QWebSocketPrivate::version() const
 {
     return m_version;
 }
@@ -394,7 +394,7 @@ QWebSocketProtocol::Version QWebSocketPrivate::version()
 /*!
     \internal
  */
-QString QWebSocketPrivate::resourceName()
+QString QWebSocketPrivate::resourceName() const
 {
     return m_resourceName;
 }
@@ -402,7 +402,7 @@ QString QWebSocketPrivate::resourceName()
 /*!
     \internal
  */
-QUrl QWebSocketPrivate::requestUrl()
+QUrl QWebSocketPrivate::requestUrl() const
 {
     return m_requestUrl;
 }
@@ -410,7 +410,7 @@ QUrl QWebSocketPrivate::requestUrl()
 /*!
     \internal
  */
-QString QWebSocketPrivate::origin()
+QString QWebSocketPrivate::origin() const
 {
     return m_origin;
 }
@@ -418,7 +418,7 @@ QString QWebSocketPrivate::origin()
 /*!
     \internal
  */
-QString QWebSocketPrivate::protocol()
+QString QWebSocketPrivate::protocol() const
 {
     return m_protocol;
 }
@@ -426,7 +426,7 @@ QString QWebSocketPrivate::protocol()
 /*!
     \internal
  */
-QString QWebSocketPrivate::extension()
+QString QWebSocketPrivate::extension() const
 {
     return m_extension;
 }
@@ -1203,7 +1203,7 @@ QVariant QWebSocketPrivate::socketOption(QAbstractSocket::SocketOption option)
 /*!
     \internal
  */
-bool QWebSocketPrivate::isValid()
+bool QWebSocketPrivate::isValid() const
 {
     bool valid = false;
     if (m_pSocket)

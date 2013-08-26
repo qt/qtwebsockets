@@ -53,7 +53,7 @@ class QWebSocketPrivate:public QObject
     Q_OBJECT
 
 public:
-    explicit QWebSocketPrivate(QString origin,
+    explicit QWebSocketPrivate(const QString &origin,
                                QWebSocketProtocol::Version version,
                                QWebSocket * const pWebSocket,
                                QObject *parent = 0);
@@ -63,7 +63,7 @@ public:
     QAbstractSocket::SocketError error() const;
     QString errorString() const;
     bool flush();
-    bool isValid();
+    bool isValid() const;
     QHostAddress localAddress() const;
     quint16 localPort() const;
     QAbstractSocket::PauseModes pauseMode() const;
@@ -85,12 +85,12 @@ public:
     bool waitForConnected(int msecs = 30000);
     bool waitForDisconnected(int msecs = 30000);
 
-    QWebSocketProtocol::Version version();
-    QString resourceName();
-    QUrl requestUrl();
-    QString origin();
-    QString protocol();
-    QString extension();
+    QWebSocketProtocol::Version version() const;
+    QString resourceName() const;
+    QUrl requestUrl() const;
+    QString origin() const;
+    QString protocol() const;
+    QString extension() const;
 
     qint64 write(const char *message);		//send data as text
     qint64 write(const char *message, qint64 maxSize);		//send data as text
@@ -171,7 +171,6 @@ private:
     QTime m_pingTimer;
 
     DataProcessor m_dataProcessor;
-
 
     friend class QWebSocketServerPrivate;
     friend class QWebSocket;
