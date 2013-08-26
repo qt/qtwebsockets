@@ -19,7 +19,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "dataprocessor_p.h"
 #include "qwebsocketprotocol.h"
-#include "qwebsocket.h"
 #include <QTcpSocket>
 #include <QtEndian>
 #include <limits.h>
@@ -303,7 +302,7 @@ Frame Frame::readFrame(QTcpSocket *pSocket)
                 bool ok = pSocket->waitForReadyRead(5000);
                 if (!ok)
                 {
-                    frame.setError(QWebSocketProtocol::CC_GOING_AWAY, QWebSocket::tr("Timeout when reading data from socket."));
+                    frame.setError(QWebSocketProtocol::CC_GOING_AWAY, QObject::tr("Timeout when reading data from socket."));
                     isDone = true;
                 }
                 else
@@ -420,7 +419,7 @@ Frame Frame::readFrame(QTcpSocket *pSocket)
                 }
                 else if (payloadLength > MAX_FRAME_SIZE_IN_BYTES)
                 {
-                    frame.setError(QWebSocketProtocol::CC_TOO_MUCH_DATA, QWebSocket::tr("Maximum framesize exceeded."));
+                    frame.setError(QWebSocketProtocol::CC_TOO_MUCH_DATA, QObject::tr("Maximum framesize exceeded."));
                     processingState = PS_DISPATCH_RESULT;
                 }
                 else
@@ -484,21 +483,21 @@ bool Frame::checkValidity()
     {
         if (m_rsv1 || m_rsv2 || m_rsv3)
         {
-            setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, QWebSocket::tr("Rsv field is non-zero"));
+            setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, QObject::tr("Rsv field is non-zero"));
         }
         else if (QWebSocketProtocol::isOpCodeReserved(m_opCode))
         {
-            setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, QWebSocket::tr("Used reserved opcode"));
+            setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, QObject::tr("Used reserved opcode"));
         }
         else if (isControlFrame())
         {
             if (m_length > 125)
             {
-                setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, QWebSocket::tr("Controle frame is larger than 125 bytes"));
+                setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, QObject::tr("Controle frame is larger than 125 bytes"));
             }
             else if (!m_isFinalFrame)
             {
-                setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, QWebSocket::tr("Controle frames cannot be fragmented"));
+                setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, QObject::tr("Controle frames cannot be fragmented"));
             }
             else
             {
