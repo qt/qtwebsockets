@@ -786,46 +786,46 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
     QAbstractSocket::SocketState webSocketState = this->state();
     switch (socketState)
     {
-        case QAbstractSocket::ConnectedState:
+    case QAbstractSocket::ConnectedState:
+    {
+        if (webSocketState == QAbstractSocket::ConnectingState)
         {
-            if (webSocketState == QAbstractSocket::ConnectingState)
-            {
-                m_key = generateKey();
-                QString handshake = createHandShakeRequest(m_resourceName, m_requestUrl.host() % ":" % QString::number(m_requestUrl.port(80)), origin(), "", "", m_key);
-                m_pSocket->write(handshake.toLatin1());
-            }
-            break;
+            m_key = generateKey();
+            QString handshake = createHandShakeRequest(m_resourceName, m_requestUrl.host() % ":" % QString::number(m_requestUrl.port(80)), origin(), "", "", m_key);
+            m_pSocket->write(handshake.toLatin1());
         }
-        case QAbstractSocket::ClosingState:
+        break;
+    }
+    case QAbstractSocket::ClosingState:
+    {
+        if (webSocketState == QAbstractSocket::ConnectedState)
         {
-            if (webSocketState == QAbstractSocket::ConnectedState)
-            {
-                setSocketState(QAbstractSocket::ClosingState);
-            }
-            break;
+            setSocketState(QAbstractSocket::ClosingState);
         }
-        case QAbstractSocket::UnconnectedState:
+        break;
+    }
+    case QAbstractSocket::UnconnectedState:
+    {
+        if (webSocketState != QAbstractSocket::UnconnectedState)
         {
-            if (webSocketState != QAbstractSocket::UnconnectedState)
-            {
-                setSocketState(QAbstractSocket::UnconnectedState);
-                Q_EMIT q->disconnected();
-            }
-            break;
+            setSocketState(QAbstractSocket::UnconnectedState);
+            Q_EMIT q->disconnected();
         }
-        case QAbstractSocket::HostLookupState:
-        case QAbstractSocket::ConnectingState:
-        case QAbstractSocket::BoundState:
-        case QAbstractSocket::ListeningState:
-        {
-            //do nothing
-            //to make C++ compiler happy;
-            break;
-        }
-        default:
-        {
-            break;
-        }
+        break;
+    }
+    case QAbstractSocket::HostLookupState:
+    case QAbstractSocket::ConnectingState:
+    case QAbstractSocket::BoundState:
+    case QAbstractSocket::ListeningState:
+    {
+        //do nothing
+        //to make C++ compiler happy;
+        break;
+    }
+    default:
+    {
+        break;
+    }
     }
 }
 
@@ -864,85 +864,85 @@ void QWebSocketPrivate::processControlFrame(QWebSocketProtocol::OpCode opCode, Q
     Q_Q(QWebSocket);
     switch (opCode)
     {
-        case QWebSocketProtocol::OC_PING:
+    case QWebSocketProtocol::OC_PING:
+    {
+        quint32 maskingKey = 0;
+        if (m_mustMask)
         {
-            quint32 maskingKey = 0;
+            maskingKey = generateMaskingKey();
+        }
+        m_pSocket->write(getFrameHeader(QWebSocketProtocol::OC_PONG, frame.size(), maskingKey, true));
+        if (frame.size() > 0)
+        {
             if (m_mustMask)
             {
-                maskingKey = generateMaskingKey();
+                QWebSocketProtocol::mask(&frame, maskingKey);
             }
-            m_pSocket->write(getFrameHeader(QWebSocketProtocol::OC_PONG, frame.size(), maskingKey, true));
-            if (frame.size() > 0)
+            m_pSocket->write(frame);
+        }
+        break;
+    }
+    case QWebSocketProtocol::OC_PONG:
+    {
+        Q_EMIT q->pong(static_cast<quint64>(m_pingTimer.elapsed()));
+        break;
+    }
+    case QWebSocketProtocol::OC_CLOSE:
+    {
+        quint16 closeCode = QWebSocketProtocol::CC_NORMAL;
+        QString closeReason;
+        if (frame.size() > 0)   //close frame can have a close code and reason
+        {
+            closeCode = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(frame.constData()));
+            if (!QWebSocketProtocol::isCloseCodeValid(closeCode))
             {
-                if (m_mustMask)
-                {
-                    QWebSocketProtocol::mask(&frame, maskingKey);
-                }
-                m_pSocket->write(frame);
+                closeCode = QWebSocketProtocol::CC_PROTOCOL_ERROR;
+                closeReason = tr("Invalid close code %1 detected.").arg(closeCode);
             }
-            break;
-        }
-        case QWebSocketProtocol::OC_PONG:
-        {
-            Q_EMIT q->pong(static_cast<quint64>(m_pingTimer.elapsed()));
-            break;
-        }
-        case QWebSocketProtocol::OC_CLOSE:
-        {
-            quint16 closeCode = QWebSocketProtocol::CC_NORMAL;
-            QString closeReason;
-            if (frame.size() > 0)   //close frame can have a close code and reason
+            else
             {
-                closeCode = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(frame.constData()));
-                if (!QWebSocketProtocol::isCloseCodeValid(closeCode))
+                if (frame.size() > 2)
                 {
-                    closeCode = QWebSocketProtocol::CC_PROTOCOL_ERROR;
-                    closeReason = tr("Invalid close code %1 detected.").arg(closeCode);
-                }
-                else
-                {
-                    if (frame.size() > 2)
+                    QTextCodec *tc = QTextCodec::codecForName("UTF-8");
+                    QTextCodec::ConverterState state(QTextCodec::ConvertInvalidToNull);
+                    closeReason = tc->toUnicode(frame.constData() + 2, frame.size() - 2, &state);
+                    bool failed = (state.invalidChars != 0) || (state.remainingChars != 0);
+                    if (failed)
                     {
-                        QTextCodec *tc = QTextCodec::codecForName("UTF-8");
-                        QTextCodec::ConverterState state(QTextCodec::ConvertInvalidToNull);
-                        closeReason = tc->toUnicode(frame.constData() + 2, frame.size() - 2, &state);
-                        bool failed = (state.invalidChars != 0) || (state.remainingChars != 0);
-                        if (failed)
-                        {
-                            closeCode = QWebSocketProtocol::CC_WRONG_DATATYPE;
-                            closeReason = tr("Invalid UTF-8 code encountered.");
-                        }
+                        closeCode = QWebSocketProtocol::CC_WRONG_DATATYPE;
+                        closeReason = tr("Invalid UTF-8 code encountered.");
                     }
                 }
             }
-            m_isClosingHandshakeReceived = true;
-            close(static_cast<QWebSocketProtocol::CloseCode>(closeCode), closeReason);
-            break;
         }
-        case QWebSocketProtocol::OC_CONTINUE:
-        case QWebSocketProtocol::OC_BINARY:
-        case QWebSocketProtocol::OC_TEXT:
-        case QWebSocketProtocol::OC_RESERVED_3:
-        case QWebSocketProtocol::OC_RESERVED_4:
-        case QWebSocketProtocol::OC_RESERVED_5:
-        case QWebSocketProtocol::OC_RESERVED_6:
-        case QWebSocketProtocol::OC_RESERVED_7:
-        case QWebSocketProtocol::OC_RESERVED_B:
-        case QWebSocketProtocol::OC_RESERVED_D:
-        case QWebSocketProtocol::OC_RESERVED_E:
-        case QWebSocketProtocol::OC_RESERVED_F:
-        case QWebSocketProtocol::OC_RESERVED_V:
-        {
-            //do nothing
-            //case added to make C++ compiler happy
-            break;
-        }
-        default:
-        {
-            qDebug() << "WebSocket::processData: Invalid opcode detected:" << static_cast<int>(opCode);
-            //Do nothing
-            break;
-        }
+        m_isClosingHandshakeReceived = true;
+        close(static_cast<QWebSocketProtocol::CloseCode>(closeCode), closeReason);
+        break;
+    }
+    case QWebSocketProtocol::OC_CONTINUE:
+    case QWebSocketProtocol::OC_BINARY:
+    case QWebSocketProtocol::OC_TEXT:
+    case QWebSocketProtocol::OC_RESERVED_3:
+    case QWebSocketProtocol::OC_RESERVED_4:
+    case QWebSocketProtocol::OC_RESERVED_5:
+    case QWebSocketProtocol::OC_RESERVED_6:
+    case QWebSocketProtocol::OC_RESERVED_7:
+    case QWebSocketProtocol::OC_RESERVED_B:
+    case QWebSocketProtocol::OC_RESERVED_D:
+    case QWebSocketProtocol::OC_RESERVED_E:
+    case QWebSocketProtocol::OC_RESERVED_F:
+    case QWebSocketProtocol::OC_RESERVED_V:
+    {
+        //do nothing
+        //case added to make C++ compiler happy
+        break;
+    }
+    default:
+    {
+        qDebug() << "WebSocket::processData: Invalid opcode detected:" << static_cast<int>(opCode);
+        //Do nothing
+        break;
+    }
     }
 }
 

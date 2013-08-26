@@ -39,11 +39,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 QT_BEGIN_NAMESPACE
 
-class QTcpSocket;
+class QIODevice;
 
-/**
- * @internal
- * @brief The DataProcessor class
+/*!
+    \internal
+    The DataProcessor class reads and interprets incoming websocket messages, and emits appropriate signals.
  */
 class DataProcessor: public QObject
 {
@@ -61,7 +61,7 @@ Q_SIGNALS:
     void errorEncountered(QWebSocketProtocol::CloseCode code, QString description);
 
 public Q_SLOTS:
-    void process(QTcpSocket *pSocket);
+    void process(QIODevice *pIoDevice);
     void clear();
 
 private:

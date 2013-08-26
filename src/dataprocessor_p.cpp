@@ -19,11 +19,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "dataprocessor_p.h"
 #include "qwebsocketprotocol.h"
-#include <QTcpSocket>
+#include <QIODevice>
 #include <QtEndian>
 #include <limits.h>
 #include <QTextCodec>
 #include <QTextDecoder>
+#include <QDebug>
 
 QT_BEGIN_NAMESPACE
 
@@ -59,7 +60,7 @@ public:
 
     bool isValid() const;
 
-    static Frame readFrame(QTcpSocket *pSocket);
+    static Frame readFrame(QIODevice *pIoDevice);
 
 private:
     QWebSocketProtocol::CloseCode m_closeCode;
@@ -282,7 +283,7 @@ bool Frame::isValid() const
 /*!
     \internal
  */
-Frame Frame::readFrame(QTcpSocket *pSocket)
+Frame Frame::readFrame(QIODevice *pIoDevice)
 {
     bool isDone = false;
     qint64 bytesRead = 0;
@@ -299,7 +300,7 @@ Frame Frame::readFrame(QTcpSocket *pSocket)
         {
             case PS_WAIT_FOR_MORE_DATA:
             {
-                bool ok = pSocket->waitForReadyRead(5000);
+                bool ok = pIoDevice->waitForReadyRead(5000);
                 if (!ok)
                 {
                     frame.setError(QWebSocketProtocol::CC_GOING_AWAY, QObject::tr("Timeout when reading data from socket."));
@@ -313,11 +314,11 @@ Frame Frame::readFrame(QTcpSocket *pSocket)
             }
             case PS_READ_HEADER:
             {
-                if (pSocket->bytesAvailable() >= 2)
+                if (pIoDevice->bytesAvailable() >= 2)
                 {
                     //FIN, RSV1-3, Opcode
                     char header[2] = {0};
-                    bytesRead = pSocket->read(header, 2);
+                    bytesRead = pIoDevice->read(header, 2);
                     frame.m_isFinalFrame = (header[0] & 0x80) != 0;
                     frame.m_rsv1 = (header[0] & 0x40);
                     frame.m_rsv2 = (header[0] & 0x20);
@@ -361,11 +362,11 @@ Frame Frame::readFrame(QTcpSocket *pSocket)
 
             case PS_READ_PAYLOAD_LENGTH:
             {
-                if (pSocket->bytesAvailable() >= 2)
+                if (pIoDevice->bytesAvailable() >= 2)
                 {
                     uchar length[2] = {0};
                     //TODO: Handle return value
-                    bytesRead = pSocket->read(reinterpret_cast<char *>(length), 2);
+                    bytesRead = pIoDevice->read(reinterpret_cast<char *>(length), 2);
                     payloadLength = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(length));
                     processingState = hasMask ? PS_READ_MASK : PS_READ_PAYLOAD;
                 }
@@ -378,11 +379,11 @@ Frame Frame::readFrame(QTcpSocket *pSocket)
 
             case PS_READ_BIG_PAYLOAD_LENGTH:
             {
-                if (pSocket->bytesAvailable() >= 8)
+                if (pIoDevice->bytesAvailable() >= 8)
                 {
                     uchar length[8] = {0};
                     //TODO: Handle return value
-                    bytesRead = pSocket->read(reinterpret_cast<char *>(length), 8);
+                    bytesRead = pIoDevice->read(reinterpret_cast<char *>(length), 8);
                     //Most significant bit must be set to 0 as per http://tools.ietf.org/html/rfc6455#section-5.2
                     //TODO: Do we check for that?
                     payloadLength = qFromBigEndian<quint64>(length) & ~(1ULL << 63);
@@ -398,10 +399,10 @@ Frame Frame::readFrame(QTcpSocket *pSocket)
 
             case PS_READ_MASK:
             {
-                if (pSocket->bytesAvailable() >= 4)
+                if (pIoDevice->bytesAvailable() >= 4)
                 {
                     //TODO: Handle return value
-                    bytesRead = pSocket->read(reinterpret_cast<char *>(&frame.m_mask), sizeof(frame.m_mask));
+                    bytesRead = pIoDevice->read(reinterpret_cast<char *>(&frame.m_mask), sizeof(frame.m_mask));
                     processingState = PS_READ_PAYLOAD;
                 }
                 else
@@ -424,10 +425,10 @@ Frame Frame::readFrame(QTcpSocket *pSocket)
                 }
                 else
                 {
-                    quint64 bytesAvailable = static_cast<quint64>(pSocket->bytesAvailable());
+                    quint64 bytesAvailable = static_cast<quint64>(pIoDevice->bytesAvailable());
                     if (bytesAvailable >= payloadLength)
                     {
-                        frame.m_payload = pSocket->read(payloadLength);
+                        frame.m_payload = pIoDevice->read(payloadLength);
                         if (hasMask)
                         {
                             QWebSocketProtocol::mask(&frame.m_payload, frame.m_mask);
@@ -452,7 +453,7 @@ Frame Frame::readFrame(QTcpSocket *pSocket)
             default:
             {
                 //should not come here
-                qDebug() << "DataProcessor::process: Found invalid state. This should not happen!";
+                qWarning() << "DataProcessor::process: Found invalid state. This should not happen!";
                 frame.clear();
                 isDone = true;
                 break;
@@ -549,13 +550,13 @@ DataProcessor::~DataProcessor()
 /*!
     \internal
  */
-void DataProcessor::process(QTcpSocket *pSocket)
+void DataProcessor::process(QIODevice *pIoDevice)
 {
     bool isDone = false;
 
     while (!isDone)
     {
-        Frame frame = Frame::readFrame(pSocket);
+        Frame frame = Frame::readFrame(pIoDevice);
         if (frame.isValid())
         {
             if (frame.isControlFrame())
