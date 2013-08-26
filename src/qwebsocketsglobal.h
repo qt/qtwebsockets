@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 QT_BEGIN_NAMESPACE
 
 #ifndef QT_STATIC
-#  if defined(QT_BUILD_SERIALPORT_LIB)
+#  if defined(QT_BUILD_WEBSOCKETS_LIB)
 #    define Q_WEBSOCKETS_EXPORT Q_DECL_EXPORT
 #  else
 #    define Q_WEBSOCKETS_EXPORT Q_DECL_IMPORT
