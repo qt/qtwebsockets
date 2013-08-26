@@ -174,7 +174,6 @@ private:
     DataProcessor m_dataProcessor;
 
     friend class QWebSocketServerPrivate;
-    friend class QWebSocket;
 };
 
 QT_END_NAMESPACE

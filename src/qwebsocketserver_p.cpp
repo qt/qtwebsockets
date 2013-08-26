@@ -275,6 +275,7 @@ void QWebSocketServerPrivate::onCloseConnection()
  */
 void QWebSocketServerPrivate::handshakeReceived()
 {
+    Q_Q(QWebSocketServer);
     QTcpSocket *pTcpSocket = qobject_cast<QTcpSocket*>(sender());
     if (pTcpSocket != 0)
     {
@@ -286,7 +287,7 @@ void QWebSocketServerPrivate::handshakeReceived()
 
         HandshakeResponse response(request,
                                    m_serverName,
-                                   q_ptr->isOriginAllowed(request.getOrigin()),
+                                   q->isOriginAllowed(request.getOrigin()),
                                    supportedVersions(),
                                    supportedProtocols(),
                                    supportedExtensions());
@@ -305,7 +306,7 @@ void QWebSocketServerPrivate::handshakeReceived()
                 {
                     pWebSocket->setParent(this);
                     addPendingConnection(pWebSocket);
-                    Q_EMIT q_ptr->newConnection();
+                    Q_EMIT q->newConnection();
                     success = true;
                 }
                 else

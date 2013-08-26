@@ -125,7 +125,8 @@ QWebSocketServer::~QWebSocketServer()
  */
 void QWebSocketServer::close()
 {
-    d_ptr->close();
+    Q_D(QWebSocketServer);
+    d->close();
 }
 
 /*!
@@ -135,7 +136,8 @@ void QWebSocketServer::close()
 */
 QString QWebSocketServer::errorString() const
 {
-    return d_ptr->errorString();
+    Q_D(const QWebSocketServer);
+    return d->errorString();
 }
 
 /*!
@@ -145,7 +147,8 @@ QString QWebSocketServer::errorString() const
  */
 bool QWebSocketServer::hasPendingConnections() const
 {
-    return d_ptr->hasPendingConnections();
+    Q_D(const QWebSocketServer);
+    return d->hasPendingConnections();
 }
 
 /*!
@@ -155,7 +158,8 @@ bool QWebSocketServer::hasPendingConnections() const
  */
 bool QWebSocketServer::isListening() const
 {
-    return d_ptr->isListening();
+    Q_D(const QWebSocketServer);
+    return d->isListening();
 }
 
 /*!
@@ -169,7 +173,8 @@ bool QWebSocketServer::isListening() const
  */
 bool QWebSocketServer::listen(const QHostAddress &address, quint16 port)
 {
-    return d_ptr->listen(address, port);
+    Q_D(QWebSocketServer);
+    return d->listen(address, port);
 }
 
 /*!
@@ -179,7 +184,8 @@ bool QWebSocketServer::listen(const QHostAddress &address, quint16 port)
  */
 int QWebSocketServer::maxPendingConnections() const
 {
-    return d_ptr->maxPendingConnections();
+    Q_D(const QWebSocketServer);
+    return d->maxPendingConnections();
 }
 
 /*!
@@ -193,7 +199,8 @@ int QWebSocketServer::maxPendingConnections() const
 */
 QWebSocket *QWebSocketServer::nextPendingConnection()
 {
-    return d_ptr->nextPendingConnection();
+    Q_D(QWebSocketServer);
+    return d->nextPendingConnection();
 }
 
 /*!
@@ -202,7 +209,8 @@ QWebSocket *QWebSocketServer::nextPendingConnection()
  */
 void QWebSocketServer::pauseAccepting()
 {
-    d_ptr->pauseAccepting();
+    Q_D(QWebSocketServer);
+    d->pauseAccepting();
 }
 
 #ifndef QT_NO_NETWORKPROXY
@@ -213,7 +221,8 @@ void QWebSocketServer::pauseAccepting()
 */
 QNetworkProxy QWebSocketServer::proxy() const
 {
-    return d_ptr->proxy();
+    Q_D(const QWebSocketServer);
+    return d->proxy();
 }
 
 /*!
@@ -229,7 +238,8 @@ QNetworkProxy QWebSocketServer::proxy() const
 */
 void QWebSocketServer::setProxy(const QNetworkProxy &networkProxy)
 {
-    d_ptr->setProxy(networkProxy);
+    Q_D(QWebSocketServer);
+    d->setProxy(networkProxy);
 }
 #endif
 /*!
@@ -238,7 +248,8 @@ void QWebSocketServer::setProxy(const QNetworkProxy &networkProxy)
  */
 void QWebSocketServer::resumeAccepting()
 {
-    d_ptr->resumeAccepting();
+    Q_D(QWebSocketServer);
+    d->resumeAccepting();
 }
 
 /*!
@@ -248,7 +259,8 @@ void QWebSocketServer::resumeAccepting()
  */
 QHostAddress QWebSocketServer::serverAddress() const
 {
-    return d_ptr->serverAddress();
+    Q_D(const QWebSocketServer);
+    return d->serverAddress();
 }
 
 /*!
@@ -257,7 +269,8 @@ QHostAddress QWebSocketServer::serverAddress() const
  */
 QAbstractSocket::SocketError QWebSocketServer::serverError() const
 {
-    return d_ptr->serverError();
+    Q_D(const QWebSocketServer);
+    return d->serverError();
 }
 
 /*!
@@ -266,7 +279,8 @@ QAbstractSocket::SocketError QWebSocketServer::serverError() const
  */
 quint16 QWebSocketServer::serverPort() const
 {
-    return d_ptr->serverPort();
+    Q_D(const QWebSocketServer);
+    return d->serverPort();
 }
 
 /*!
@@ -279,7 +293,8 @@ quint16 QWebSocketServer::serverPort() const
  */
 void QWebSocketServer::setMaxPendingConnections(int numConnections)
 {
-    d_ptr->setMaxPendingConnections(numConnections);
+    Q_D(QWebSocketServer);
+    d->setMaxPendingConnections(numConnections);
 }
 
 /*!
@@ -292,7 +307,8 @@ void QWebSocketServer::setMaxPendingConnections(int numConnections)
  */
 bool QWebSocketServer::setSocketDescriptor(int socketDescriptor)
 {
-    return d_ptr->setSocketDescriptor(socketDescriptor);
+    Q_D(QWebSocketServer);
+    return d->setSocketDescriptor(socketDescriptor);
 }
 
 /*!
@@ -303,7 +319,8 @@ bool QWebSocketServer::setSocketDescriptor(int socketDescriptor)
  */
 int QWebSocketServer::socketDescriptor() const
 {
-    return d_ptr->socketDescriptor();
+    Q_D(const QWebSocketServer);
+    return d->socketDescriptor();
 }
 
 /*!
@@ -321,7 +338,8 @@ int QWebSocketServer::socketDescriptor() const
 */
 bool QWebSocketServer::waitForNewConnection(int msec, bool *timedOut)
 {
-    return d_ptr->waitForNewConnection(msec, timedOut);
+    Q_D(QWebSocketServer);
+    return d->waitForNewConnection(msec, timedOut);
 }
 
 /*!
@@ -329,7 +347,8 @@ bool QWebSocketServer::waitForNewConnection(int msec, bool *timedOut)
  */
 QList<QWebSocketProtocol::Version> QWebSocketServer::supportedVersions() const
 {
-    return d_ptr->supportedVersions();
+    Q_D(const QWebSocketServer);
+    return d->supportedVersions();
 }
 
 /*!
@@ -337,7 +356,8 @@ QList<QWebSocketProtocol::Version> QWebSocketServer::supportedVersions() const
  */
 QList<QString> QWebSocketServer::supportedProtocols() const
 {
-    return d_ptr->supportedProtocols();
+    Q_D(const QWebSocketServer);
+    return d->supportedProtocols();
 }
 
 /*!
@@ -345,9 +365,11 @@ QList<QString> QWebSocketServer::supportedProtocols() const
  */
 QList<QString> QWebSocketServer::supportedExtensions() const
 {
-    return d_ptr->supportedExtensions();
+    Q_D(const QWebSocketServer);
+    return d->supportedExtensions();
 }
 
+//TODO: should be probably replaced by an injectable OriginAuthenticator object
 /*!
     This method checks if the given \a origin is allowed; it returns true when the \a origin is allowed, otherwise false.
     It is supposed to be overriden by a subclass to filter out unwanted origins.

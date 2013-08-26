@@ -206,7 +206,8 @@ QWebSocket::~QWebSocket()
  */
 void QWebSocket::abort()
 {
-    d_ptr->abort();
+    Q_D(QWebSocket);
+    d->abort();
 }
 
 /*!
@@ -215,7 +216,8 @@ void QWebSocket::abort()
  */
 QAbstractSocket::SocketError QWebSocket::error() const
 {
-    return d_ptr->error();
+    Q_D(const QWebSocket);
+    return d->error();
 }
 
 //only called by QWebSocketPrivate::upgradeFrom
@@ -235,7 +237,8 @@ QWebSocket::QWebSocket(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version versi
  */
 QString QWebSocket::errorString() const
 {
-    return d_ptr->errorString();
+    Q_D(const QWebSocket);
+    return d->errorString();
 }
 
 /*!
@@ -248,7 +251,8 @@ QString QWebSocket::errorString() const
 */
 bool QWebSocket::flush()
 {
-    return d_ptr->flush();
+    Q_D(QWebSocket);
+    return d->flush();
 }
 
 /*!
@@ -257,7 +261,8 @@ bool QWebSocket::flush()
  */
 qint64 QWebSocket::write(const char *message)
 {
-    return d_ptr->write(message);
+    Q_D(QWebSocket);
+    return d->write(message);
 }
 
 /*!
@@ -265,7 +270,8 @@ qint64 QWebSocket::write(const char *message)
  */
 qint64 QWebSocket::write(const char *message, qint64 maxSize)
 {
-    return d_ptr->write(message, maxSize);
+    Q_D(QWebSocket);
+    return d->write(message, maxSize);
 }
 
 /*!
@@ -273,7 +279,8 @@ qint64 QWebSocket::write(const char *message, qint64 maxSize)
  */
 qint64 QWebSocket::write(const QString &message)
 {
-    return d_ptr->write(message);
+    Q_D(QWebSocket);
+    return d->write(message);
 }
 
 /*!
@@ -281,7 +288,8 @@ qint64 QWebSocket::write(const QString &message)
  */
 qint64 QWebSocket::write(const QByteArray &data)
 {
-    return d_ptr->write(data);
+    Q_D(QWebSocket);
+    return d->write(data);
 }
 
 /*!
@@ -302,7 +310,8 @@ void QWebSocket::close(QWebSocketProtocol::CloseCode closeCode, const QString &r
  */
 void QWebSocket::open(const QUrl &url, bool mask)
 {
-    d_ptr->open(url, mask);
+    Q_D(QWebSocket);
+    d->open(url, mask);
 }
 
 /*!
@@ -312,7 +321,8 @@ void QWebSocket::open(const QUrl &url, bool mask)
  */
 void QWebSocket::ping()
 {
-    d_ptr->ping();
+    Q_D(QWebSocket);
+    d->ping();
 }
 
 /*!
@@ -320,7 +330,8 @@ void QWebSocket::ping()
  */
 QWebSocketProtocol::Version QWebSocket::version() const
 {
-    return d_ptr->version();
+    Q_D(const QWebSocket);
+    return d->version();
 }
 
 /*!
@@ -328,7 +339,8 @@ QWebSocketProtocol::Version QWebSocket::version() const
  */
 QString QWebSocket::resourceName() const
 {
-    return d_ptr->resourceName();
+    Q_D(const QWebSocket);
+    return d->resourceName();
 }
 
 /*!
@@ -336,7 +348,8 @@ QString QWebSocket::resourceName() const
  */
 QUrl QWebSocket::requestUrl() const
 {
-    return d_ptr->requestUrl();
+    Q_D(const QWebSocket);
+    return d->requestUrl();
 }
 
 /*!
@@ -344,7 +357,8 @@ QUrl QWebSocket::requestUrl() const
  */
 QString QWebSocket::origin() const
 {
-    return d_ptr->origin();
+    Q_D(const QWebSocket);
+    return d->origin();
 }
 
 /*!
@@ -352,7 +366,8 @@ QString QWebSocket::origin() const
  */
 QString QWebSocket::protocol() const
 {
-    return d_ptr->protocol();
+    Q_D(const QWebSocket);
+    return d->protocol();
 }
 
 /*!
@@ -360,7 +375,8 @@ QString QWebSocket::protocol() const
  */
 QString QWebSocket::extension() const
 {
-    return d_ptr->extension();
+    Q_D(const QWebSocket);
+    return d->extension();
 }
 
 /*!
@@ -368,7 +384,8 @@ QString QWebSocket::extension() const
  */
 QAbstractSocket::SocketState QWebSocket::state() const
 {
-    return d_ptr->state();
+    Q_D(const QWebSocket);
+    return d->state();
 }
 
 /*!
@@ -391,7 +408,8 @@ QAbstractSocket::SocketState QWebSocket::state() const
  */
 bool QWebSocket::waitForConnected(int msecs)
 {
-    return d_ptr->waitForConnected(msecs);
+    Q_D(QWebSocket);
+    return d->waitForConnected(msecs);
 }
 
 /*!
@@ -404,7 +422,8 @@ bool QWebSocket::waitForConnected(int msecs)
 */
 bool QWebSocket::waitForDisconnected(int msecs)
 {
-    return d_ptr->waitForDisconnected(msecs);
+    Q_D(QWebSocket);
+    return d->waitForDisconnected(msecs);
 }
 
 /*!
@@ -412,7 +431,8 @@ bool QWebSocket::waitForDisconnected(int msecs)
  */
 QHostAddress QWebSocket::localAddress() const
 {
-    return d_ptr->localAddress();
+    Q_D(const QWebSocket);
+    return d->localAddress();
 }
 
 /*!
@@ -420,7 +440,8 @@ QHostAddress QWebSocket::localAddress() const
  */
 quint16 QWebSocket::localPort() const
 {
-    return d_ptr->localPort();
+    Q_D(const QWebSocket);
+    return d->localPort();
 }
 
 /*!
@@ -428,7 +449,8 @@ quint16 QWebSocket::localPort() const
  */
 QAbstractSocket::PauseModes QWebSocket::pauseMode() const
 {
-    return d_ptr->pauseMode();
+    Q_D(const QWebSocket);
+    return d->pauseMode();
 }
 
 /*!
@@ -436,7 +458,8 @@ QAbstractSocket::PauseModes QWebSocket::pauseMode() const
  */
 QHostAddress QWebSocket::peerAddress() const
 {
-    return d_ptr->peerAddress();
+    Q_D(const QWebSocket);
+    return d->peerAddress();
 }
 
 /*!
@@ -444,7 +467,8 @@ QHostAddress QWebSocket::peerAddress() const
  */
 QString QWebSocket::peerName() const
 {
-    return d_ptr->peerName();
+    Q_D(const QWebSocket);
+    return d->peerName();
 }
 
 /*!
@@ -452,7 +476,8 @@ QString QWebSocket::peerName() const
  */
 quint16 QWebSocket::peerPort() const
 {
-    return d_ptr->peerPort();
+    Q_D(const QWebSocket);
+    return d->peerPort();
 }
 
 #ifndef QT_NO_NETWORKPROXY
@@ -461,7 +486,8 @@ quint16 QWebSocket::peerPort() const
  */
 QNetworkProxy QWebSocket::proxy() const
 {
-    return d_ptr->proxy();
+    Q_D(const QWebSocket);
+    return d->proxy();
 }
 
 /*!
@@ -469,7 +495,8 @@ QNetworkProxy QWebSocket::proxy() const
  */
 void QWebSocket::setProxy(const QNetworkProxy &networkProxy)
 {
-    d_ptr->setProxy(networkProxy);
+    Q_D(QWebSocket);
+    d->setProxy(networkProxy);
 }
 #endif
 
@@ -478,7 +505,8 @@ void QWebSocket::setProxy(const QNetworkProxy &networkProxy)
  */
 qint64 QWebSocket::readBufferSize() const
 {
-    return d_ptr->readBufferSize();
+    Q_D(const QWebSocket);
+    return d->readBufferSize();
 }
 
 /*!
@@ -491,7 +519,8 @@ qint64 QWebSocket::readBufferSize() const
  */
 void QWebSocket::resume()
 {
-    d_ptr->resume();
+    Q_D(QWebSocket);
+    d->resume();
 }
 
 /*!
@@ -507,7 +536,8 @@ void QWebSocket::resume()
  */
 void QWebSocket::setPauseMode(QAbstractSocket::PauseModes pauseMode)
 {
-    d_ptr->setPauseMode(pauseMode);
+    Q_D(QWebSocket);
+    d->setPauseMode(pauseMode);
 }
 
 /*!
@@ -519,7 +549,8 @@ void QWebSocket::setPauseMode(QAbstractSocket::PauseModes pauseMode)
 */
 void QWebSocket::setReadBufferSize(qint64 size)
 {
-    d_ptr->setReadBufferSize(size);
+    Q_D(QWebSocket);
+    d->setReadBufferSize(size);
 }
 
 /*!
@@ -528,7 +559,8 @@ void QWebSocket::setReadBufferSize(qint64 size)
 */
 void QWebSocket::setSocketOption(QAbstractSocket::SocketOption option, const QVariant &value)
 {
-    d_ptr->setSocketOption(option, value);
+    Q_D(QWebSocket);
+    d->setSocketOption(option, value);
 }
 
 /*!
@@ -537,7 +569,8 @@ void QWebSocket::setSocketOption(QAbstractSocket::SocketOption option, const QVa
 */
 QVariant QWebSocket::socketOption(QAbstractSocket::SocketOption option)
 {
-    return d_ptr->socketOption(option);
+    Q_D(QWebSocket);
+    return d->socketOption(option);
 }
 
 /*!
@@ -545,7 +578,8 @@ QVariant QWebSocket::socketOption(QAbstractSocket::SocketOption option)
  */
 bool QWebSocket::isValid() const
 {
-    return d_ptr->isValid();
+    Q_D(const QWebSocket);
+    return d->isValid();
 }
 
 QT_END_NAMESPACE

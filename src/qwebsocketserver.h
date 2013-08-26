@@ -81,8 +81,8 @@ Q_SIGNALS:
 
 private:
     Q_DISABLE_COPY(QWebSocketServer)
+    Q_DECLARE_PRIVATE(QWebSocketServer)
     QWebSocketServerPrivate * const d_ptr;
-    friend class QWebSocketServerPrivate;
 };
 
 QT_END_NAMESPACE

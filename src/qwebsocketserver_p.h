@@ -83,6 +83,7 @@ private Q_SLOTS:
     void handshakeReceived();
 
 private:
+    Q_DECLARE_PUBLIC(QWebSocketServer)
     QWebSocketServer * const q_ptr;
 
     QTcpServer *m_pTcpServer;
