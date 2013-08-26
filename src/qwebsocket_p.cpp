@@ -281,7 +281,7 @@ void QWebSocketPrivate::setVersion(QWebSocketProtocol::Version version)
     \internal
     Sets the resource name of the connection; must be set before the socket is openend
 */
-void QWebSocketPrivate::setResourceName(QString resourceName)
+void QWebSocketPrivate::setResourceName(const QString &resourceName)
 {
     m_resourceName = resourceName;
 }
@@ -289,7 +289,7 @@ void QWebSocketPrivate::setResourceName(QString resourceName)
 /*!
   \internal
  */
-void QWebSocketPrivate::setRequestUrl(QUrl requestUrl)
+void QWebSocketPrivate::setRequestUrl(const QUrl &requestUrl)
 {
     m_requestUrl = requestUrl;
 }
@@ -297,7 +297,7 @@ void QWebSocketPrivate::setRequestUrl(QUrl requestUrl)
 /*!
   \internal
  */
-void QWebSocketPrivate::setOrigin(QString origin)
+void QWebSocketPrivate::setOrigin(const QString &origin)
 {
     m_origin = origin;
 }
@@ -305,7 +305,7 @@ void QWebSocketPrivate::setOrigin(QString origin)
 /*!
   \internal
  */
-void QWebSocketPrivate::setProtocol(QString protocol)
+void QWebSocketPrivate::setProtocol(const QString &protocol)
 {
     m_protocol = protocol;
 }
@@ -313,7 +313,7 @@ void QWebSocketPrivate::setProtocol(QString protocol)
 /*!
   \internal
  */
-void QWebSocketPrivate::setExtension(QString extension)
+void QWebSocketPrivate::setExtension(const QString &extension)
 {
     m_extension = extension;
 }
@@ -1021,7 +1021,7 @@ void QWebSocketPrivate::setSocketState(QAbstractSocket::SocketState state)
 /*!
     \internal
  */
-void QWebSocketPrivate::setErrorString(QString errorString)
+void QWebSocketPrivate::setErrorString(const QString &errorString)
 {
     m_errorString = errorString;
 }

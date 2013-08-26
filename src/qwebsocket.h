@@ -84,7 +84,7 @@ public:
     qint64 write(const QByteArray &data);	//send data as binary
 
 public Q_SLOTS:
-    void close(QWebSocketProtocol::CloseCode closeCode = QWebSocketProtocol::CC_NORMAL, QString reason = QString());
+    void close(QWebSocketProtocol::CloseCode closeCode = QWebSocketProtocol::CC_NORMAL, const QString &reason = QString());
     void open(const QUrl &url, bool mask = true);
     void ping();
 

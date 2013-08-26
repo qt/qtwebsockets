@@ -116,14 +116,14 @@ private:
 
     QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version, QWebSocket *pWebSocket, QObject *parent = 0);
     void setVersion(QWebSocketProtocol::Version version);
-    void setResourceName(QString resourceName);
-    void setRequestUrl(QUrl requestUrl);
-    void setOrigin(QString origin);
-    void setProtocol(QString protocol);
-    void setExtension(QString extension);
+    void setResourceName(const QString &resourceName);
+    void setRequestUrl(const QUrl &requestUrl);
+    void setOrigin(const QString &origin);
+    void setProtocol(const QString &protocol);
+    void setExtension(const QString &extension);
     void enableMasking(bool enable);
     void setSocketState(QAbstractSocket::SocketState state);
-    void setErrorString(QString errorString);
+    void setErrorString(const QString &errorString);
 
     qint64 doWriteData(const QByteArray &data, bool isBinary);
     qint64 doWriteFrames(const QByteArray &data, bool isBinary);

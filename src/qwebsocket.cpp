@@ -289,9 +289,10 @@ qint64 QWebSocket::write(const QByteArray &data)
     The \a closeCode is a QWebSocketProtocol::CloseCode indicating the reason to close, and
     \a reason describes the reason of the closure more in detail
  */
-void QWebSocket::close(QWebSocketProtocol::CloseCode closeCode, QString reason)
+void QWebSocket::close(QWebSocketProtocol::CloseCode closeCode, const QString &reason)
 {
-    d_ptr->close(closeCode, reason);
+    Q_D(QWebSocket);
+    d->close(closeCode, reason);
 }
 
 /*!
