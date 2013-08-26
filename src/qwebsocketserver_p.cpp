@@ -54,7 +54,7 @@ QWebSocketServerPrivate::~QWebSocketServerPrivate()
     while (!m_pendingConnections.isEmpty())
     {
         QWebSocket *pWebSocket = m_pendingConnections.dequeue();
-        pWebSocket->close(QWebSocketProtocol::CC_GOING_AWAY, QWebSocketServer::tr("Server closed."));
+        pWebSocket->close(QWebSocketProtocol::CC_GOING_AWAY, tr("Server closed."));
         pWebSocket->deleteLater();
     }
     m_pTcpServer->deleteLater();
@@ -312,24 +312,24 @@ void QWebSocketServerPrivate::handshakeReceived()
                 else
                 {
                     //TODO: should set or emit error
-                    qDebug() << QWebSocketServer::tr("Upgrading to websocket failed.");
+                    qDebug() << tr("Upgrading to websocket failed.");
                 }
             }
             else
             {
                 //TODO: should set or emit error
-                qDebug() << QWebSocketServer::tr("Cannot upgrade to websocket.");
+                qDebug() << tr("Cannot upgrade to websocket.");
             }
         }
         else
         {
             //TODO: should set or emit error
-            qDebug() << QWebSocketServer::tr("Invalid response received.");
+            qDebug() << tr("Invalid response received.");
         }
         if (!success)
         {
             //TODO: should set or emit error
-            qDebug() << QWebSocketServer::tr("Closing socket because of invalid or unsupported request.");
+            qDebug() << tr("Closing socket because of invalid or unsupported request.");
             pTcpSocket->close();
         }
     }

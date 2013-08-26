@@ -569,13 +569,13 @@ void DataProcessor::process(QTcpSocket *pSocket)
                 if (!m_isFragmented && frame.isContinuationFrame())
                 {
                     clear();
-                    Q_EMIT errorEncountered(QWebSocketProtocol::CC_PROTOCOL_ERROR, QWebSocket::tr("Received Continuation frame /*with FIN=true*/, while there is nothing to continue."));
+                    Q_EMIT errorEncountered(QWebSocketProtocol::CC_PROTOCOL_ERROR, tr("Received Continuation frame /*with FIN=true*/, while there is nothing to continue."));
                     return;
                 }
                 if (m_isFragmented && frame.isDataFrame() && !frame.isContinuationFrame())
                 {
                     clear();
-                    Q_EMIT errorEncountered(QWebSocketProtocol::CC_PROTOCOL_ERROR, QWebSocket::tr("All data frames after the initial data frame must have opcode 0 (continuation)."));
+                    Q_EMIT errorEncountered(QWebSocketProtocol::CC_PROTOCOL_ERROR, tr("All data frames after the initial data frame must have opcode 0 (continuation)."));
                     return;
                 }
                 if (!frame.isContinuationFrame())
@@ -587,7 +587,7 @@ void DataProcessor::process(QTcpSocket *pSocket)
                 if ((messageLength + quint64(frame.getPayload().length())) > MAX_MESSAGE_SIZE_IN_BYTES)
                 {
                     clear();
-                    Q_EMIT errorEncountered(QWebSocketProtocol::CC_TOO_MUCH_DATA, QWebSocket::tr("Received message is too big."));
+                    Q_EMIT errorEncountered(QWebSocketProtocol::CC_TOO_MUCH_DATA, tr("Received message is too big."));
                     return;
                 }
 
@@ -598,7 +598,7 @@ void DataProcessor::process(QTcpSocket *pSocket)
                     if (failed)
                     {
                         clear();
-                        Q_EMIT errorEncountered(QWebSocketProtocol::CC_WRONG_DATATYPE, QWebSocket::tr("Invalid UTF-8 code encountered."));
+                        Q_EMIT errorEncountered(QWebSocketProtocol::CC_WRONG_DATATYPE, tr("Invalid UTF-8 code encountered."));
                         return;
                     }
                     else
