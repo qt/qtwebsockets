@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <QRegularExpression>
 #include <QStringList>
 #include <QHostAddress>
+#include <QStringBuilder>   //for more efficient string concatenation
 #ifndef QT_NONETWORKPROXY
 #include <QNetworkProxy>
 #endif
@@ -603,7 +604,7 @@ QByteArray QWebSocketPrivate::generateKey() const
  */
 QString QWebSocketPrivate::calculateAcceptKey(const QString &key) const
 {
-    QString tmpKey = key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+    QString tmpKey = key % "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
     QByteArray hash = QCryptographicHash::hash(tmpKey.toLatin1(), QCryptographicHash::Sha1);
     return QString(hash.toBase64());
 }
@@ -784,7 +785,7 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
             if (webSocketState == QAbstractSocket::ConnectingState)
             {
                 m_key = generateKey();
-                QString handshake = createHandShakeRequest(m_resourceName, m_requestUrl.host() + ":" + QString::number(m_requestUrl.port(80)), origin(), "", "", m_key);
+                QString handshake = createHandShakeRequest(m_resourceName, m_requestUrl.host() % ":" % QString::number(m_requestUrl.port(80)), origin(), "", "", m_key);
                 m_pSocket->write(handshake.toLatin1());
             }
             break;
@@ -950,23 +951,23 @@ QString QWebSocketPrivate::createHandShakeRequest(QString resourceName,
 {
     QStringList handshakeRequest;
 
-    handshakeRequest << "GET " + resourceName + " HTTP/1.1" <<
-                        "Host: " + host <<
+    handshakeRequest << "GET " % resourceName % " HTTP/1.1" <<
+                        "Host: " % host <<
                         "Upgrade: websocket" <<
                         "Connection: Upgrade" <<
-                        "Sec-WebSocket-Key: " + QString(key);
+                        "Sec-WebSocket-Key: " % QString(key);
     if (!origin.isEmpty())
     {
-        handshakeRequest << "Origin: " + origin;
+        handshakeRequest << "Origin: " % origin;
     }
-    handshakeRequest << "Sec-WebSocket-Version: " + QString::number(QWebSocketProtocol::currentVersion());
+    handshakeRequest << "Sec-WebSocket-Version: " % QString::number(QWebSocketProtocol::currentVersion());
     if (extensions.length() > 0)
     {
-        handshakeRequest << "Sec-WebSocket-Extensions: " + extensions;
+        handshakeRequest << "Sec-WebSocket-Extensions: " % extensions;
     }
     if (protocols.length() > 0)
     {
-        handshakeRequest << "Sec-WebSocket-Protocol: " + protocols;
+        handshakeRequest << "Sec-WebSocket-Protocol: " % protocols;
     }
     handshakeRequest << "\r\n";
 

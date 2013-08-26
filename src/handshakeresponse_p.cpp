@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <QCryptographicHash>
 #include <QSet>
 #include <QList>
+#include <QStringBuilder>   //for more efficient string concatenation
 
 QT_BEGIN_NAMESPACE
 
@@ -130,16 +131,16 @@ QString HandshakeResponse::getHandshakeResponse(const HandshakeRequest &request,
                 response << "HTTP/1.1 101 Switching Protocols" <<
                             "Upgrade: websocket" <<
                             "Connection: Upgrade" <<
-                            "Sec-WebSocket-Accept: " + acceptKey;
+                            "Sec-WebSocket-Accept: " % acceptKey;
                 if (!matchingProtocols.isEmpty())
                 {
                     m_acceptedProtocol = matchingProtocols.first();
-                    response << "Sec-WebSocket-Protocol: " + m_acceptedProtocol;
+                    response << "Sec-WebSocket-Protocol: " % m_acceptedProtocol;
                 }
                 if (!matchingExtensions.isEmpty())
                 {
                     m_acceptedExtension = matchingExtensions.first();
-                    response << "Sec-WebSocket-Extensions: " + m_acceptedExtension;
+                    response << "Sec-WebSocket-Extensions: " % m_acceptedExtension;
                 }
                 QString origin = request.getOrigin().trimmed();
                 if (origin.isEmpty())
@@ -151,8 +152,8 @@ QString HandshakeResponse::getHandshakeResponse(const HandshakeRequest &request,
                             "Access-Control-Allow-Credentials: false"		<<	//do not allow credentialed request (containing cookies)
                             "Access-Control-Allow-Methods: GET"				<<	//only GET is allowed during handshaking
                             "Access-Control-Allow-Headers: content-type"	<<	//this is OK to be fixed; only the content-type header is allowed, no other headers are accepted
-                            "Access-Control-Allow-Origin: " + origin		<<
-                            "Date: " + QDateTime::currentDateTimeUtc().toString("ddd, dd MMM yyyy hh:mm:ss 'GMT'");
+                            "Access-Control-Allow-Origin: " % origin		<<
+                            "Date: " % QDateTime::currentDateTimeUtc().toString("ddd, dd MMM yyyy hh:mm:ss 'GMT'");
 
                 m_acceptedVersion = QWebSocketProtocol::currentVersion();
                 m_canUpgrade = true;
@@ -170,7 +171,7 @@ QString HandshakeResponse::getHandshakeResponse(const HandshakeRequest &request,
             {
                 versions << QString::number(static_cast<int>(version));
             }
-            response << "Sec-WebSocket-Version: " + versions.join(", ");
+            response << "Sec-WebSocket-Version: " % versions.join(", ");
         }
     }
     response << "\r\n";	//append empty line at end of header
