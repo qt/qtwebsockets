@@ -12,22 +12,22 @@ TEMPLATE = app
 include(../src/qwebsockets.pri)
 
 # Remove the main.cpp file from the sources.
-S = $$SOURCES
-SOURCES = \
-	tst_compliance.cpp
-for(F, S) {
-	M = $$find(F, main.cpp)
-	count(M, 0) {
-		SOURCES += $$F
-	}
-}
+#S = $$SOURCES
+#for(F, S) {
+#    M = $$find(F, main.cpp)
+#    count(M, 0) {
+#        SOURCES += $$F
+#    }
+#}
 
 SOURCES += \
-		main.cpp \
-		tst_websockets.cpp
+        main.cpp \
+        tst_websockets.cpp \
+        tst_compliance.cpp \
+        tst_dataprocessor.cpp
 
 HEADERS += \
-	unittests.h
+    unittests.h
 
 INCLUDEPATH +=
 DEPENDPATH +=
