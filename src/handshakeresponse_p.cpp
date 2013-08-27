@@ -147,11 +147,10 @@ QString HandshakeResponse::getHandshakeResponse(const HandshakeRequest &request,
                 {
                     origin = "*";
                 }
-                //TODO: header values should be configurable; i.e. Server, Allow-Credentials, Allow-Headers
                 response << "Server: " + serverName <<
                             "Access-Control-Allow-Credentials: false"		<<	//do not allow credentialed request (containing cookies)
                             "Access-Control-Allow-Methods: GET"				<<	//only GET is allowed during handshaking
-                            "Access-Control-Allow-Headers: content-type"	<<	//this is OK to be fixed; only the content-type header is allowed, no other headers are accepted
+                            "Access-Control-Allow-Headers: content-type"	<<	//this is OK; only the content-type header is allowed, no other headers are accepted
                             "Access-Control-Allow-Origin: " % origin		<<
                             "Date: " % QDateTime::currentDateTimeUtc().toString("ddd, dd MMM yyyy hh:mm:ss 'GMT'");
 
