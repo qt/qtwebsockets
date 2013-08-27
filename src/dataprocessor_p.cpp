@@ -304,7 +304,7 @@ Frame Frame::readFrame(QIODevice *pIoDevice)
                 if (!ok)
                 {
                     frame.setError(QWebSocketProtocol::CC_GOING_AWAY, QObject::tr("Timeout when reading data from socket."));
-                    isDone = true;
+                    processingState = PS_DISPATCH_RESULT;
                 }
                 else
                 {
@@ -350,7 +350,7 @@ Frame Frame::readFrame(QIODevice *pIoDevice)
                     }
                     if (!frame.checkValidity())
                     {
-                        isDone = true;
+                        processingState = PS_DISPATCH_RESULT;
                     }
                 }
                 else
@@ -379,8 +379,8 @@ Frame Frame::readFrame(QIODevice *pIoDevice)
                     }
                     else
                     {
-                    processingState = hasMask ? PS_READ_MASK : PS_READ_PAYLOAD;
-                }
+                        processingState = hasMask ? PS_READ_MASK : PS_READ_PAYLOAD;
+                    }
                 }
                 else
                 {
@@ -402,9 +402,9 @@ Frame Frame::readFrame(QIODevice *pIoDevice)
                     }
                     else
                     {
-                    //Most significant bit must be set to 0 as per http://tools.ietf.org/html/rfc6455#section-5.2
+                        //Most significant bit must be set to 0 as per http://tools.ietf.org/html/rfc6455#section-5.2
                         //TODO: Do we check for that? Now we just strip off the highest bit
-                    payloadLength = qFromBigEndian<quint64>(length) & ~(1ULL << 63);
+                        payloadLength = qFromBigEndian<quint64>(length) & ~(1ULL << 63);
                         if (payloadLength < 0xFFFFu)
                         {
                             //see http://tools.ietf.org/html/rfc6455#page-28 paragraph 5.2
@@ -416,8 +416,8 @@ Frame Frame::readFrame(QIODevice *pIoDevice)
                         }
                         else
                         {
-                    processingState = hasMask ? PS_READ_MASK : PS_READ_PAYLOAD;
-                }
+                            processingState = hasMask ? PS_READ_MASK : PS_READ_PAYLOAD;
+                        }
                     }
                 }
                 else
@@ -468,12 +468,12 @@ Frame Frame::readFrame(QIODevice *pIoDevice)
                         }
                         else
                         {
-                        if (hasMask)
-                        {
-                            QWebSocketProtocol::mask(&frame.m_payload, frame.m_mask);
+                            if (hasMask)
+                            {
+                                QWebSocketProtocol::mask(&frame.m_payload, frame.m_mask);
+                            }
+                            processingState = PS_DISPATCH_RESULT;
                         }
-                        processingState = PS_DISPATCH_RESULT;
-                    }
                     }
                     else
                     {
