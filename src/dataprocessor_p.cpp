@@ -368,7 +368,19 @@ Frame Frame::readFrame(QIODevice *pIoDevice)
                     //TODO: Handle return value
                     bytesRead = pIoDevice->read(reinterpret_cast<char *>(length), 2);
                     payloadLength = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(length));
+                    if (payloadLength < 126)
+                    {
+                        //see http://tools.ietf.org/html/rfc6455#page-28 paragraph 5.2
+                        //"in all cases, the minimal number of bytes MUST be used to encode
+                        //the length, for example, the length of a 124-byte-long string
+                        //can't be encoded as the sequence 126, 0, 124"
+                        frame.setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, QObject::tr("Lengths smaller than 126 must be expressed as one byte."));
+                        processingState = PS_DISPATCH_RESULT;
+                    }
+                    else
+                    {
                     processingState = hasMask ? PS_READ_MASK : PS_READ_PAYLOAD;
+                }
                 }
                 else
                 {
@@ -382,12 +394,31 @@ Frame Frame::readFrame(QIODevice *pIoDevice)
                 if (pIoDevice->bytesAvailable() >= 8)
                 {
                     uchar length[8] = {0};
-                    //TODO: Handle return value
                     bytesRead = pIoDevice->read(reinterpret_cast<char *>(length), 8);
+                    if (bytesRead < 8)
+                    {
+                        frame.setError(QWebSocketProtocol::CC_ABNORMAL_DISCONNECTION, QObject::tr("Something went wrong during reading from the network."));
+                        processingState = PS_DISPATCH_RESULT;
+                    }
+                    else
+                    {
                     //Most significant bit must be set to 0 as per http://tools.ietf.org/html/rfc6455#section-5.2
-                    //TODO: Do we check for that?
+                        //TODO: Do we check for that? Now we just strip off the highest bit
                     payloadLength = qFromBigEndian<quint64>(length) & ~(1ULL << 63);
+                        if (payloadLength < 0xFFFFu)
+                        {
+                            //see http://tools.ietf.org/html/rfc6455#page-28 paragraph 5.2
+                            //"in all cases, the minimal number of bytes MUST be used to encode
+                            //the length, for example, the length of a 124-byte-long string
+                            //can't be encoded as the sequence 126, 0, 124"
+                            frame.setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, QObject::tr("Lengths smaller than 65536 (2^16) must be expressed as 2 bytes."));
+                            processingState = PS_DISPATCH_RESULT;
+                        }
+                        else
+                        {
                     processingState = hasMask ? PS_READ_MASK : PS_READ_PAYLOAD;
+                }
+                    }
                 }
                 else
                 {
@@ -429,15 +460,24 @@ Frame Frame::readFrame(QIODevice *pIoDevice)
                     if (bytesAvailable >= payloadLength)
                     {
                         frame.m_payload = pIoDevice->read(payloadLength);
+                        //payloadLength can be safely cast to an integer, as the MAX_FRAME_SIZE_IN_BYTES = MAX_INT
+                        if (frame.m_payload.length() != static_cast<int>(payloadLength))  //some error occurred; refer to the Qt documentation
+                        {
+                            frame.setError(QWebSocketProtocol::CC_ABNORMAL_DISCONNECTION, QObject::tr("Some serious error occurred while reading from the network."));
+                            processingState = PS_DISPATCH_RESULT;
+                        }
+                        else
+                        {
                         if (hasMask)
                         {
                             QWebSocketProtocol::mask(&frame.m_payload, frame.m_mask);
                         }
                         processingState = PS_DISPATCH_RESULT;
                     }
+                    }
                     else
                     {
-                        WAIT_FOR_MORE_DATA(payloadLength);
+                        WAIT_FOR_MORE_DATA(payloadLength);  //if payload is too big, then this will timeout
                     }
                 }
                 break;
