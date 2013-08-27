@@ -365,21 +365,28 @@ Frame Frame::readFrame(QIODevice *pIoDevice)
                 if (pIoDevice->bytesAvailable() >= 2)
                 {
                     uchar length[2] = {0};
-                    //TODO: Handle return value
                     bytesRead = pIoDevice->read(reinterpret_cast<char *>(length), 2);
-                    payloadLength = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(length));
-                    if (payloadLength < 126)
+                    if (bytesRead == -1)
                     {
-                        //see http://tools.ietf.org/html/rfc6455#page-28 paragraph 5.2
-                        //"in all cases, the minimal number of bytes MUST be used to encode
-                        //the length, for example, the length of a 124-byte-long string
-                        //can't be encoded as the sequence 126, 0, 124"
-                        frame.setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, QObject::tr("Lengths smaller than 126 must be expressed as one byte."));
+                        frame.setError(QWebSocketProtocol::CC_GOING_AWAY, QObject::tr("Error occurred while reading from the network: %1").arg(pIoDevice->errorString()));
                         processingState = PS_DISPATCH_RESULT;
                     }
                     else
                     {
-                        processingState = hasMask ? PS_READ_MASK : PS_READ_PAYLOAD;
+                        payloadLength = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(length));
+                        if (payloadLength < 126)
+                        {
+                            //see http://tools.ietf.org/html/rfc6455#page-28 paragraph 5.2
+                            //"in all cases, the minimal number of bytes MUST be used to encode
+                            //the length, for example, the length of a 124-byte-long string
+                            //can't be encoded as the sequence 126, 0, 124"
+                            frame.setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, QObject::tr("Lengths smaller than 126 must be expressed as one byte."));
+                            processingState = PS_DISPATCH_RESULT;
+                        }
+                        else
+                        {
+                            processingState = hasMask ? PS_READ_MASK : PS_READ_PAYLOAD;
+                        }
                     }
                 }
                 else
@@ -432,9 +439,16 @@ Frame Frame::readFrame(QIODevice *pIoDevice)
             {
                 if (pIoDevice->bytesAvailable() >= 4)
                 {
-                    //TODO: Handle return value
                     bytesRead = pIoDevice->read(reinterpret_cast<char *>(&frame.m_mask), sizeof(frame.m_mask));
-                    processingState = PS_READ_PAYLOAD;
+                    if (bytesRead == -1)
+                    {
+                        frame.setError(QWebSocketProtocol::CC_GOING_AWAY, QObject::tr("Error while reading from the network: %1.").arg(pIoDevice->errorString()));
+                        processingState = PS_DISPATCH_RESULT;
+                    }
+                    else
+                    {
+                        processingState = PS_READ_PAYLOAD;
+                    }
                 }
                 else
                 {
