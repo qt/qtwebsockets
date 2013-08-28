@@ -9,6 +9,24 @@
 
 Q_DECLARE_METATYPE(QWebSocketProtocol::CloseCode)
 
+//TODO: test on invalid handshakes; like the errors I got with FireFox (multiple values in field)
+//TODO: test on valid handshakes; like the errors I got with FireFox (multiple values in field)
+//TODO: test valid close codes
+//TODO: test invalid close codes
+//TODO: test valid UTF8 sequences
+//DONE: test invalid UTF8 sequences
+//TODO: test for valid fields
+//DONE: test for invalid fields
+//TODO: test for valid opcodes
+//DONE: test for invalid opcodes
+//TODO: test continuation frames for bad rsv fields, etc.
+//TODO: test continuation frames for incomplete payload
+//DONE: test continuation frames for too big payload
+//DONE: test continuation frames for too small frame
+//TODO: test valid frame sequences
+//TODO: test invalid frame sequences
+//TODO: test invalid UTF8 sequences in control/close frames
+
 const quint8 FIN = 0x80;
 const quint8 RSV1 = 0x40;
 const quint8 RSV2 = 0x30;
