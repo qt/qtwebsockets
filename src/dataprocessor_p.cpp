@@ -623,7 +623,7 @@ void DataProcessor::process(QIODevice *pIoDevice)
                 if (!m_isFragmented && frame.isContinuationFrame())
                 {
                     clear();
-                    Q_EMIT errorEncountered(QWebSocketProtocol::CC_PROTOCOL_ERROR, tr("Received Continuation frame /*with FIN=true*/, while there is nothing to continue."));
+                    Q_EMIT errorEncountered(QWebSocketProtocol::CC_PROTOCOL_ERROR, tr("Received Continuation frame, while there is nothing to continue."));
                     return;
                 }
                 if (m_isFragmented && frame.isDataFrame() && !frame.isContinuationFrame())
