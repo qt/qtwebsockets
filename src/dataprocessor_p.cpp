@@ -412,7 +412,7 @@ Frame Frame::readFrame(QIODevice *pIoDevice)
                         //Most significant bit must be set to 0 as per http://tools.ietf.org/html/rfc6455#section-5.2
                         //TODO: Do we check for that? Now we just strip off the highest bit
                         payloadLength = qFromBigEndian<quint64>(length) & ~(1ULL << 63);
-                        if (payloadLength < 0xFFFFu)
+                        if (payloadLength <= 0xFFFFu)
                         {
                             //see http://tools.ietf.org/html/rfc6455#page-28 paragraph 5.2
                             //"in all cases, the minimal number of bytes MUST be used to encode
