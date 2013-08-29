@@ -18,6 +18,12 @@ private Q_SLOTS:
     void cleanupTestCase();
     void init();
     void cleanup();
+
+    /**
+      * @brief Test isValid() with an unoped socket
+      */
+    void testInvalidWithUnopenedSocket();
+
     /**
      * @brief testTextMessage Tests sending and receiving a text message
      */
@@ -59,9 +65,9 @@ WebSocketsTest::WebSocketsTest() :
 void WebSocketsTest::initTestCase()
 {
     m_pWebSocket = new QWebSocket();
-    m_pWebSocket->open(m_url, true);
+    /*m_pWebSocket->open(m_url, true);
     QTRY_VERIFY_WITH_TIMEOUT(m_pWebSocket->state() == QAbstractSocket::ConnectedState, 1000);
-    QVERIFY(m_pWebSocket->isValid());
+    QVERIFY(m_pWebSocket->isValid());*/
 }
 
 void WebSocketsTest::cleanupTestCase()
@@ -158,6 +164,12 @@ void WebSocketsTest::testProxy()
     QCOMPARE(proxy, m_pWebSocket->proxy());
     m_pWebSocket->setProxy(oldProxy);
     QCOMPARE(oldProxy, m_pWebSocket->proxy());
+}
+
+void WebSocketsTest::testInvalidWithUnopenedSocket()
+{
+    QWebSocket qws;
+    QCOMPARE(qws.isValid(), false);
 }
 
 //DECLARE_TEST(WebSocketsTest)

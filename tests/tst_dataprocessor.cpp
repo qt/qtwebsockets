@@ -8,24 +8,33 @@
 #include "unittests.h"
 
 Q_DECLARE_METATYPE(QWebSocketProtocol::CloseCode)
+Q_DECLARE_METATYPE(QWebSocketProtocol::OpCode)
 
-//TODO: test on invalid handshakes; like the errors I got with FireFox (multiple values in field)
-//TODO: test on valid handshakes; like the errors I got with FireFox (multiple values in field)
-//TODO: test valid close codes
-//TODO: test invalid close codes
+//happy flow
 //TODO: test valid UTF8 sequences
-//DONE: test invalid UTF8 sequences
+//TODO: test on masking correctness
 //TODO: test for valid fields
-//DONE: test for invalid fields
 //TODO: test for valid opcodes
+
+//TODO: test valid frame sequences
+
+//unhappy flow
+//DONE: test invalid UTF8 sequences
+//TODO: test invalid masks
+//DONE: test for invalid fields
 //DONE: test for invalid opcodes
-//TODO: test continuation frames for bad rsv fields, etc.
-//TODO: test continuation frames for incomplete payload
 //DONE: test continuation frames for too big payload
 //DONE: test continuation frames for too small frame
-//TODO: test valid frame sequences
+//DONE: test continuation frames for bad rsv fields, etc.
+//DONE: test continuation frames for incomplete payload
+
+//TODO: besides spying on errors, we should also check if the frame and message signals are not emitted (or partially emitted)
+
 //TODO: test invalid frame sequences
-//TODO: test invalid UTF8 sequences in control/close frames
+/*
+Control frames are only checked in qwebsocket_p! These checks should probably be moved to
+/TODO: test invalid UTF8 sequences in control/close frames
+*/
 
 const quint8 FIN = 0x80;
 const quint8 RSV1 = 0x40;
@@ -59,6 +68,8 @@ private Q_SLOTS:
       */
     void goodTextFrames();
 
+    void goodControlFrames();
+
     /*!
       Tests the DataProcessor for the correct handling of non-charactercodes
       Due to a workaround in QTextCodec, non-characters are treated as illegal.
@@ -77,14 +88,11 @@ private Q_SLOTS:
      */
     void frameTooSmall();
 
-    void continuationFrameTooSmall();
     /*!
         \brief Tests the DataProcessor for correct handling of frames that are oversized.
         This test does not test sequences of frames, only single frames are tested
      */
     void frameTooBig();
-
-    void continuationFrameTooBig();
 
     /*!
         \brief Tests the DataProcessor for the correct handling of malformed frame headers.
@@ -135,6 +143,9 @@ private Q_SLOTS:
     void frameTooBig_data();
 
     void nonCharacterCodes_data();
+    void goodTextFrames_data();
+    void goodBinaryFrames_data();
+    void goodControlFrames_data();
 
 private:
     //helper function that constructs a new row of test data for invalid UTF8 sequences
@@ -142,12 +153,13 @@ private:
     //helper function that constructs a new row of test data for invalid leading field values
     void invalidField(const char *dataTag, quint8 invalidFieldValue);
     //helper functions that construct a new row of test data for size fields that do not adhere to the minimum size requirement
-    void minimumSize16Bit(quint8 controlCode, quint16 sizeInBytes);
-    void minimumSize64Bit(quint8 controlCode, quint64 sizeInBytes);
+    void minimumSize16Bit(quint16 sizeInBytes);
+    void minimumSize64Bit(quint64 sizeInBytes);
     //helper function to construct a new row of test data containing frames with a payload size smaller than indicated in the header
     void incompleteFrame(quint8 controlCode, quint64 indicatedSize, quint64 actualPayloadSize);
+    void insertIncompleteSizeFieldTest(quint8 payloadCode, quint8 numBytesFollowing);
 
-    //helper function to construct a new row of test data containing text frames containing non-character code sequences
+    //helper function to construct a new row of test data containing text frames containing  sequences
     void nonCharacterSequence(const char *sequence);
 
     void doTest();
@@ -176,16 +188,76 @@ void tst_DataProcessor::cleanup()
 {
 }
 
+void tst_DataProcessor::goodTextFrames_data()
+{
+    QTest::addColumn<QByteArray>("payload");
+
+    for (int i = 0; i < (65536 + 256); i += 128)
+    {
+        QTest::newRow(QString("Text frame with %1 ASCII characters").arg(i).toStdString().data()) << QByteArray(i, 'a');
+    }
+    for (int i = 0; i < 128; ++i)
+    {
+        QTest::newRow(QString("Text frame with containing ASCII character '0x%1'").arg(QByteArray(1, char(i)).toHex().constData()).toStdString().data()) << QByteArray(1, char(i));
+    }
+}
+
+void tst_DataProcessor::goodBinaryFrames_data()
+{
+    QTest::addColumn<QByteArray>("payload");
+    for (int i = 0; i < (65536 + 256); i += 128)
+    {
+        QTest::newRow(QString("Binary frame with %1 bytes").arg(i).toStdString().data()) << QByteArray(i, char(1));
+    }
+    for (int i = 0; i < 256; ++i)
+    {
+        QTest::newRow(QString("Binary frame containing byte: '0x%1'").arg(QByteArray(1, char(i)).toHex().constData()).toStdString().data()) << QByteArray(i, char(1));
+    }
+}
+
+void tst_DataProcessor::goodControlFrames_data()
+{
+    //TODO: still to test with no close code and no close reason (is valid)
+    QTest::addColumn<QByteArray>("payload");
+    QTest::addColumn<QWebSocketProtocol::CloseCode>("closeCode");
+    //control frame data cannot exceed 125 bytes; smaller than 124, because we also need a 2 byte close code
+    for (int i = 0; i < 124; ++i)
+    {
+        QTest::newRow(QString("Close frame with %1 ASCII characters").arg(i).toStdString().data()) << QByteArray(i, 'a') << QWebSocketProtocol::CC_NORMAL;
+    }
+    for (int i = 0; i < 256; ++i)
+    {
+        QTest::newRow(QString("Text frame with containing ASCII character '0x%1'").arg(QByteArray(1, char(i)).toHex().constData()).toStdString().data()) << QByteArray(1, char(i)) << QWebSocketProtocol::CC_NORMAL;
+    }
+}
+
 void tst_DataProcessor::goodBinaryFrames()
 {
     QByteArray data;
     QBuffer buffer;
     DataProcessor dataProcessor;
+    QFETCH(QByteArray, payload);
 
-    //TODO: add goodTextFrames_data() to provide more data
+    data.append((char)(FIN | QWebSocketProtocol::OC_BINARY));
 
-    //empty binary payload; this should be OK
-    data.append((char)(FIN | QWebSocketProtocol::OC_BINARY)).append(char(0x0));
+    if (payload.length() < 126)
+    {
+        data.append(char(payload.length()));
+    }
+    else if (payload.length() < 65536)
+    {
+        quint16 swapped = qToBigEndian<quint16>(payload.length());
+        const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
+        data.append(char(126)).append(wireRepresentation, 2);
+    }
+    else
+    {
+        quint64 swapped = qToBigEndian<quint64>(payload.length());
+        const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
+        data.append(char(127)).append(wireRepresentation, 8);
+    }
+
+    data.append(payload);
     buffer.setData(data);
     buffer.open(QIODevice::ReadWrite);
 
@@ -195,9 +267,9 @@ void tst_DataProcessor::goodBinaryFrames()
     QCOMPARE(spyFrameReceived.count(), 1);
     QCOMPARE(spyMessageReceived.count(), 1);
     QList<QVariant> arguments = spyFrameReceived.takeFirst();
-    QCOMPARE(arguments.at(0).toByteArray().length(), 0);
+    QCOMPARE(arguments.at(0).toByteArray().length(), payload.length());
     arguments = spyMessageReceived.takeFirst();
-    QCOMPARE(arguments.at(0).toByteArray().length(), 0);
+    QCOMPARE(arguments.at(0).toByteArray().length(), payload.length());
     buffer.close();
     spyFrameReceived.clear();
     spyMessageReceived.clear();
@@ -209,11 +281,28 @@ void tst_DataProcessor::goodTextFrames()
     QByteArray data;
     QBuffer buffer;
     DataProcessor dataProcessor;
+    QFETCH(QByteArray, payload);
 
-    //TODO: add goodTextFrames_data() to provide more data
+    data.append((char)(FIN | QWebSocketProtocol::OC_TEXT));
 
-    //empty text payload; this should be OK
-    data.append((char)(FIN | QWebSocketProtocol::OC_TEXT)).append(char(0x0));
+    if (payload.length() < 126)
+    {
+        data.append(char(payload.length()));
+    }
+    else if (payload.length() < 65536)
+    {
+        quint16 swapped = qToBigEndian<quint16>(payload.length());
+        const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
+        data.append(char(126)).append(wireRepresentation, 2);
+    }
+    else
+    {
+        quint64 swapped = qToBigEndian<quint64>(payload.length());
+        const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
+        data.append(char(127)).append(wireRepresentation, 8);
+    }
+
+    data.append(payload);
     buffer.setData(data);
     buffer.open(QIODevice::ReadWrite);
 
@@ -223,12 +312,38 @@ void tst_DataProcessor::goodTextFrames()
     QCOMPARE(spyFrameReceived.count(), 1);
     QCOMPARE(spyMessageReceived.count(), 1);
     QList<QVariant> arguments = spyFrameReceived.takeFirst();
-    QCOMPARE(arguments.at(0).toString().length(), 0);
+    QCOMPARE(arguments.at(0).toString().length(), payload.length());
     arguments = spyMessageReceived.takeFirst();
-    QCOMPARE(arguments.at(0).toString().length(), 0);
+    QCOMPARE(arguments.at(0).toString().length(), payload.length());
     buffer.close();
     spyFrameReceived.clear();
     spyMessageReceived.clear();
+    data.clear();
+}
+
+void tst_DataProcessor::goodControlFrames()
+{
+    qRegisterMetaType<QWebSocketProtocol::OpCode>("QWebSocketProtocol::OpCode");
+    QByteArray data;
+    QBuffer buffer;
+    DataProcessor dataProcessor;
+    QFETCH(QByteArray, payload);
+    QFETCH(QWebSocketProtocol::CloseCode, closeCode);
+    quint16 swapped = qToBigEndian<quint16>(closeCode);
+    const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
+
+    data.append((char)(FIN | QWebSocketProtocol::OC_CLOSE)).append(char(payload.length() + 2)).append(wireRepresentation, 2).append(payload);
+    buffer.setData(data);
+    buffer.open(QIODevice::ReadOnly);
+
+    QSignalSpy spyControlFrameReceived(&dataProcessor, SIGNAL(controlFrameReceived(QWebSocketProtocol::OpCode,QByteArray)));
+    dataProcessor.process(&buffer);
+    QCOMPARE(spyControlFrameReceived.count(), 1);
+    QList<QVariant> arguments = spyControlFrameReceived.takeFirst();
+    //QCOMPARE(arguments.at(0).toInt(), int(QWebSocketProtocol::OC_CLOSE));
+    QCOMPARE(arguments.at(1).toByteArray().length() - 2, payload.length());
+    buffer.close();
+    spyControlFrameReceived.clear();
     data.clear();
 }
 
@@ -269,6 +384,9 @@ void tst_DataProcessor::frameTooSmall()
     QByteArray data;
     QBuffer buffer;
     DataProcessor dataProcessor;
+    QByteArray firstFrame;
+
+    firstFrame.append(quint8(QWebSocketProtocol::OC_TEXT)).append(char(1)).append(QByteArray(1, 'a'));
 
     //with nothing in the buffer, the dataProcessor should time out and the error should be CC_GOING_AWAY
     //meaning the socket will be closed
@@ -295,92 +413,58 @@ void tst_DataProcessor::frameTooSmall()
     buffer.close();
     spy.clear();
     data.clear();
-}
 
-void tst_DataProcessor::continuationFrameTooSmall()
-{
-    QByteArray data;
-    QBuffer buffer;
-    DataProcessor dataProcessor;
 
-    //text frame with final bit not set
-    data.append((char)(QWebSocketProtocol::OC_TEXT)).append(char(0x0));
-    buffer.setData(data);
-    buffer.open(QIODevice::ReadWrite);
-    dataProcessor.process(&buffer);
+    {
+        //text frame with final bit not set
+        data.append((char)(QWebSocketProtocol::OC_TEXT)).append(char(0x0));
+        buffer.setData(data);
+        buffer.open(QIODevice::ReadWrite);
+        dataProcessor.process(&buffer);
 
-    buffer.close();
-    data.clear();
+        buffer.close();
+        data.clear();
 
-    //with nothing in the buffer, the dataProcessor should time out and the error should be CC_GOING_AWAY
-    //meaning the socket will be closed
-    buffer.setData(data);
-    buffer.open(QIODevice::ReadWrite);
-    QSignalSpy spy(&dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
-    dataProcessor.process(&buffer);
-    QCOMPARE(spy.count(), 1);
-    QList<QVariant> arguments = spy.takeFirst();
-    QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(), QWebSocketProtocol::CC_GOING_AWAY);
-    spy.clear();
-    buffer.close();
-    data.clear();
+        //with nothing in the buffer, the dataProcessor should time out and the error should be CC_GOING_AWAY
+        //meaning the socket will be closed
+        buffer.setData(data);
+        buffer.open(QIODevice::ReadWrite);
+        QSignalSpy spy(&dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
+        dataProcessor.process(&buffer);
+        QCOMPARE(spy.count(), 1);
+        QList<QVariant> arguments = spy.takeFirst();
+        QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(), QWebSocketProtocol::CC_GOING_AWAY);
+        spy.clear();
+        buffer.close();
+        data.clear();
 
-    //text frame with final bit not set
-    data.append((char)(QWebSocketProtocol::OC_TEXT)).append(char(0x0));
-    buffer.setData(data);
-    buffer.open(QIODevice::ReadWrite);
-    dataProcessor.process(&buffer);
+        //text frame with final bit not set
+        data.append((char)(QWebSocketProtocol::OC_TEXT)).append(char(0x0));
+        buffer.setData(data);
+        buffer.open(QIODevice::ReadWrite);
+        dataProcessor.process(&buffer);
 
-    buffer.close();
-    data.clear();
-    spy.clear();
+        buffer.close();
+        data.clear();
+        spy.clear();
 
-    //only 1 byte follows in continuation frame; should time out with close code CC_GOING_AWAY
-    data.append('a');
-    buffer.setData(data);
-    buffer.open(QIODevice::ReadWrite);
+        //only 1 byte follows in continuation frame; should time out with close code CC_GOING_AWAY
+        data.append('a');
+        buffer.setData(data);
+        buffer.open(QIODevice::ReadWrite);
 
-    dataProcessor.process(&buffer);
-    QCOMPARE(spy.count(), 1);
-    arguments = spy.takeFirst();
-    QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(), QWebSocketProtocol::CC_GOING_AWAY);
-    spy.clear();
-    buffer.close();
+        dataProcessor.process(&buffer);
+        QCOMPARE(spy.count(), 1);
+        arguments = spy.takeFirst();
+        QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(), QWebSocketProtocol::CC_GOING_AWAY);
+        spy.clear();
+        buffer.close();
+    }
 }
 
 void tst_DataProcessor::frameTooBig()
 {
     doTest();
-}
-
-void tst_DataProcessor::continuationFrameTooBig()
-{
-    QByteArray data;
-    QBuffer buffer;
-    DataProcessor dataProcessor;
-    quint64 swapped64 = qToBigEndian<quint64>(quint64(INT_MAX + 1));
-    const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped64));
-
-    //text frame with final bit not set
-    data.append((char)(QWebSocketProtocol::OC_TEXT)).append(char(0x0));
-    buffer.setData(data);
-    buffer.open(QIODevice::ReadWrite);
-    dataProcessor.process(&buffer);
-
-    buffer.close();
-    data.clear();
-    //continuation frame with size too big
-    data.append((char)(FIN | QWebSocketProtocol::OC_CONTINUE)).append(char(127)).append(QByteArray(wireRepresentation, 8)).append(QByteArray());
-    buffer.setData(data);
-    buffer.open(QIODevice::ReadWrite);
-
-    QSignalSpy spy(&dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
-    dataProcessor.process(&buffer);
-    QCOMPARE(spy.count(), 1);
-    QList<QVariant> arguments = spy.takeFirst();
-    QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(), QWebSocketProtocol::CC_TOO_MUCH_DATA);
-    spy.clear();
-    buffer.close();
 }
 
 void tst_DataProcessor::invalidHeader()
@@ -421,6 +505,7 @@ void tst_DataProcessor::doTest()
     QFETCH(quint8, firstByte);
     QFETCH(quint8, secondByte);
     QFETCH(QByteArray, payload);
+    QFETCH(bool, isContinuationFrame);
     QFETCH(QWebSocketProtocol::CloseCode, expectedCloseCode);
 
     QByteArray data;
@@ -428,6 +513,10 @@ void tst_DataProcessor::doTest()
     DataProcessor dataProcessor;
     QSignalSpy spy(&dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
 
+    if (isContinuationFrame)
+    {
+        data.append(quint8(QWebSocketProtocol::OC_TEXT)).append(char(1)).append(QByteArray(1, 'a'));
+    }
     data.append(firstByte).append(secondByte);
     data.append(payload);
     buffer.setData(data);
@@ -535,40 +624,72 @@ QString tst_DataProcessor::opCodeToString(quint8 opCode)
     return frameType;
 }
 
-void tst_DataProcessor::minimumSize16Bit(quint8 controlCode, quint16 sizeInBytes)
+void tst_DataProcessor::minimumSize16Bit(quint16 sizeInBytes)
 {
-    QVERIFY((controlCode == QWebSocketProtocol::OC_BINARY) || (controlCode == QWebSocketProtocol::OC_TEXT));
-    quint16 swapped16 = qToBigEndian<quint16>(0);
+    quint16 swapped16 = qToBigEndian<quint16>(sizeInBytes);
     const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped16));
-    QString frameType = opCodeToString(controlCode);
-    QTest::newRow(frameType.append(QString(" frame with payload size %1, represented in 2 bytes").arg(sizeInBytes)).toStdString().data())
-            << quint8(FIN | controlCode)
+    QTest::newRow(QString("Text frame with payload size %1, represented in 2 bytes").arg(sizeInBytes).toStdString().data())
+            << quint8(FIN | QWebSocketProtocol::OC_TEXT)
             << quint8(126)
             << QByteArray(wireRepresentation, 2)
+            << false
+            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+    QTest::newRow(QString("Binary frame with payload size %1, represented in 2 bytes").arg(sizeInBytes).toStdString().data())
+            << quint8(FIN | QWebSocketProtocol::OC_BINARY)
+            << quint8(126)
+            << QByteArray(wireRepresentation, 2)
+            << false
+            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+    QTest::newRow(QString("Continuation frame with payload size %1, represented in 2 bytes").arg(sizeInBytes).toStdString().data())
+            << quint8(FIN | QWebSocketProtocol::OC_CONTINUE)
+            << quint8(126)
+            << QByteArray(wireRepresentation, 2)
+            << true
             << QWebSocketProtocol::CC_PROTOCOL_ERROR;
 }
 
-void tst_DataProcessor::minimumSize64Bit(quint8 controlCode, quint64 sizeInBytes)
+void tst_DataProcessor::minimumSize64Bit(quint64 sizeInBytes)
 {
-    QVERIFY((controlCode == QWebSocketProtocol::OC_BINARY) || (controlCode == QWebSocketProtocol::OC_TEXT));
     quint64 swapped64 = qToBigEndian<quint64>(sizeInBytes);
     const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped64));
-    QString frameType = opCodeToString(controlCode);
 
-    QTest::newRow(frameType.append(QString(" frame with payload size %1, represented in 8 bytes").arg(sizeInBytes)).toStdString().data())
-            << quint8(FIN | controlCode)
+    QTest::newRow(QString("Text frame with payload size %1, represented in 8 bytes").arg(sizeInBytes).toStdString().data())
+            << quint8(FIN | QWebSocketProtocol::OC_TEXT)
             << quint8(127)
             << QByteArray(wireRepresentation, 8)
+            << false
+            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+
+    QTest::newRow(QString("Binary frame with payload size %1, represented in 8 bytes").arg(sizeInBytes).toStdString().data())
+            << quint8(FIN | QWebSocketProtocol::OC_BINARY)
+            << quint8(127)
+            << QByteArray(wireRepresentation, 8)
+            << false
+            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+
+    QTest::newRow(QString("Continuation frame with payload size %1, represented in 8 bytes").arg(sizeInBytes).toStdString().data())
+            << quint8(FIN | QWebSocketProtocol::OC_CONTINUE)
+            << quint8(127)
+            << QByteArray(wireRepresentation, 8)
+            << true
             << QWebSocketProtocol::CC_PROTOCOL_ERROR;
 }
 
 void tst_DataProcessor::invalidUTF8(const char *dataTag, const char *utf8Sequence)
 {
     QByteArray payload = QByteArray::fromHex(utf8Sequence);
-    QTest::newRow(QString("Invalid UTF8-sequence: %1").arg(dataTag).toStdString().data())
+    QTest::newRow(QString("Text frame with invalid UTF8-sequence: %1").arg(dataTag).toStdString().data())
             << quint8(FIN | QWebSocketProtocol::OC_TEXT)
             << quint8(payload.length())
             << payload
+            << false
+            << QWebSocketProtocol::CC_WRONG_DATATYPE;
+
+    QTest::newRow(QString("Continuation text frame with invalid UTF8-sequence: %1").arg(dataTag).toStdString().data())
+            << quint8(FIN | QWebSocketProtocol::OC_CONTINUE)
+            << quint8(payload.length())
+            << payload
+            << true
             << QWebSocketProtocol::CC_WRONG_DATATYPE;
 }
 
@@ -577,30 +698,36 @@ void tst_DataProcessor::invalidField(const char *dataTag, quint8 invalidFieldVal
     QTest::newRow(dataTag) << quint8(FIN | invalidFieldValue)
                            << quint8(0x00)
                            << QByteArray()
+                           << false
                            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+    QTest::newRow(QString(dataTag).append(" with continuation frame").toStdString().data())
+                            << quint8(FIN | invalidFieldValue)
+                            << quint8(0x00)
+                            << QByteArray()
+                            << true
+                            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
 }
 
 void tst_DataProcessor::incompleteFrame(quint8 controlCode, quint64 indicatedSize, quint64 actualPayloadSize)
 {
-    QVERIFY((controlCode == QWebSocketProtocol::OC_TEXT) ||
-            (controlCode == QWebSocketProtocol::OC_BINARY) ||
-            (controlCode == QWebSocketProtocol::OC_CLOSE) ||
-            (controlCode == QWebSocketProtocol::OC_PING) ||
-            (controlCode == QWebSocketProtocol::OC_PONG));
+    QVERIFY(!QWebSocketProtocol::isOpCodeReserved(QWebSocketProtocol::OpCode(controlCode)));
     QVERIFY(indicatedSize > actualPayloadSize);
-    QTest::addColumn<quint8>("firstByte");
-    QTest::addColumn<quint8>("secondByte");
-    QTest::addColumn<QByteArray>("payload");
-    QTest::addColumn<QWebSocketProtocol::CloseCode>("expectedCloseCode");
 
     QString frameType = opCodeToString(controlCode);
+    QByteArray firstFrame;
+
+//    if (controlCode == QWebSocketProtocol::OC_CONTINUE)
+//    {
+//        firstFrame.append(quint8(QWebSocketProtocol::OC_TEXT)).append(char(0)).append(QByteArray());
+//    }
 
     if (indicatedSize < 126)
     {
         QTest::newRow(frameType.append(QString(" frame with payload size %1, but only %2 bytes of data").arg(indicatedSize).arg(actualPayloadSize)).toStdString().data())
                 << quint8(FIN | controlCode)
                 << quint8(indicatedSize)
-                << QByteArray(actualPayloadSize, 'a')
+                << firstFrame.append(QByteArray(actualPayloadSize, 'a'))
+                << (controlCode == QWebSocketProtocol::OC_CONTINUE)
                 << QWebSocketProtocol::CC_GOING_AWAY;
     }
     else if (indicatedSize <= 0xFFFFu)
@@ -610,7 +737,8 @@ void tst_DataProcessor::incompleteFrame(quint8 controlCode, quint64 indicatedSiz
         QTest::newRow(frameType.append(QString(" frame with payload size %1, but only %2 bytes of data").arg(indicatedSize).arg(actualPayloadSize)).toStdString().data())
                 << quint8(FIN | controlCode)
                 << quint8(126)
-                << QByteArray(wireRepresentation, 2).append(QByteArray(actualPayloadSize, 'a'))
+                << firstFrame.append(QByteArray(wireRepresentation, 2).append(QByteArray(actualPayloadSize, 'a')))
+                << (controlCode == QWebSocketProtocol::OC_CONTINUE)
                 << QWebSocketProtocol::CC_GOING_AWAY;
     }
     else
@@ -620,7 +748,8 @@ void tst_DataProcessor::incompleteFrame(quint8 controlCode, quint64 indicatedSiz
         QTest::newRow(frameType.append(QString(" frame with payload size %1, but only %2 bytes of data").arg(indicatedSize).arg(actualPayloadSize)).toStdString().data())
                 << quint8(FIN | controlCode)
                 << quint8(127)
-                << QByteArray(wireRepresentation, 8).append(QByteArray(actualPayloadSize, 'a'))
+                << firstFrame.append(QByteArray(wireRepresentation, 8).append(QByteArray(actualPayloadSize, 'a')))
+                << (controlCode == QWebSocketProtocol::OC_CONTINUE)
                 << QWebSocketProtocol::CC_GOING_AWAY;
     }
 }
@@ -628,12 +757,43 @@ void tst_DataProcessor::incompleteFrame(quint8 controlCode, quint64 indicatedSiz
 void tst_DataProcessor::nonCharacterSequence(const char *sequence)
 {
     QByteArray utf8Sequence = QByteArray::fromHex(sequence);
-    const char *tagName = QString("Text frame with payload containing the non-control character sequence 0x%1").arg(sequence).toStdString().data();
+    //TODO: qstrdup - memory leak! qstrdup is necessary because once QString goes out of scope we have garbage
+    const char *tagName = qstrdup(qPrintable(QString("Text frame with payload containing the non-control character sequence 0x%1").arg(QString(sequence))));
+    const char *tagName2 = qstrdup(qPrintable(QString("Continuation frame with payload containing the non-control character sequence 0x%1").arg(QString(sequence))));
 
     QTest::newRow(tagName)
             << quint8(FIN | QWebSocketProtocol::OC_TEXT)
             << quint8(utf8Sequence.size())
-            << utf8Sequence;
+            << utf8Sequence
+            << false;
+
+    QTest::newRow(tagName2)
+            << quint8(FIN | QWebSocketProtocol::OC_CONTINUE)
+            << quint8(utf8Sequence.size())
+            << utf8Sequence
+            << true;
+}
+
+void tst_DataProcessor::insertIncompleteSizeFieldTest(quint8 payloadCode, quint8 numBytesFollowing)
+{
+    QTest::newRow(QString("Text frame with payload size %1, with %2 bytes following.").arg(payloadCode).arg(numBytesFollowing).toStdString().data())
+            << quint8(FIN | QWebSocketProtocol::OC_TEXT)
+            << quint8(payloadCode)
+            << QByteArray(numBytesFollowing, quint8(1))
+            << false
+            << QWebSocketProtocol::CC_GOING_AWAY;
+    QTest::newRow(QString("Binary frame with payload size %1, with %2 bytes following.").arg(payloadCode).arg(numBytesFollowing).toStdString().data())
+            << quint8(FIN | QWebSocketProtocol::OC_BINARY)
+            << quint8(payloadCode)
+            << QByteArray(numBytesFollowing, quint8(1))
+            << false
+            << QWebSocketProtocol::CC_GOING_AWAY;
+    QTest::newRow(QString("Continuation frame with payload size %1, with %2 bytes following.").arg(payloadCode).arg(numBytesFollowing).toStdString().data())
+            << quint8(FIN | QWebSocketProtocol::OC_CONTINUE)
+            << quint8(payloadCode)
+            << QByteArray(numBytesFollowing, quint8(1))
+            << true
+            << QWebSocketProtocol::CC_GOING_AWAY;
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -646,6 +806,7 @@ void tst_DataProcessor::invalidHeader_data()
     QTest::addColumn<quint8>("firstByte");
     QTest::addColumn<quint8>("secondByte");
     QTest::addColumn<QByteArray>("payload");    //superfluous, but present to be able to call doTest(), which expects a payload field
+    QTest::addColumn<bool>("isContinuationFrame");
     QTest::addColumn<QWebSocketProtocol::CloseCode>("expectedCloseCode");
 
     //invalid bit fields
@@ -669,7 +830,7 @@ void tst_DataProcessor::invalidHeader_data()
     invalidField("Invalid OpCode E", QWebSocketProtocol::OC_RESERVED_E);
     invalidField("Invalid OpCode F", QWebSocketProtocol::OC_RESERVED_F);
 
-    invalidField("Continuation Frame without previous data frame", QWebSocketProtocol::OC_CONTINUE);
+    //invalidField("Continuation Frame without previous data frame", QWebSocketProtocol::OC_CONTINUE);
 }
 
 void tst_DataProcessor::invalidPayload_data()
@@ -677,6 +838,7 @@ void tst_DataProcessor::invalidPayload_data()
     QTest::addColumn<quint8>("firstByte");
     QTest::addColumn<quint8>("secondByte");
     QTest::addColumn<QByteArray>("payload");
+    QTest::addColumn<bool>("isContinuationFrame");
     QTest::addColumn<QWebSocketProtocol::CloseCode>("expectedCloseCode");
 
     //6.3: invalid UTF-8 sequence
@@ -789,44 +951,26 @@ void tst_DataProcessor::minimumSizeRequirement_data()
     QTest::addColumn<quint8>("firstByte");
     QTest::addColumn<quint8>("secondByte");
     QTest::addColumn<QByteArray>("payload");
+    QTest::addColumn<bool>("isContinuationFrame");
     QTest::addColumn<QWebSocketProtocol::CloseCode>("expectedCloseCode");
 
-    minimumSize16Bit(QWebSocketProtocol::OC_TEXT, 0);
-    minimumSize16Bit(QWebSocketProtocol::OC_TEXT, 64);
-    minimumSize16Bit(QWebSocketProtocol::OC_TEXT, 125);
+    minimumSize16Bit(0);
+    minimumSize16Bit(64);
+    minimumSize16Bit(125);
 
-    minimumSize16Bit(QWebSocketProtocol::OC_BINARY, 0);
-    minimumSize16Bit(QWebSocketProtocol::OC_BINARY, 64);
-    minimumSize16Bit(QWebSocketProtocol::OC_BINARY, 125);
-
-
-    minimumSize64Bit(QWebSocketProtocol::OC_TEXT, 0);
-    minimumSize64Bit(QWebSocketProtocol::OC_TEXT, 64);
-    minimumSize64Bit(QWebSocketProtocol::OC_TEXT, 125);
-    minimumSize64Bit(QWebSocketProtocol::OC_TEXT, 126);
-    minimumSize64Bit(QWebSocketProtocol::OC_TEXT, 256);
-    minimumSize64Bit(QWebSocketProtocol::OC_TEXT, 512);
-    minimumSize64Bit(QWebSocketProtocol::OC_TEXT, 1024);
-    minimumSize64Bit(QWebSocketProtocol::OC_TEXT, 2048);
-    minimumSize64Bit(QWebSocketProtocol::OC_TEXT, 4096);
-    minimumSize64Bit(QWebSocketProtocol::OC_TEXT, 8192);
-    minimumSize64Bit(QWebSocketProtocol::OC_TEXT, 16384);
-    minimumSize64Bit(QWebSocketProtocol::OC_TEXT, 32768);
-    minimumSize64Bit(QWebSocketProtocol::OC_TEXT, 0xFFFFu);
-
-    minimumSize64Bit(QWebSocketProtocol::OC_BINARY, 0);
-    minimumSize64Bit(QWebSocketProtocol::OC_BINARY, 64);
-    minimumSize64Bit(QWebSocketProtocol::OC_BINARY, 125);
-    minimumSize64Bit(QWebSocketProtocol::OC_BINARY, 126);
-    minimumSize64Bit(QWebSocketProtocol::OC_BINARY, 256);
-    minimumSize64Bit(QWebSocketProtocol::OC_BINARY, 512);
-    minimumSize64Bit(QWebSocketProtocol::OC_BINARY, 1024);
-    minimumSize64Bit(QWebSocketProtocol::OC_BINARY, 2048);
-    minimumSize64Bit(QWebSocketProtocol::OC_BINARY, 4096);
-    minimumSize64Bit(QWebSocketProtocol::OC_BINARY, 8192);
-    minimumSize64Bit(QWebSocketProtocol::OC_BINARY, 16384);
-    minimumSize64Bit(QWebSocketProtocol::OC_BINARY, 32768);
-    minimumSize64Bit(QWebSocketProtocol::OC_BINARY, 0xFFFFu);
+    minimumSize64Bit(0);
+    minimumSize64Bit(64);
+    minimumSize64Bit(125);
+    minimumSize64Bit(126);
+    minimumSize64Bit(256);
+    minimumSize64Bit(512);
+    minimumSize64Bit(1024);
+    minimumSize64Bit(2048);
+    minimumSize64Bit(4096);
+    minimumSize64Bit(8192);
+    minimumSize64Bit(16384);
+    minimumSize64Bit(32768);
+    minimumSize64Bit(0xFFFFu);
 }
 
 void tst_DataProcessor::invalidControlFrame_data()
@@ -834,21 +978,22 @@ void tst_DataProcessor::invalidControlFrame_data()
     QTest::addColumn<quint8>("firstByte");
     QTest::addColumn<quint8>("secondByte");
     QTest::addColumn<QByteArray>("payload");
+    QTest::addColumn<bool>("isContinuationFrame");
     QTest::addColumn<QWebSocketProtocol::CloseCode>("expectedCloseCode");
 
     QTest::newRow("Close control frame with payload size 126")
-            << quint8(FIN | QWebSocketProtocol::OC_CLOSE) << quint8(126) << QByteArray() << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << quint8(FIN | QWebSocketProtocol::OC_CLOSE) << quint8(126) << QByteArray() << false << QWebSocketProtocol::CC_PROTOCOL_ERROR;
     QTest::newRow("Ping control frame with payload size 126")
-            << quint8(FIN | QWebSocketProtocol::OC_PING) << quint8(126) << QByteArray() << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << quint8(FIN | QWebSocketProtocol::OC_PING) << quint8(126) << QByteArray() << false << QWebSocketProtocol::CC_PROTOCOL_ERROR;
     QTest::newRow("Close control frame with payload size 126")
-            << quint8(FIN | QWebSocketProtocol::OC_PONG) << quint8(126) << QByteArray() << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << quint8(FIN | QWebSocketProtocol::OC_PONG) << quint8(126) << QByteArray() << false << QWebSocketProtocol::CC_PROTOCOL_ERROR;
 
     QTest::newRow("Non-final close control frame (fragmented)")
-            << quint8(QWebSocketProtocol::OC_CLOSE) << quint8(32) << QByteArray() << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << quint8(QWebSocketProtocol::OC_CLOSE) << quint8(32) << QByteArray() << false << QWebSocketProtocol::CC_PROTOCOL_ERROR;
     QTest::newRow("Non-final ping control frame (fragmented)")
-            << quint8(QWebSocketProtocol::OC_PING) << quint8(32) << QByteArray() << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << quint8(QWebSocketProtocol::OC_PING) << quint8(32) << QByteArray() << false << QWebSocketProtocol::CC_PROTOCOL_ERROR;
     QTest::newRow("Non-final pong control frame (fragmented)")
-            << quint8(QWebSocketProtocol::OC_PONG) << quint8(32) << QByteArray() << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << quint8(QWebSocketProtocol::OC_PONG) << quint8(32) << QByteArray() << false << QWebSocketProtocol::CC_PROTOCOL_ERROR;
 }
 
 void tst_DataProcessor::incompleteSizeField_data()
@@ -856,52 +1001,26 @@ void tst_DataProcessor::incompleteSizeField_data()
     QTest::addColumn<quint8>("firstByte");
     QTest::addColumn<quint8>("secondByte");
     QTest::addColumn<QByteArray>("payload");
+    QTest::addColumn<bool>("isContinuationFrame");
     QTest::addColumn<QWebSocketProtocol::CloseCode>("expectedCloseCode");
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
     //for a frame length value of 126, there should be 2 bytes following to form a 16-bit frame length
     //////////////////////////////////////////////////////////////////////////////////////////////////
-    QTest::newRow("Text frame with payload size 126, but no data")
-            << quint8(FIN | QWebSocketProtocol::OC_TEXT) << quint8(126) << QByteArray() << QWebSocketProtocol::CC_GOING_AWAY;
-    QTest::newRow("Text frame with payloadsize 126, but only 1 byte following")
-            << quint8(FIN | QWebSocketProtocol::OC_TEXT) << quint8(126) << QByteArray().append(quint8(1)) << QWebSocketProtocol::CC_GOING_AWAY;
+    insertIncompleteSizeFieldTest(126, 0);
+    insertIncompleteSizeFieldTest(126, 1);
 
     //////////////////////////////////////////////////////////////////////////////////////////////////
     //for a frame length value of 127, there should be 8 bytes following to form a 64-bit frame length
     //////////////////////////////////////////////////////////////////////////////////////////////////
-    QTest::newRow("Binary frame with payload size 127, but no data")
-            << quint8(FIN | QWebSocketProtocol::OC_BINARY) << quint8(127) << QByteArray() << QWebSocketProtocol::CC_GOING_AWAY;
-    QTest::newRow("Binary frame with payloadsize 127, but only 1 byte following")
-            << quint8(FIN | QWebSocketProtocol::OC_BINARY) << quint8(127) << QByteArray(1, quint8(1)) << QWebSocketProtocol::CC_GOING_AWAY;
-    QTest::newRow("Binary frame with payload size 127, but only 2 bytes following")
-            << quint8(FIN | QWebSocketProtocol::OC_BINARY) << quint8(127) << QByteArray(2, quint8(1)) << QWebSocketProtocol::CC_GOING_AWAY;
-    QTest::newRow("Binary frame with payload size 127, but only 3 bytes following")
-            << quint8(FIN | QWebSocketProtocol::OC_BINARY) << quint8(127) << QByteArray(3, quint8(1)) << QWebSocketProtocol::CC_GOING_AWAY;
-    QTest::newRow("Binary frame with payload size 127, but only 4 bytes following")
-            << quint8(FIN | QWebSocketProtocol::OC_BINARY) << quint8(127) << QByteArray(4, quint8(1)) << QWebSocketProtocol::CC_GOING_AWAY;
-    QTest::newRow("Binary frame with payload size 127, but only 5 bytes following")
-            << quint8(FIN | QWebSocketProtocol::OC_BINARY) << quint8(127) << QByteArray(5, quint8(1)) << QWebSocketProtocol::CC_GOING_AWAY;
-    QTest::newRow("Binary frame with payload size 127, but only 6 bytes following")
-            << quint8(FIN | QWebSocketProtocol::OC_BINARY) << quint8(127) << QByteArray(6, quint8(1)) << QWebSocketProtocol::CC_GOING_AWAY;
-    QTest::newRow("Binary frame with payload size 127, but only 7 bytes following")
-            << quint8(FIN | QWebSocketProtocol::OC_BINARY) << quint8(127) << QByteArray(7, quint8(1)) << QWebSocketProtocol::CC_GOING_AWAY;
-
-    QTest::newRow("Text frame with payload size 127, but no data")
-            << quint8(FIN | QWebSocketProtocol::OC_TEXT) << quint8(127) << QByteArray() << QWebSocketProtocol::CC_GOING_AWAY;
-    QTest::newRow("Text frame with payloadsize 127, but only 1 byte following")
-            << quint8(FIN | QWebSocketProtocol::OC_TEXT) << quint8(127) << QByteArray(1, quint8(1)) << QWebSocketProtocol::CC_GOING_AWAY;
-    QTest::newRow("Text frame with payload size 127, but only 2 bytes following")
-            << quint8(FIN | QWebSocketProtocol::OC_TEXT) << quint8(127) << QByteArray(2, quint8(1)) << QWebSocketProtocol::CC_GOING_AWAY;
-    QTest::newRow("Text frame with payload size 127, but only 3 bytes following")
-            << quint8(FIN | QWebSocketProtocol::OC_TEXT) << quint8(127) << QByteArray(3, quint8(1)) << QWebSocketProtocol::CC_GOING_AWAY;
-    QTest::newRow("Text frame with payload size 127, but only 4 bytes following")
-            << quint8(FIN | QWebSocketProtocol::OC_TEXT) << quint8(127) << QByteArray(4, quint8(1)) << QWebSocketProtocol::CC_GOING_AWAY;
-    QTest::newRow("Text frame with payload size 127, but only 5 bytes following")
-            << quint8(FIN | QWebSocketProtocol::OC_TEXT) << quint8(127) << QByteArray(5, quint8(1)) << QWebSocketProtocol::CC_GOING_AWAY;
-    QTest::newRow("Text frame with payload size 127, but only 6 bytes following")
-            << quint8(FIN | QWebSocketProtocol::OC_TEXT) << quint8(127) << QByteArray(6, quint8(1)) << QWebSocketProtocol::CC_GOING_AWAY;
-    QTest::newRow("Text frame with payload size 127, but only 7 bytes following")
-            << quint8(FIN | QWebSocketProtocol::OC_TEXT) << quint8(127) << QByteArray(7, quint8(1)) << QWebSocketProtocol::CC_GOING_AWAY;
+    insertIncompleteSizeFieldTest(127, 0);
+    insertIncompleteSizeFieldTest(127, 1);
+    insertIncompleteSizeFieldTest(127, 2);
+    insertIncompleteSizeFieldTest(127, 3);
+    insertIncompleteSizeFieldTest(127, 4);
+    insertIncompleteSizeFieldTest(127, 5);
+    insertIncompleteSizeFieldTest(127, 6);
+    insertIncompleteSizeFieldTest(127, 7);
 }
 
 void tst_DataProcessor::nonCharacterCodes_data()
@@ -909,6 +1028,7 @@ void tst_DataProcessor::nonCharacterCodes_data()
     QTest::addColumn<quint8>("firstByte");
     QTest::addColumn<quint8>("secondByte");
     QTest::addColumn<QByteArray>("payload");
+    QTest::addColumn<bool>("isContinuationFrame");
 
     nonCharacterSequence("efbfbe");
     nonCharacterSequence("efbfbf");
@@ -951,6 +1071,7 @@ void tst_DataProcessor::incompletePayload_data()
     QTest::addColumn<quint8>("firstByte");
     QTest::addColumn<quint8>("secondByte");
     QTest::addColumn<QByteArray>("payload");
+    QTest::addColumn<bool>("isContinuationFrame");
     QTest::addColumn<QWebSocketProtocol::CloseCode>("expectedCloseCode");
 
     incompleteFrame(QWebSocketProtocol::OC_TEXT, 125, 0);
@@ -961,6 +1082,10 @@ void tst_DataProcessor::incompletePayload_data()
     incompleteFrame(QWebSocketProtocol::OC_BINARY, 64, 32);
     incompleteFrame(QWebSocketProtocol::OC_BINARY, 256, 32);
     incompleteFrame(QWebSocketProtocol::OC_BINARY, 128000, 32);
+    incompleteFrame(QWebSocketProtocol::OC_CONTINUE, 125, 0);
+    incompleteFrame(QWebSocketProtocol::OC_CONTINUE, 64, 32);
+    incompleteFrame(QWebSocketProtocol::OC_CONTINUE, 256, 32);
+    incompleteFrame(QWebSocketProtocol::OC_CONTINUE, 128000, 32);
 
     incompleteFrame(QWebSocketProtocol::OC_CLOSE, 64, 32);
     incompleteFrame(QWebSocketProtocol::OC_PING, 64, 32);
@@ -972,13 +1097,14 @@ void tst_DataProcessor::frameTooBig_data()
     QTest::addColumn<quint8>("firstByte");
     QTest::addColumn<quint8>("secondByte");
     QTest::addColumn<QByteArray>("payload");
+    QTest::addColumn<bool>("isContinuationFrame");
     QTest::addColumn<QWebSocketProtocol::CloseCode>("expectedCloseCode");
 
     quint64 swapped64 = 0;
     const char *wireRepresentation = 0;
 
-    //only data frames can be too big
-    //control frames have explicit checking on a maximum payload size of 125
+    //only data frames are checked for being too big
+    //control frames have explicit checking on a maximum payload size of 125, which is tested elsewhere
 
     //TODO: get maximum framesize from the frame somehow
     //the maximum framesize is currently defined as a constant in the dataprocessor_p.cpp file
@@ -989,6 +1115,7 @@ void tst_DataProcessor::frameTooBig_data()
             << quint8(FIN | QWebSocketProtocol::OC_TEXT)
             << quint8(127)
             << QByteArray(wireRepresentation, 8).append(QByteArray(32, 'a'))
+            << false
             << QWebSocketProtocol::CC_TOO_MUCH_DATA;
 
     swapped64 = qToBigEndian<quint64>(quint64(INT_MAX + 1));
@@ -997,8 +1124,17 @@ void tst_DataProcessor::frameTooBig_data()
             << quint8(FIN | QWebSocketProtocol::OC_BINARY)
             << quint8(127)
             << QByteArray(wireRepresentation, 8).append(QByteArray(32, 'a'))
+            << false
             << QWebSocketProtocol::CC_TOO_MUCH_DATA;
 
+    swapped64 = qToBigEndian<quint64>(quint64(INT_MAX + 1));
+    wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped64));
+    QTest::newRow("Continuation frame with payload size > INT_MAX")
+            << quint8(FIN | QWebSocketProtocol::OC_CONTINUE)
+            << quint8(127)
+            << QByteArray(wireRepresentation, 8).append(QByteArray(32, 'a'))
+            << true
+            << QWebSocketProtocol::CC_TOO_MUCH_DATA;
 }
 
 DECLARE_TEST(tst_DataProcessor)

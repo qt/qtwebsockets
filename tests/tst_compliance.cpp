@@ -120,7 +120,7 @@ void ComplianceTest::autobahnTest()
     pWebSocket = 0;
 }
 
-DECLARE_TEST(ComplianceTest)
+//DECLARE_TEST(ComplianceTest)
 
 #include "tst_compliance.moc"
 

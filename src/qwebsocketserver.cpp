@@ -95,6 +95,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "qwebsocketserver.h"
 #include "qwebsocketserver_p.h"
 
+//TODO: CorsCheck: give list in constructor or use CorsAuthenticator object
+//in QNetworkAccessManager the signal cannot be connected to a queued signal, because it waits for the signal to return
+
 QT_BEGIN_NAMESPACE
 
 /*!
@@ -389,7 +392,6 @@ QList<QString> QWebSocketServer::supportedExtensions() const
     return d->supportedExtensions();
 }
 
-//TODO: should be probably replaced by an injectable OriginAuthenticator object
 /*!
     This method checks if the given \a origin is allowed; it returns true when the \a origin is allowed, otherwise false.
     It is supposed to be overriden by a subclass to filter out unwanted origins.

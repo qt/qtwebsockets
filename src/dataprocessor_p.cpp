@@ -26,6 +26,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <QTextDecoder>
 #include <QDebug>
 
+//TODO: ControlFrames are currently parsed in qwebsocket_p
+//we should do it in the DataProcessor, so that the basic checks (valid UTF-8 sequences, payload length, ... happen in one place
+
 QT_BEGIN_NAMESPACE
 
 const quint64 MAX_FRAME_SIZE_IN_BYTES = INT_MAX - 1;
