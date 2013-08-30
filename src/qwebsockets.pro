@@ -7,3 +7,4 @@ VERSION = 0.9
 TARGET = QWebSockets
 
 mac:QMAKE_FRAMEWORK_BUNDLE_NAME = $$TARGET
+mac:QMAKE_CXXFLAGS += -Wall -Werror

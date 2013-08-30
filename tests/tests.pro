@@ -9,6 +9,8 @@ CONFIG  -= app_bundle
 
 TEMPLATE = app
 
+QMAKE_CXXFLAGS += -Wall -Werror
+
 include(../src/qwebsockets.pri)
 
 # Remove the main.cpp file from the sources.
