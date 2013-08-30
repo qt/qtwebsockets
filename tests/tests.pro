@@ -9,7 +9,7 @@ CONFIG  -= app_bundle
 
 TEMPLATE = app
 
-QMAKE_CXXFLAGS += -Wall -Werror
+mac:QMAKE_CXXFLAGS += -Wall -Werror -Wextra
 
 include(../src/qwebsockets.pri)
 
