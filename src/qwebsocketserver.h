@@ -30,6 +30,7 @@ QT_BEGIN_NAMESPACE
 
 class QWebSocketServerPrivate;
 class QWebSocket;
+class QCorsAuthenticator;
 
 class Q_WEBSOCKETS_EXPORT QWebSocketServer : public QObject
 {
@@ -75,11 +76,9 @@ public:
     QList<QString> supportedProtocols() const;
     QList<QString> supportedExtensions() const;
 
-protected:
-    virtual bool isOriginAllowed(const QString &origin) const;
-
 Q_SIGNALS:
     void acceptError(QAbstractSocket::SocketError socketError);
+    void originAuthenticationRequired(QCorsAuthenticator *pAuthenticator);
     void newConnection();
 
 private:

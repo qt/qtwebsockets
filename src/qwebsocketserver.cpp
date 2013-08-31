@@ -87,6 +87,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
     \sa hasPendingConnections(), nextPendingConnection()
 */
 
+/*!
+    \fn void QWebSocketServer::originAuthenticationRequired(QCorsAuthenticator *authenticator)
+    This signal is emitted when a new connection is requested.
+    The slot connected to this signal should indicate whether the origin (which can be determined by the origin() call)
+    is allowed in the \a authenticator object (by issuing \l{QCorsAuthenticator::}{setAllowed()})
+
+    If no slot is connected to this signal, all origins will be accepted by default.
+
+    \note It is not possible to use a QueuedConnection to connect to
+    this signal, as the connection will always succeed.
+*/
+
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QNetworkProxy>
@@ -390,22 +402,6 @@ QList<QString> QWebSocketServer::supportedExtensions() const
 {
     Q_D(const QWebSocketServer);
     return d->supportedExtensions();
-}
-
-/*!
-    This method checks if the given \a origin is allowed; it returns true when the \a origin is allowed, otherwise false.
-    It is supposed to be overriden by a subclass to filter out unwanted origins.
-    By default, every origin is accepted.
-
-    \note Checking on the origin does not make much sense when the server is accessed
-    via a non-browser client, as that client can set whatever origin header it likes
-    In case of a browser client, the server SHOULD check the validity of the origin.
-    \sa http://tools.ietf.org/html/rfc6455#section-10
-*/
-bool QWebSocketServer::isOriginAllowed(const QString &origin) const
-{
-    Q_UNUSED(origin)
-    return true;
 }
 
 QT_END_NAMESPACE
