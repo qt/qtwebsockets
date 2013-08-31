@@ -173,7 +173,6 @@ tst_DataProcessor::tst_DataProcessor()
 
 void tst_DataProcessor::initTestCase()
 {
-    qRegisterMetaType<QWebSocketProtocol::CloseCode>("QWebSocketProtocol::CloseCode");
 }
 
 void tst_DataProcessor::cleanupTestCase()
@@ -182,6 +181,8 @@ void tst_DataProcessor::cleanupTestCase()
 
 void tst_DataProcessor::init()
 {
+    qRegisterMetaType<QWebSocketProtocol::OpCode>("QWebSocketProtocol::OpCode");
+    qRegisterMetaType<QWebSocketProtocol::CloseCode>("QWebSocketProtocol::CloseCode");
 }
 
 void tst_DataProcessor::cleanup()
@@ -218,16 +219,16 @@ void tst_DataProcessor::goodBinaryFrames_data()
 void tst_DataProcessor::goodControlFrames_data()
 {
     //TODO: still to test with no close code and no close reason (is valid)
-    QTest::addColumn<QByteArray>("payload");
+    QTest::addColumn<QString>("payload");
     QTest::addColumn<QWebSocketProtocol::CloseCode>("closeCode");
     //control frame data cannot exceed 125 bytes; smaller than 124, because we also need a 2 byte close code
     for (int i = 0; i < 124; ++i)
     {
-        QTest::newRow(QString("Close frame with %1 ASCII characters").arg(i).toStdString().data()) << QByteArray(i, 'a') << QWebSocketProtocol::CC_NORMAL;
+        QTest::newRow(QString("Close frame with %1 ASCII characters").arg(i).toStdString().data()) << QString(i, 'a') << QWebSocketProtocol::CC_NORMAL;
     }
-    for (int i = 0; i < 256; ++i)
+    for (int i = 0; i < 126; ++i)
     {
-        QTest::newRow(QString("Text frame with containing ASCII character '0x%1'").arg(QByteArray(1, char(i)).toHex().constData()).toStdString().data()) << QByteArray(1, char(i)) << QWebSocketProtocol::CC_NORMAL;
+        QTest::newRow(QString("Text frame with containing ASCII character '0x%1'").arg(QByteArray(1, char(i)).toHex().constData()).toStdString().data()) << QString(1, char(i)) << QWebSocketProtocol::CC_NORMAL;
     }
 }
 
@@ -323,11 +324,10 @@ void tst_DataProcessor::goodTextFrames()
 
 void tst_DataProcessor::goodControlFrames()
 {
-    qRegisterMetaType<QWebSocketProtocol::OpCode>("QWebSocketProtocol::OpCode");
     QByteArray data;
     QBuffer buffer;
     DataProcessor dataProcessor;
-    QFETCH(QByteArray, payload);
+    QFETCH(QString, payload);
     QFETCH(QWebSocketProtocol::CloseCode, closeCode);
     quint16 swapped = qToBigEndian<quint16>(closeCode);
     const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
@@ -336,14 +336,15 @@ void tst_DataProcessor::goodControlFrames()
     buffer.setData(data);
     buffer.open(QIODevice::ReadOnly);
 
-    QSignalSpy spyControlFrameReceived(&dataProcessor, SIGNAL(controlFrameReceived(QWebSocketProtocol::OpCode,QByteArray)));
+    QSignalSpy spyCloseFrameReceived(&dataProcessor, SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
+
     dataProcessor.process(&buffer);
-    QCOMPARE(spyControlFrameReceived.count(), 1);
-    QList<QVariant> arguments = spyControlFrameReceived.takeFirst();
-    //QCOMPARE(arguments.at(0).toInt(), int(QWebSocketProtocol::OC_CLOSE));
-    QCOMPARE(arguments.at(1).toByteArray().length() - 2, payload.length());
+    QCOMPARE(spyCloseFrameReceived.count(), 1);
+    QList<QVariant> arguments = spyCloseFrameReceived.takeFirst();
+    QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(), closeCode);
+    QCOMPARE(arguments.at(1).toString().length(), payload.length());
     buffer.close();
-    spyControlFrameReceived.clear();
+    spyCloseFrameReceived.clear();
     data.clear();
 }
 
