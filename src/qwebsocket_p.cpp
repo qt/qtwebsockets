@@ -261,10 +261,12 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
 /*!
     \internal
  */
-void QWebSocketPrivate::ping()
+void QWebSocketPrivate::ping(const QByteArray &payload)
 {
+    Q_ASSERT(payload.length() < 126);
     m_pingTimer.restart();
-    QByteArray pingFrame = getFrameHeader(QWebSocketProtocol::OC_PING, 0, 0, true);
+    QByteArray pingFrame = getFrameHeader(QWebSocketProtocol::OC_PING, payload.size(), 0 /*do not mask*/, true);
+    pingFrame.append(payload);
     writeFrame(pingFrame);
 }
 
@@ -886,9 +888,8 @@ void QWebSocketPrivate::processPing(QByteArray data)
  */
 void QWebSocketPrivate::processPong(QByteArray data)
 {
-    Q_UNUSED(data);
     Q_Q(QWebSocket);
-    Q_EMIT q->pong(static_cast<quint64>(m_pingTimer.elapsed()));
+    Q_EMIT q->pong(static_cast<quint64>(m_pingTimer.elapsed()), data);
 }
 
 /*!

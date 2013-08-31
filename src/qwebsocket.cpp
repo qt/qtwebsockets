@@ -157,10 +157,10 @@ not been filled in with new information when the signal returns.
     \sa error(), errorString()
 */
 /*!
-    \fn void QWebSocket::pong(quint64 elapsedTime)
+    \fn void QWebSocket::pong(quint64 elapsedTime, QByteArray payload)
 
     Emitted when a pong message is received in reply to a previous ping.
-    \a elapsedTime contains the roundtrip time in milliseconds
+    \a elapsedTime contains the roundtrip time in milliseconds and \a payload contains an optional payload that was sent with the ping.
 
     \sa ping()
   */
@@ -316,13 +316,20 @@ void QWebSocket::open(const QUrl &url, bool mask)
 
 /*!
     \brief Pings the server to indicate that the connection is still alive.
+    Additional \a payload can be sent along the ping message.
+
+    The size of the \a payload cannot be bigger than 125. If it is larger, the \a payload is clipped to 125 bytes.
 
     \sa pong()
  */
-void QWebSocket::ping()
+void QWebSocket::ping(const QByteArray &payload)
 {
     Q_D(QWebSocket);
-    d->ping();
+    if (payload.length() > 125)
+    {
+        payload.left(125);
+    }
+    d->ping(payload);
 }
 
 /*!

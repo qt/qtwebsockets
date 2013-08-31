@@ -86,7 +86,7 @@ public:
 public Q_SLOTS:
     void close(QWebSocketProtocol::CloseCode closeCode = QWebSocketProtocol::CC_NORMAL, const QString &reason = QString());
     void open(const QUrl &url, bool mask = true);
-    void ping();
+    void ping(const QByteArray &payload = QByteArray());
 
 Q_SIGNALS:
     void aboutToClose();
@@ -102,7 +102,7 @@ Q_SIGNALS:
     void textMessageReceived(QString message);
     void binaryMessageReceived(QByteArray message);
     void error(QAbstractSocket::SocketError error);
-    void pong(quint64 elapsedTime);
+    void pong(quint64 elapsedTime, QByteArray payload);
 
 private:
     Q_DISABLE_COPY(QWebSocket)

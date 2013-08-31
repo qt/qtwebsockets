@@ -100,7 +100,7 @@ public:
 public Q_SLOTS:
     void close(QWebSocketProtocol::CloseCode closeCode, QString reason);
     void open(const QUrl &url, bool mask);
-    void ping();
+    void ping(const QByteArray &payload);
 
 private Q_SLOTS:
     void processData();
