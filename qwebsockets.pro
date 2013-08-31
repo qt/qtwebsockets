@@ -2,6 +2,7 @@ cache()
 TEMPLATE = subdirs
 
 SUBDIRS =	\
-			src \
-			examples \
-			tests
+            src \
+            examples \
+            tests
+CONFIG += ordered
