@@ -40,6 +40,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 QT_BEGIN_NAMESPACE
 
 class QIODevice;
+class Frame;
 
 /*!
     \internal
@@ -53,7 +54,9 @@ public:
     virtual ~DataProcessor();
 
 Q_SIGNALS:
-    void controlFrameReceived(QWebSocketProtocol::OpCode opCode, QByteArray frame);
+    void pingReceived(QByteArray data);
+    void pongReceived(QByteArray data);
+    void closeReceived(QWebSocketProtocol::CloseCode closeCode, QString closeReason);
     void textFrameReceived(QString frame, bool lastFrame);
     void binaryFrameReceived(QByteArray frame, bool lastFrame);
     void textMessageReceived(QString message);
@@ -87,6 +90,8 @@ private:
     quint64 m_payloadLength;
     QTextCodec::ConverterState *m_pConverterState;
     QTextCodec *m_pTextCodec;
+
+    bool processControlFrame(const Frame &frame);
 };
 
 QT_END_NAMESPACE

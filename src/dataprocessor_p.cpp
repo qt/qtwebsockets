@@ -637,8 +637,7 @@ void DataProcessor::process(QIODevice *pIoDevice)
         {
             if (frame.isControlFrame())
             {
-                Q_EMIT controlFrameReceived(frame.getOpCode(), frame.getPayload());
-                isDone = true;  //exit the loop after a control frame, so we can get a chance to close the socket if necessary
+                isDone = processControlFrame(frame);
             }
             else    //we have a dataframe; opcode can be OC_CONTINUE, OC_TEXT or OC_BINARY
             {
@@ -739,6 +738,82 @@ void DataProcessor::clear()
     {
         m_pConverterState = new QTextCodec::ConverterState(QTextCodec::ConvertInvalidToNull | QTextCodec::IgnoreHeader);
     }
+}
+
+bool DataProcessor::processControlFrame(const Frame &frame)
+{
+    bool mustStopProcessing = false;
+    switch (frame.getOpCode())
+    {
+    case QWebSocketProtocol::OC_PING:
+    {
+        Q_EMIT pingReceived(frame.getPayload());
+        break;
+    }
+    case QWebSocketProtocol::OC_PONG:
+    {
+        Q_EMIT pongReceived(frame.getPayload());
+        break;
+    }
+    case QWebSocketProtocol::OC_CLOSE:
+    {
+        quint16 closeCode = QWebSocketProtocol::CC_NORMAL;
+        QString closeReason;
+        QByteArray payload = frame.getPayload();
+        if (payload.size() > 0)   //close frame can have a close code and reason
+        {
+            closeCode = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(payload.constData()));
+            if (!QWebSocketProtocol::isCloseCodeValid(closeCode))
+            {
+                closeCode = QWebSocketProtocol::CC_PROTOCOL_ERROR;
+                closeReason = tr("Invalid close code %1 detected.").arg(closeCode);
+            }
+            else
+            {
+                if (payload.size() > 2)
+                {
+                    QTextCodec *tc = QTextCodec::codecForName("UTF-8");
+                    QTextCodec::ConverterState state(QTextCodec::ConvertInvalidToNull);
+                    closeReason = tc->toUnicode(payload.constData() + 2, payload.size() - 2, &state);
+                    bool failed = (state.invalidChars != 0) || (state.remainingChars != 0);
+                    if (failed)
+                    {
+                        closeCode = QWebSocketProtocol::CC_WRONG_DATATYPE;
+                        closeReason = tr("Invalid UTF-8 code encountered.");
+                    }
+                }
+            }
+        }
+        mustStopProcessing = true;
+        Q_EMIT closeReceived(static_cast<QWebSocketProtocol::CloseCode>(closeCode), closeReason);
+        break;
+    }
+    case QWebSocketProtocol::OC_CONTINUE:
+    case QWebSocketProtocol::OC_BINARY:
+    case QWebSocketProtocol::OC_TEXT:
+    case QWebSocketProtocol::OC_RESERVED_3:
+    case QWebSocketProtocol::OC_RESERVED_4:
+    case QWebSocketProtocol::OC_RESERVED_5:
+    case QWebSocketProtocol::OC_RESERVED_6:
+    case QWebSocketProtocol::OC_RESERVED_7:
+    case QWebSocketProtocol::OC_RESERVED_C:
+    case QWebSocketProtocol::OC_RESERVED_B:
+    case QWebSocketProtocol::OC_RESERVED_D:
+    case QWebSocketProtocol::OC_RESERVED_E:
+    case QWebSocketProtocol::OC_RESERVED_F:
+    {
+        //do nothing
+        //case added to make C++ compiler happy
+        break;
+    }
+    default:
+    {
+        qDebug() << "DataProcessor::processControlFrame: Invalid opcode detected:" << static_cast<int>(frame.getOpCode());
+        //Do nothing
+        break;
+    }
+    }
+    return mustStopProcessing;
 }
 
 QT_END_NAMESPACE

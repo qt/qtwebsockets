@@ -104,7 +104,9 @@ public Q_SLOTS:
 
 private Q_SLOTS:
     void processData();
-    void processControlFrame(QWebSocketProtocol::OpCode opCode, QByteArray frame);
+    void processPing(QByteArray data);
+    void processPong(QByteArray data);
+    void processClose(QWebSocketProtocol::CloseCode closeCode, QString closeReason);
     void processHandshake(QTcpSocket *pSocket);
     void processStateChanged(QAbstractSocket::SocketState socketState);
 
