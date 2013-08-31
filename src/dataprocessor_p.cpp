@@ -16,7 +16,20 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
+/*!
+    \class DataProcessor
+    The class DataProcessor is responsible for reading, validating and interpreting data from a websocket.
+    It reads data from a QIODevice, validates it against RFC 6455, and parses it into frames (data, control).
+    It emits signals that correspond to the type of the frame: textFrameReceived(), binaryFrameReceived(),
+    textMessageReceived(), binaryMessageReceived(), pingReceived(), pongReceived() and closeReceived().
+    Whenever an error is detected, the errorEncountered() signal is emitted.
+    DataProcessor also checks if a frame is allowed in a sequence of frames (e.g. a continuation frame cannot follow a final frame).
+    This class is an internal class used by QWebSocketInternal for data processing and validation.
 
+    \sa Frame()
+
+    \internal
+*/
 #include "dataprocessor_p.h"
 #include "qwebsocketprotocol.h"
 #include <QIODevice>
@@ -26,15 +39,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <QTextDecoder>
 #include <QDebug>
 
-//TODO: ControlFrames are currently parsed in qwebsocket_p
-//we should do it in the DataProcessor, so that the basic checks (valid UTF-8 sequences, payload length, ... happen in one place
-
 QT_BEGIN_NAMESPACE
 
 const quint64 MAX_FRAME_SIZE_IN_BYTES = INT_MAX - 1;
 const quint64 MAX_MESSAGE_SIZE_IN_BYTES = INT_MAX - 1;
 
 /*!
+    \class Frame
+    The class Frame is responsible for reading, validating and interpreting frames from a websocket.
+    It reads data from a QIODevice, validates it against RFC 6455, and parses it into a frame (data, control).
+    Whenever an error is detected, the isValid() returns false.
+
+    \note The Frame class does not look at valid sequences of frames. It processes frames one at a time.
+    \note It is the DataProcessor that takes the sequence into account.
+
+    \sa DataProcessor()
     \internal
  */
 class Frame
