@@ -740,6 +740,9 @@ void DataProcessor::clear()
     }
 }
 
+/*!
+    \internal
+ */
 bool DataProcessor::processControlFrame(const Frame &frame)
 {
     bool mustStopProcessing = false;

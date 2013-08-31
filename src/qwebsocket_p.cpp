@@ -860,6 +860,9 @@ void QWebSocketPrivate::processData()
     }
 }
 
+/*!
+ \internal
+ */
 void QWebSocketPrivate::processPing(QByteArray data)
 {
     quint32 maskingKey = 0;
@@ -878,6 +881,9 @@ void QWebSocketPrivate::processPing(QByteArray data)
     }
 }
 
+/*!
+ \internal
+ */
 void QWebSocketPrivate::processPong(QByteArray data)
 {
     Q_UNUSED(data);
@@ -885,6 +891,9 @@ void QWebSocketPrivate::processPong(QByteArray data)
     Q_EMIT q->pong(static_cast<quint64>(m_pingTimer.elapsed()));
 }
 
+/*!
+ \internal
+ */
 void QWebSocketPrivate::processClose(QWebSocketProtocol::CloseCode closeCode, QString closeReason)
 {
     m_isClosingHandshakeReceived = true;
