@@ -24,7 +24,7 @@ Qt 5.x
 ### Usage
 Include the .pri file into your Qt project  
 ~~~
-include (websocket.pri)
+include (qwebsockets.pri)
 ~~~
 
 ### Compliance
