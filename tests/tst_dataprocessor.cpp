@@ -284,7 +284,7 @@ void tst_DataProcessor::goodBinaryFrames()
 
     data.append(payload);
     buffer.setData(data);
-    buffer.open(QIODevice::ReadWrite);
+    buffer.open(QIODevice::ReadOnly);
 
     QSignalSpy spyFrameReceived(&dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)));
     QSignalSpy spyMessageReceived(&dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)));
@@ -333,7 +333,7 @@ void tst_DataProcessor::goodTextFrames()
 
     data.append(payload);
     buffer.setData(data);
-    buffer.open(QIODevice::ReadWrite);
+    buffer.open(QIODevice::ReadOnly);
 
     QSignalSpy spyFrameReceived(&dataProcessor, SIGNAL(textFrameReceived(QString,bool)));
     QSignalSpy spyMessageReceived(&dataProcessor, SIGNAL(textMessageReceived(QString)));
@@ -405,7 +405,7 @@ void tst_DataProcessor::nonCharacterCodes()
     data.append(firstByte).append(secondByte);
     data.append(payload);
     buffer.setData(data);
-    buffer.open(QIODevice::ReadWrite);
+    buffer.open(QIODevice::ReadOnly);
     dataProcessor.process(&buffer);
     QEXPECT_FAIL(QTest::currentDataTag(), "Due to QTextCode interpeting non-characters unicode points as invalid (QTBUG-33229).", Abort);
 
@@ -436,7 +436,7 @@ void tst_DataProcessor::frameTooSmall()
     //with nothing in the buffer, the dataProcessor should time out and the error should be CC_GOING_AWAY
     //meaning the socket will be closed
     buffer.setData(data);
-    buffer.open(QIODevice::ReadWrite);
+    buffer.open(QIODevice::ReadOnly);
     QSignalSpy spy(&dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
     QSignalSpy textMessageSpy(&dataProcessor, SIGNAL(textMessageReceived(QString)));
     QSignalSpy binaryMessageSpy(&dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)));
@@ -484,7 +484,7 @@ void tst_DataProcessor::frameTooSmall()
         //text frame with final bit not set
         data.append((char)(QWebSocketProtocol::OC_TEXT)).append(char(0x0));
         buffer.setData(data);
-        buffer.open(QIODevice::ReadWrite);
+        buffer.open(QIODevice::ReadOnly);
         dataProcessor.process(&buffer);
 
         buffer.close();
@@ -493,7 +493,7 @@ void tst_DataProcessor::frameTooSmall()
         //with nothing in the buffer, the dataProcessor should time out and the error should be CC_GOING_AWAY
         //meaning the socket will be closed
         buffer.setData(data);
-        buffer.open(QIODevice::ReadWrite);
+        buffer.open(QIODevice::ReadOnly);
         QSignalSpy spy(&dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
         dataProcessor.process(&buffer);
         QCOMPARE(spy.count(), 1);
@@ -514,7 +514,7 @@ void tst_DataProcessor::frameTooSmall()
         //text frame with final bit not set
         data.append((char)(QWebSocketProtocol::OC_TEXT)).append(char(0x0));
         buffer.setData(data);
-        buffer.open(QIODevice::ReadWrite);
+        buffer.open(QIODevice::ReadOnly);
         dataProcessor.process(&buffer);
 
         QCOMPARE(textMessageSpy.count(), 0);
@@ -533,7 +533,7 @@ void tst_DataProcessor::frameTooSmall()
         //only 1 byte follows in continuation frame; should time out with close code CC_GOING_AWAY
         data.append('a');
         buffer.setData(data);
-        buffer.open(QIODevice::ReadWrite);
+        buffer.open(QIODevice::ReadOnly);
 
         dataProcessor.process(&buffer);
         QCOMPARE(spy.count(), 1);
@@ -600,7 +600,7 @@ void tst_DataProcessor::invalidPayloadInCloseFrame()
     data.append(firstByte).append(secondByte);
     data.append(payload);
     buffer.setData(data);
-    buffer.open(QIODevice::ReadWrite);
+    buffer.open(QIODevice::ReadOnly);
     dataProcessor.process(&buffer);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(textMessageSpy.count(), 0);
@@ -651,7 +651,7 @@ void tst_DataProcessor::doTest()
     data.append(firstByte).append(secondByte);
     data.append(payload);
     buffer.setData(data);
-    buffer.open(QIODevice::ReadWrite);
+    buffer.open(QIODevice::ReadOnly);
     dataProcessor.process(&buffer);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(textMessageSpy.count(), 0);
