@@ -53,6 +53,9 @@ public:
     explicit DataProcessor(QObject *parent = 0);
     virtual ~DataProcessor();
 
+    static quint64 maxMessageSize();
+    static quint64 maxFrameSize();
+
 Q_SIGNALS:
     void pingReceived(QByteArray data);
     void pongReceived(QByteArray data);

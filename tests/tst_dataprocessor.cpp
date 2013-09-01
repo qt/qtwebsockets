@@ -1107,10 +1107,7 @@ void tst_DataProcessor::frameTooBig_data()
     //only data frames are checked for being too big
     //control frames have explicit checking on a maximum payload size of 125, which is tested elsewhere
 
-    //TODO: get maximum framesize from the frame somehow
-    //the maximum framesize is currently defined as a constant in the dataprocessor_p.cpp file
-    //and is set to MAX_INT; changing that value will make this test fail (which is not good)
-    swapped64 = qToBigEndian<quint64>(quint64(INT_MAX + 1));
+    swapped64 = qToBigEndian<quint64>(DataProcessor::maxFrameSize() + 1);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped64));
     QTest::newRow("Text frame with payload size > INT_MAX")
             << quint8(FIN | QWebSocketProtocol::OC_TEXT)
@@ -1119,7 +1116,7 @@ void tst_DataProcessor::frameTooBig_data()
             << false
             << QWebSocketProtocol::CC_TOO_MUCH_DATA;
 
-    swapped64 = qToBigEndian<quint64>(quint64(INT_MAX + 1));
+    swapped64 = qToBigEndian<quint64>(DataProcessor::maxFrameSize() + 1);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped64));
     QTest::newRow("Binary frame with payload size > INT_MAX")
             << quint8(FIN | QWebSocketProtocol::OC_BINARY)
@@ -1128,7 +1125,7 @@ void tst_DataProcessor::frameTooBig_data()
             << false
             << QWebSocketProtocol::CC_TOO_MUCH_DATA;
 
-    swapped64 = qToBigEndian<quint64>(quint64(INT_MAX + 1));
+    swapped64 = qToBigEndian<quint64>(DataProcessor::maxFrameSize() + 1);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped64));
     QTest::newRow("Continuation frame with payload size > INT_MAX")
             << quint8(FIN | QWebSocketProtocol::OC_CONTINUE)

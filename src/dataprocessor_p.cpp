@@ -626,6 +626,22 @@ DataProcessor::~DataProcessor()
 /*!
     \internal
  */
+quint64 DataProcessor::maxMessageSize()
+{
+    return MAX_MESSAGE_SIZE_IN_BYTES;
+}
+
+/*!
+    \internal
+ */
+quint64 DataProcessor::maxFrameSize()
+{
+    return MAX_FRAME_SIZE_IN_BYTES;
+}
+
+/*!
+    \internal
+ */
 void DataProcessor::process(QIODevice *pIoDevice)
 {
     bool isDone = false;
@@ -763,7 +779,12 @@ bool DataProcessor::processControlFrame(const Frame &frame)
         quint16 closeCode = QWebSocketProtocol::CC_NORMAL;
         QString closeReason;
         QByteArray payload = frame.getPayload();
-        if (payload.size() > 0)   //close frame can have a close code and reason
+        if (payload.size() == 1)
+        {
+            closeCode = QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            closeReason = tr("Payload of close frame is too small.");
+        }
+        else if (payload.size() > 1)   //close frame can have a close code and reason
         {
             closeCode = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(payload.constData()));
             if (!QWebSocketProtocol::isCloseCodeValid(closeCode))
