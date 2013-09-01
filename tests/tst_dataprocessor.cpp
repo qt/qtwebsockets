@@ -17,6 +17,7 @@ Q_DECLARE_METATYPE(QWebSocketProtocol::OpCode)
 //TODO: test for valid opcodes
 //DONE: test for valid close codes
 //TODO: test close frame with no close code and reason
+//TODO: test if opcode is correct after processing of a continuation frame (text and binary frames)
 
 //TODO: test valid frame sequences
 
@@ -678,6 +679,7 @@ void tst_DataProcessor::doCloseFrameTest()
     QBuffer buffer;
     DataProcessor dataProcessor;
     QSignalSpy spy(&dataProcessor, SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
+    QSignalSpy errorSpy(&dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
     QSignalSpy textMessageSpy(&dataProcessor, SIGNAL(textMessageReceived(QString)));
     QSignalSpy binaryMessageSpy(&dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)));
     QSignalSpy textFrameSpy(&dataProcessor, SIGNAL(textFrameReceived(QString, bool)));
@@ -686,9 +688,10 @@ void tst_DataProcessor::doCloseFrameTest()
     data.append(firstByte).append(secondByte);
     data.append(payload);
     buffer.setData(data);
-    buffer.open(QIODevice::ReadWrite);
+    buffer.open(QIODevice::ReadOnly);
     dataProcessor.process(&buffer);
     QCOMPARE(spy.count(), 1);
+    QCOMPARE(errorSpy.count(), 0);
     QCOMPARE(textMessageSpy.count(), 0);
     QCOMPARE(binaryMessageSpy.count(), 0);
     QCOMPARE(textFrameSpy.count(), 0);
@@ -1190,84 +1193,118 @@ void tst_DataProcessor::invalidCloseFrame_data()
 
     QTest::newRow("Close control frame with payload size 1")
             << quint8(FIN | QWebSocketProtocol::OC_CLOSE) << quint8(1) << QByteArray(1, 'a') << false << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+    quint16 swapped = qToBigEndian<quint16>(QWebSocketProtocol::CC_ABNORMAL_DISCONNECTION);
+    const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code ABNORMAL DISCONNECTION")
             << quint8(FIN | QWebSocketProtocol::OC_CLOSE) <<
                quint8(2) <<
-               QByteArray() <<
+               QByteArray(wireRepresentation, 2) <<
                false <<
-               QWebSocketProtocol::CC_ABNORMAL_DISCONNECTION;
+               QWebSocketProtocol::CC_PROTOCOL_ERROR;
+    swapped = qToBigEndian<quint16>(QWebSocketProtocol::CC_MISSING_STATUS_CODE);
+    wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code MISSING STATUS CODE")
             << quint8(FIN | QWebSocketProtocol::OC_CLOSE) <<
                quint8(2) <<
-               QByteArray() <<
+               QByteArray(wireRepresentation, 2) <<
                false <<
-               QWebSocketProtocol::CC_MISSING_STATUS_CODE;
+               QWebSocketProtocol::CC_PROTOCOL_ERROR;
+    swapped = qToBigEndian<quint16>(1004);
+    wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code 1004")
             << quint8(FIN | QWebSocketProtocol::OC_CLOSE) <<
                quint8(2) <<
-               QByteArray() <<
+               QByteArray(wireRepresentation, 2) <<
                false <<
-               QWebSocketProtocol::CC_RESERVED_1004;
+               QWebSocketProtocol::CC_PROTOCOL_ERROR;
+    swapped = qToBigEndian<quint16>(QWebSocketProtocol::CC_TLS_HANDSHAKE_FAILED);
+    wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code TLS HANDSHAKE FAILED")
             << quint8(FIN | QWebSocketProtocol::OC_CLOSE) <<
                quint8(2) <<
-               QByteArray() <<
+               QByteArray(wireRepresentation, 2) <<
                false <<
-               QWebSocketProtocol::CC_TLS_HANDSHAKE_FAILED;
+               QWebSocketProtocol::CC_PROTOCOL_ERROR;
+    swapped = qToBigEndian<quint16>(0);
+    wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code 0")
             << quint8(FIN | QWebSocketProtocol::OC_CLOSE) <<
                quint8(2) <<
-               QByteArray() <<
+               QByteArray(wireRepresentation, 2) <<
                false <<
-               QWebSocketProtocol::CloseCode(0);
+               QWebSocketProtocol::CC_PROTOCOL_ERROR;
+    swapped = qToBigEndian<quint16>(999);
+    wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code 999")
             << quint8(FIN | QWebSocketProtocol::OC_CLOSE) <<
                quint8(2) <<
-               QByteArray() <<
+               QByteArray(wireRepresentation, 2) <<
                false <<
-               QWebSocketProtocol::CloseCode(999);
+               QWebSocketProtocol::CC_PROTOCOL_ERROR;
+    swapped = qToBigEndian<quint16>(1012);
+    wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code 1012")
             << quint8(FIN | QWebSocketProtocol::OC_CLOSE) <<
                quint8(2) <<
-               QByteArray() <<
+               QByteArray(wireRepresentation, 2) <<
                false <<
-               QWebSocketProtocol::CloseCode(1012);
+               QWebSocketProtocol::CC_PROTOCOL_ERROR;
+    swapped = qToBigEndian<quint16>(1013);
+    wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code 1013")
             << quint8(FIN | QWebSocketProtocol::OC_CLOSE) <<
                quint8(2) <<
-               QByteArray() <<
+               QByteArray(wireRepresentation, 2) <<
                false <<
-               QWebSocketProtocol::CloseCode(1013);
+               QWebSocketProtocol::CC_PROTOCOL_ERROR;
+    swapped = qToBigEndian<quint16>(1014);
+    wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code 1014")
             << quint8(FIN | QWebSocketProtocol::OC_CLOSE) <<
                quint8(2) <<
-               QByteArray() <<
+               QByteArray(wireRepresentation, 2) <<
                false <<
-               QWebSocketProtocol::CloseCode(1014);
-    QTest::newRow("Close control frame close code 1014")
-            << quint8(FIN | QWebSocketProtocol::OC_CLOSE) <<
-               quint8(2) <<
-               QByteArray() <<
-               false <<
-               QWebSocketProtocol::CloseCode(1016);
+               QWebSocketProtocol::CC_PROTOCOL_ERROR;
+    swapped = qToBigEndian<quint16>(1100);
+    wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code 1100")
             << quint8(FIN | QWebSocketProtocol::OC_CLOSE) <<
                quint8(2) <<
-               QByteArray() <<
+               QByteArray(wireRepresentation, 2) <<
                false <<
-               QWebSocketProtocol::CloseCode(1100);
+               QWebSocketProtocol::CC_PROTOCOL_ERROR;
+    swapped = qToBigEndian<quint16>(2000);
+    wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code 2000")
             << quint8(FIN | QWebSocketProtocol::OC_CLOSE) <<
                quint8(2) <<
-               QByteArray() <<
+               QByteArray(wireRepresentation, 2) <<
                false <<
-               QWebSocketProtocol::CloseCode(2000);
+               QWebSocketProtocol::CC_PROTOCOL_ERROR;
+    swapped = qToBigEndian<quint16>(2999);
+    wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code 2999")
             << quint8(FIN | QWebSocketProtocol::OC_CLOSE) <<
                quint8(2) <<
-               QByteArray() <<
+               QByteArray(wireRepresentation, 2) <<
                false <<
-               QWebSocketProtocol::CloseCode(2999);
+               QWebSocketProtocol::CC_PROTOCOL_ERROR;
+    swapped = qToBigEndian<quint16>(5000);
+    wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
+    QTest::newRow("Close control frame close code 5000")
+            << quint8(FIN | QWebSocketProtocol::OC_CLOSE) <<
+               quint8(2) <<
+               QByteArray(wireRepresentation, 2) <<
+               false <<
+               QWebSocketProtocol::CC_PROTOCOL_ERROR;
+    swapped = qToBigEndian<quint16>(65535u);
+    wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
+    QTest::newRow("Close control frame close code 65535")
+            << quint8(FIN | QWebSocketProtocol::OC_CLOSE) <<
+               quint8(2) <<
+               QByteArray(wireRepresentation, 2) <<
+               false <<
+               QWebSocketProtocol::CC_PROTOCOL_ERROR;
 }
 
 void tst_DataProcessor::incompleteSizeField_data()
