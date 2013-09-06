@@ -245,7 +245,11 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
     m_isClosingHandshakeSent = false;
 
     setRequestUrl(url);
-    QString resourceName = url.path() + url.query();
+    QString resourceName = url.path();
+    if (!url.query().isEmpty())
+    {
+        resourceName.append("?" + url.query());
+    }
     if (resourceName.isEmpty())
     {
         resourceName = "/";
