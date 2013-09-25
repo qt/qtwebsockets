@@ -3,6 +3,5 @@
 );
 
 %dependencies = (
-		"qtbase" => "",
-		"qtnetwork" => ""
+    "qtbase" => "",
 );
