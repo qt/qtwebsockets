@@ -1,8 +1,14 @@
 %modules = (
-	"QWebSockets" => "$basedir/src",
+    "QtWebSockets" => "$basedir/src/websockets",
+);
+
+%moduleheaders = (
+);
+
+%classnames = (
+    "qtwebsockets.h" => "QtWebSockets",
 );
 
 %dependencies = (
-		"qtbase" => "",
-		"qtnetwork" => ""
+    "qtbase" => "",
 );
