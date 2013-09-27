@@ -1,5 +1,5 @@
-cache()
 TEMPLATE = subdirs
 
-SUBDIRS =	echoclient \
-			echoserver
+SUBDIRS = echoclient \
+        echoserver \
+        qmlwebsocketclient
