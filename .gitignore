@@ -12,8 +12,6 @@
 *.dylib
 *.obj
 Makefile*
-moc_*.cpp
-*.moc
 
 # Directories to ignore
 # ---------------------
@@ -34,19 +32,28 @@ build-unittests-Qt_5_1_0_clang_64-Debug/unittests
 build-unittests-Qt_5_1_0_clang_64-Release/unittests
 examples/.coverity-submit
 
-reports
-doc/html
-build-examples-Qt_5_1_0_clang_64_temporary-Debug
-build-unittests-Qt_5_1_0_clang_64-Release
-src/doc/html
+# Qt specific
 .qmake.cache
-examples/echoclient/echoclient
-src/libQWebSockets.0.9.0.dylib
-src/libQWebSockets.0.9.dylib
-src/libQWebSockets.0.dylib
-src/libQWebSockets.1.0.0.dylib
-src/libQWebSockets.1.0.dylib
-src/libQWebSockets.1.dylib
-src/libQWebSockets.dylib
-examples/echoserver/echoserver
-tests/unittests
+*.pro.user
+*.pro.shared
+moc_*.cpp
+*.moc
+*_resource.rc
+ui_*.h
+qrc_*.cpp
+
+*~
+*.pdb
+*.exe
+*.lib
+*.res
+*.exp
+*.manifest
+config.log
+tmp
+imports/*
+include
+tests/auto/cmake/build
+lib/
+mkspecs/
+qml/
