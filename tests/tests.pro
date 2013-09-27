@@ -1,6 +1,6 @@
 cache()
 
-QT += core network testlib
+QT += core network websockets testlib
 
 TARGET	= unittests
 CONFIG  += testcase
@@ -10,19 +10,6 @@ CONFIG  -= app_bundle
 
 TEMPLATE = app
 
-mac:QMAKE_CXXFLAGS += -Wall -Werror -Wextra
-
-include(../src/qwebsockets.pri)
-
-# Remove the main.cpp file from the sources.
-#S = $$SOURCES
-#for(F, S) {
-#    M = $$find(F, main.cpp)
-#    count(M, 0) {
-#        SOURCES += $$F
-#    }
-#}
-
 SOURCES += \
         main.cpp \
         tst_websockets.cpp \
@@ -31,8 +18,5 @@ SOURCES += \
 
 HEADERS += \
     unittests.h
-
-INCLUDEPATH +=
-DEPENDPATH +=
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"

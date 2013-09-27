@@ -1,1 +1,3 @@
-include ($$PWD/qwebsockets.pro)
+TEMPLATE = subdirs
+
+SUBDIRS += websockets imports
