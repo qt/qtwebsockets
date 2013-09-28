@@ -11,7 +11,7 @@ Q_DECLARE_METATYPE(QWebSocketProtocol::CloseCode)
 Q_DECLARE_METATYPE(QWebSocketProtocol::OpCode)
 
 //happy flow
-//TODO: test valid UTF8 sequences
+//TODO: test valid UTF8 sequences (see UC 6.2)
 //TODO: test on masking correctness
 //TODO: test for valid fields
 //TODO: test for valid opcodes
@@ -25,6 +25,10 @@ Q_DECLARE_METATYPE(QWebSocketProtocol::OpCode)
 //DONE: test invalid UTF8 sequences
 //DONE: test invalid UTF8 sequences in control/close frames
 //TODO: test invalid masks
+//TODO: test for AutoBahn testcase 5
+//TODO: test for AutoBahn testcase 6.1
+//TODO: test for AutoBahn testcase 6.3 (fragmentation test)
+//TODO: test for AutoBahn testcase 6.4 (fragmentation test)
 //DONE: test for invalid fields
 //DONE: test for invalid opcodes
 //DONE: test continuation frames for too big payload
@@ -69,6 +73,8 @@ private Q_SLOTS:
     void goodTextFrames();
 
     void goodControlFrames();
+
+    //void goodHeaders();   //test all valid control codes
 
     /*!
       Tests the DataProcessor for the correct handling of non-charactercodes
