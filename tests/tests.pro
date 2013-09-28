@@ -1,8 +1,9 @@
 cache()
 
-QT += core network
+QT += core network testlib
 
 TARGET	= unittests
+CONFIG  += testcase
 CONFIG  += console
 CONFIG	+= c++11
 CONFIG  -= app_bundle
@@ -33,7 +34,5 @@ HEADERS += \
 
 INCLUDEPATH +=
 DEPENDPATH +=
-
-QT += testlib
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
