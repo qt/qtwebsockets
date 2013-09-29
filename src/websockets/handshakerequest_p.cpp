@@ -186,7 +186,7 @@ QTextStream &HandshakeRequest::readFromStream(QTextStream &textStream)
         m_headers.clear();
         while (!headerLine.isEmpty())
         {
-            QStringList headerField = headerLine.split(QString(": "), QString::SkipEmptyParts);
+            QStringList headerField = headerLine.split(QString::fromLatin1(": "), QString::SkipEmptyParts);
             m_headers.insertMulti(headerField[0], headerField[1]);
             headerLine = textStream.readLine();
         }
@@ -199,7 +199,7 @@ QTextStream &HandshakeRequest::readFromStream(QTextStream &textStream)
         }
         if (m_requestUrl.scheme().isEmpty())
         {
-            QString scheme =  isSecure() ? "wss://" : "ws://";
+            QString scheme =  QString::fromLatin1(isSecure() ? "wss://" : "ws://");
             m_requestUrl.setScheme(scheme);
         }
 
@@ -250,9 +250,9 @@ QTextStream &HandshakeRequest::readFromStream(QTextStream &textStream)
                       resourceName.isEmpty() ||
                       m_versions.isEmpty() ||
                       m_key.isEmpty() ||
-                      (verb != "GET") ||
+                      (verb != QString::fromLatin1("GET")) ||
                       (!conversionOk || (httpVersion < 1.1f)) ||
-                      (upgrade.toLower() != "websocket") ||
+                      (upgrade.toLower() != QString::fromLatin1("websocket")) ||
                       (!connectionValues.contains("upgrade", Qt::CaseInsensitive)));
     }
     return textStream;
