@@ -5,7 +5,7 @@
 #include <QByteArray>
 #include <QDebug>
 
-#include "private/dataprocessor_p.h"
+#include "private/qwebsocketdataprocessor_p.h"
 
 Q_DECLARE_METATYPE(QWebSocketProtocol::CloseCode)
 Q_DECLARE_METATYPE(QWebSocketProtocol::OpCode)
@@ -77,7 +77,7 @@ private Q_SLOTS:
     //void goodHeaders();   //test all valid control codes
 
     /*!
-      Tests the DataProcessor for the correct handling of non-charactercodes
+      Tests the QWebSocketDataProcessor for the correct handling of non-charactercodes
       Due to a workaround in QTextCodec, non-characters are treated as illegal.
       This workaround is not necessary anymore, and hence code should be changed in Qt
       to allow non-characters again.
@@ -88,26 +88,26 @@ private Q_SLOTS:
      * Unhappy Flows
      ***************************************************************************/
     /*!
-        \brief Tests the DataProcessor for correct handling of frames that don't contain the starting 2 bytes.
+        \brief Tests the QWebSocketDataProcessor for correct handling of frames that don't contain the starting 2 bytes.
         This test is a border case, where not enough bytes are received to even start parsing a frame.
         This test does not test sequences of frames, only single frames are tested
      */
     void frameTooSmall();
 
     /*!
-        \brief Tests the DataProcessor for correct handling of frames that are oversized.
+        \brief Tests the QWebSocketDataProcessor for correct handling of frames that are oversized.
         This test does not test sequences of frames, only single frames are tested
      */
     void frameTooBig();
 
     /*!
-        \brief Tests the DataProcessor for the correct handling of malformed frame headers.
+        \brief Tests the QWebSocketDataProcessor for the correct handling of malformed frame headers.
         This test does not test sequences of frames, only single frames are tested
      */
     void invalidHeader();
 
     /*!
-        \brief Tests the DataProcessor for the correct handling of invalid control frames.
+        \brief Tests the QWebSocketDataProcessor for the correct handling of invalid control frames.
         Invalid means: payload bigger than 125, frame is fragmented, ...
         This test does not test sequences of frames, only single frames are tested
      */
@@ -115,12 +115,12 @@ private Q_SLOTS:
     void invalidCloseFrame();
 
     /*!
-        \brief Tests the DataProcess for the correct handling of incomplete size fields for large and big payloads.
+        \brief Tests the QWebSocketDataProcessor for the correct handling of incomplete size fields for large and big payloads.
      */
     void incompleteSizeField();
 
     /*!
-        \brief Tests the DataProcessor for the correct handling of incomplete payloads.
+        \brief Tests the QWebSocketDataProcessor for the correct handling of incomplete payloads.
         This includes:
         - incomplete length bytes for large and big payloads (16- and 64-bit values),
         - minimum size representation (see RFC 6455 paragraph 5.2),
@@ -131,7 +131,7 @@ private Q_SLOTS:
     void incompletePayload();
 
     /*!
-        \brief Tests the DataProcessor for the correct handling of invalid UTF-8 payloads.
+        \brief Tests the QWebSocketDataProcessor for the correct handling of invalid UTF-8 payloads.
         This test does not test sequences of frames, only single frames are tested
      */
     void invalidPayload();
@@ -139,7 +139,7 @@ private Q_SLOTS:
     void invalidPayloadInCloseFrame();
 
     /*!
-      Tests the DataProcessor for the correct handling of the minimum size representation requirement of RFC 6455 (see paragraph 5.2)
+      Tests the QWebSocketDataProcessor for the correct handling of the minimum size representation requirement of RFC 6455 (see paragraph 5.2)
      */
     void minimumSizeRequirement();
 
@@ -266,7 +266,7 @@ void tst_DataProcessor::goodBinaryFrames()
 {
     QByteArray data;
     QBuffer buffer;
-    DataProcessor dataProcessor;
+    QWebSocketDataProcessor dataProcessor;
     QFETCH(QByteArray, payload);
 
     data.append((char)(FIN | QWebSocketProtocol::OC_BINARY));
@@ -315,7 +315,7 @@ void tst_DataProcessor::goodTextFrames()
 {
     QByteArray data;
     QBuffer buffer;
-    DataProcessor dataProcessor;
+    QWebSocketDataProcessor dataProcessor;
     QFETCH(QByteArray, payload);
 
     data.append((char)(FIN | QWebSocketProtocol::OC_TEXT));
@@ -364,7 +364,7 @@ void tst_DataProcessor::goodControlFrames()
 {
     QByteArray data;
     QBuffer buffer;
-    DataProcessor dataProcessor;
+    QWebSocketDataProcessor dataProcessor;
     QFETCH(QString, payload);
     QFETCH(QWebSocketProtocol::CloseCode, closeCode);
     quint16 swapped = qToBigEndian<quint16>(closeCode);
@@ -402,7 +402,7 @@ void tst_DataProcessor::nonCharacterCodes()
 
     QByteArray data;
     QBuffer buffer;
-    DataProcessor dataProcessor;
+    QWebSocketDataProcessor dataProcessor;
     QSignalSpy frameSpy(&dataProcessor, SIGNAL(textFrameReceived(QString,bool)));
     QSignalSpy messageSpy(&dataProcessor, SIGNAL(textMessageReceived(QString)));
     QSignalSpy binaryFrameSpy(&dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)));
@@ -434,7 +434,7 @@ void tst_DataProcessor::frameTooSmall()
 {
     QByteArray data;
     QBuffer buffer;
-    DataProcessor dataProcessor;
+    QWebSocketDataProcessor dataProcessor;
     QByteArray firstFrame;
 
     firstFrame.append(quint8(QWebSocketProtocol::OC_TEXT)).append(char(1)).append(QByteArray(1, 'a'));
@@ -596,7 +596,7 @@ void tst_DataProcessor::invalidPayloadInCloseFrame()
 
     QByteArray data;
     QBuffer buffer;
-    DataProcessor dataProcessor;
+    QWebSocketDataProcessor dataProcessor;
     QSignalSpy spy(&dataProcessor, SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
     QSignalSpy textMessageSpy(&dataProcessor, SIGNAL(textMessageReceived(QString)));
     QSignalSpy binaryMessageSpy(&dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)));
@@ -643,7 +643,7 @@ void tst_DataProcessor::doTest()
 
     QByteArray data;
     QBuffer buffer;
-    DataProcessor dataProcessor;
+    QWebSocketDataProcessor dataProcessor;
     QSignalSpy spy(&dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
     QSignalSpy textMessageSpy(&dataProcessor, SIGNAL(textMessageReceived(QString)));
     QSignalSpy binaryMessageSpy(&dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)));
@@ -683,7 +683,7 @@ void tst_DataProcessor::doCloseFrameTest()
 
     QByteArray data;
     QBuffer buffer;
-    DataProcessor dataProcessor;
+    QWebSocketDataProcessor dataProcessor;
     QSignalSpy spy(&dataProcessor, SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
     QSignalSpy errorSpy(&dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
     QSignalSpy textMessageSpy(&dataProcessor, SIGNAL(textMessageReceived(QString)));
@@ -1423,7 +1423,7 @@ void tst_DataProcessor::frameTooBig_data()
     //only data frames are checked for being too big
     //control frames have explicit checking on a maximum payload size of 125, which is tested elsewhere
 
-    swapped64 = qToBigEndian<quint64>(DataProcessor::maxFrameSize() + 1);
+    swapped64 = qToBigEndian<quint64>(QWebSocketDataProcessor::maxFrameSize() + 1);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped64));
     QTest::newRow("Text frame with payload size > INT_MAX")
             << quint8(FIN | QWebSocketProtocol::OC_TEXT)
@@ -1432,7 +1432,7 @@ void tst_DataProcessor::frameTooBig_data()
             << false
             << QWebSocketProtocol::CC_TOO_MUCH_DATA;
 
-    swapped64 = qToBigEndian<quint64>(DataProcessor::maxFrameSize() + 1);
+    swapped64 = qToBigEndian<quint64>(QWebSocketDataProcessor::maxFrameSize() + 1);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped64));
     QTest::newRow("Binary frame with payload size > INT_MAX")
             << quint8(FIN | QWebSocketProtocol::OC_BINARY)
@@ -1441,7 +1441,7 @@ void tst_DataProcessor::frameTooBig_data()
             << false
             << QWebSocketProtocol::CC_TOO_MUCH_DATA;
 
-    swapped64 = qToBigEndian<quint64>(DataProcessor::maxFrameSize() + 1);
+    swapped64 = qToBigEndian<quint64>(QWebSocketDataProcessor::maxFrameSize() + 1);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped64));
     QTest::newRow("Continuation frame with payload size > INT_MAX")
             << quint8(FIN | QWebSocketProtocol::OC_CONTINUE)
