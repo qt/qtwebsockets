@@ -54,8 +54,8 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
     m_resourceName(),
     m_requestUrl(),
     m_origin(origin),
-    m_protocol(""),
-    m_extension(""),
+    m_protocol(),
+    m_extension(),
     m_socketState(QAbstractSocket::UnconnectedState),
     m_key(),
     m_mustMask(true),
@@ -248,11 +248,11 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
     QString resourceName = url.path();
     if (!url.query().isEmpty())
     {
-        resourceName.append("?" + url.query());
+        resourceName.append(QString::fromLatin1("?") + url.query());
     }
     if (resourceName.isEmpty())
     {
-        resourceName = "/";
+        resourceName = QString::fromLatin1("/");
     }
     setResourceName(resourceName);
     enableMasking(mask);
@@ -618,9 +618,9 @@ QByteArray QWebSocketPrivate::generateKey() const
  */
 QString QWebSocketPrivate::calculateAcceptKey(const QString &key) const
 {
-    QString tmpKey = key % "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+    QString tmpKey = key % QString::fromLatin1("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
     QByteArray hash = QCryptographicHash::hash(tmpKey.toLatin1(), QCryptographicHash::Sha1);
-    return QString(hash.toBase64());
+    return QString::fromLatin1(hash.toBase64());
 }
 
 /*!
@@ -660,7 +660,7 @@ QString readLine(QTcpSocket *pSocket)
         }
         else
         {
-            line.append(QChar(c));
+            line.append(QChar::fromLatin1(c));
         }
     }
     return line;
@@ -681,7 +681,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
     bool ok = false;
     QString errorDescription;
 
-    const QString regExpStatusLine("^(HTTP/[0-9]+\\.[0-9]+)\\s([0-9]+)\\s(.*)");
+    const QString regExpStatusLine(QString::fromLatin1("^(HTTP/[0-9]+\\.[0-9]+)\\s([0-9]+)\\s(.*)"));
     const QRegularExpression regExp(regExpStatusLine);
     QString statusLine = readLine(pSocket);
     QString httpProtocol;
@@ -710,7 +710,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
         QMap<QString, QString> headers;
         while (!headerLine.isEmpty())
         {
-            QStringList headerField = headerLine.split(QString(": "), QString::SkipEmptyParts);
+            QStringList headerField = headerLine.split(QString::fromLatin1(": "), QString::SkipEmptyParts);
             headers.insertMulti(headerField[0], headerField[1]);
             headerLine = readLine(pSocket);
         }
@@ -730,11 +730,11 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
             //TODO: do not check the httpStatusText right now
             ok = !(acceptKey.isEmpty() ||
                    (!conversionOk || (version < 1.1f)) ||
-                   (upgrade.toLower() != "websocket") ||
-                   (connection.toLower() != "upgrade"));
+                   (upgrade.toLower() != QString::fromLatin1("websocket")) ||
+                   (connection.toLower() != QString::fromLatin1("upgrade")));
             if (ok)
             {
-                QString accept = calculateAcceptKey(m_key);
+                QString accept = calculateAcceptKey(QString::fromLatin1(m_key));
                 ok = (accept == acceptKey);
                 if (!ok)
                 {
@@ -801,7 +801,7 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
         if (webSocketState == QAbstractSocket::ConnectingState)
         {
             m_key = generateKey();
-            QString handshake = createHandShakeRequest(m_resourceName, m_requestUrl.host() % ":" % QString::number(m_requestUrl.port(80)), origin(), "", "", m_key);
+            QString handshake = createHandShakeRequest(m_resourceName, m_requestUrl.host() % QString::fromLatin1(":") % QString::number(m_requestUrl.port(80)), origin(), QString(), QString(), m_key);
             m_pSocket->write(handshake.toLatin1());
         }
         break;
@@ -917,23 +917,23 @@ QString QWebSocketPrivate::createHandShakeRequest(QString resourceName,
 {
     QStringList handshakeRequest;
 
-    handshakeRequest << "GET " % resourceName % " HTTP/1.1" <<
-                        "Host: " % host <<
+    handshakeRequest << QString::fromLatin1("GET ") % resourceName % QString::fromLatin1(" HTTP/1.1") <<
+                        QString::fromLatin1("Host: ") % host <<
                         "Upgrade: websocket" <<
                         "Connection: Upgrade" <<
-                        "Sec-WebSocket-Key: " % QString(key);
+                        QString::fromLatin1("Sec-WebSocket-Key: ") % QString(QString::fromLatin1(key));
     if (!origin.isEmpty())
     {
-        handshakeRequest << "Origin: " % origin;
+        handshakeRequest << QString::fromLatin1("Origin: ") % origin;
     }
-    handshakeRequest << "Sec-WebSocket-Version: " % QString::number(QWebSocketProtocol::currentVersion());
+    handshakeRequest << QString::fromLatin1("Sec-WebSocket-Version: ") % QString::number(QWebSocketProtocol::currentVersion());
     if (extensions.length() > 0)
     {
-        handshakeRequest << "Sec-WebSocket-Extensions: " % extensions;
+        handshakeRequest << QString::fromLatin1("Sec-WebSocket-Extensions: ") % extensions;
     }
     if (protocols.length() > 0)
     {
-        handshakeRequest << "Sec-WebSocket-Protocol: " % protocols;
+        handshakeRequest << QString::fromLatin1("Sec-WebSocket-Protocol: ") % protocols;
     }
     handshakeRequest << "\r\n";
 
