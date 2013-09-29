@@ -194,7 +194,7 @@ QWebSocket *QWebSocketPrivate::upgradeFrom(QTcpSocket *pTcpSocket,
     pWebSocket->d_func()->setRequestUrl(request.getRequestUrl());
     pWebSocket->d_func()->setProtocol(response.getAcceptedProtocol());
     pWebSocket->d_func()->setResourceName(request.getRequestUrl().toString(QUrl::RemoveUserInfo));
-    pWebSocket->d_func()->enableMasking(false);	//a server should not send masked frames
+    pWebSocket->d_func()->enableMasking(false);    //a server should not send masked frames
 
     return pWebSocket;
 }
@@ -212,7 +212,7 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
         {
             maskingKey = generateMaskingKey();
         }
-        quint16 code = qToBigEndian<quint16>(closeCode);
+        const quint16 code = qToBigEndian<quint16>(closeCode);
         QByteArray payload;
         payload.append(static_cast<const char *>(static_cast<const void *>(&code)), 2);
         if (!reason.isEmpty())
@@ -248,11 +248,11 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
     QString resourceName = url.path();
     if (!url.query().isEmpty())
     {
-        resourceName.append(QString::fromLatin1("?") % url.query());
+        resourceName.append(QStringLiteral("?") % url.query());
     }
     if (resourceName.isEmpty())
     {
-        resourceName = QString::fromLatin1("/");
+        resourceName = QStringLiteral("/");
     }
     setResourceName(resourceName);
     enableMasking(mask);
@@ -536,11 +536,11 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
             maskingKey = generateMaskingKey();
         }
 
-        bool isLastFrame = (i == (numFrames - 1));
-        bool isFirstFrame = (i == 0);
+        const bool isLastFrame = (i == (numFrames - 1));
+        const bool isFirstFrame = (i == 0);
 
-        quint64 size = qMin(bytesLeft, FRAME_SIZE_IN_BYTES);
-        QWebSocketProtocol::OpCode opcode = isFirstFrame ? firstOpCode : QWebSocketProtocol::OC_CONTINUE;
+        const quint64 size = qMin(bytesLeft, FRAME_SIZE_IN_BYTES);
+        const QWebSocketProtocol::OpCode opcode = isFirstFrame ? firstOpCode : QWebSocketProtocol::OC_CONTINUE;
 
         //write header
         bytesWritten += m_pSocket->write(getFrameHeader(opcode, size, maskingKey, isLastFrame));
@@ -618,8 +618,8 @@ QByteArray QWebSocketPrivate::generateKey() const
  */
 QString QWebSocketPrivate::calculateAcceptKey(const QString &key) const
 {
-    QString tmpKey = key % QString::fromLatin1("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
-    QByteArray hash = QCryptographicHash::hash(tmpKey.toLatin1(), QCryptographicHash::Sha1);
+    const QString tmpKey = key % QStringLiteral("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
+    const QByteArray hash = QCryptographicHash::hash(tmpKey.toLatin1(), QCryptographicHash::Sha1);
     return QString::fromLatin1(hash.toBase64());
 }
 
@@ -681,13 +681,13 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
     bool ok = false;
     QString errorDescription;
 
-    const QString regExpStatusLine(QString::fromLatin1("^(HTTP/[0-9]+\\.[0-9]+)\\s([0-9]+)\\s(.*)"));
+    const QString regExpStatusLine(QStringLiteral("^(HTTP/[0-9]+\\.[0-9]+)\\s([0-9]+)\\s(.*)"));
     const QRegularExpression regExp(regExpStatusLine);
-    QString statusLine = readLine(pSocket);
+    const QString statusLine = readLine(pSocket);
     QString httpProtocol;
     int httpStatusCode;
     QString httpStatusMessage;
-    QRegularExpressionMatch match = regExp.match(statusLine);
+    const QRegularExpressionMatch match = regExp.match(statusLine);
     if (match.hasMatch())
     {
         QStringList tokens = match.capturedTexts();
@@ -710,31 +710,31 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
         QMap<QString, QString> headers;
         while (!headerLine.isEmpty())
         {
-            QStringList headerField = headerLine.split(QString::fromLatin1(": "), QString::SkipEmptyParts);
+            const QStringList headerField = headerLine.split(QStringLiteral(": "), QString::SkipEmptyParts);
             headers.insertMulti(headerField[0], headerField[1]);
             headerLine = readLine(pSocket);
         }
 
-        QString acceptKey = headers.value("Sec-WebSocket-Accept", "");
-        QString upgrade = headers.value("Upgrade", "");
-        QString connection = headers.value("Connection", "");
+        const QString acceptKey = headers.value(QStringLiteral("Sec-WebSocket-Accept"), QStringLiteral(""));
+        const QString upgrade = headers.value(QStringLiteral("Upgrade"), QStringLiteral(""));
+        const QString connection = headers.value(QStringLiteral("Connection"), QStringLiteral(""));
         //unused for the moment
-        //QString extensions = headers.value("Sec-WebSocket-Extensions", "");
-        //QString protocol = headers.value("Sec-WebSocket-Protocol", "");
-        QString version = headers.value("Sec-WebSocket-Version", "");
+        //const QString extensions = headers.value(QStringLiteral("Sec-WebSocket-Extensions"), QStringLiteral(""));
+        //const QString protocol = headers.value(QStringLiteral("Sec-WebSocket-Protocol"), QStringLiteral(""));
+        const QString version = headers.value(QStringLiteral("Sec-WebSocket-Version"), QStringLiteral(""));
 
         if (httpStatusCode == 101)	//HTTP/x.y 101 Switching Protocols
         {
             bool conversionOk = false;
-            float version = httpProtocol.midRef(5).toFloat(&conversionOk);
+            const float version = httpProtocol.midRef(5).toFloat(&conversionOk);
             //TODO: do not check the httpStatusText right now
             ok = !(acceptKey.isEmpty() ||
                    (!conversionOk || (version < 1.1f)) ||
-                   (upgrade.toLower() != QString::fromLatin1("websocket")) ||
-                   (connection.toLower() != QString::fromLatin1("upgrade")));
+                   (upgrade.toLower() != QStringLiteral("websocket")) ||
+                   (connection.toLower() != QStringLiteral("upgrade")));
             if (ok)
             {
-                QString accept = calculateAcceptKey(QString::fromLatin1(m_key));
+                const QString accept = calculateAcceptKey(QString::fromLatin1(m_key));
                 ok = (accept == acceptKey);
                 if (!ok)
                 {
@@ -750,12 +750,12 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
         {
             if (!version.isEmpty())
             {
-                QStringList versions = version.split(", ", QString::SkipEmptyParts);
+                const QStringList versions = version.split(QStringLiteral(", "), QString::SkipEmptyParts);
                 if (!versions.contains(QString::number(QWebSocketProtocol::currentVersion())))
                 {
                     //if needed to switch protocol version, then we are finished here
                     //because we cannot handle other protocols than the RFC one (v13)
-                    errorDescription = tr("Handshake: Server requests a version that we don't support: %1.").arg(versions.join(", "));
+                    errorDescription = tr("Handshake: Server requests a version that we don't support: %1.").arg(versions.join(QStringLiteral(", ")));
                     ok = false;
                 }
                 else
@@ -801,7 +801,7 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
         if (webSocketState == QAbstractSocket::ConnectingState)
         {
             m_key = generateKey();
-            QString handshake = createHandShakeRequest(m_resourceName, m_requestUrl.host() % QString::fromLatin1(":") % QString::number(m_requestUrl.port(80)), origin(), QString(), QString(), m_key);
+            QString handshake = createHandShakeRequest(m_resourceName, m_requestUrl.host() % QStringLiteral(":") % QString::number(m_requestUrl.port(80)), origin(), QStringLiteral(""), QStringLiteral(""), m_key);
             m_pSocket->write(handshake.toLatin1());
         }
         break;
@@ -917,27 +917,27 @@ QString QWebSocketPrivate::createHandShakeRequest(QString resourceName,
 {
     QStringList handshakeRequest;
 
-    handshakeRequest << QString::fromLatin1("GET ") % resourceName % QString::fromLatin1(" HTTP/1.1") <<
-                        QString::fromLatin1("Host: ") % host <<
-                        "Upgrade: websocket" <<
-                        "Connection: Upgrade" <<
-                        QString::fromLatin1("Sec-WebSocket-Key: ") % QString::fromLatin1(key);
+    handshakeRequest << QStringLiteral("GET ") % resourceName % QStringLiteral(" HTTP/1.1") <<
+                        QStringLiteral("Host: ") % host <<
+                        QStringLiteral("Upgrade: websocket") <<
+                        QStringLiteral("Connection: Upgrade") <<
+                        QStringLiteral("Sec-WebSocket-Key: ") % QString::fromLatin1(key);
     if (!origin.isEmpty())
     {
-        handshakeRequest << QString::fromLatin1("Origin: ") % origin;
+        handshakeRequest << QStringLiteral("Origin: ") % origin;
     }
-    handshakeRequest << QString::fromLatin1("Sec-WebSocket-Version: ") % QString::number(QWebSocketProtocol::currentVersion());
+    handshakeRequest << QStringLiteral("Sec-WebSocket-Version: ") % QString::number(QWebSocketProtocol::currentVersion());
     if (extensions.length() > 0)
     {
-        handshakeRequest << QString::fromLatin1("Sec-WebSocket-Extensions: ") % extensions;
+        handshakeRequest << QStringLiteral("Sec-WebSocket-Extensions: ") % extensions;
     }
     if (protocols.length() > 0)
     {
-        handshakeRequest << QString::fromLatin1("Sec-WebSocket-Protocol: ") % protocols;
+        handshakeRequest << QStringLiteral("Sec-WebSocket-Protocol: ") % protocols;
     }
-    handshakeRequest << "\r\n";
+    handshakeRequest << QStringLiteral("\r\n");
 
-    return handshakeRequest.join("\r\n");
+    return handshakeRequest.join(QStringLiteral("\r\n"));
 }
 
 /*!
