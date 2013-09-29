@@ -87,7 +87,7 @@ QString HandshakeResponse::getAcceptedProtocol() const
  */
 QString HandshakeResponse::calculateAcceptKey(const QString &key) const
 {
-    QString tmpKey = key + QString::fromLatin1("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");	//the UID comes from RFC6455
+    QString tmpKey = key + QString::fromLatin1("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");    //the UID comes from RFC6455
     QByteArray hash = QCryptographicHash::hash(tmpKey.toLatin1(), QCryptographicHash::Sha1);
     return QString::fromLatin1(hash.toBase64());
 }
@@ -147,11 +147,11 @@ QString HandshakeResponse::getHandshakeResponse(const HandshakeRequest &request,
                 {
                     origin = QString::fromLatin1("*");
                 }
-                response << QString::fromLatin1("Server: ") % serverName <<
-                            "Access-Control-Allow-Credentials: false"		<<	//do not allow credentialed request (containing cookies)
-                            "Access-Control-Allow-Methods: GET"				<<	//only GET is allowed during handshaking
-                            "Access-Control-Allow-Headers: content-type"	<<	//this is OK; only the content-type header is allowed, no other headers are accepted
-                            QString::fromLatin1("Access-Control-Allow-Origin: ") % origin		<<
+                response << QString::fromLatin1("Server: ") % serverName    <<
+                            "Access-Control-Allow-Credentials: false"       <<	//do not allow credentialed request (containing cookies)
+                            "Access-Control-Allow-Methods: GET"             <<	//only GET is allowed during handshaking
+                            "Access-Control-Allow-Headers: content-type"    <<	//this is OK; only the content-type header is allowed, no other headers are accepted
+                            QString::fromLatin1("Access-Control-Allow-Origin: ") % origin <<
                             QString::fromLatin1("Date: ") % QDateTime::currentDateTimeUtc().toString("ddd, dd MMM yyyy hh:mm:ss 'GMT'");
 
                 m_acceptedVersion = QWebSocketProtocol::currentVersion();
