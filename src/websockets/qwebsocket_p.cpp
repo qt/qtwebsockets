@@ -248,7 +248,7 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
     QString resourceName = url.path();
     if (!url.query().isEmpty())
     {
-        resourceName.append(QString::fromLatin1("?") + url.query());
+        resourceName.append(QString::fromLatin1("?") % url.query());
     }
     if (resourceName.isEmpty())
     {
@@ -921,7 +921,7 @@ QString QWebSocketPrivate::createHandShakeRequest(QString resourceName,
                         QString::fromLatin1("Host: ") % host <<
                         "Upgrade: websocket" <<
                         "Connection: Upgrade" <<
-                        QString::fromLatin1("Sec-WebSocket-Key: ") % QString(QString::fromLatin1(key));
+                        QString::fromLatin1("Sec-WebSocket-Key: ") % QString::fromLatin1(key);
     if (!origin.isEmpty())
     {
         handshakeRequest << QString::fromLatin1("Origin: ") % origin;
