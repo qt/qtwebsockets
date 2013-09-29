@@ -4,14 +4,13 @@
 #include <QHostInfo>
 #include <QDebug>
 #include "qwebsocket.h"
-#include "unittests.h"
 
-class ComplianceTest : public QObject
+class tst_ComplianceTest : public QObject
 {
     Q_OBJECT
 
 public:
-    ComplianceTest();
+    tst_ComplianceTest();
 
 private Q_SLOTS:
     void initTestCase();
@@ -30,28 +29,28 @@ private:
     void runTestCase(int nbr, int total);
 };
 
-ComplianceTest::ComplianceTest() :
+tst_ComplianceTest::tst_ComplianceTest() :
     m_url("ws://localhost:9001")
 {
 }
 
-void ComplianceTest::initTestCase()
+void tst_ComplianceTest::initTestCase()
 {
 }
 
-void ComplianceTest::cleanupTestCase()
+void tst_ComplianceTest::cleanupTestCase()
 {
 }
 
-void ComplianceTest::init()
+void tst_ComplianceTest::init()
 {
 }
 
-void ComplianceTest::cleanup()
+void tst_ComplianceTest::cleanup()
 {
 }
 
-void ComplianceTest::runTestCase(int nbr, int total)
+void tst_ComplianceTest::runTestCase(int nbr, int total)
 {
     if (nbr == total)
     {
@@ -85,12 +84,12 @@ void ComplianceTest::runTestCase(int nbr, int total)
     runTestCase(nbr + 1, total);
 }
 
-void ComplianceTest::runTestCases(int startNbr, int stopNbr)
+void tst_ComplianceTest::runTestCases(int startNbr, int stopNbr)
 {
     runTestCase(startNbr, stopNbr);
 }
 
-void ComplianceTest::autobahnTest()
+void tst_ComplianceTest::autobahnTest()
 {
     //connect to autobahn server at url ws://ipaddress:port/getCaseCount
     QWebSocket *pWebSocket = new QWebSocket;
@@ -120,7 +119,7 @@ void ComplianceTest::autobahnTest()
     pWebSocket = 0;
 }
 
-//DECLARE_TEST(ComplianceTest)
+QTEST_MAIN(tst_ComplianceTest)
 
 #include "tst_compliance.moc"
 

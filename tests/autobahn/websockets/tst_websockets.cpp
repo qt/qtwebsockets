@@ -4,14 +4,13 @@
 #include <QHostInfo>
 #include <QDebug>
 #include "qwebsocket.h"
-#include "unittests.h"
 
-class WebSocketsTest : public QObject
+class tst_WebSocketsTest : public QObject
 {
     Q_OBJECT
 
 public:
-    WebSocketsTest();
+    tst_WebSocketsTest();
 
 private Q_SLOTS:
     void initTestCase();
@@ -56,13 +55,13 @@ private:
     QUrl m_url;
 };
 
-WebSocketsTest::WebSocketsTest() :
+tst_WebSocketsTest::tst_WebSocketsTest() :
     m_pWebSocket(0),
     m_url("ws://localhost:9000")
 {
 }
 
-void WebSocketsTest::initTestCase()
+void tst_WebSocketsTest::initTestCase()
 {
     m_pWebSocket = new QWebSocket();
     /*m_pWebSocket->open(m_url, true);
@@ -70,7 +69,7 @@ void WebSocketsTest::initTestCase()
     QVERIFY(m_pWebSocket->isValid());*/
 }
 
-void WebSocketsTest::cleanupTestCase()
+void tst_WebSocketsTest::cleanupTestCase()
 {
     if (m_pWebSocket)
     {
@@ -81,15 +80,15 @@ void WebSocketsTest::cleanupTestCase()
     }
 }
 
-void WebSocketsTest::init()
+void tst_WebSocketsTest::init()
 {
 }
 
-void WebSocketsTest::cleanup()
+void tst_WebSocketsTest::cleanup()
 {
 }
 
-void WebSocketsTest::testTextMessage()
+void tst_WebSocketsTest::testTextMessage()
 {
     const char *message = "Hello world!";
 
@@ -111,7 +110,7 @@ void WebSocketsTest::testTextMessage()
     QCOMPARE(spy.takeFirst().at(0).toString(), qMessage);
 }
 
-void WebSocketsTest::testBinaryMessage()
+void tst_WebSocketsTest::testBinaryMessage()
 {
     QSignalSpy spy(m_pWebSocket, SIGNAL(binaryMessageReceived(QByteArray)));
 
@@ -125,14 +124,14 @@ void WebSocketsTest::testBinaryMessage()
     QCOMPARE(spy.takeFirst().at(0).toByteArray(), data);
 }
 
-void WebSocketsTest::testLocalAddress()
+void tst_WebSocketsTest::testLocalAddress()
 {
     QCOMPARE(m_pWebSocket->localAddress().toString(), QString("127.0.0.1"));
     quint16 localPort = m_pWebSocket->localPort();
     QVERIFY2(localPort > 0, "Local port is invalid.");
 }
 
-void WebSocketsTest::testPeerAddress()
+void tst_WebSocketsTest::testPeerAddress()
 {
     QHostInfo hostInfo = QHostInfo::fromName(m_url.host());
     QList<QHostAddress> addresses = hostInfo.addresses();
@@ -156,7 +155,7 @@ void WebSocketsTest::testPeerAddress()
     QCOMPARE(m_pWebSocket->peerPort(), (quint16)m_url.port(80));
 }
 
-void WebSocketsTest::testProxy()
+void tst_WebSocketsTest::testProxy()
 {
     QNetworkProxy oldProxy = m_pWebSocket->proxy();
     QNetworkProxy proxy(QNetworkProxy::HttpProxy, QString("proxy.network.com"), 80);
@@ -166,13 +165,13 @@ void WebSocketsTest::testProxy()
     QCOMPARE(oldProxy, m_pWebSocket->proxy());
 }
 
-void WebSocketsTest::testInvalidWithUnopenedSocket()
+void tst_WebSocketsTest::testInvalidWithUnopenedSocket()
 {
     QWebSocket qws;
     QCOMPARE(qws.isValid(), false);
 }
 
-//DECLARE_TEST(WebSocketsTest)
+QTEST_MAIN(tst_WebSocketsTest)
 
 #include "tst_websockets.moc"
 
