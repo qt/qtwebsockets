@@ -87,9 +87,9 @@ QString HandshakeResponse::getAcceptedProtocol() const
  */
 QString HandshakeResponse::calculateAcceptKey(const QString &key) const
 {
-    QString tmpKey = key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";	//the UID comes from RFC6455
+    QString tmpKey = key + QString::fromLatin1("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");	//the UID comes from RFC6455
     QByteArray hash = QCryptographicHash::hash(tmpKey.toLatin1(), QCryptographicHash::Sha1);
-    return QString(hash.toBase64());
+    return QString::fromLatin1(hash.toBase64());
 }
 
 /*!
@@ -131,28 +131,28 @@ QString HandshakeResponse::getHandshakeResponse(const HandshakeRequest &request,
                 response << "HTTP/1.1 101 Switching Protocols" <<
                             "Upgrade: websocket" <<
                             "Connection: Upgrade" <<
-                            "Sec-WebSocket-Accept: " % acceptKey;
+                            QString::fromLatin1("Sec-WebSocket-Accept: ") % acceptKey;
                 if (!matchingProtocols.isEmpty())
                 {
                     m_acceptedProtocol = matchingProtocols.first();
-                    response << "Sec-WebSocket-Protocol: " % m_acceptedProtocol;
+                    response << QString::fromLatin1("Sec-WebSocket-Protocol: ") % m_acceptedProtocol;
                 }
                 if (!matchingExtensions.isEmpty())
                 {
                     m_acceptedExtension = matchingExtensions.first();
-                    response << "Sec-WebSocket-Extensions: " % m_acceptedExtension;
+                    response << QString::fromLatin1("Sec-WebSocket-Extensions: ") % m_acceptedExtension;
                 }
                 QString origin = request.getOrigin().trimmed();
                 if (origin.isEmpty())
                 {
-                    origin = "*";
+                    origin = QString::fromLatin1("*");
                 }
-                response << "Server: " + serverName <<
+                response << QString::fromLatin1("Server: ") % serverName <<
                             "Access-Control-Allow-Credentials: false"		<<	//do not allow credentialed request (containing cookies)
                             "Access-Control-Allow-Methods: GET"				<<	//only GET is allowed during handshaking
                             "Access-Control-Allow-Headers: content-type"	<<	//this is OK; only the content-type header is allowed, no other headers are accepted
-                            "Access-Control-Allow-Origin: " % origin		<<
-                            "Date: " % QDateTime::currentDateTimeUtc().toString("ddd, dd MMM yyyy hh:mm:ss 'GMT'");
+                            QString::fromLatin1("Access-Control-Allow-Origin: ") % origin		<<
+                            QString::fromLatin1("Date: ") % QDateTime::currentDateTimeUtc().toString("ddd, dd MMM yyyy hh:mm:ss 'GMT'");
 
                 m_acceptedVersion = QWebSocketProtocol::currentVersion();
                 m_canUpgrade = true;
@@ -170,7 +170,7 @@ QString HandshakeResponse::getHandshakeResponse(const HandshakeRequest &request,
             {
                 versions << QString::number(static_cast<int>(version));
             }
-            response << "Sec-WebSocket-Version: " % versions.join(", ");
+            response << QString::fromLatin1("Sec-WebSocket-Version: ") % versions.join(", ");
         }
     }
     response << "\r\n";	//append empty line at end of header
