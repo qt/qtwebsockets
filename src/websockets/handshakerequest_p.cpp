@@ -204,13 +204,13 @@ QTextStream &HandshakeRequest::readFromStream(QTextStream &textStream)
         }
 
         const QStringList versionLines = m_headers.values(QStringLiteral("Sec-WebSocket-Version"));
-        Q_FOREACH(QString versionLine, versionLines)
+        for (QStringList::const_iterator v = versionLines.begin(); v != versionLines.end(); ++v)
         {
-            const QStringList versions = versionLine.split(QStringLiteral(","), QString::SkipEmptyParts);
-            Q_FOREACH(QString version, versions)
+            const QStringList versions = (*v).split(QStringLiteral(","), QString::SkipEmptyParts);
+            for (QStringList::const_iterator i = versions.begin(); i != versions.end(); ++i)
             {
-                const QWebSocketProtocol::Version ver = QWebSocketProtocol::versionFromString(version.trimmed());
-                m_versions << ver;
+               const QWebSocketProtocol::Version ver = QWebSocketProtocol::versionFromString((*i).trimmed());
+               m_versions << ver;
             }
         }
         qStableSort(m_versions.begin(), m_versions.end(), qGreater<QWebSocketProtocol::Version>()); //sort in descending order
@@ -219,31 +219,32 @@ QTextStream &HandshakeRequest::readFromStream(QTextStream &textStream)
         const QString connection = m_headers.value(QStringLiteral("Connection"), QStringLiteral(""));     //must contain "Upgrade", case-insensitive
         const QStringList connectionLine = connection.split(QStringLiteral(","), QString::SkipEmptyParts);
         QStringList connectionValues;
-        Q_FOREACH(QString connection, connectionLine)
+        for (QStringList::const_iterator c = connectionLine.begin(); c != connectionLine.end(); ++c)
         {
-            connectionValues << connection.trimmed();
+            connectionValues << (*c).trimmed();
         }
 
         //optional headers
         m_origin = m_headers.value(QStringLiteral("Sec-WebSocket-Origin"), QStringLiteral(""));
         const QStringList protocolLines = m_headers.values(QStringLiteral("Sec-WebSocket-Protocol"));
-        Q_FOREACH(QString protocolLine, protocolLines)
+        for (QStringList::const_iterator pl = protocolLines.begin(); pl != protocolLines.end(); ++pl)
         {
-            QStringList protocols = protocolLine.split(QStringLiteral(","), QString::SkipEmptyParts);
-            Q_FOREACH(QString protocol, protocols)
+            QStringList protocols = (*pl).split(QStringLiteral(","), QString::SkipEmptyParts);
+            for (QStringList::const_iterator p = protocols.begin(); p != protocols.end(); ++p)
             {
-                m_protocols << protocol.trimmed();
+                m_protocols << (*p).trimmed();
             }
         }
         const QStringList extensionLines = m_headers.values(QStringLiteral("Sec-WebSocket-Extensions"));
-        Q_FOREACH(QString extensionLine, extensionLines)
+        for (QStringList::const_iterator el = extensionLines.begin(); el != extensionLines.end(); ++el)
         {
-            QStringList extensions = extensionLine.split(QStringLiteral(","), QString::SkipEmptyParts);
-            Q_FOREACH(QString extension, extensions)
+            QStringList extensions = (*el).split(QStringLiteral(","), QString::SkipEmptyParts);
+            for (QStringList::const_iterator e = extensions.begin(); e != extensions.end(); ++e)
             {
-                m_extensions << extension.trimmed();
+                m_extensions << (*e).trimmed();
             }
         }
+
         //TODO: authentication field
 
         m_isValid = !(host.isEmpty() ||
