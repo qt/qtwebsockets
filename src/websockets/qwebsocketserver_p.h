@@ -44,6 +44,8 @@ class QWebSocketServer;
 class QWebSocketServerPrivate : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(QWebSocketServerPrivate)
+    Q_DECLARE_PUBLIC(QWebSocketServer)
 
 public:
     explicit QWebSocketServerPrivate(const QString &serverName, QWebSocketServer * const pWebSocketServer, QObject *parent = 0);
@@ -86,7 +88,6 @@ private Q_SLOTS:
     void handshakeReceived();
 
 private:
-    Q_DECLARE_PUBLIC(QWebSocketServer)
     QWebSocketServer * const q_ptr;
 
     QTcpServer *m_pTcpServer;

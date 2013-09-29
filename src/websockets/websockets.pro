@@ -15,15 +15,15 @@ PUBLIC_HEADERS += \
     $$PWD/qwebsocketserver.h \
     $$PWD/qwebsocketprotocol.h \
     $$PWD/qwebsocketsglobal.h \
-    $$PWD/qcorsauthenticator.h
+    $$PWD/qwebsocketcorsauthenticator.h
 
 PRIVATE_HEADERS += \
     $$PWD/qwebsocket_p.h \
     $$PWD/qwebsocketserver_p.h \
-    $$PWD/handshakerequest_p.h \
-    $$PWD/handshakeresponse_p.h \
-    $$PWD/dataprocessor_p.h \
-    $$PWD/qcorsauthenticator_p.h
+    $$PWD/qwebsockethandshakerequest_p.h \
+    $$PWD/qwebsockethandshakeresponse_p.h \
+    $$PWD/qwebsocketdataprocessor_p.h \
+    $$PWD/qwebsocketcorsauthenticator_p.h
 
 SOURCES += \
     $$PWD/qwebsocket.cpp \
@@ -31,15 +31,9 @@ SOURCES += \
     $$PWD/qwebsocketserver.cpp \
     $$PWD/qwebsocketserver_p.cpp \
     $$PWD/qwebsocketprotocol.cpp \
-    $$PWD/handshakerequest_p.cpp \
-    $$PWD/handshakeresponse_p.cpp \
-    $$PWD/dataprocessor_p.cpp \
-    $$PWD/qcorsauthenticator.cpp
+    $$PWD/qwebsockethandshakerequest_p.cpp \
+    $$PWD/qwebsockethandshakeresponse_p.cpp \
+    $$PWD/qwebsocketdataprocessor_p.cpp \
+    $$PWD/qwebsocketcorsauthenticator.cpp
 
 HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS
-
-#mac:QMAKE_FRAMEWORK_BUNDLE_NAME = $$TARGET
-#mac:QMAKE_CXXFLAGS += -Wall -Werror -Wextra
-
-
-

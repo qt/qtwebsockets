@@ -17,8 +17,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include "handshakeresponse_p.h"
-#include "handshakerequest_p.h"
+#include "qwebsockethandshakeresponse_p.h"
+#include "qwebsockethandshakerequest_p.h"
 #include <QString>
 #include <QTextStream>
 #include <QByteArray>
@@ -34,7 +34,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \internal
  */
-HandshakeResponse::HandshakeResponse(const HandshakeRequest &request,
+QWebSocketHandshakeResponse::QWebSocketHandshakeResponse(const QWebSocketHandshakeRequest &request,
                                      const QString &serverName,
                                      bool isOriginAllowed,
                                      const QList<QWebSocketProtocol::Version> &supportedVersions,
@@ -54,14 +54,14 @@ HandshakeResponse::HandshakeResponse(const HandshakeRequest &request,
 /*!
     \internal
  */
-HandshakeResponse::~HandshakeResponse()
+QWebSocketHandshakeResponse::~QWebSocketHandshakeResponse()
 {
 }
 
 /*!
     \internal
  */
-bool HandshakeResponse::isValid() const
+bool QWebSocketHandshakeResponse::isValid() const
 {
     return m_isValid;
 }
@@ -69,7 +69,7 @@ bool HandshakeResponse::isValid() const
 /*!
     \internal
  */
-bool HandshakeResponse::canUpgrade() const
+bool QWebSocketHandshakeResponse::canUpgrade() const
 {
     return m_isValid && m_canUpgrade;
 }
@@ -77,7 +77,7 @@ bool HandshakeResponse::canUpgrade() const
 /*!
     \internal
  */
-QString HandshakeResponse::getAcceptedProtocol() const
+QString QWebSocketHandshakeResponse::getAcceptedProtocol() const
 {
     return m_acceptedProtocol;
 }
@@ -85,7 +85,7 @@ QString HandshakeResponse::getAcceptedProtocol() const
 /*!
     \internal
  */
-QString HandshakeResponse::calculateAcceptKey(const QString &key) const
+QString QWebSocketHandshakeResponse::calculateAcceptKey(const QString &key) const
 {
     const QString tmpKey = key % QStringLiteral("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");    //the UID comes from RFC6455
     const QByteArray hash = QCryptographicHash::hash(tmpKey.toLatin1(), QCryptographicHash::Sha1);
@@ -95,7 +95,7 @@ QString HandshakeResponse::calculateAcceptKey(const QString &key) const
 /*!
     \internal
  */
-QString HandshakeResponse::getHandshakeResponse(const HandshakeRequest &request,
+QString QWebSocketHandshakeResponse::getHandshakeResponse(const QWebSocketHandshakeRequest &request,
                                                 const QString &serverName,
                                                 bool isOriginAllowed,
                                                 const QList<QWebSocketProtocol::Version> &supportedVersions,
@@ -180,7 +180,7 @@ QString HandshakeResponse::getHandshakeResponse(const HandshakeRequest &request,
 /*!
     \internal
  */
-QTextStream &HandshakeResponse::writeToStream(QTextStream &textStream) const
+QTextStream &QWebSocketHandshakeResponse::writeToStream(QTextStream &textStream) const
 {
     if (!m_response.isEmpty())
     {
@@ -196,7 +196,7 @@ QTextStream &HandshakeResponse::writeToStream(QTextStream &textStream) const
 /*!
     \internal
  */
-QTextStream &operator <<(QTextStream &stream, const HandshakeResponse &response)
+QTextStream &operator <<(QTextStream &stream, const QWebSocketHandshakeResponse &response)
 {
     return response.writeToStream(stream);
 }
@@ -204,7 +204,7 @@ QTextStream &operator <<(QTextStream &stream, const HandshakeResponse &response)
 /*!
     \internal
  */
-QWebSocketProtocol::Version HandshakeResponse::getAcceptedVersion() const
+QWebSocketProtocol::Version QWebSocketHandshakeResponse::getAcceptedVersion() const
 {
     return m_acceptedVersion;
 }
@@ -212,7 +212,7 @@ QWebSocketProtocol::Version HandshakeResponse::getAcceptedVersion() const
 /*!
     \internal
  */
-QString HandshakeResponse::getAcceptedExtension() const
+QString QWebSocketHandshakeResponse::getAcceptedExtension() const
 {
     return m_acceptedExtension;
 }

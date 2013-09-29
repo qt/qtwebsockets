@@ -17,8 +17,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef DATAPROCESSOR_P_H
-#define DATAPROCESSOR_P_H
+#ifndef QWEBSOCKETDATAPROCESSOR_P_H
+#define QWEBSOCKETDATAPROCESSOR_P_H
 
 //
 //  W A R N I N G
@@ -40,18 +40,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 QT_BEGIN_NAMESPACE
 
 class QIODevice;
-class Frame;
+class QWebSocketFrame;
 
 /*!
     \internal
     The DataProcessor class reads and interprets incoming websocket messages, and emits appropriate signals.
  */
-class DataProcessor: public QObject
+class QWebSocketDataProcessor: public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(QWebSocketDataProcessor)
+
 public:
-    explicit DataProcessor(QObject *parent = 0);
-    virtual ~DataProcessor();
+    explicit QWebSocketDataProcessor(QObject *parent = 0);
+    virtual ~QWebSocketDataProcessor();
 
     static quint64 maxMessageSize();
     static quint64 maxFrameSize();
@@ -71,7 +73,6 @@ public Q_SLOTS:
     void clear();
 
 private:
-    Q_DISABLE_COPY(DataProcessor)
     enum
     {
         PS_READ_HEADER,
@@ -94,9 +95,9 @@ private:
     QTextCodec::ConverterState *m_pConverterState;
     QTextCodec *m_pTextCodec;
 
-    bool processControlFrame(const Frame &frame);
+    bool processControlFrame(const QWebSocketFrame &frame);
 };
 
 QT_END_NAMESPACE
 
-#endif // DATAPROCESSOR_P_H
+#endif // QWEBSOCKETDATAPROCESSOR_P_H

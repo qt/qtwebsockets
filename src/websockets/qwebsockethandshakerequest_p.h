@@ -17,8 +17,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef HANDSHAKEREQUEST_P_H
-#define HANDSHAKEREQUEST_P_H
+#ifndef QWEBSOCKETHANDSHAKEREQUEST_P_H
+#define QWEBSOCKETHANDSHAKEREQUEST_P_H
 //
 //  W A R N I N G
 //  -------------
@@ -42,11 +42,13 @@ QT_BEGIN_NAMESPACE
 
 class QTextStream;
 
-class HandshakeRequest
+class QWebSocketHandshakeRequest
 {
+    Q_DISABLE_COPY(QWebSocketHandshakeRequest)
+
 public:
-    HandshakeRequest(int port, bool isSecure);
-    virtual ~HandshakeRequest();
+    QWebSocketHandshakeRequest(int port, bool isSecure);
+    virtual ~QWebSocketHandshakeRequest();
 
     void clear();
 
@@ -64,9 +66,8 @@ public:
     QString getHost() const;
 
 private:
-    Q_DISABLE_COPY(HandshakeRequest)
     QTextStream &readFromStream(QTextStream &textStream);
-    friend QTextStream &operator >>(QTextStream &stream, HandshakeRequest &request);
+    friend QTextStream &operator >>(QTextStream &stream, QWebSocketHandshakeRequest &request);
 
     int m_port;
     bool m_isSecure;
@@ -80,8 +81,8 @@ private:
     QUrl m_requestUrl;
 };
 
-QTextStream &operator >>(QTextStream &stream, HandshakeRequest &request);
+QTextStream &operator >>(QTextStream &stream, QWebSocketHandshakeRequest &request);
 
 QT_END_NAMESPACE
 
-#endif // HANDSHAKEREQUEST_P_H
+#endif // QWEBSOCKETHANDSHAKEREQUEST_P_H

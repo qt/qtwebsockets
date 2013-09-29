@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
     \internal
 */
-#include "dataprocessor_p.h"
+#include "qwebsocketdataprocessor_p.h"
 #include "qwebsocketprotocol.h"
 #include <QIODevice>
 #include <QtEndian>
@@ -56,13 +56,13 @@ const quint64 MAX_MESSAGE_SIZE_IN_BYTES = INT_MAX - 1;
     \sa DataProcessor()
     \internal
  */
-class Frame
+class QWebSocketFrame
 {
 public:
-    Frame();
-    Frame(const Frame &other);
+    QWebSocketFrame();
+    QWebSocketFrame(const QWebSocketFrame &other);
 
-    const Frame &operator =(const Frame &other);
+    const QWebSocketFrame &operator =(const QWebSocketFrame &other);
 
     QWebSocketProtocol::CloseCode getCloseCode() const;
     QString getCloseReason() const;
@@ -82,7 +82,7 @@ public:
 
     bool isValid() const;
 
-    static Frame readFrame(QIODevice *pIoDevice);
+    static QWebSocketFrame readFrame(QIODevice *pIoDevice);
 
 private:
     QWebSocketProtocol::CloseCode m_closeCode;
@@ -117,7 +117,7 @@ private:
 /*!
     \internal
  */
-Frame::Frame() :
+QWebSocketFrame::QWebSocketFrame() :
     m_closeCode(QWebSocketProtocol::CC_NORMAL),
     m_closeReason(),
     m_isFinalFrame(true),
@@ -135,7 +135,7 @@ Frame::Frame() :
 /*!
     \internal
  */
-Frame::Frame(const Frame &other) :
+QWebSocketFrame::QWebSocketFrame(const QWebSocketFrame &other) :
     m_closeCode(other.m_closeCode),
     m_closeReason(other.m_closeReason),
     m_isFinalFrame(other.m_isFinalFrame),
@@ -153,7 +153,7 @@ Frame::Frame(const Frame &other) :
 /*!
     \internal
  */
-const Frame &Frame::operator =(const Frame &other)
+const QWebSocketFrame &QWebSocketFrame::operator =(const QWebSocketFrame &other)
 {
     m_closeCode = other.m_closeCode;
     m_closeReason = other.m_closeReason;
@@ -173,7 +173,7 @@ const Frame &Frame::operator =(const Frame &other)
 /*!
     \internal
  */
-QWebSocketProtocol::CloseCode Frame::getCloseCode() const
+QWebSocketProtocol::CloseCode QWebSocketFrame::getCloseCode() const
 {
     return m_closeCode;
 }
@@ -181,7 +181,7 @@ QWebSocketProtocol::CloseCode Frame::getCloseCode() const
 /*!
     \internal
  */
-QString Frame::getCloseReason() const
+QString QWebSocketFrame::getCloseReason() const
 {
     return m_closeReason;
 }
@@ -189,7 +189,7 @@ QString Frame::getCloseReason() const
 /*!
     \internal
  */
-bool Frame::isFinalFrame() const
+bool QWebSocketFrame::isFinalFrame() const
 {
     return m_isFinalFrame;
 }
@@ -197,7 +197,7 @@ bool Frame::isFinalFrame() const
 /*!
     \internal
  */
-bool Frame::isControlFrame() const
+bool QWebSocketFrame::isControlFrame() const
 {
     return (m_opCode & 0x08) == 0x08;
 }
@@ -205,7 +205,7 @@ bool Frame::isControlFrame() const
 /*!
     \internal
  */
-bool Frame::isDataFrame() const
+bool QWebSocketFrame::isDataFrame() const
 {
     return !isControlFrame();
 }
@@ -213,7 +213,7 @@ bool Frame::isDataFrame() const
 /*!
     \internal
  */
-bool Frame::isContinuationFrame() const
+bool QWebSocketFrame::isContinuationFrame() const
 {
     return isDataFrame() && (m_opCode == QWebSocketProtocol::OC_CONTINUE);
 }
@@ -221,7 +221,7 @@ bool Frame::isContinuationFrame() const
 /*!
     \internal
  */
-bool Frame::hasMask() const
+bool QWebSocketFrame::hasMask() const
 {
     return m_mask != 0;
 }
@@ -229,7 +229,7 @@ bool Frame::hasMask() const
 /*!
     \internal
  */
-quint32 Frame::getMask() const
+quint32 QWebSocketFrame::getMask() const
 {
     return m_mask;
 }
@@ -237,7 +237,7 @@ quint32 Frame::getMask() const
 /*!
     \internal
  */
-int Frame::getRsv1() const
+int QWebSocketFrame::getRsv1() const
 {
     return m_rsv1;
 }
@@ -245,7 +245,7 @@ int Frame::getRsv1() const
 /*!
     \internal
  */
-int Frame::getRsv2() const
+int QWebSocketFrame::getRsv2() const
 {
     return m_rsv2;
 }
@@ -253,7 +253,7 @@ int Frame::getRsv2() const
 /*!
     \internal
  */
-int Frame::getRsv3() const
+int QWebSocketFrame::getRsv3() const
 {
     return m_rsv3;
 }
@@ -261,7 +261,7 @@ int Frame::getRsv3() const
 /*!
     \internal
  */
-QWebSocketProtocol::OpCode Frame::getOpCode() const
+QWebSocketProtocol::OpCode QWebSocketFrame::getOpCode() const
 {
     return m_opCode;
 }
@@ -269,7 +269,7 @@ QWebSocketProtocol::OpCode Frame::getOpCode() const
 /*!
     \internal
  */
-QByteArray Frame::getPayload() const
+QByteArray QWebSocketFrame::getPayload() const
 {
     return m_payload;
 }
@@ -277,7 +277,7 @@ QByteArray Frame::getPayload() const
 /*!
     \internal
  */
-void Frame::clear()
+void QWebSocketFrame::clear()
 {
     m_closeCode = QWebSocketProtocol::CC_NORMAL;
     m_closeReason.clear();
@@ -295,7 +295,7 @@ void Frame::clear()
 /*!
     \internal
  */
-bool Frame::isValid() const
+bool QWebSocketFrame::isValid() const
 {
     return m_isValid;
 }
@@ -305,11 +305,11 @@ bool Frame::isValid() const
 /*!
     \internal
  */
-Frame Frame::readFrame(QIODevice *pIoDevice)
+QWebSocketFrame QWebSocketFrame::readFrame(QIODevice *pIoDevice)
 {
     bool isDone = false;
     qint64 bytesRead = 0;
-    Frame frame;
+    QWebSocketFrame frame;
     quint64 dataWaitSize = 0;
     ProcessingState processingState = PS_READ_HEADER;
     ProcessingState returnState = PS_READ_HEADER;
@@ -543,7 +543,7 @@ Frame Frame::readFrame(QIODevice *pIoDevice)
 /*!
     \internal
  */
-void Frame::setError(QWebSocketProtocol::CloseCode code, QString closeReason)
+void QWebSocketFrame::setError(QWebSocketProtocol::CloseCode code, QString closeReason)
 {
     clear();
     m_closeCode = code;
@@ -554,7 +554,7 @@ void Frame::setError(QWebSocketProtocol::CloseCode code, QString closeReason)
 /*!
     \internal
  */
-bool Frame::checkValidity()
+bool QWebSocketFrame::checkValidity()
 {
     if (!isValid())
     {
@@ -592,7 +592,7 @@ bool Frame::checkValidity()
 /*!
     \internal
  */
-DataProcessor::DataProcessor(QObject *parent) :
+QWebSocketDataProcessor::QWebSocketDataProcessor(QObject *parent) :
     QObject(parent),
     m_processingState(PS_READ_HEADER),
     m_isFinalFrame(false),
@@ -613,7 +613,7 @@ DataProcessor::DataProcessor(QObject *parent) :
 /*!
     \internal
  */
-DataProcessor::~DataProcessor()
+QWebSocketDataProcessor::~QWebSocketDataProcessor()
 {
     clear();
     if (m_pConverterState)
@@ -626,7 +626,7 @@ DataProcessor::~DataProcessor()
 /*!
     \internal
  */
-quint64 DataProcessor::maxMessageSize()
+quint64 QWebSocketDataProcessor::maxMessageSize()
 {
     return MAX_MESSAGE_SIZE_IN_BYTES;
 }
@@ -634,7 +634,7 @@ quint64 DataProcessor::maxMessageSize()
 /*!
     \internal
  */
-quint64 DataProcessor::maxFrameSize()
+quint64 QWebSocketDataProcessor::maxFrameSize()
 {
     return MAX_FRAME_SIZE_IN_BYTES;
 }
@@ -642,13 +642,13 @@ quint64 DataProcessor::maxFrameSize()
 /*!
     \internal
  */
-void DataProcessor::process(QIODevice *pIoDevice)
+void QWebSocketDataProcessor::process(QIODevice *pIoDevice)
 {
     bool isDone = false;
 
     while (!isDone)
     {
-        Frame frame = Frame::readFrame(pIoDevice);
+        QWebSocketFrame frame = QWebSocketFrame::readFrame(pIoDevice);
         if (frame.isValid())
         {
             if (frame.isControlFrame())
@@ -731,7 +731,7 @@ void DataProcessor::process(QIODevice *pIoDevice)
 /*!
     \internal
  */
-void DataProcessor::clear()
+void QWebSocketDataProcessor::clear()
 {
     m_processingState = PS_READ_HEADER;
     m_isFinalFrame = false;
@@ -759,7 +759,7 @@ void DataProcessor::clear()
 /*!
     \internal
  */
-bool DataProcessor::processControlFrame(const Frame &frame)
+bool QWebSocketDataProcessor::processControlFrame(const QWebSocketFrame &frame)
 {
     bool mustStopProcessing = false;
     switch (frame.getOpCode())

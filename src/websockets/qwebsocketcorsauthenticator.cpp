@@ -38,15 +38,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
     \sa QWebSocketServer
 */
 
-#include "qcorsauthenticator.h"
-#include "qcorsauthenticator_p.h"
+#include "qwebsocketcorsauthenticator.h"
+#include "qwebsocketcorsauthenticator_p.h"
 
 QT_BEGIN_NAMESPACE
 
 /*!
   \internal
  */
-QCorsAuthenticatorPrivate::QCorsAuthenticatorPrivate(const QString &origin, bool allowed) :
+QWebSocketCorsAuthenticatorPrivate::QWebSocketCorsAuthenticatorPrivate(const QString &origin, bool allowed) :
     m_origin(origin),
     m_isAllowed(allowed)
 {}
@@ -54,22 +54,22 @@ QCorsAuthenticatorPrivate::QCorsAuthenticatorPrivate(const QString &origin, bool
 /*!
   \internal
  */
-QCorsAuthenticatorPrivate::~QCorsAuthenticatorPrivate()
+QWebSocketCorsAuthenticatorPrivate::~QWebSocketCorsAuthenticatorPrivate()
 {}
 
 /*!
   Constructs a new QCorsAuthencator object with the given \a origin.
   \note By default, allowed() returns true. This means that per default every origin is accepted.
  */
-QCorsAuthenticator::QCorsAuthenticator(const QString &origin) :
-    d_ptr(new QCorsAuthenticatorPrivate(origin, true))  //all origins are per default allowed
+QWebSocketCorsAuthenticator::QWebSocketCorsAuthenticator(const QString &origin) :
+    d_ptr(new QWebSocketCorsAuthenticatorPrivate(origin, true))  //all origins are per default allowed
 {
 }
 
 /*!
   Destructs the object
  */
-QCorsAuthenticator::~QCorsAuthenticator()
+QWebSocketCorsAuthenticator::~QWebSocketCorsAuthenticator()
 {
     if (d_ptr)
     {
@@ -80,17 +80,17 @@ QCorsAuthenticator::~QCorsAuthenticator()
 /*!
   Constructs a coy of \a other
  */
-QCorsAuthenticator::QCorsAuthenticator(const QCorsAuthenticator &other) :
-    d_ptr(new QCorsAuthenticatorPrivate(other.d_ptr->m_origin, other.d_ptr->m_isAllowed))
+QWebSocketCorsAuthenticator::QWebSocketCorsAuthenticator(const QWebSocketCorsAuthenticator &other) :
+    d_ptr(new QWebSocketCorsAuthenticatorPrivate(other.d_ptr->m_origin, other.d_ptr->m_isAllowed))
 {
 }
 
 /*!
   Assigns \a other to this authenticator object
  */
-QCorsAuthenticator &QCorsAuthenticator::operator =(const QCorsAuthenticator &other)
+QWebSocketCorsAuthenticator &QWebSocketCorsAuthenticator::operator =(const QWebSocketCorsAuthenticator &other)
 {
-    Q_D(QCorsAuthenticator);
+    Q_D(QWebSocketCorsAuthenticator);
     if (this != &other)
     {
         d->m_origin = other.d_ptr->m_origin;
@@ -102,9 +102,9 @@ QCorsAuthenticator &QCorsAuthenticator::operator =(const QCorsAuthenticator &oth
 /*!
   Returns the origin this autenticator is handling about.
  */
-QString QCorsAuthenticator::origin() const
+QString QWebSocketCorsAuthenticator::origin() const
 {
-    Q_D(const QCorsAuthenticator);
+    Q_D(const QWebSocketCorsAuthenticator);
     return d->m_origin;
 }
 
@@ -114,9 +114,9 @@ QString QCorsAuthenticator::origin() const
 
   \note By default, all origins are accepted.
  */
-void QCorsAuthenticator::setAllowed(bool allowed)
+void QWebSocketCorsAuthenticator::setAllowed(bool allowed)
 {
-    Q_D(QCorsAuthenticator);
+    Q_D(QWebSocketCorsAuthenticator);
     d->m_isAllowed = allowed;
 }
 
@@ -125,8 +125,8 @@ void QCorsAuthenticator::setAllowed(bool allowed)
 
   \note By default, all origins are accepted.
  */
-bool QCorsAuthenticator::allowed() const
+bool QWebSocketCorsAuthenticator::allowed() const
 {
-    Q_D(const QCorsAuthenticator);
+    Q_D(const QWebSocketCorsAuthenticator);
     return d->m_isAllowed;
 }

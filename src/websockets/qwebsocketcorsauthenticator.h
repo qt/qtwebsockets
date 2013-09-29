@@ -16,23 +16,25 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
-#ifndef QCORSAUTHENTICATOR_H
-#define QCORSAUTHENTICATOR_H
+#ifndef QWEBSOCKETCORSAUTHENTICATOR_H
+#define QWEBSOCKETCORSAUTHENTICATOR_H
 
 #include "qwebsocketsglobal.h"
 
 QT_BEGIN_NAMESPACE
 
-class QCorsAuthenticatorPrivate;
+class QWebSocketCorsAuthenticatorPrivate;
 
-class Q_WEBSOCKETS_EXPORT QCorsAuthenticator
+class Q_WEBSOCKETS_EXPORT QWebSocketCorsAuthenticator
 {
-public:
-    QCorsAuthenticator(const QString &origin);
-    ~QCorsAuthenticator();
-    QCorsAuthenticator(const QCorsAuthenticator &other);
+    Q_DECLARE_PRIVATE(QWebSocketCorsAuthenticator)
 
-    QCorsAuthenticator &operator =(const QCorsAuthenticator &other);
+public:
+    QWebSocketCorsAuthenticator(const QString &origin);
+    ~QWebSocketCorsAuthenticator();
+    QWebSocketCorsAuthenticator(const QWebSocketCorsAuthenticator &other);
+
+    QWebSocketCorsAuthenticator &operator =(const QWebSocketCorsAuthenticator &other);
 
     QString origin() const;
 
@@ -40,9 +42,7 @@ public:
     bool allowed() const;
 
 private:
-    Q_DECLARE_PRIVATE(QCorsAuthenticator)
-
-    QCorsAuthenticatorPrivate * const d_ptr;
+    QWebSocketCorsAuthenticatorPrivate * const d_ptr;
 };
 
-#endif // QCORSAUTHENTICATOR_H
+#endif // QWEBSOCKETCORSAUTHENTICATOR_H
