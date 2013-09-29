@@ -21,12 +21,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define QWEBSOCKET_H
 
 #include <QUrl>
-#include <QAbstractSocket>
-#include <QHostAddress>
 #ifndef QT_NO_NETWORKPROXY
 #include <QNetworkProxy>
 #endif
-#include <QTime>
 #include "qwebsocketsglobal.h"
 #include "qwebsocketprotocol.h"
 
@@ -35,7 +32,7 @@ QT_BEGIN_NAMESPACE
 class QTcpSocket;
 class QWebSocketPrivate;
 
-class Q_WEBSOCKETS_EXPORT QWebSocket:public QObject
+class Q_WEBSOCKETS_EXPORT QWebSocket : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(QWebSocket)
