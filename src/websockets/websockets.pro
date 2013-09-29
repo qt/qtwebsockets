@@ -11,10 +11,10 @@ load(qt_module)
 QMAKE_DOCS = $$PWD/doc/qwebsockets.qdocconfig
 
 PUBLIC_HEADERS += \
+    $$PWD/qwebsockets_global.h \
     $$PWD/qwebsocket.h \
     $$PWD/qwebsocketserver.h \
     $$PWD/qwebsocketprotocol.h \
-    $$PWD/qwebsocketsglobal.h \
     $$PWD/qwebsocketcorsauthenticator.h
 
 PRIVATE_HEADERS += \

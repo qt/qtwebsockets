@@ -37,7 +37,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 #include <QTime>
 
-#include "qwebsocketsglobal.h"
 #include "qwebsocketprotocol.h"
 #include "qwebsocketdataprocessor_p.h"
 
