@@ -4,8 +4,8 @@
 #include <QBuffer>
 #include <QByteArray>
 #include <QDebug>
-#include "dataprocessor_p.h"
-#include "unittests.h"
+
+#include "private/dataprocessor_p.h"
 
 Q_DECLARE_METATYPE(QWebSocketProtocol::CloseCode)
 Q_DECLARE_METATYPE(QWebSocketProtocol::OpCode)
@@ -1451,7 +1451,7 @@ void tst_DataProcessor::frameTooBig_data()
             << QWebSocketProtocol::CC_TOO_MUCH_DATA;
 }
 
-DECLARE_TEST(tst_DataProcessor)
+QTEST_MAIN(tst_DataProcessor)
 
 #include "tst_dataprocessor.moc"
 
