@@ -23,11 +23,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "qwebsocketserver.h"
 #include "qwebsocketserver_p.h"
 #include "qwebsocketprotocol.h"
-#include "handshakerequest_p.h"
-#include "handshakeresponse_p.h"
+#include "qwebsockethandshakerequest_p.h"
+#include "qwebsockethandshakeresponse_p.h"
 #include "qwebsocket.h"
 #include "qwebsocket_p.h"
-#include "qcorsauthenticator.h"
+#include "qwebsocketcorsauthenticator.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -298,14 +298,14 @@ void QWebSocketServerPrivate::handshakeReceived()
     {
         bool success = false;
         bool isSecure = false;
-        HandshakeRequest request(pTcpSocket->peerPort(), isSecure);
+        QWebSocketHandshakeRequest request(pTcpSocket->peerPort(), isSecure);
         QTextStream textStream(pTcpSocket);
         textStream >> request;
 
-        QCorsAuthenticator corsAuthenticator(request.getOrigin());
+        QWebSocketCorsAuthenticator corsAuthenticator(request.getOrigin());
         Q_EMIT q->originAuthenticationRequired(&corsAuthenticator);
 
-        HandshakeResponse response(request,
+        QWebSocketHandshakeResponse response(request,
                                    m_serverName,
                                    corsAuthenticator.allowed(),
                                    supportedVersions(),

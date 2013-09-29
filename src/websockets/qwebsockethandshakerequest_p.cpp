@@ -17,7 +17,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include "handshakerequest_p.h"
+#include "qwebsockethandshakerequest_p.h"
 #include <QString>
 #include <QMap>
 #include <QTextStream>
@@ -31,7 +31,7 @@ QT_BEGIN_NAMESPACE
 /*!
     \internal
  */
-HandshakeRequest::HandshakeRequest(int port, bool isSecure) :
+QWebSocketHandshakeRequest::QWebSocketHandshakeRequest(int port, bool isSecure) :
     m_port(port),
     m_isSecure(isSecure),
     m_isValid(false),
@@ -48,14 +48,14 @@ HandshakeRequest::HandshakeRequest(int port, bool isSecure) :
 /*!
     \internal
  */
-HandshakeRequest::~HandshakeRequest()
+QWebSocketHandshakeRequest::~QWebSocketHandshakeRequest()
 {
 }
 
 /*!
     \internal
  */
-void HandshakeRequest::clear()
+void QWebSocketHandshakeRequest::clear()
 {
     m_port = -1;
     m_isSecure = false;
@@ -72,7 +72,7 @@ void HandshakeRequest::clear()
 /*!
     \internal
  */
-int HandshakeRequest::getPort() const
+int QWebSocketHandshakeRequest::getPort() const
 {
     return m_requestUrl.port(m_port);
 }
@@ -80,7 +80,7 @@ int HandshakeRequest::getPort() const
 /*!
     \internal
  */
-bool HandshakeRequest::isSecure() const
+bool QWebSocketHandshakeRequest::isSecure() const
 {
     return m_isSecure;
 }
@@ -88,7 +88,7 @@ bool HandshakeRequest::isSecure() const
 /*!
     \internal
  */
-bool HandshakeRequest::isValid() const
+bool QWebSocketHandshakeRequest::isValid() const
 {
     return m_isValid;
 }
@@ -96,7 +96,7 @@ bool HandshakeRequest::isValid() const
 /*!
     \internal
  */
-QMap<QString, QString> HandshakeRequest::getHeaders() const
+QMap<QString, QString> QWebSocketHandshakeRequest::getHeaders() const
 {
     return m_headers;
 }
@@ -104,7 +104,7 @@ QMap<QString, QString> HandshakeRequest::getHeaders() const
 /*!
     \internal
  */
-QList<QWebSocketProtocol::Version> HandshakeRequest::getVersions() const
+QList<QWebSocketProtocol::Version> QWebSocketHandshakeRequest::getVersions() const
 {
     return m_versions;
 }
@@ -112,7 +112,7 @@ QList<QWebSocketProtocol::Version> HandshakeRequest::getVersions() const
 /*!
     \internal
  */
-QString HandshakeRequest::getResourceName() const
+QString QWebSocketHandshakeRequest::getResourceName() const
 {
     return m_requestUrl.path();
 }
@@ -120,7 +120,7 @@ QString HandshakeRequest::getResourceName() const
 /*!
     \internal
  */
-QString HandshakeRequest::getKey() const
+QString QWebSocketHandshakeRequest::getKey() const
 {
     return m_key;
 }
@@ -128,7 +128,7 @@ QString HandshakeRequest::getKey() const
 /*!
     \internal
  */
-QString HandshakeRequest::getHost() const
+QString QWebSocketHandshakeRequest::getHost() const
 {
     return m_requestUrl.host();
 }
@@ -136,7 +136,7 @@ QString HandshakeRequest::getHost() const
 /*!
     \internal
  */
-QString HandshakeRequest::getOrigin() const
+QString QWebSocketHandshakeRequest::getOrigin() const
 {
     return m_origin;
 }
@@ -144,7 +144,7 @@ QString HandshakeRequest::getOrigin() const
 /*!
     \internal
  */
-QList<QString> HandshakeRequest::getProtocols() const
+QList<QString> QWebSocketHandshakeRequest::getProtocols() const
 {
     return m_protocols;
 }
@@ -152,7 +152,7 @@ QList<QString> HandshakeRequest::getProtocols() const
 /*!
     \internal
  */
-QList<QString> HandshakeRequest::getExtensions() const
+QList<QString> QWebSocketHandshakeRequest::getExtensions() const
 {
     return m_extensions;
 }
@@ -160,7 +160,7 @@ QList<QString> HandshakeRequest::getExtensions() const
 /*!
     \internal
  */
-QUrl HandshakeRequest::getRequestUrl() const
+QUrl QWebSocketHandshakeRequest::getRequestUrl() const
 {
     return m_requestUrl;
 }
@@ -168,7 +168,7 @@ QUrl HandshakeRequest::getRequestUrl() const
 /*!
     \internal
  */
-QTextStream &HandshakeRequest::readFromStream(QTextStream &textStream)
+QTextStream &QWebSocketHandshakeRequest::readFromStream(QTextStream &textStream)
 {
     m_isValid = false;
     clear();
@@ -262,7 +262,7 @@ QTextStream &HandshakeRequest::readFromStream(QTextStream &textStream)
 /*!
     \internal
  */
-QTextStream &operator >>(QTextStream &stream, HandshakeRequest &request)
+QTextStream &operator >>(QTextStream &stream, QWebSocketHandshakeRequest &request)
 {
     return request.readFromStream(stream);
 }

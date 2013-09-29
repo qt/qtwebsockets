@@ -39,18 +39,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <QTime>
 #include "qwebsocketsglobal.h"
 #include "qwebsocketprotocol.h"
-#include "dataprocessor_p.h"
+#include "qwebsocketdataprocessor_p.h"
 
 QT_BEGIN_NAMESPACE
 
-class HandshakeRequest;
-class HandshakeResponse;
+class QWebSocketHandshakeRequest;
+class QWebSocketHandshakeResponse;
 class QTcpSocket;
 class QWebSocket;
 
 class QWebSocketPrivate:public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(QWebSocketPrivate)
+    Q_DECLARE_PUBLIC(QWebSocket)
 
 public:
     explicit QWebSocketPrivate(const QString &origin,
@@ -111,9 +113,6 @@ private Q_SLOTS:
     void processStateChanged(QAbstractSocket::SocketState socketState);
 
 private:
-    Q_DISABLE_COPY(QWebSocketPrivate)
-    Q_DECLARE_PUBLIC(QWebSocket)
-
     QWebSocket * const q_ptr;
 
     QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version, QWebSocket *pWebSocket, QObject *parent = 0);
@@ -143,8 +142,8 @@ private:
                                    QByteArray key);
 
     static QWebSocket *upgradeFrom(QTcpSocket *tcpSocket,
-                                   const HandshakeRequest &request,
-                                   const HandshakeResponse &response,
+                                   const QWebSocketHandshakeRequest &request,
+                                   const QWebSocketHandshakeResponse &response,
                                    QObject *parent = 0);
 
     quint32 generateMaskingKey() const;
@@ -173,7 +172,7 @@ private:
 
     QTime m_pingTimer;
 
-    DataProcessor m_dataProcessor;
+    QWebSocketDataProcessor m_dataProcessor;
 
     friend class QWebSocketServerPrivate;
 };

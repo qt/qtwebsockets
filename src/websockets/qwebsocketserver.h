@@ -30,11 +30,13 @@ QT_BEGIN_NAMESPACE
 
 class QWebSocketServerPrivate;
 class QWebSocket;
-class QCorsAuthenticator;
+class QWebSocketCorsAuthenticator;
 
 class Q_WEBSOCKETS_EXPORT QWebSocketServer : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(QWebSocketServer)
+    Q_DECLARE_PRIVATE(QWebSocketServer)
 
 public:
     explicit QWebSocketServer(const QString &serverName, QObject *parent = 0);
@@ -78,12 +80,10 @@ public:
 
 Q_SIGNALS:
     void acceptError(QAbstractSocket::SocketError socketError);
-    void originAuthenticationRequired(QCorsAuthenticator *pAuthenticator);
+    void originAuthenticationRequired(QWebSocketCorsAuthenticator *pAuthenticator);
     void newConnection();
 
 private:
-    Q_DISABLE_COPY(QWebSocketServer)
-    Q_DECLARE_PRIVATE(QWebSocketServer)
     QWebSocketServerPrivate * const d_ptr;
 };
 

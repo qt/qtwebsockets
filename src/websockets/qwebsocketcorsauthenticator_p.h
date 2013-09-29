@@ -1,5 +1,5 @@
-#ifndef QCORSAUTHENTICATOR_P_H
-#define QCORSAUTHENTICATOR_P_H
+#ifndef QWEBSOCKETCORSAUTHENTICATOR_P_H
+#define QWEBSOCKETCORSAUTHENTICATOR_P_H
 
 #include <qglobal.h>    //for QT_BEGIN_NAMESPACE
 #include <QString>
@@ -16,14 +16,14 @@
 //
 QT_BEGIN_NAMESPACE
 
-class QCorsAuthenticatorPrivate
+class QWebSocketCorsAuthenticatorPrivate
 {
 public:
-    QCorsAuthenticatorPrivate(const QString &origin, bool allowed);
-    ~QCorsAuthenticatorPrivate();
+    QWebSocketCorsAuthenticatorPrivate(const QString &origin, bool allowed);
+    ~QWebSocketCorsAuthenticatorPrivate();
 
     QString m_origin;
     bool m_isAllowed;
 };
 
-#endif // QCORSAUTHENTICATOR_P_H
+#endif // QWEBSOCKETCORSAUTHENTICATOR_P_H

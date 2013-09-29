@@ -19,8 +19,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "qwebsocket.h"
 #include "qwebsocket_p.h"
-#include "handshakerequest_p.h"
-#include "handshakeresponse_p.h"
+#include "qwebsockethandshakerequest_p.h"
+#include "qwebsockethandshakeresponse_p.h"
 #include <QUrl>
 #include <QTcpSocket>
 #include <QByteArray>
@@ -184,8 +184,8 @@ qint64 QWebSocketPrivate::write(const QByteArray &data)
   \internal
  */
 QWebSocket *QWebSocketPrivate::upgradeFrom(QTcpSocket *pTcpSocket,
-                                           const HandshakeRequest &request,
-                                           const HandshakeResponse &response,
+                                           const QWebSocketHandshakeRequest &request,
+                                           const QWebSocketHandshakeResponse &response,
                                            QObject *parent)
 {
     QWebSocket *pWebSocket = new QWebSocket(pTcpSocket, response.getAcceptedVersion(), parent);

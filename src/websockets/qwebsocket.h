@@ -38,6 +38,8 @@ class QWebSocketPrivate;
 class Q_WEBSOCKETS_EXPORT QWebSocket:public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(QWebSocket)
+    Q_DECLARE_PRIVATE(QWebSocket)
 
 public:
     explicit QWebSocket(const QString &origin = QString(), QWebSocketProtocol::Version version = QWebSocketProtocol::V_LATEST, QObject *parent = 0);
@@ -105,8 +107,6 @@ Q_SIGNALS:
     void pong(quint64 elapsedTime, QByteArray payload);
 
 private:
-    Q_DISABLE_COPY(QWebSocket)
-    Q_DECLARE_PRIVATE(QWebSocket)
     QWebSocket(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version, QObject *parent = 0);
     QWebSocketPrivate * const d_ptr;
 };

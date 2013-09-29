@@ -17,8 +17,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef HANDSHAKERESPONSE_P_H
-#define HANDSHAKERESPONSE_P_H
+#ifndef QWEBSOCKETHANDSHAKERESPONSE_P_H
+#define QWEBSOCKETHANDSHAKERESPONSE_P_H
 //
 //  W A R N I N G
 //  -------------
@@ -35,22 +35,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 QT_BEGIN_NAMESPACE
 
-class HandshakeRequest;
+class QWebSocketHandshakeRequest;
 class QString;
 class QTextStream;
 
-class HandshakeResponse:public QObject
+class QWebSocketHandshakeResponse:public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(QWebSocketHandshakeResponse)
+
 public:
-    HandshakeResponse(const HandshakeRequest &request,
+    QWebSocketHandshakeResponse(const QWebSocketHandshakeRequest &request,
                       const QString &serverName,
                       bool isOriginAllowed,
                       const QList<QWebSocketProtocol::Version> &supportedVersions,
                       const QList<QString> &supportedProtocols,
                       const QList<QString> &supportedExtensions);
 
-    virtual ~HandshakeResponse();
+    virtual ~QWebSocketHandshakeResponse();
 
     bool isValid() const;
     bool canUpgrade() const;
@@ -63,7 +65,6 @@ public Q_SLOTS:
 Q_SIGNALS:
 
 private:
-    Q_DISABLE_COPY(HandshakeResponse)
     bool m_isValid;
     bool m_canUpgrade;
     QString m_response;
@@ -72,7 +73,7 @@ private:
     QWebSocketProtocol::Version m_acceptedVersion;
 
     QString calculateAcceptKey(const QString &key) const;
-    QString getHandshakeResponse(const HandshakeRequest &request,
+    QString getHandshakeResponse(const QWebSocketHandshakeRequest &request,
                                  const QString &serverName,
                                  bool isOriginAllowed,
                                  const QList<QWebSocketProtocol::Version> &supportedVersions,
@@ -80,9 +81,9 @@ private:
                                  const QList<QString> &supportedExtensions);
 
     QTextStream &writeToStream(QTextStream &textStream) const;
-    friend QTextStream &operator <<(QTextStream &stream, const HandshakeResponse &response);
+    friend QTextStream &operator <<(QTextStream &stream, const QWebSocketHandshakeResponse &response);
 };
 
 QT_END_NAMESPACE
 
-#endif // HANDSHAKERESPONSE_P_H
+#endif // QWEBSOCKETHANDSHAKERESPONSE_P_H
