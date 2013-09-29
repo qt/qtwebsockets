@@ -39,7 +39,7 @@ class QWebSocketHandshakeRequest;
 class QString;
 class QTextStream;
 
-class QWebSocketHandshakeResponse:public QObject
+class QWebSocketHandshakeResponse : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(QWebSocketHandshakeResponse)

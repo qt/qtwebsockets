@@ -48,7 +48,7 @@ class QWebSocketHandshakeResponse;
 class QTcpSocket;
 class QWebSocket;
 
-class QWebSocketPrivate:public QObject
+class QWebSocketPrivate : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(QWebSocketPrivate)
