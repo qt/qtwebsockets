@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef QWEBSOCKETCORSAUTHENTICATOR_H
 #define QWEBSOCKETCORSAUTHENTICATOR_H
 
-#include "qwebsocketsglobal.h"
+#include "qwebsockets_global.h"
 
 QT_BEGIN_NAMESPACE
 
