@@ -31,12 +31,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
 
 #include <QUrl>
-#include <QAbstractSocket>
 #include <QHostAddress>
 #ifndef QT_NO_NETWORKPROXY
 #include <QNetworkProxy>
 #endif
 #include <QTime>
+
 #include "qwebsocketsglobal.h"
 #include "qwebsocketprotocol.h"
 #include "qwebsocketdataprocessor_p.h"
