@@ -46,7 +46,7 @@ class QWebSocketFrame;
     \internal
     The DataProcessor class reads and interprets incoming websocket messages, and emits appropriate signals.
  */
-class QWebSocketDataProcessor: public QObject
+class QWebSocketDataProcessor : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(QWebSocketDataProcessor)

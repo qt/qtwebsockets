@@ -35,7 +35,7 @@ QT_BEGIN_NAMESPACE
 class QTcpSocket;
 class QWebSocketPrivate;
 
-class Q_WEBSOCKETS_EXPORT QWebSocket:public QObject
+class Q_WEBSOCKETS_EXPORT QWebSocket : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(QWebSocket)
