@@ -148,9 +148,9 @@ QString HandshakeResponse::getHandshakeResponse(const HandshakeRequest &request,
                     origin = QString::fromLatin1("*");
                 }
                 response << QString::fromLatin1("Server: ") % serverName    <<
-                            "Access-Control-Allow-Credentials: false"       <<	//do not allow credentialed request (containing cookies)
-                            "Access-Control-Allow-Methods: GET"             <<	//only GET is allowed during handshaking
-                            "Access-Control-Allow-Headers: content-type"    <<	//this is OK; only the content-type header is allowed, no other headers are accepted
+                            "Access-Control-Allow-Credentials: false"       <<    //do not allow credentialed request (containing cookies)
+                            "Access-Control-Allow-Methods: GET"             <<    //only GET is allowed during handshaking
+                            "Access-Control-Allow-Headers: content-type"    <<    //this is OK; only the content-type header is allowed, no other headers are accepted
                             QString::fromLatin1("Access-Control-Allow-Origin: ") % origin <<
                             QString::fromLatin1("Date: ") % QDateTime::currentDateTimeUtc().toString("ddd, dd MMM yyyy hh:mm:ss 'GMT'");
 
