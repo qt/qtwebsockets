@@ -174,24 +174,24 @@ QTextStream &HandshakeRequest::readFromStream(QTextStream &textStream)
     clear();
     if (textStream.status() == QTextStream::Ok)
     {
-        QString requestLine = textStream.readLine();
-        QStringList tokens = requestLine.split(' ', QString::SkipEmptyParts);
-        QString verb = tokens[0];
-        QString resourceName = tokens[1];
-        QString httpProtocol = tokens[2];
+        const QString requestLine = textStream.readLine();
+        const QStringList tokens = requestLine.split(' ', QString::SkipEmptyParts);
+        const QString verb = tokens[0];
+        const QString resourceName = tokens[1];
+        const QString httpProtocol = tokens[2];
         bool conversionOk = false;
-        float httpVersion = httpProtocol.midRef(5).toFloat(&conversionOk);
+        const float httpVersion = httpProtocol.midRef(5).toFloat(&conversionOk);
 
         QString headerLine = textStream.readLine();
         m_headers.clear();
         while (!headerLine.isEmpty())
         {
-            QStringList headerField = headerLine.split(QStringLiteral(": "), QString::SkipEmptyParts);
+            const QStringList headerField = headerLine.split(QStringLiteral(": "), QString::SkipEmptyParts);
             m_headers.insertMulti(headerField[0], headerField[1]);
             headerLine = textStream.readLine();
         }
 
-        QString host = m_headers.value(QStringLiteral("Host"), QStringLiteral(""));
+        const QString host = m_headers.value(QStringLiteral("Host"), QStringLiteral(""));
         m_requestUrl = QUrl::fromEncoded(resourceName.toLatin1());
         if (m_requestUrl.isRelative())
         {
@@ -199,25 +199,25 @@ QTextStream &HandshakeRequest::readFromStream(QTextStream &textStream)
         }
         if (m_requestUrl.scheme().isEmpty())
         {
-            QString scheme =  isSecure() ? QStringLiteral("wss://") : QStringLiteral("ws://");
+            const QString scheme =  isSecure() ? QStringLiteral("wss://") : QStringLiteral("ws://");
             m_requestUrl.setScheme(scheme);
         }
 
-        QStringList versionLines = m_headers.values(QStringLiteral("Sec-WebSocket-Version"));
+        const QStringList versionLines = m_headers.values(QStringLiteral("Sec-WebSocket-Version"));
         Q_FOREACH(QString versionLine, versionLines)
         {
-            QStringList versions = versionLine.split(QStringLiteral(","), QString::SkipEmptyParts);
+            const QStringList versions = versionLine.split(QStringLiteral(","), QString::SkipEmptyParts);
             Q_FOREACH(QString version, versions)
             {
-                QWebSocketProtocol::Version ver = QWebSocketProtocol::versionFromString(version.trimmed());
+                const QWebSocketProtocol::Version ver = QWebSocketProtocol::versionFromString(version.trimmed());
                 m_versions << ver;
             }
         }
         qStableSort(m_versions.begin(), m_versions.end(), qGreater<QWebSocketProtocol::Version>()); //sort in descending order
         m_key = m_headers.value(QStringLiteral("Sec-WebSocket-Key"), QStringLiteral(""));
-        QString upgrade = m_headers.value(QStringLiteral("Upgrade"), QStringLiteral(""));           //must be equal to "websocket", case-insensitive
-        QString connection = m_headers.value(QStringLiteral("Connection"), QStringLiteral(""));     //must contain "Upgrade", case-insensitive
-        QStringList connectionLine = connection.split(QStringLiteral(","), QString::SkipEmptyParts);
+        const QString upgrade = m_headers.value(QStringLiteral("Upgrade"), QStringLiteral(""));           //must be equal to "websocket", case-insensitive
+        const QString connection = m_headers.value(QStringLiteral("Connection"), QStringLiteral(""));     //must contain "Upgrade", case-insensitive
+        const QStringList connectionLine = connection.split(QStringLiteral(","), QString::SkipEmptyParts);
         QStringList connectionValues;
         Q_FOREACH(QString connection, connectionLine)
         {
@@ -226,7 +226,7 @@ QTextStream &HandshakeRequest::readFromStream(QTextStream &textStream)
 
         //optional headers
         m_origin = m_headers.value(QStringLiteral("Sec-WebSocket-Origin"), QStringLiteral(""));
-        QStringList protocolLines = m_headers.values(QStringLiteral("Sec-WebSocket-Protocol"));
+        const QStringList protocolLines = m_headers.values(QStringLiteral("Sec-WebSocket-Protocol"));
         Q_FOREACH(QString protocolLine, protocolLines)
         {
             QStringList protocols = protocolLine.split(QStringLiteral(","), QString::SkipEmptyParts);
@@ -235,7 +235,7 @@ QTextStream &HandshakeRequest::readFromStream(QTextStream &textStream)
                 m_protocols << protocol.trimmed();
             }
         }
-        QStringList extensionLines = m_headers.values(QStringLiteral("Sec-WebSocket-Extensions"));
+        const QStringList extensionLines = m_headers.values(QStringLiteral("Sec-WebSocket-Extensions"));
         Q_FOREACH(QString extensionLine, extensionLines)
         {
             QStringList extensions = extensionLine.split(QStringLiteral(","), QString::SkipEmptyParts);
