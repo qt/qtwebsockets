@@ -219,6 +219,7 @@ QWebSocketFrame QWebSocketFrame::readFrame(QIODevice *pIoDevice)
     qint64 bytesRead = 0;
     QWebSocketFrame frame;
     quint64 dataWaitSize = 0;
+    Q_UNUSED(dataWaitSize); // value is used in MACRO, Q_UNUSED to avoid compiler warnings
     ProcessingState processingState = PS_READ_HEADER;
     ProcessingState returnState = PS_READ_HEADER;
     bool hasMask = false;
