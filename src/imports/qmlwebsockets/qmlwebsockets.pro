@@ -1,4 +1,4 @@
-QT += websockets qml
+QT = core websockets qml
 
 TARGETPATH = Qt/Playground/WebSockets
 
