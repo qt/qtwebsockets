@@ -213,7 +213,7 @@ QTextStream &QWebSocketHandshakeRequest::readFromStream(QTextStream &textStream)
                m_versions << ver;
             }
         }
-        qStableSort(m_versions.begin(), m_versions.end(), qGreater<QWebSocketProtocol::Version>()); //sort in descending order
+        std::sort(m_versions.begin(), m_versions.end(), qGreater<QWebSocketProtocol::Version>()); //sort in descending order
         m_key = m_headers.value(QStringLiteral("Sec-WebSocket-Key"), QStringLiteral(""));
         const QString upgrade = m_headers.value(QStringLiteral("Upgrade"), QStringLiteral(""));           //must be equal to "websocket", case-insensitive
         const QString connection = m_headers.value(QStringLiteral("Connection"), QStringLiteral(""));     //must contain "Upgrade", case-insensitive
