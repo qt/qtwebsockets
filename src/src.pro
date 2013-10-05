@@ -1,3 +1,5 @@
 TEMPLATE = subdirs
+CONFIG += ordered
 
-SUBDIRS += websockets imports
+SUBDIRS += websockets
+qtHaveModule(quick): SUBDIRS += imports
