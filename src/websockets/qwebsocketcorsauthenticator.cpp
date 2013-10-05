@@ -18,17 +18,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 /*!
-    \class QCorsAuthenticator
+    \class QWebSocketCorsAuthenticator
 
-    \inmodule QWebSockets
-    \brief The QCorsAuthenticator class provides an authenticator object for Cross Origin Requests (CORS).
+    \inmodule QtWebSockets
+    \brief The QWebSocketCorsAuthenticator class provides an authenticator object for Cross Origin Requests (CORS).
 
-    The QCorsAuthenticator class is used in the \l{QWebSocketServer::}{originAuthenticationRequired()} signal.
+    The QWebSocketCorsAuthenticator class is used in the \l{QWebSocketServer::}{originAuthenticationRequired()} signal.
     The class provides a way to pass back the required information to the QWebSocketServer.
     It provides applications with fine-grained control over which origin URLs are allowed and which aren't.
     By default, every origin is accepted.
     To get fine grained control, an application connects the \l{QWebSocketServer::}{originAuthenticationRequired()} signal to
-    a slot. When the origin (QCorsAuthenticator::origin()) is accepted, it calls QCorsAuthenticator::setAllowed(true)
+    a slot. When the origin (QWebSocketCorsAuthenticator::origin()) is accepted, it calls QWebSocketCorsAuthenticator::setAllowed(true)
 
     \note Checking on the origin does not make much sense when the server is accessed
     via a non-browser client, as that client can set whatever origin header it likes.

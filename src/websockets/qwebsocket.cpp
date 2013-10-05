@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 /*!
     \class QWebSocket
 
-    \inmodule QWebSockets
+    \inmodule QtWebSockets
     \brief Implements a TCP socket that talks the websocket protocol.
 
     WebSockets is a web technology providing full-duplex communications channels over a single TCP connection.
