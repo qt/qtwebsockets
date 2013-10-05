@@ -267,10 +267,22 @@ void tst_DataProcessor::goodCloseFrame_data()
     QTest::newRow("Close frame with close code 4000") << QString(1, 'a') << QWebSocketProtocol::CloseCode(4000);
     QTest::newRow("Close frame with close code 4999") << QString(1, 'a') << QWebSocketProtocol::CloseCode(4999);
 
-    //Not allowed per RFC 6455 (see para 7.4.1)
-    //QTest::newRow("Close frame with close code ABNORMAL DISCONNECTION") << QString(1, 'a') << QWebSocketProtocol::CC_ABNORMAL_DISCONNECTION;
-    //QTest::newRow("Close frame with close code MISSING STATUS CODE") << QString(1, 'a') << QWebSocketProtocol::CC_MISSING_STATUS_CODE;
-    //QTest::newRow("Close frame with close code HANDSHAKE FAILED") << QString(1, 'a') << QWebSocketProtocol::CC_TLS_HANDSHAKE_FAILED;
+    //close frames with no close reason
+    QTest::newRow("Close frame with close code NORMAL and no reason") << QString() << QWebSocketProtocol::CC_NORMAL;
+    QTest::newRow("Close frame with close code BAD OPERATION and no reason") << QString() << QWebSocketProtocol::CC_BAD_OPERATION;
+    QTest::newRow("Close frame with close code DATATYPE NOT SUPPORTED and no reason") << QString() << QWebSocketProtocol::CC_DATATYPE_NOT_SUPPORTED;
+    QTest::newRow("Close frame with close code GOING AWAY and no reason") << QString() << QWebSocketProtocol::CC_GOING_AWAY;
+    QTest::newRow("Close frame with close code MISSING EXTENSION and no reason") << QString() << QWebSocketProtocol::CC_MISSING_EXTENSION;
+    QTest::newRow("Close frame with close code POLICY VIOLATED and no reason") << QString() << QWebSocketProtocol::CC_POLICY_VIOLATED;
+    QTest::newRow("Close frame with close code PROTOCOL ERROR and no reason") << QString() << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+    QTest::newRow("Close frame with close code TOO MUCH DATA and no reason") << QString() << QWebSocketProtocol::CC_TOO_MUCH_DATA;
+    QTest::newRow("Close frame with close code WRONG DATATYPE and no reason") << QString() << QWebSocketProtocol::CC_WRONG_DATATYPE;
+    QTest::newRow("Close frame with close code 3000 and no reason") << QString() << QWebSocketProtocol::CloseCode(3000);
+    QTest::newRow("Close frame with close code 3999 and no reason") << QString() << QWebSocketProtocol::CloseCode(3999);
+    QTest::newRow("Close frame with close code 4000 and no reason") << QString() << QWebSocketProtocol::CloseCode(4000);
+    QTest::newRow("Close frame with close code 4999 and no reason") << QString() << QWebSocketProtocol::CloseCode(4999);
+
+    QTest::newRow("Close frame with no close code and no reason") << QString() << QWebSocketProtocol::CloseCode(0);
 }
 
 void tst_DataProcessor::goodBinaryFrame()
@@ -381,7 +393,16 @@ void tst_DataProcessor::goodCloseFrame()
     quint16 swapped = qToBigEndian<quint16>(closeCode);
     const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
 
-    data.append((char)(FIN | QWebSocketProtocol::OC_CLOSE)).append(char(payload.length() + 2)).append(wireRepresentation, 2).append(payload);
+    data.append((char)(FIN | QWebSocketProtocol::OC_CLOSE));
+    if (swapped != 0)
+    {
+        data.append(char(payload.length() + 2)).append(wireRepresentation, 2).append(payload);
+    }
+    else
+    {
+        //dataprocessor emits a CC_NORMAL close code when none is present
+        closeCode = QWebSocketProtocol::CC_NORMAL;
+    }
     buffer.setData(data);
     buffer.open(QIODevice::ReadOnly);
 
@@ -1212,6 +1233,8 @@ void tst_DataProcessor::invalidCloseFrame_data()
             << quint8(FIN | QWebSocketProtocol::OC_CLOSE) << quint8(1) << QByteArray(1, 'a') << false << QWebSocketProtocol::CC_PROTOCOL_ERROR;
     quint16 swapped = qToBigEndian<quint16>(QWebSocketProtocol::CC_ABNORMAL_DISCONNECTION);
     const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
+
+    //Not allowed per RFC 6455 (see para 7.4.1)
     QTest::newRow("Close control frame close code ABNORMAL DISCONNECTION")
             << quint8(FIN | QWebSocketProtocol::OC_CLOSE) <<
                quint8(2) <<
@@ -1220,6 +1243,7 @@ void tst_DataProcessor::invalidCloseFrame_data()
                QWebSocketProtocol::CC_PROTOCOL_ERROR;
     swapped = qToBigEndian<quint16>(QWebSocketProtocol::CC_MISSING_STATUS_CODE);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
+    //Not allowed per RFC 6455 (see para 7.4.1)
     QTest::newRow("Close control frame close code MISSING STATUS CODE")
             << quint8(FIN | QWebSocketProtocol::OC_CLOSE) <<
                quint8(2) <<
@@ -1236,6 +1260,7 @@ void tst_DataProcessor::invalidCloseFrame_data()
                QWebSocketProtocol::CC_PROTOCOL_ERROR;
     swapped = qToBigEndian<quint16>(QWebSocketProtocol::CC_TLS_HANDSHAKE_FAILED);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
+    //Not allowed per RFC 6455 (see para 7.4.1)
     QTest::newRow("Close control frame close code TLS HANDSHAKE FAILED")
             << quint8(FIN | QWebSocketProtocol::OC_CLOSE) <<
                quint8(2) <<
