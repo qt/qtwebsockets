@@ -1,8 +1,8 @@
 /*!
-  \module QWebSockets
-  \title QWebSockets module
+  \module QtWebSockets
+  \title QtWebSockets module
 
-  The QWebSockets module implements the WebSocket protocol as specified in \l {http://tools.ietf.org/html/rfc6455} {RFC 6455}.
+  The QtWebSockets module implements the WebSocket protocol as specified in \l {http://tools.ietf.org/html/rfc6455} {RFC 6455}.
   It solely depends on Qt (no external depencies).
   The module contains 2 main classes: QWebSocket and QWebSocketServer, with which one can create client- and server applications.
  */
