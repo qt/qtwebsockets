@@ -25,6 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 /*!
     \enum QWebSocketProtocol::CloseCode
 
+    \inmodule QtWebSockets
+
     The close codes supported by WebSockets V13
 
     \value CC_NORMAL                    Normal closure
@@ -45,6 +47,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 /*!
     \enum QWebSocketProtocol::Version
+
+    \inmodule QtWebSockets
 
     \brief The different defined versions of the Websocket protocol.
 
