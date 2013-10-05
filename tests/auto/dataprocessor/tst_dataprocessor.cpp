@@ -21,7 +21,7 @@ Q_DECLARE_METATYPE(QWebSocketProtocol::OpCode)
 
 //TODO: test valid frame sequences
 
-//unhappy flow
+//rainy-day flow
 //DONE: test invalid UTF8 sequences
 //DONE: test invalid UTF8 sequences in control/close frames
 //TODO: test invalid masks
@@ -67,16 +67,23 @@ private Q_SLOTS:
     /*!
       \brief Tests all kinds of valid binary frames, including zero length frames
       */
-    void goodBinaryFrames();
+    void goodBinaryFrame();
 
     /*!
       \brief Tests all kinds of valid text frames, including zero length frames
       */
-    void goodTextFrames();
+    void goodTextFrame();
 
-    void goodControlFrames();
+    /*!
+     * \brief Test all kinds of valid control frames.
+     */
+    void goodControlFrame();
+    /*!
+     * \brief Test all kinds of valid close frames.
+     */
+    void goodCloseFrame();
 
-    //void goodHeaders();   //test all valid control codes
+    //void goodHeaders();   //test all valid opcodes
 
     /*!
       Tests the QWebSocketDataProcessor for the correct handling of non-charactercodes
@@ -156,9 +163,9 @@ private Q_SLOTS:
     void frameTooBig_data();
 
     void nonCharacterCodes_data();
-    void goodTextFrames_data();
-    void goodBinaryFrames_data();
-    void goodControlFrames_data();
+    void goodTextFrame_data();
+    void goodBinaryFrame_data();
+    void goodCloseFrame_data();
 
 private:
     //helper function that constructs a new row of test data for invalid UTF8 sequences
@@ -203,21 +210,23 @@ void tst_DataProcessor::cleanup()
 {
 }
 
-void tst_DataProcessor::goodTextFrames_data()
+void tst_DataProcessor::goodTextFrame_data()
 {
     QTest::addColumn<QByteArray>("payload");
 
+    //test frames with small (< 126), large ( < 65536) and big ( > 65535) payloads
     for (int i = 0; i < (65536 + 256); i += 128)
     {
         QTest::newRow(QString("Text frame with %1 ASCII characters").arg(i).toStdString().data()) << QByteArray(i, 'a');
     }
+    //test all valid ASCII characters
     for (int i = 0; i < 128; ++i)
     {
         QTest::newRow(QString("Text frame with containing ASCII character '0x%1'").arg(QByteArray(1, char(i)).toHex().constData()).toStdString().data()) << QByteArray(1, char(i));
     }
 }
 
-void tst_DataProcessor::goodBinaryFrames_data()
+void tst_DataProcessor::goodBinaryFrame_data()
 {
     QTest::addColumn<QByteArray>("payload");
     for (int i = 0; i < (65536 + 256); i += 128)
@@ -230,7 +239,7 @@ void tst_DataProcessor::goodBinaryFrames_data()
     }
 }
 
-void tst_DataProcessor::goodControlFrames_data()
+void tst_DataProcessor::goodCloseFrame_data()
 {
     //TODO: still to test with no close code and no close reason (is valid)
     QTest::addColumn<QString>("payload");
@@ -264,7 +273,7 @@ void tst_DataProcessor::goodControlFrames_data()
     //QTest::newRow("Close frame with close code HANDSHAKE FAILED") << QString(1, 'a') << QWebSocketProtocol::CC_TLS_HANDSHAKE_FAILED;
 }
 
-void tst_DataProcessor::goodBinaryFrames()
+void tst_DataProcessor::goodBinaryFrame()
 {
     QByteArray data;
     QBuffer buffer;
@@ -313,7 +322,7 @@ void tst_DataProcessor::goodBinaryFrames()
     data.clear();
 }
 
-void tst_DataProcessor::goodTextFrames()
+void tst_DataProcessor::goodTextFrame()
 {
     QByteArray data;
     QBuffer buffer;
@@ -362,7 +371,7 @@ void tst_DataProcessor::goodTextFrames()
     data.clear();
 }
 
-void tst_DataProcessor::goodControlFrames()
+void tst_DataProcessor::goodCloseFrame()
 {
     QByteArray data;
     QBuffer buffer;
