@@ -14,9 +14,9 @@ Q_DECLARE_METATYPE(QWebSocketProtocol::OpCode)
 //TODO: test valid UTF8 sequences (see UC 6.2)
 //TODO: test on masking correctness
 //TODO: test for valid fields
-//TODO: test for valid opcodes
+//TODO: test for valid control frames
 //DONE: test for valid close codes
-//TODO: test close frame with no close code and reason
+//DONE: test close frame with no close code and reason
 //TODO: test if opcode is correct after processing of a continuation frame (text and binary frames)
 
 //TODO: test valid frame sequences
@@ -241,7 +241,6 @@ void tst_DataProcessor::goodBinaryFrame_data()
 
 void tst_DataProcessor::goodCloseFrame_data()
 {
-    //TODO: still to test with no close code and no close reason (is valid)
     QTest::addColumn<QString>("payload");
     QTest::addColumn<QWebSocketProtocol::CloseCode>("closeCode");
     //control frame data cannot exceed 125 bytes; smaller than 124, because we also need a 2 byte close code
