@@ -231,7 +231,7 @@ bool QWebSocketDataProcessor::processControlFrame(const QWebSocketFrame &frame)
         quint16 closeCode = QWebSocketProtocol::CC_NORMAL;
         QString closeReason;
         QByteArray payload = frame.getPayload();
-        if (payload.size() == 1)
+        if (payload.size() == 1)    //size is either 0 (no close code and no reason) or >= 2 (at least a close code of 2 bytes)
         {
             closeCode = QWebSocketProtocol::CC_PROTOCOL_ERROR;
             closeReason = tr("Payload of close frame is too small.");
