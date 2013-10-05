@@ -11,12 +11,12 @@ headers				+=	../qwebsocket.h  \
 
 sourcedirs			+=	..
 sources				+=	../qwebsocket.cpp \
-						../qwebsocketserver.cpp \
-						qwebsockets.qdoc
+					../qwebsocketserver.cpp \
+					qwebsockets.qdoc
 
-exampledirs			+=	../../examples/ \
-						../../examples/echoclient \
-						../../examples/echoserver
+exampledirs			+=	../../../examples/ \
+					../../../examples/echoclient \
+					../../../examples/echoserver
 
 #imagedirs			+=	./images
 
