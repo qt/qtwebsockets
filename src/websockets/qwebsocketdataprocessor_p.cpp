@@ -17,13 +17,13 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 /*!
-    \class DataProcessor
-    The class DataProcessor is responsible for reading, validating and interpreting data from a websocket.
+    \class QWebSocketDataProcessor
+    The class QWebSocketDataProcessor is responsible for reading, validating and interpreting data from a websocket.
     It reads data from a QIODevice, validates it against RFC 6455, and parses it into frames (data, control).
     It emits signals that correspond to the type of the frame: textFrameReceived(), binaryFrameReceived(),
     textMessageReceived(), binaryMessageReceived(), pingReceived(), pongReceived() and closeReceived().
     Whenever an error is detected, the errorEncountered() signal is emitted.
-    DataProcessor also checks if a frame is allowed in a sequence of frames (e.g. a continuation frame cannot follow a final frame).
+    QWebSocketDataProcessor also checks if a frame is allowed in a sequence of frames (e.g. a continuation frame cannot follow a final frame).
     This class is an internal class used by QWebSocketInternal for data processing and validation.
 
     \sa Frame()

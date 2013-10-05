@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 /*!
     \class QWebSocketServer
 
-    \inmodule QWebSockets
+    \inmodule QtWebSockets
 
     \brief Implements a websocket-based server.
 
@@ -88,10 +88,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 /*!
-    \fn void QWebSocketServer::originAuthenticationRequired(QCorsAuthenticator *authenticator)
+    \fn void QWebSocketServer::originAuthenticationRequired(QWebSocketCorsAuthenticator *authenticator)
     This signal is emitted when a new connection is requested.
     The slot connected to this signal should indicate whether the origin (which can be determined by the origin() call)
-    is allowed in the \a authenticator object (by issuing \l{QCorsAuthenticator::}{setAllowed()})
+    is allowed in the \a authenticator object (by issuing \l{QWebSocketCorsAuthenticator::}{setAllowed()})
 
     If no slot is connected to this signal, all origins will be accepted by default.
 

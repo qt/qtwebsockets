@@ -42,10 +42,6 @@ QT_BEGIN_NAMESPACE
 class QIODevice;
 class QWebSocketFrame;
 
-/*!
-    \internal
-    The DataProcessor class reads and interprets incoming websocket messages, and emits appropriate signals.
- */
 class Q_AUTOTEST_EXPORT QWebSocketDataProcessor : public QObject
 {
     Q_OBJECT

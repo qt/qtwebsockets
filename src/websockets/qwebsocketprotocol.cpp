@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <QtEndian>
 
 /*!
-    \enum WebSocketProtocol::CloseCode
+    \enum QWebSocketProtocol::CloseCode
 
     The close codes supported by WebSockets V13
 
@@ -44,7 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
     \sa \l{QWebSocket::} {close()}
 */
 /*!
-    \enum WebSocketProtocol::Version
+    \enum QWebSocketProtocol::Version
 
     \brief The different defined versions of the Websocket protocol.
 
@@ -79,19 +79,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
 /*!
-  \fn WebSocketProtocol::isOpCodeReserved(OpCode code)
+  \fn QWebSocketProtocol::isOpCodeReserved(OpCode code)
   Checks if \a code is a valid OpCode
   \internal
 */
 
 /*!
-  \fn WebSocketProtocol::isCloseCodeValid(int closeCode)
+  \fn QWebSocketProtocol::isCloseCodeValid(int closeCode)
   Checks if \a closeCode is a valid web socket close code
   \internal
 */
 
 /*!
-  \fn WebSocketProtocol::getCurrentVersion()
+  \fn QWebSocketProtocol::currentVersion()
   Returns the latest version that WebSocket is supporting
   \internal
 */
