@@ -249,7 +249,11 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
     QString resourceName = url.path();
     if (!url.query().isEmpty())
     {
-        resourceName.append(QStringLiteral("?") % url.query());
+        if (!resourceName.endsWith(QChar::fromLatin1('?')))
+        {
+            resourceName.append(QChar::fromLatin1('?'));
+        }
+        resourceName.append(url.query());
     }
     if (resourceName.isEmpty())
     {
@@ -745,7 +749,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
             }
             else
             {
-                errorDescription = tr("Invalid statusline in response: %1.").arg(statusLine);
+                errorDescription = tr("QWebSocketPrivate::processHandshake: Invalid statusline in response: %1.").arg(statusLine);
             }
         }
         else if (httpStatusCode == 400)	//HTTP/1.1 400 Bad Request
@@ -763,14 +767,14 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
                 else
                 {
                     //we tried v13, but something different went wrong
-                    errorDescription = tr("Unknown error condition encountered. Aborting connection.");
+                    errorDescription = tr("QWebSocketPrivate::processHandshake: Unknown error condition encountered. Aborting connection.");
                     ok = false;
                 }
             }
         }
         else
         {
-            errorDescription = tr("Unhandled http status code: %1.").arg(httpStatusCode);
+            errorDescription = tr("QWebSocketPrivate::processHandshake: Unhandled http status code: %1 (%2).").arg(httpStatusCode).arg(httpStatusMessage);
             ok = false;
         }
 
