@@ -120,7 +120,7 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(const QWebSocketHandsh
             const QList<QString> matchingProtocols = supportedProtocols.toSet().intersect(request.getProtocols().toSet()).toList();
             const QList<QString> matchingExtensions = supportedExtensions.toSet().intersect(request.getExtensions().toSet()).toList();
             QList<QWebSocketProtocol::Version> matchingVersions = request.getVersions().toSet().intersect(supportedVersions.toSet()).toList();
-            qStableSort(matchingVersions.begin(), matchingVersions.end(), qGreater<QWebSocketProtocol::Version>());	//sort in descending order
+            std::sort(matchingVersions.begin(), matchingVersions.end(), qGreater<QWebSocketProtocol::Version>());	//sort in descending order
 
             if (matchingVersions.isEmpty())
             {
