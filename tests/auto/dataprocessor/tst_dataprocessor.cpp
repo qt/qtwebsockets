@@ -77,7 +77,7 @@ private Q_SLOTS:
     /*!
      * \brief Test all kinds of valid control frames.
      */
-    void goodControlFrame();
+    //void goodControlFrame();
     /*!
      * \brief Test all kinds of valid close frames.
      */
