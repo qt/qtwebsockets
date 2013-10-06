@@ -365,8 +365,8 @@ void tst_DataProcessor::goodTextFrame()
 
     QSignalSpy spyFrameReceived(&dataProcessor, SIGNAL(textFrameReceived(QString,bool)));
     QSignalSpy spyMessageReceived(&dataProcessor, SIGNAL(textMessageReceived(QString)));
-    QSignalSpy spyBinaryFrameReceived(&dataProcessor, SIGNAL(binaryFrameReceived(QString,bool)));
-    QSignalSpy spyBinaryMessageReceived(&dataProcessor, SIGNAL(binaryMessageReceived(QString)));
+    QSignalSpy spyBinaryFrameReceived(&dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)));
+    QSignalSpy spyBinaryMessageReceived(&dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)));
     dataProcessor.process(&buffer);
     QCOMPARE(spyFrameReceived.count(), 1);
     QCOMPARE(spyMessageReceived.count(), 1);
@@ -399,6 +399,7 @@ void tst_DataProcessor::goodCloseFrame()
     }
     else
     {
+        data.append(QChar::fromLatin1(0));  //payload length 0;
         //dataprocessor emits a CC_NORMAL close code when none is present
         closeCode = QWebSocketProtocol::CC_NORMAL;
     }
@@ -430,35 +431,39 @@ void tst_DataProcessor::nonCharacterCodes()
     QFETCH(quint8, firstByte);
     QFETCH(quint8, secondByte);
     QFETCH(QByteArray, payload);
+    QFETCH(bool, isContinuationFrame);
 
-    QByteArray data;
-    QBuffer buffer;
-    QWebSocketDataProcessor dataProcessor;
-    QSignalSpy frameSpy(&dataProcessor, SIGNAL(textFrameReceived(QString,bool)));
-    QSignalSpy messageSpy(&dataProcessor, SIGNAL(textMessageReceived(QString)));
-    QSignalSpy binaryFrameSpy(&dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)));
-    QSignalSpy binaryMessageSpy(&dataProcessor, SIGNAL(textMessageReceived(QByteArray)));
+    if (!isContinuationFrame)
+    {
+        QByteArray data;
+        QBuffer buffer;
+        QWebSocketDataProcessor dataProcessor;
+        QSignalSpy frameSpy(&dataProcessor, SIGNAL(textFrameReceived(QString,bool)));
+        QSignalSpy messageSpy(&dataProcessor, SIGNAL(textMessageReceived(QString)));
+        QSignalSpy binaryFrameSpy(&dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)));
+        QSignalSpy binaryMessageSpy(&dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)));
 
-    data.append(firstByte).append(secondByte);
-    data.append(payload);
-    buffer.setData(data);
-    buffer.open(QIODevice::ReadOnly);
-    dataProcessor.process(&buffer);
-    QEXPECT_FAIL(QTest::currentDataTag(), "Due to QTextCode interpeting non-characters unicode points as invalid (QTBUG-33229).", Abort);
+        data.append(firstByte).append(secondByte);
+        data.append(payload);
+        buffer.setData(data);
+        buffer.open(QIODevice::ReadOnly);
+        dataProcessor.process(&buffer);
+        //QEXPECT_FAIL(QTest::currentDataTag(), "Due to QTextCode interpeting non-characters unicode points as invalid (QTBUG-33229).", Abort);
 
-    QCOMPARE(frameSpy.count(), 1);
-    QCOMPARE(messageSpy.count(), 1);
-    QCOMPARE(binaryFrameSpy.count(), 0);
-    QCOMPARE(binaryMessageSpy.count(), 0);
+        QCOMPARE(frameSpy.count(), 1);
+        QCOMPARE(messageSpy.count(), 1);
+        QCOMPARE(binaryFrameSpy.count(), 0);
+        QCOMPARE(binaryMessageSpy.count(), 0);
 
-    QVariantList arguments = frameSpy.takeFirst();
-    QCOMPARE(arguments.at(0).value<QString>().toUtf8(), payload);
-    arguments = messageSpy.takeFirst();
-    QCOMPARE(arguments.at(0).value<QString>().toUtf8(), payload);
-    buffer.close();
-    frameSpy.clear();
-    messageSpy.clear();
-    data.clear();
+        QVariantList arguments = frameSpy.takeFirst();
+        QCOMPARE(arguments.at(0).value<QString>().toUtf8(), payload);
+        arguments = messageSpy.takeFirst();
+        QCOMPARE(arguments.at(0).value<QString>().toUtf8(), payload);
+        buffer.close();
+        frameSpy.clear();
+        messageSpy.clear();
+        data.clear();
+    }
 }
 
 void tst_DataProcessor::frameTooSmall()
