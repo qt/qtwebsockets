@@ -213,81 +213,80 @@ void QWebSocketDataProcessor::clear()
  */
 bool QWebSocketDataProcessor::processControlFrame(const QWebSocketFrame &frame)
 {
-    bool mustStopProcessing = false;
+    bool mustStopProcessing = true; //control frames never expect additional frames to be processed
     switch (frame.getOpCode())
     {
-    case QWebSocketProtocol::OC_PING:
-    {
-        Q_EMIT pingReceived(frame.getPayload());
-        break;
-    }
-    case QWebSocketProtocol::OC_PONG:
-    {
-        Q_EMIT pongReceived(frame.getPayload());
-        break;
-    }
-    case QWebSocketProtocol::OC_CLOSE:
-    {
-        quint16 closeCode = QWebSocketProtocol::CC_NORMAL;
-        QString closeReason;
-        QByteArray payload = frame.getPayload();
-        if (payload.size() == 1)    //size is either 0 (no close code and no reason) or >= 2 (at least a close code of 2 bytes)
+        case QWebSocketProtocol::OC_PING:
         {
-            closeCode = QWebSocketProtocol::CC_PROTOCOL_ERROR;
-            closeReason = tr("Payload of close frame is too small.");
+            Q_EMIT pingReceived(frame.getPayload());
+            break;
         }
-        else if (payload.size() > 1)   //close frame can have a close code and reason
+        case QWebSocketProtocol::OC_PONG:
         {
-            closeCode = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(payload.constData()));
-            if (!QWebSocketProtocol::isCloseCodeValid(closeCode))
+            Q_EMIT pongReceived(frame.getPayload());
+            break;
+        }
+        case QWebSocketProtocol::OC_CLOSE:
+        {
+            quint16 closeCode = QWebSocketProtocol::CC_NORMAL;
+            QString closeReason;
+            QByteArray payload = frame.getPayload();
+            if (payload.size() == 1)    //size is either 0 (no close code and no reason) or >= 2 (at least a close code of 2 bytes)
             {
                 closeCode = QWebSocketProtocol::CC_PROTOCOL_ERROR;
-                closeReason = tr("Invalid close code %1 detected.").arg(closeCode);
+                closeReason = tr("Payload of close frame is too small.");
             }
-            else
+            else if (payload.size() > 1)   //close frame can have a close code and reason
             {
-                if (payload.size() > 2)
+                closeCode = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(payload.constData()));
+                if (!QWebSocketProtocol::isCloseCodeValid(closeCode))
                 {
-                    QTextCodec *tc = QTextCodec::codecForName("UTF-8");
-                    QTextCodec::ConverterState state(QTextCodec::ConvertInvalidToNull);
-                    closeReason = tc->toUnicode(payload.constData() + 2, payload.size() - 2, &state);
-                    bool failed = (state.invalidChars != 0) || (state.remainingChars != 0);
-                    if (failed)
+                    closeCode = QWebSocketProtocol::CC_PROTOCOL_ERROR;
+                    closeReason = tr("Invalid close code %1 detected.").arg(closeCode);
+                }
+                else
+                {
+                    if (payload.size() > 2)
                     {
-                        closeCode = QWebSocketProtocol::CC_WRONG_DATATYPE;
-                        closeReason = tr("Invalid UTF-8 code encountered.");
+                        QTextCodec *tc = QTextCodec::codecForName("UTF-8");
+                        QTextCodec::ConverterState state(QTextCodec::ConvertInvalidToNull);
+                        closeReason = tc->toUnicode(payload.constData() + 2, payload.size() - 2, &state);
+                        bool failed = (state.invalidChars != 0) || (state.remainingChars != 0);
+                        if (failed)
+                        {
+                            closeCode = QWebSocketProtocol::CC_WRONG_DATATYPE;
+                            closeReason = tr("Invalid UTF-8 code encountered.");
+                        }
                     }
                 }
             }
+            Q_EMIT closeReceived(static_cast<QWebSocketProtocol::CloseCode>(closeCode), closeReason);
+            break;
         }
-        mustStopProcessing = true;
-        Q_EMIT closeReceived(static_cast<QWebSocketProtocol::CloseCode>(closeCode), closeReason);
-        break;
-    }
-    case QWebSocketProtocol::OC_CONTINUE:
-    case QWebSocketProtocol::OC_BINARY:
-    case QWebSocketProtocol::OC_TEXT:
-    case QWebSocketProtocol::OC_RESERVED_3:
-    case QWebSocketProtocol::OC_RESERVED_4:
-    case QWebSocketProtocol::OC_RESERVED_5:
-    case QWebSocketProtocol::OC_RESERVED_6:
-    case QWebSocketProtocol::OC_RESERVED_7:
-    case QWebSocketProtocol::OC_RESERVED_C:
-    case QWebSocketProtocol::OC_RESERVED_B:
-    case QWebSocketProtocol::OC_RESERVED_D:
-    case QWebSocketProtocol::OC_RESERVED_E:
-    case QWebSocketProtocol::OC_RESERVED_F:
-    {
-        //do nothing
-        //case added to make C++ compiler happy
-        break;
-    }
-    default:
-    {
-        qDebug() << "DataProcessor::processControlFrame: Invalid opcode detected:" << static_cast<int>(frame.getOpCode());
-        //Do nothing
-        break;
-    }
+        case QWebSocketProtocol::OC_CONTINUE:
+        case QWebSocketProtocol::OC_BINARY:
+        case QWebSocketProtocol::OC_TEXT:
+        case QWebSocketProtocol::OC_RESERVED_3:
+        case QWebSocketProtocol::OC_RESERVED_4:
+        case QWebSocketProtocol::OC_RESERVED_5:
+        case QWebSocketProtocol::OC_RESERVED_6:
+        case QWebSocketProtocol::OC_RESERVED_7:
+        case QWebSocketProtocol::OC_RESERVED_C:
+        case QWebSocketProtocol::OC_RESERVED_B:
+        case QWebSocketProtocol::OC_RESERVED_D:
+        case QWebSocketProtocol::OC_RESERVED_E:
+        case QWebSocketProtocol::OC_RESERVED_F:
+        {
+            //do nothing
+            //case added to make C++ compiler happy
+            break;
+        }
+        default:
+        {
+            qDebug() << "DataProcessor::processControlFrame: Invalid opcode detected:" << static_cast<int>(frame.getOpCode());
+            //Do nothing
+            break;
+        }
     }
     return mustStopProcessing;
 }
