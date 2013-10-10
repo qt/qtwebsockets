@@ -176,85 +176,99 @@ QTextStream &QWebSocketHandshakeRequest::readFromStream(QTextStream &textStream)
     {
         const QString requestLine = textStream.readLine();
         const QStringList tokens = requestLine.split(' ', QString::SkipEmptyParts);
-        const QString verb = tokens[0];
-        const QString resourceName = tokens[1];
-        const QString httpProtocol = tokens[2];
-        bool conversionOk = false;
-        const float httpVersion = httpProtocol.midRef(5).toFloat(&conversionOk);
-
-        QString headerLine = textStream.readLine();
-        m_headers.clear();
-        while (!headerLine.isEmpty())
+        if (tokens.length() < 3)
         {
-            const QStringList headerField = headerLine.split(QStringLiteral(": "), QString::SkipEmptyParts);
-            m_headers.insertMulti(headerField[0], headerField[1]);
-            headerLine = textStream.readLine();
+            m_isValid = false;
+            clear();
         }
+        else
+        {
+            const QString verb(tokens.at(0));
+            const QString resourceName(tokens.at(1));
+            const QString httpProtocol(tokens.at(2));
+            bool conversionOk = false;
+            const float httpVersion = httpProtocol.midRef(5).toFloat(&conversionOk);
 
-        const QString host = m_headers.value(QStringLiteral("Host"), QStringLiteral(""));
-        m_requestUrl = QUrl::fromEncoded(resourceName.toLatin1());
-        if (m_requestUrl.isRelative())
-        {
-            m_requestUrl.setHost(host);
-        }
-        if (m_requestUrl.scheme().isEmpty())
-        {
-            const QString scheme =  isSecure() ? QStringLiteral("wss://") : QStringLiteral("ws://");
-            m_requestUrl.setScheme(scheme);
-        }
-
-        const QStringList versionLines = m_headers.values(QStringLiteral("Sec-WebSocket-Version"));
-        for (QStringList::const_iterator v = versionLines.begin(); v != versionLines.end(); ++v)
-        {
-            const QStringList versions = (*v).split(QStringLiteral(","), QString::SkipEmptyParts);
-            for (QStringList::const_iterator i = versions.begin(); i != versions.end(); ++i)
+            QString headerLine = textStream.readLine();
+            m_headers.clear();
+            while (!headerLine.isEmpty())
             {
-               const QWebSocketProtocol::Version ver = QWebSocketProtocol::versionFromString((*i).trimmed());
-               m_versions << ver;
+                const QStringList headerField = headerLine.split(QStringLiteral(": "), QString::SkipEmptyParts);
+                if (headerField.length() < 2)
+                {
+                    m_isValid = false;
+                    clear();
+                    return textStream;
+                }
+                m_headers.insertMulti(headerField.at(0), headerField.at(1));
+                headerLine = textStream.readLine();
             }
-        }
-        std::sort(m_versions.begin(), m_versions.end(), qGreater<QWebSocketProtocol::Version>()); //sort in descending order
-        m_key = m_headers.value(QStringLiteral("Sec-WebSocket-Key"), QStringLiteral(""));
-        const QString upgrade = m_headers.value(QStringLiteral("Upgrade"), QStringLiteral(""));           //must be equal to "websocket", case-insensitive
-        const QString connection = m_headers.value(QStringLiteral("Connection"), QStringLiteral(""));     //must contain "Upgrade", case-insensitive
-        const QStringList connectionLine = connection.split(QStringLiteral(","), QString::SkipEmptyParts);
-        QStringList connectionValues;
-        for (QStringList::const_iterator c = connectionLine.begin(); c != connectionLine.end(); ++c)
-        {
-            connectionValues << (*c).trimmed();
-        }
 
-        //optional headers
-        m_origin = m_headers.value(QStringLiteral("Sec-WebSocket-Origin"), QStringLiteral(""));
-        const QStringList protocolLines = m_headers.values(QStringLiteral("Sec-WebSocket-Protocol"));
-        for (QStringList::const_iterator pl = protocolLines.begin(); pl != protocolLines.end(); ++pl)
-        {
-            QStringList protocols = (*pl).split(QStringLiteral(","), QString::SkipEmptyParts);
-            for (QStringList::const_iterator p = protocols.begin(); p != protocols.end(); ++p)
+            const QString host = m_headers.value(QStringLiteral("Host"), QStringLiteral(""));
+            m_requestUrl = QUrl::fromEncoded(resourceName.toLatin1());
+            if (m_requestUrl.isRelative())
             {
-                m_protocols << (*p).trimmed();
+                m_requestUrl.setHost(host);
             }
-        }
-        const QStringList extensionLines = m_headers.values(QStringLiteral("Sec-WebSocket-Extensions"));
-        for (QStringList::const_iterator el = extensionLines.begin(); el != extensionLines.end(); ++el)
-        {
-            QStringList extensions = (*el).split(QStringLiteral(","), QString::SkipEmptyParts);
-            for (QStringList::const_iterator e = extensions.begin(); e != extensions.end(); ++e)
+            if (m_requestUrl.scheme().isEmpty())
             {
-                m_extensions << (*e).trimmed();
+                const QString scheme =  isSecure() ? QStringLiteral("wss://") : QStringLiteral("ws://");
+                m_requestUrl.setScheme(scheme);
             }
+
+            const QStringList versionLines = m_headers.values(QStringLiteral("Sec-WebSocket-Version"));
+            for (QStringList::const_iterator v = versionLines.begin(); v != versionLines.end(); ++v)
+            {
+                const QStringList versions = (*v).split(QStringLiteral(","), QString::SkipEmptyParts);
+                for (QStringList::const_iterator i = versions.begin(); i != versions.end(); ++i)
+                {
+                   const QWebSocketProtocol::Version ver = QWebSocketProtocol::versionFromString((*i).trimmed());
+                   m_versions << ver;
+                }
+            }
+            std::sort(m_versions.begin(), m_versions.end(), qGreater<QWebSocketProtocol::Version>()); //sort in descending order
+            m_key = m_headers.value(QStringLiteral("Sec-WebSocket-Key"), QStringLiteral(""));
+            const QString upgrade = m_headers.value(QStringLiteral("Upgrade"), QStringLiteral(""));           //must be equal to "websocket", case-insensitive
+            const QString connection = m_headers.value(QStringLiteral("Connection"), QStringLiteral(""));     //must contain "Upgrade", case-insensitive
+            const QStringList connectionLine = connection.split(QStringLiteral(","), QString::SkipEmptyParts);
+            QStringList connectionValues;
+            for (QStringList::const_iterator c = connectionLine.begin(); c != connectionLine.end(); ++c)
+            {
+                connectionValues << (*c).trimmed();
+            }
+
+            //optional headers
+            m_origin = m_headers.value(QStringLiteral("Sec-WebSocket-Origin"), QStringLiteral(""));
+            const QStringList protocolLines = m_headers.values(QStringLiteral("Sec-WebSocket-Protocol"));
+            for (QStringList::const_iterator pl = protocolLines.begin(); pl != protocolLines.end(); ++pl)
+            {
+                QStringList protocols = (*pl).split(QStringLiteral(","), QString::SkipEmptyParts);
+                for (QStringList::const_iterator p = protocols.begin(); p != protocols.end(); ++p)
+                {
+                    m_protocols << (*p).trimmed();
+                }
+            }
+            const QStringList extensionLines = m_headers.values(QStringLiteral("Sec-WebSocket-Extensions"));
+            for (QStringList::const_iterator el = extensionLines.begin(); el != extensionLines.end(); ++el)
+            {
+                QStringList extensions = (*el).split(QStringLiteral(","), QString::SkipEmptyParts);
+                for (QStringList::const_iterator e = extensions.begin(); e != extensions.end(); ++e)
+                {
+                    m_extensions << (*e).trimmed();
+                }
+            }
+
+            //TODO: authentication field
+
+            m_isValid = !(host.isEmpty() ||
+                          resourceName.isEmpty() ||
+                          m_versions.isEmpty() ||
+                          m_key.isEmpty() ||
+                          (verb != QStringLiteral("GET")) ||
+                          (!conversionOk || (httpVersion < 1.1f)) ||
+                          (upgrade.toLower() != QStringLiteral("websocket")) ||
+                          (!connectionValues.contains(QStringLiteral("upgrade"), Qt::CaseInsensitive)));
         }
-
-        //TODO: authentication field
-
-        m_isValid = !(host.isEmpty() ||
-                      resourceName.isEmpty() ||
-                      m_versions.isEmpty() ||
-                      m_key.isEmpty() ||
-                      (verb != QStringLiteral("GET")) ||
-                      (!conversionOk || (httpVersion < 1.1f)) ||
-                      (upgrade.toLower() != QStringLiteral("websocket")) ||
-                      (!connectionValues.contains(QStringLiteral("upgrade"), Qt::CaseInsensitive)));
     }
     return textStream;
 }
