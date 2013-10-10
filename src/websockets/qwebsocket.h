@@ -40,7 +40,7 @@ class Q_WEBSOCKETS_EXPORT QWebSocket : public QObject
     Q_DECLARE_PRIVATE(QWebSocket)
 
 public:
-    explicit QWebSocket(const QString &origin = QString(), QWebSocketProtocol::Version version = QWebSocketProtocol::V_LATEST, QObject *parent = 0);
+    explicit QWebSocket(const QString &origin = QString(), QWebSocketProtocol::Version version = QWebSocketProtocol::V_LATEST, QObject *parent = Q_NULLPTR);
     virtual ~QWebSocket();
 
     void abort();
@@ -105,7 +105,7 @@ Q_SIGNALS:
     void pong(quint64 elapsedTime, QByteArray payload);
 
 private:
-    QWebSocket(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version, QObject *parent = 0);
+    QWebSocket(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version, QObject *parent = Q_NULLPTR);
     QWebSocketPrivate * const d_ptr;
 };
 

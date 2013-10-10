@@ -12,7 +12,7 @@ class EchoServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit EchoServer(quint16 port, QObject *parent = 0);
+    explicit EchoServer(quint16 port, QObject *parent = Q_NULLPTR);
 
 Q_SIGNALS:
 

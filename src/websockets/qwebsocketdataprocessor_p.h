@@ -48,7 +48,7 @@ class Q_AUTOTEST_EXPORT QWebSocketDataProcessor : public QObject
     Q_DISABLE_COPY(QWebSocketDataProcessor)
 
 public:
-    explicit QWebSocketDataProcessor(QObject *parent = 0);
+    explicit QWebSocketDataProcessor(QObject *parent = Q_NULLPTR);
     virtual ~QWebSocketDataProcessor();
 
     static quint64 maxMessageSize();

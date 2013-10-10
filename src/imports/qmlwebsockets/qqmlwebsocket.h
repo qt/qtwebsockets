@@ -30,7 +30,7 @@ class QQmlWebSocket : public QObject, public QQmlParserStatus
     Q_INTERFACES(QQmlParserStatus)
 
 public:
-    explicit QQmlWebSocket(QObject *parent = 0);
+    explicit QQmlWebSocket(QObject *parent = Q_NULLPTR);
 
 public:
     void classBegin() Q_DECL_OVERRIDE;

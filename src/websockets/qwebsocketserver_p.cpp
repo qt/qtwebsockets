@@ -37,11 +37,11 @@ QT_BEGIN_NAMESPACE
 QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName, QWebSocketServer * const pWebSocketServer, QObject *parent) :
     QObject(parent),
     q_ptr(pWebSocketServer),
-    m_pTcpServer(0),
+    m_pTcpServer(Q_NULLPTR),
     m_serverName(serverName),
     m_pendingConnections()
 {
-    Q_ASSERT(pWebSocketServer != 0);
+    Q_ASSERT(pWebSocketServer);
     m_pTcpServer = new QTcpServer(this);
     connect(m_pTcpServer, SIGNAL(acceptError(QAbstractSocket::SocketError)), q_ptr, SIGNAL(acceptError(QAbstractSocket::SocketError)));
     connect(m_pTcpServer, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
@@ -125,7 +125,7 @@ void QWebSocketServerPrivate::addPendingConnection(QWebSocket *pWebSocket)
  */
 QWebSocket *QWebSocketServerPrivate::nextPendingConnection()
 {
-    QWebSocket *pWebSocket = 0;
+    QWebSocket *pWebSocket = Q_NULLPTR;
     if (!m_pendingConnections.isEmpty())
     {
         pWebSocket = m_pendingConnections.dequeue();
@@ -281,7 +281,7 @@ void QWebSocketServerPrivate::onNewConnection()
 void QWebSocketServerPrivate::onCloseConnection()
 {
     QTcpSocket *pTcpSocket = qobject_cast<QTcpSocket*>(sender());
-    if (pTcpSocket != 0)
+    if (pTcpSocket)
     {
         pTcpSocket->close();
     }
@@ -294,7 +294,7 @@ void QWebSocketServerPrivate::handshakeReceived()
 {
     Q_Q(QWebSocketServer);
     QTcpSocket *pTcpSocket = qobject_cast<QTcpSocket*>(sender());
-    if (pTcpSocket != 0)
+    if (pTcpSocket)
     {
         bool success = false;
         bool isSecure = false;

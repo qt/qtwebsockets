@@ -8,7 +8,7 @@ class EchoClient : public QObject
 {
     Q_OBJECT
 public:
-    explicit EchoClient(const QUrl &url, QObject *parent = 0);
+    explicit EchoClient(const QUrl &url, QObject *parent = Q_NULLPTR);
 
 Q_SIGNALS:
 

@@ -64,7 +64,7 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
     m_pingTimer(),
     m_dataProcessor()
 {
-    Q_ASSERT(pWebSocket != 0);
+    Q_ASSERT(pWebSocket);
     makeConnections(m_pSocket);
     qsrand(static_cast<uint>(QDateTime::currentMSecsSinceEpoch()));
 }
@@ -91,7 +91,7 @@ QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol:
     m_pingTimer(),
     m_dataProcessor()
 {
-    Q_ASSERT(pWebSocket != 0);
+    Q_ASSERT(pWebSocket);
     makeConnections(m_pSocket);
 }
 
@@ -106,7 +106,7 @@ QWebSocketPrivate::~QWebSocketPrivate()
     }
     releaseConnections(m_pSocket);
     m_pSocket->deleteLater();
-    m_pSocket = 0;
+    m_pSocket = Q_NULLPTR;
 }
 
 /*!
@@ -679,7 +679,7 @@ QString readLine(QTcpSocket *pSocket)
 void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
 {
     Q_Q(QWebSocket);
-    if (pSocket == 0)
+    if (!pSocket)
     {
         return;
     }
