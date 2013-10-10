@@ -107,9 +107,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "qwebsocketserver.h"
 #include "qwebsocketserver_p.h"
 
-//TODO: CorsCheck: give list in constructor or use CorsAuthenticator object
-//in QNetworkAccessManager the signal cannot be connected to a queued signal, because it waits for the signal to return
-
 QT_BEGIN_NAMESPACE
 
 /*!
