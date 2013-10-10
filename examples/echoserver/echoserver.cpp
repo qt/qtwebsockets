@@ -6,7 +6,7 @@
 //! [constructor]
 EchoServer::EchoServer(quint16 port, QObject *parent) :
     QObject(parent),
-    m_pWebSocketServer(0),
+    m_pWebSocketServer(Q_NULLPTR),
     m_clients()
 {
     m_pWebSocketServer = new QWebSocketServer("Echo Server", this);
@@ -36,7 +36,7 @@ void EchoServer::onNewConnection()
 void EchoServer::processMessage(QString message)
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
-    if (pClient != 0)
+    if (pClient)
     {
         pClient->write(message);
     }
@@ -47,7 +47,7 @@ void EchoServer::processMessage(QString message)
 void EchoServer::processBinaryMessage(QByteArray message)
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
-    if (pClient != 0)
+    if (pClient)
     {
         pClient->write(message);
     }
@@ -58,7 +58,7 @@ void EchoServer::processBinaryMessage(QByteArray message)
 void EchoServer::socketDisconnected()
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
-    if (pClient != 0)
+    if (pClient)
     {
         m_clients.removeAll(pClient);
         pClient->deleteLater();

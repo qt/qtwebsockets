@@ -57,7 +57,7 @@ public:
     explicit QWebSocketPrivate(const QString &origin,
                                QWebSocketProtocol::Version version,
                                QWebSocket * const pWebSocket,
-                               QObject *parent = 0);
+                               QObject *parent = Q_NULLPTR);
     virtual ~QWebSocketPrivate();
 
     void abort();
@@ -114,7 +114,7 @@ private Q_SLOTS:
 private:
     QWebSocket * const q_ptr;
 
-    QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version, QWebSocket *pWebSocket, QObject *parent = 0);
+    QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version, QWebSocket *pWebSocket, QObject *parent = Q_NULLPTR);
     void setVersion(QWebSocketProtocol::Version version);
     void setResourceName(const QString &resourceName);
     void setRequestUrl(const QUrl &requestUrl);
@@ -143,7 +143,7 @@ private:
     static QWebSocket *upgradeFrom(QTcpSocket *tcpSocket,
                                    const QWebSocketHandshakeRequest &request,
                                    const QWebSocketHandshakeResponse &response,
-                                   QObject *parent = 0);
+                                   QObject *parent = Q_NULLPTR);
 
     quint32 generateMaskingKey() const;
     QByteArray generateKey() const;

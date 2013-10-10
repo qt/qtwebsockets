@@ -196,7 +196,6 @@ QWebSocket::QWebSocket(const QString &origin, QWebSocketProtocol::Version versio
 QWebSocket::~QWebSocket()
 {
     delete d_ptr;
-    //d_ptr = 0;
 }
 
 /*!

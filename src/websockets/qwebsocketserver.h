@@ -40,7 +40,7 @@ class Q_WEBSOCKETS_EXPORT QWebSocketServer : public QObject
     Q_DECLARE_PRIVATE(QWebSocketServer)
 
 public:
-    explicit QWebSocketServer(const QString &serverName, QObject *parent = 0);
+    explicit QWebSocketServer(const QString &serverName, QObject *parent = Q_NULLPTR);
     virtual ~QWebSocketServer();
 
     bool listen(const QHostAddress &address = QHostAddress::Any, quint16 port = 0);

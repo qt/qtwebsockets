@@ -48,7 +48,7 @@ class QWebSocketServerPrivate : public QObject
     Q_DECLARE_PUBLIC(QWebSocketServer)
 
 public:
-    explicit QWebSocketServerPrivate(const QString &serverName, QWebSocketServer * const pWebSocketServer, QObject *parent = 0);
+    explicit QWebSocketServerPrivate(const QString &serverName, QWebSocketServer * const pWebSocketServer, QObject *parent = Q_NULLPTR);
     virtual ~QWebSocketServerPrivate();
 
     void close();
