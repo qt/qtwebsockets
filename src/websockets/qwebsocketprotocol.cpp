@@ -134,24 +134,7 @@ Version versionFromString(const QString &versionString)
     */
 void mask(QByteArray *payload, quint32 maskingKey)
 {
-    quint32 *payloadData = reinterpret_cast<quint32 *>(payload->data());
-    const quint32 numIterations = static_cast<quint32>(payload->size()) / sizeof(quint32);
-    const quint32 remainder = static_cast<quint32>(payload->size()) % sizeof(quint32);
-    quint32 i;
-    for (i = 0; i < numIterations; ++i)
-    {
-        *(payloadData + i) ^= maskingKey;
-    }
-    if (remainder)
-    {
-        const quint32 offset = i * static_cast<quint32>(sizeof(quint32));
-        char *payloadBytes = payload->data();
-        const uchar *mask = reinterpret_cast<uchar *>(&maskingKey);
-        for (quint32 i = 0; i < remainder; ++i)
-        {
-            *(payloadBytes + offset + i) ^= static_cast<char>(mask[(i + offset) % 4]);
-        }
-    }
+    mask(payload->data(), payload->size(), maskingKey);
 }
 
 /*!
