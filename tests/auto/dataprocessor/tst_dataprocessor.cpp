@@ -10,23 +10,6 @@
 Q_DECLARE_METATYPE(QWebSocketProtocol::CloseCode)
 Q_DECLARE_METATYPE(QWebSocketProtocol::OpCode)
 
-//happy flow
-//TODO: test valid UTF8 sequences (see UC 6.2)
-//TODO: test on masking correctness
-//TODO: test for valid fields
-//TODO: test if opcode is correct after processing of a continuation frame (text and binary frames)
-
-//TODO: test valid frame sequences
-
-//rainy-day flow
-//TODO: test invalid masks
-//TODO: test for AutoBahn testcase 5
-//TODO: test for AutoBahn testcase 6.1
-//TODO: test for AutoBahn testcase 6.3 (fragmentation test)
-//TODO: test for AutoBahn testcase 6.4 (fragmentation test)
-
-//TODO: test invalid frame sequences
-
 const quint8 FIN = 0x80;
 const quint8 RSV1 = 0x40;
 const quint8 RSV2 = 0x30;
@@ -267,17 +250,21 @@ void tst_DataProcessor::goodBinaryFrame()
 void tst_DataProcessor::goodTextFrame_data()
 {
     QTest::addColumn<QByteArray>("payload");
+    QTest::addColumn<int>("size");
 
     //test frames with small (< 126), large ( < 65536) and big ( > 65535) payloads
     for (int i = 0; i < (65536 + 256); i += 128)
     {
-        QTest::newRow(QString("Text frame with %1 ASCII characters").arg(i).toStdString().data()) << QByteArray(i, 'a');
+        QTest::newRow(QString("Text frame with %1 ASCII characters").arg(i).toStdString().data()) << QByteArray(i, 'a') << i;
     }
     //test all valid ASCII characters
     for (int i = 0; i < 128; ++i)
     {
-        QTest::newRow(QString("Text frame with containing ASCII character '0x%1'").arg(QByteArray(1, char(i)).toHex().constData()).toStdString().data()) << QByteArray(1, char(i));
+        QTest::newRow(QString("Text frame with containing ASCII character '0x%1'").arg(QByteArray(1, char(i)).toHex().constData()).toStdString().data()) << QByteArray(1, char(i)) << 1;
     }
+
+    //UC 6.2
+    QTest::newRow(QStringLiteral("Text frame containing Hello-µ@ßöäüàá-UTF-8!!").toStdString().data()) << QByteArray::fromHex("48656c6c6f2dc2b540c39fc3b6c3a4c3bcc3a0c3a12d5554462d382121") << QStringLiteral("Hello-µ@ßöäüàá-UTF-8!!").size();
 }
 
 void tst_DataProcessor::goodTextFrame()
@@ -286,6 +273,7 @@ void tst_DataProcessor::goodTextFrame()
     QBuffer buffer;
     QWebSocketDataProcessor dataProcessor;
     QFETCH(QByteArray, payload);
+    QFETCH(int, size);
 
     data.append((char)(FIN | QWebSocketProtocol::OC_TEXT));
 
@@ -330,9 +318,9 @@ void tst_DataProcessor::goodTextFrame()
     QCOMPARE(binaryFrameReceivedSpy.count(), 0);
     QCOMPARE(binaryMessageReceivedSpy.count(), 0);
     QList<QVariant> arguments = textFrameReceivedSpy.takeFirst();
-    QCOMPARE(arguments.at(0).toString().length(), payload.length());
+    QCOMPARE(arguments.at(0).toString().length(), size);
     arguments = textMessageReceivedSpy.takeFirst();
-    QCOMPARE(arguments.at(0).toString().length(), payload.length());
+    QCOMPARE(arguments.at(0).toString().length(), size);
     buffer.close();
 }
 
@@ -1549,17 +1537,14 @@ void tst_DataProcessor::incompleteFrame(quint8 controlCode, quint64 indicatedSiz
 void tst_DataProcessor::nonCharacterSequence(const char *sequence)
 {
     QByteArray utf8Sequence = QByteArray::fromHex(sequence);
-    //TODO: qstrdup - memory leak! qstrdup is necessary because once QString goes out of scope we have garbage
-    const char *tagName = qstrdup(qPrintable(QString("Text frame with payload containing the non-control character sequence 0x%1").arg(QString(sequence))));
-    const char *tagName2 = qstrdup(qPrintable(QString("Continuation frame with payload containing the non-control character sequence 0x%1").arg(QString(sequence))));
 
-    QTest::newRow(tagName)
+    QTest::newRow(QString("Text frame with payload containing the non-control character sequence 0x%1").arg(QString(sequence)).toLatin1().constData())
             << quint8(FIN | QWebSocketProtocol::OC_TEXT)
             << quint8(utf8Sequence.size())
             << utf8Sequence
             << false;
 
-    QTest::newRow(tagName2)
+    QTest::newRow(QString("Continuation frame with payload containing the non-control character sequence 0x%1").arg(QString(sequence)).toLatin1().constData())
             << quint8(FIN | QWebSocketProtocol::OC_CONTINUE)
             << quint8(utf8Sequence.size())
             << utf8Sequence
