@@ -96,8 +96,8 @@ inline bool isCloseCodeValid(int closeCode)
             ((closeCode >= 3000) || (closeCode < 1012));
 }
 
-void mask(QByteArray *payload, quint32 maskingKey);
-void mask(char *payload, quint64 size, quint32 maskingKey);
+void Q_AUTOTEST_EXPORT mask(QByteArray *payload, quint32 maskingKey);
+void Q_AUTOTEST_EXPORT mask(char *payload, quint64 size, quint32 maskingKey);
 
 inline Version currentVersion() { return V_LATEST; }
 
