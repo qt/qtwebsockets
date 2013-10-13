@@ -116,10 +116,10 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(const QWebSocketHandsh
     {
         if (request.isValid())
         {
-            const QString acceptKey = calculateAcceptKey(request.getKey());
-            const QList<QString> matchingProtocols = supportedProtocols.toSet().intersect(request.getProtocols().toSet()).toList();
-            const QList<QString> matchingExtensions = supportedExtensions.toSet().intersect(request.getExtensions().toSet()).toList();
-            QList<QWebSocketProtocol::Version> matchingVersions = request.getVersions().toSet().intersect(supportedVersions.toSet()).toList();
+            const QString acceptKey = calculateAcceptKey(request.key());
+            const QList<QString> matchingProtocols = supportedProtocols.toSet().intersect(request.protocols().toSet()).toList();
+            const QList<QString> matchingExtensions = supportedExtensions.toSet().intersect(request.extensions().toSet()).toList();
+            QList<QWebSocketProtocol::Version> matchingVersions = request.versions().toSet().intersect(supportedVersions.toSet()).toList();
             std::sort(matchingVersions.begin(), matchingVersions.end(), qGreater<QWebSocketProtocol::Version>());    //sort in descending order
 
             if (matchingVersions.isEmpty())
@@ -142,7 +142,7 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(const QWebSocketHandsh
                     m_acceptedExtension = matchingExtensions.first();
                     response << QStringLiteral("Sec-WebSocket-Extensions: ") % m_acceptedExtension;
                 }
-                QString origin = request.getOrigin().trimmed();
+                QString origin = request.origin().trimmed();
                 if (origin.isEmpty())
                 {
                     origin = QStringLiteral("*");

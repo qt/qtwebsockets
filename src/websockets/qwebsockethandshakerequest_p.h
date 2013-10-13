@@ -51,18 +51,18 @@ public:
 
     void clear();
 
-    int getPort() const;
+    int port() const;
     bool isSecure() const;
     bool isValid() const;
-    QMap<QString, QString> getHeaders() const;
-    QList<QWebSocketProtocol::Version> getVersions() const;
-    QString getKey() const;
-    QString getOrigin() const;
-    QList<QString> getProtocols() const;
-    QList<QString> getExtensions() const;
-    QUrl getRequestUrl() const;
-    QString getResourceName() const;
-    QString getHost() const;
+    QMap<QString, QString> headers() const;
+    QList<QWebSocketProtocol::Version> versions() const;
+    QString key() const;
+    QString origin() const;
+    QList<QString> protocols() const;
+    QList<QString> extensions() const;
+    QUrl requestUrl() const;
+    QString resourceName() const;
+    QString host() const;
 
 private:
     QTextStream &readFromStream(QTextStream &textStream);
