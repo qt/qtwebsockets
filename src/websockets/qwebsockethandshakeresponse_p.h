@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
 
 #include <QObject>
+#include <QList>
 #include "qwebsocketprotocol.h"
 
 QT_BEGIN_NAMESPACE
@@ -56,9 +57,9 @@ public:
 
     bool isValid() const;
     bool canUpgrade() const;
-    QString getAcceptedProtocol() const;
-    QString getAcceptedExtension() const;
-    QWebSocketProtocol::Version getAcceptedVersion() const;
+    QString acceptedProtocol() const;
+    QString acceptedExtension() const;
+    QWebSocketProtocol::Version acceptedVersion() const;
 
 public Q_SLOTS:
 
