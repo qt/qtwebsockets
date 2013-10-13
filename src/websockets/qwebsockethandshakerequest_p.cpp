@@ -72,7 +72,7 @@ void QWebSocketHandshakeRequest::clear()
 /*!
     \internal
  */
-int QWebSocketHandshakeRequest::getPort() const
+int QWebSocketHandshakeRequest::port() const
 {
     return m_requestUrl.port(m_port);
 }
@@ -96,7 +96,7 @@ bool QWebSocketHandshakeRequest::isValid() const
 /*!
     \internal
  */
-QMap<QString, QString> QWebSocketHandshakeRequest::getHeaders() const
+QMap<QString, QString> QWebSocketHandshakeRequest::headers() const
 {
     return m_headers;
 }
@@ -104,7 +104,7 @@ QMap<QString, QString> QWebSocketHandshakeRequest::getHeaders() const
 /*!
     \internal
  */
-QList<QWebSocketProtocol::Version> QWebSocketHandshakeRequest::getVersions() const
+QList<QWebSocketProtocol::Version> QWebSocketHandshakeRequest::versions() const
 {
     return m_versions;
 }
@@ -112,7 +112,7 @@ QList<QWebSocketProtocol::Version> QWebSocketHandshakeRequest::getVersions() con
 /*!
     \internal
  */
-QString QWebSocketHandshakeRequest::getResourceName() const
+QString QWebSocketHandshakeRequest::resourceName() const
 {
     return m_requestUrl.path();
 }
@@ -120,7 +120,7 @@ QString QWebSocketHandshakeRequest::getResourceName() const
 /*!
     \internal
  */
-QString QWebSocketHandshakeRequest::getKey() const
+QString QWebSocketHandshakeRequest::key() const
 {
     return m_key;
 }
@@ -128,7 +128,7 @@ QString QWebSocketHandshakeRequest::getKey() const
 /*!
     \internal
  */
-QString QWebSocketHandshakeRequest::getHost() const
+QString QWebSocketHandshakeRequest::host() const
 {
     return m_requestUrl.host();
 }
@@ -136,7 +136,7 @@ QString QWebSocketHandshakeRequest::getHost() const
 /*!
     \internal
  */
-QString QWebSocketHandshakeRequest::getOrigin() const
+QString QWebSocketHandshakeRequest::origin() const
 {
     return m_origin;
 }
@@ -144,7 +144,7 @@ QString QWebSocketHandshakeRequest::getOrigin() const
 /*!
     \internal
  */
-QList<QString> QWebSocketHandshakeRequest::getProtocols() const
+QList<QString> QWebSocketHandshakeRequest::protocols() const
 {
     return m_protocols;
 }
@@ -152,7 +152,7 @@ QList<QString> QWebSocketHandshakeRequest::getProtocols() const
 /*!
     \internal
  */
-QList<QString> QWebSocketHandshakeRequest::getExtensions() const
+QList<QString> QWebSocketHandshakeRequest::extensions() const
 {
     return m_extensions;
 }
@@ -160,7 +160,7 @@ QList<QString> QWebSocketHandshakeRequest::getExtensions() const
 /*!
     \internal
  */
-QUrl QWebSocketHandshakeRequest::getRequestUrl() const
+QUrl QWebSocketHandshakeRequest::requestUrl() const
 {
     return m_requestUrl;
 }

@@ -302,7 +302,7 @@ void QWebSocketServerPrivate::handshakeReceived()
         QTextStream textStream(pTcpSocket);
         textStream >> request;
 
-        QWebSocketCorsAuthenticator corsAuthenticator(request.getOrigin());
+        QWebSocketCorsAuthenticator corsAuthenticator(request.origin());
         Q_EMIT q->originAuthenticationRequired(&corsAuthenticator);
 
         QWebSocketHandshakeResponse response(request,
