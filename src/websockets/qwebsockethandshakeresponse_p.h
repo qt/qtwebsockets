@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //
 
 #include <QObject>
+#include <QList>
 #include "qwebsocketprotocol.h"
 
 QT_BEGIN_NAMESPACE
@@ -46,19 +47,19 @@ class QWebSocketHandshakeResponse : public QObject
 
 public:
     QWebSocketHandshakeResponse(const QWebSocketHandshakeRequest &request,
-                      const QString &serverName,
-                      bool isOriginAllowed,
-                      const QList<QWebSocketProtocol::Version> &supportedVersions,
-                      const QList<QString> &supportedProtocols,
-                      const QList<QString> &supportedExtensions);
+                                const QString &serverName,
+                                bool isOriginAllowed,
+                                const QList<QWebSocketProtocol::Version> &supportedVersions,
+                                const QList<QString> &supportedProtocols,
+                                const QList<QString> &supportedExtensions);
 
     virtual ~QWebSocketHandshakeResponse();
 
     bool isValid() const;
     bool canUpgrade() const;
-    QString getAcceptedProtocol() const;
-    QString getAcceptedExtension() const;
-    QWebSocketProtocol::Version getAcceptedVersion() const;
+    QString acceptedProtocol() const;
+    QString acceptedExtension() const;
+    QWebSocketProtocol::Version acceptedVersion() const;
 
 public Q_SLOTS:
 

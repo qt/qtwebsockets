@@ -192,11 +192,11 @@ QWebSocket *QWebSocketPrivate::upgradeFrom(QTcpSocket *pTcpSocket,
                                            const QWebSocketHandshakeResponse &response,
                                            QObject *parent)
 {
-    QWebSocket *pWebSocket = new QWebSocket(pTcpSocket, response.getAcceptedVersion(), parent);
-    pWebSocket->d_func()->setExtension(response.getAcceptedExtension());
+    QWebSocket *pWebSocket = new QWebSocket(pTcpSocket, response.acceptedVersion(), parent);
+    pWebSocket->d_func()->setExtension(response.acceptedExtension());
     pWebSocket->d_func()->setOrigin(request.origin());
     pWebSocket->d_func()->setRequestUrl(request.requestUrl());
-    pWebSocket->d_func()->setProtocol(response.getAcceptedProtocol());
+    pWebSocket->d_func()->setProtocol(response.acceptedProtocol());
     pWebSocket->d_func()->setResourceName(request.requestUrl().toString(QUrl::RemoveUserInfo));
     //a server should not send masked frames
     pWebSocket->d_func()->enableMasking(false);

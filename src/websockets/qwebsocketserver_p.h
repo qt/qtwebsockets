@@ -70,7 +70,7 @@ public:
     void setMaxPendingConnections(int numConnections);
     bool setSocketDescriptor(int socketDescriptor);
     int socketDescriptor() const;
-    bool waitForNewConnection(int msec = 0, bool *timedOut = 0);
+    bool waitForNewConnection(int msec = 0, bool *timedOut = Q_NULLPTR);
 
     QList<QWebSocketProtocol::Version> supportedVersions() const;
     QList<QString> supportedProtocols() const;
