@@ -17,6 +17,19 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+/*!
+    \class QWebSocketFrame
+    The class QWebSocketFrame is responsible for reading, validating and interpreting frames from a websocket.
+    It reads data from a QIODevice, validates it against RFC 6455, and parses it into a frame (data, control).
+    Whenever an error is detected, isValid() returns false.
+
+    \note The QWebSocketFrame class does not look at valid sequences of frames. It processes frames one at a time.
+    \note It is the QWebSocketDataProcessor that takes the sequence into account.
+
+    \sa DataProcessor()
+    \internal
+ */
+
 #include "qwebsocketframe_p.h"
 
 #include <QtEndian>
@@ -231,6 +244,10 @@ QWebSocketFrame QWebSocketFrame::readFrame(QIODevice *pIoDevice)
         {
             case PS_WAIT_FOR_MORE_DATA:
             {
+                //TODO: waitForReadyRead should really be changed
+                //now, when a websocket is used in a GUI thread
+                //the GUI will hang for at most 5 seconds
+                //maybe, a QStateMachine should be used
                 bool ok = pIoDevice->waitForReadyRead(5000);
                 if (!ok)
                 {

@@ -153,6 +153,8 @@ bool QWebSocketPrivate::flush()
  */
 qint64 QWebSocketPrivate::write(const char *message)
 {
+    //TODO: create a QByteArray from message, and directly call doWriteData
+    //now the data is converted to a string, and then converted back to a bytearray
     return write(QString::fromUtf8(message));
 }
 
@@ -161,6 +163,8 @@ qint64 QWebSocketPrivate::write(const char *message)
  */
 qint64 QWebSocketPrivate::write(const char *message, qint64 maxSize)
 {
+    //TODO: create a QByteArray from message, and directly call doWriteData
+    //now the data is converted to a string, and then converted back to a bytearray
     return write(QString::fromUtf8(message, static_cast<int>(maxSize)));
 }
 
