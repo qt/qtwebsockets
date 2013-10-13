@@ -20,11 +20,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef QWEBSOCKETFRAME_P_H
 #define QWEBSOCKETFRAME_P_H
 
-#include "qwebsocketprotocol.h"
+#include <QString>
+#include <QByteArray>
+#include <limits.h>
 
-#include <QIODevice>
+#include "qwebsocketprotocol.h"
+#include "qwebsockets_global.h"
 
 QT_BEGIN_NAMESPACE
+
+class QIODevice;
 
 const quint64 MAX_FRAME_SIZE_IN_BYTES = INT_MAX - 1;
 const quint64 MAX_MESSAGE_SIZE_IN_BYTES = INT_MAX - 1;
@@ -37,19 +42,19 @@ public:
 
     const QWebSocketFrame &operator =(const QWebSocketFrame &other);
 
-    QWebSocketProtocol::CloseCode getCloseCode() const;
-    QString getCloseReason() const;
+    QWebSocketProtocol::CloseCode closeCode() const;
+    QString closeReason() const;
     bool isFinalFrame() const;
     bool isControlFrame() const;
     bool isDataFrame() const;
     bool isContinuationFrame() const;
     bool hasMask() const;
-    quint32 getMask() const;    //returns 0 if no mask
-    int getRsv1() const;
-    int getRsv2() const;
-    int getRsv3() const;
-    QWebSocketProtocol::OpCode getOpCode() const;
-    QByteArray getPayload() const;
+    quint32 mask() const;    //returns 0 if no mask
+    int rsv1() const;
+    int rsv2() const;
+    int rsv3() const;
+    QWebSocketProtocol::OpCode opCode() const;
+    QByteArray payload() const;
 
     void clear();       //resets all member variables, and invalidates the object
 

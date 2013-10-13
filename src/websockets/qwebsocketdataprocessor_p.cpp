@@ -123,11 +123,11 @@ void QWebSocketDataProcessor::process(QIODevice *pIoDevice)
                 }
                 if (!frame.isContinuationFrame())
                 {
-                    m_opCode = frame.getOpCode();
+                    m_opCode = frame.opCode();
                     m_isFragmented = !frame.isFinalFrame();
                 }
                 quint64 messageLength = (quint64)(m_opCode == QWebSocketProtocol::OC_TEXT) ? m_textMessage.length() : m_binaryMessage.length();
-                if ((messageLength + quint64(frame.getPayload().length())) > MAX_MESSAGE_SIZE_IN_BYTES)
+                if ((messageLength + quint64(frame.payload().length())) > MAX_MESSAGE_SIZE_IN_BYTES)
                 {
                     clear();
                     Q_EMIT errorEncountered(QWebSocketProtocol::CC_TOO_MUCH_DATA, tr("Received message is too big."));
@@ -136,7 +136,7 @@ void QWebSocketDataProcessor::process(QIODevice *pIoDevice)
 
                 if (m_opCode == QWebSocketProtocol::OC_TEXT)
                 {
-                    QString frameTxt = m_pTextCodec->toUnicode(frame.getPayload().constData(), frame.getPayload().size(), m_pConverterState);
+                    QString frameTxt = m_pTextCodec->toUnicode(frame.payload().constData(), frame.payload().size(), m_pConverterState);
                     bool failed = (m_pConverterState->invalidChars != 0) || (frame.isFinalFrame() && (m_pConverterState->remainingChars != 0));
                     if (failed)
                     {
@@ -152,8 +152,8 @@ void QWebSocketDataProcessor::process(QIODevice *pIoDevice)
                 }
                 else
                 {
-                    m_binaryMessage.append(frame.getPayload());
-                    Q_EMIT binaryFrameReceived(frame.getPayload(), frame.isFinalFrame());
+                    m_binaryMessage.append(frame.payload());
+                    Q_EMIT binaryFrameReceived(frame.payload(), frame.isFinalFrame());
                 }
 
                 if (frame.isFinalFrame())
@@ -173,7 +173,7 @@ void QWebSocketDataProcessor::process(QIODevice *pIoDevice)
         }
         else
         {
-            Q_EMIT errorEncountered(frame.getCloseCode(), frame.getCloseReason());
+            Q_EMIT errorEncountered(frame.closeCode(), frame.closeReason());
             clear();
             isDone = true;
         }
@@ -214,23 +214,23 @@ void QWebSocketDataProcessor::clear()
 bool QWebSocketDataProcessor::processControlFrame(const QWebSocketFrame &frame)
 {
     bool mustStopProcessing = true; //control frames never expect additional frames to be processed
-    switch (frame.getOpCode())
+    switch (frame.opCode())
     {
         case QWebSocketProtocol::OC_PING:
         {
-            Q_EMIT pingReceived(frame.getPayload());
+            Q_EMIT pingReceived(frame.payload());
             break;
         }
         case QWebSocketProtocol::OC_PONG:
         {
-            Q_EMIT pongReceived(frame.getPayload());
+            Q_EMIT pongReceived(frame.payload());
             break;
         }
         case QWebSocketProtocol::OC_CLOSE:
         {
             quint16 closeCode = QWebSocketProtocol::CC_NORMAL;
             QString closeReason;
-            QByteArray payload = frame.getPayload();
+            QByteArray payload = frame.payload();
             if (payload.size() == 1)    //size is either 0 (no close code and no reason) or >= 2 (at least a close code of 2 bytes)
             {
                 closeCode = QWebSocketProtocol::CC_PROTOCOL_ERROR;
@@ -283,7 +283,7 @@ bool QWebSocketDataProcessor::processControlFrame(const QWebSocketFrame &frame)
         }
         default:
         {
-            qDebug() << "DataProcessor::processControlFrame: Invalid opcode detected:" << static_cast<int>(frame.getOpCode());
+            qDebug() << "DataProcessor::processControlFrame: Invalid opcode detected:" << static_cast<int>(frame.opCode());
             //Do nothing
             break;
         }

@@ -94,7 +94,7 @@ const QWebSocketFrame &QWebSocketFrame::operator =(const QWebSocketFrame &other)
 /*!
     \internal
  */
-QWebSocketProtocol::CloseCode QWebSocketFrame::getCloseCode() const
+QWebSocketProtocol::CloseCode QWebSocketFrame::closeCode() const
 {
     return m_closeCode;
 }
@@ -102,7 +102,7 @@ QWebSocketProtocol::CloseCode QWebSocketFrame::getCloseCode() const
 /*!
     \internal
  */
-QString QWebSocketFrame::getCloseReason() const
+QString QWebSocketFrame::closeReason() const
 {
     return m_closeReason;
 }
@@ -150,7 +150,7 @@ bool QWebSocketFrame::hasMask() const
 /*!
     \internal
  */
-quint32 QWebSocketFrame::getMask() const
+quint32 QWebSocketFrame::mask() const
 {
     return m_mask;
 }
@@ -158,7 +158,7 @@ quint32 QWebSocketFrame::getMask() const
 /*!
     \internal
  */
-int QWebSocketFrame::getRsv1() const
+int QWebSocketFrame::rsv1() const
 {
     return m_rsv1;
 }
@@ -166,7 +166,7 @@ int QWebSocketFrame::getRsv1() const
 /*!
     \internal
  */
-int QWebSocketFrame::getRsv2() const
+int QWebSocketFrame::rsv2() const
 {
     return m_rsv2;
 }
@@ -174,7 +174,7 @@ int QWebSocketFrame::getRsv2() const
 /*!
     \internal
  */
-int QWebSocketFrame::getRsv3() const
+int QWebSocketFrame::rsv3() const
 {
     return m_rsv3;
 }
@@ -182,7 +182,7 @@ int QWebSocketFrame::getRsv3() const
 /*!
     \internal
  */
-QWebSocketProtocol::OpCode QWebSocketFrame::getOpCode() const
+QWebSocketProtocol::OpCode QWebSocketFrame::opCode() const
 {
     return m_opCode;
 }
@@ -190,7 +190,7 @@ QWebSocketProtocol::OpCode QWebSocketFrame::getOpCode() const
 /*!
     \internal
  */
-QByteArray QWebSocketFrame::getPayload() const
+QByteArray QWebSocketFrame::payload() const
 {
     return m_payload;
 }
