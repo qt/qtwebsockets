@@ -251,7 +251,7 @@ bool QWebSocketDataProcessor::processControlFrame(const QWebSocketFrame &frame)
                         QTextCodec *tc = QTextCodec::codecForName("UTF-8");
                         QTextCodec::ConverterState state(QTextCodec::ConvertInvalidToNull);
                         closeReason = tc->toUnicode(payload.constData() + 2, payload.size() - 2, &state);
-                        bool failed = (state.invalidChars != 0) || (state.remainingChars != 0);
+                        const bool failed = (state.invalidChars != 0) || (state.remainingChars != 0);
                         if (failed)
                         {
                             closeCode = QWebSocketProtocol::CC_WRONG_DATATYPE;
