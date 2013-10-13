@@ -29,19 +29,7 @@ QT_BEGIN_NAMESPACE
 const quint64 MAX_FRAME_SIZE_IN_BYTES = INT_MAX - 1;
 const quint64 MAX_MESSAGE_SIZE_IN_BYTES = INT_MAX - 1;
 
-/*!
-    \class Frame
-    The class Frame is responsible for reading, validating and interpreting frames from a websocket.
-    It reads data from a QIODevice, validates it against RFC 6455, and parses it into a frame (data, control).
-    Whenever an error is detected, the isValid() returns false.
-
-    \note The Frame class does not look at valid sequences of frames. It processes frames one at a time.
-    \note It is the DataProcessor that takes the sequence into account.
-
-    \sa DataProcessor()
-    \internal
- */
-class QWebSocketFrame
+class Q_AUTOTEST_EXPORT QWebSocketFrame
 {
 public:
     QWebSocketFrame();
