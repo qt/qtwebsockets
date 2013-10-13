@@ -84,7 +84,7 @@ void tst_WebSocketFrame::tst_initialization()
 {
     QWebSocketFrame frame;
     QVERIFY(!frame.isValid());
-    QCOMPARE(frame.getPayload().length(), 0);
+    QCOMPARE(frame.payload().length(), 0);
 }
 
 QTEST_MAIN(tst_WebSocketFrame)
