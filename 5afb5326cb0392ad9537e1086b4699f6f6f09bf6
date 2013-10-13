@@ -1,0 +1,7 @@
+Sanity-Review+1: Qt Sanity Bot <qt_sanitybot@qt-project.org>
+Code-Review+2: Steven Ceuppens <steven.ceuppens@icloud.com>
+Submitted-by: Kurt Pattyn <pattyn.kurt@gmail.com>
+Submitted-at: Sun, 13 Oct 2013 16:57:49 +0200
+Reviewed-on: https://codereview.qt-project.org/68051
+Project: playground/websockets
+Branch: refs/heads/master
