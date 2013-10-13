@@ -41,7 +41,7 @@ QT_BEGIN_NAMESPACE
 
 class QTextStream;
 
-class QWebSocketHandshakeRequest
+class Q_AUTOTEST_EXPORT QWebSocketHandshakeRequest
 {
     Q_DISABLE_COPY(QWebSocketHandshakeRequest)
 
@@ -80,7 +80,7 @@ private:
     QUrl m_requestUrl;
 };
 
-QTextStream &operator >>(QTextStream &stream, QWebSocketHandshakeRequest &request);
+QTextStream & Q_AUTOTEST_EXPORT operator >>(QTextStream &stream, QWebSocketHandshakeRequest &request);
 
 QT_END_NAMESPACE
 
