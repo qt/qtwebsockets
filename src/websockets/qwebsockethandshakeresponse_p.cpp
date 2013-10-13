@@ -77,7 +77,7 @@ bool QWebSocketHandshakeResponse::canUpgrade() const
 /*!
     \internal
  */
-QString QWebSocketHandshakeResponse::getAcceptedProtocol() const
+QString QWebSocketHandshakeResponse::acceptedProtocol() const
 {
     return m_acceptedProtocol;
 }
@@ -204,7 +204,7 @@ QTextStream &operator <<(QTextStream &stream, const QWebSocketHandshakeResponse 
 /*!
     \internal
  */
-QWebSocketProtocol::Version QWebSocketHandshakeResponse::getAcceptedVersion() const
+QWebSocketProtocol::Version QWebSocketHandshakeResponse::acceptedVersion() const
 {
     return m_acceptedVersion;
 }
@@ -212,7 +212,7 @@ QWebSocketProtocol::Version QWebSocketHandshakeResponse::getAcceptedVersion() co
 /*!
     \internal
  */
-QString QWebSocketHandshakeResponse::getAcceptedExtension() const
+QString QWebSocketHandshakeResponse::acceptedExtension() const
 {
     return m_acceptedExtension;
 }
