@@ -1,9 +1,9 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
+   websocketcorsauthenticator
 
 contains(QT_CONFIG, private_tests): SUBDIRS += \
-   dataprocessor \
    websocketprotocol \
+   dataprocessor \
    websocketframe \
-   websocketcorsauthenticator
