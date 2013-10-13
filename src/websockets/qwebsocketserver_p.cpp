@@ -298,53 +298,58 @@ void QWebSocketServerPrivate::handshakeReceived()
     {
         bool success = false;
         bool isSecure = false;
+
+        disconnect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(handshakeReceived()));
+
         QWebSocketHandshakeRequest request(pTcpSocket->peerPort(), isSecure);
         QTextStream textStream(pTcpSocket);
         textStream >> request;
 
-        QWebSocketCorsAuthenticator corsAuthenticator(request.origin());
-        Q_EMIT q->originAuthenticationRequired(&corsAuthenticator);
-
-        QWebSocketHandshakeResponse response(request,
-                                   m_serverName,
-                                   corsAuthenticator.allowed(),
-                                   supportedVersions(),
-                                   supportedProtocols(),
-                                   supportedExtensions());
-        disconnect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(handshakeReceived()));
-
-        if (response.isValid())
+        if (request.isValid())
         {
-            QTextStream httpStream(pTcpSocket);
-            httpStream << response;
-            httpStream.flush();
+            QWebSocketCorsAuthenticator corsAuthenticator(request.origin());
+            Q_EMIT q->originAuthenticationRequired(&corsAuthenticator);
 
-            if (response.canUpgrade())
+            QWebSocketHandshakeResponse response(request,
+                                                 m_serverName,
+                                                 corsAuthenticator.allowed(),
+                                                 supportedVersions(),
+                                                 supportedProtocols(),
+                                                 supportedExtensions());
+
+            if (response.isValid())
             {
-                QWebSocket *pWebSocket = QWebSocketPrivate::upgradeFrom(pTcpSocket, request, response);
-                if (pWebSocket)
+                QTextStream httpStream(pTcpSocket);
+                httpStream << response;
+                httpStream.flush();
+
+                if (response.canUpgrade())
                 {
-                    pWebSocket->setParent(this);
-                    addPendingConnection(pWebSocket);
-                    Q_EMIT q->newConnection();
-                    success = true;
+                    QWebSocket *pWebSocket = QWebSocketPrivate::upgradeFrom(pTcpSocket, request, response);
+                    if (pWebSocket)
+                    {
+                        pWebSocket->setParent(this);
+                        addPendingConnection(pWebSocket);
+                        Q_EMIT q->newConnection();
+                        success = true;
+                    }
+                    else
+                    {
+                        //TODO: should set or emit error
+                        qDebug() << tr("Upgrading to websocket failed.");
+                    }
                 }
                 else
                 {
                     //TODO: should set or emit error
-                    qDebug() << tr("Upgrading to websocket failed.");
+                    qDebug() << tr("Cannot upgrade to websocket.");
                 }
             }
             else
             {
                 //TODO: should set or emit error
-                qDebug() << tr("Cannot upgrade to websocket.");
+                qDebug() << tr("Invalid response received.");
             }
-        }
-        else
-        {
-            //TODO: should set or emit error
-            qDebug() << tr("Invalid response received.");
         }
         if (!success)
         {
