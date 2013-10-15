@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef QWEBSOCKETSGLOBAL_H
 #define QWEBSOCKETSGLOBAL_H
 
-#include <QtCore/qglobal.h>
+#include <qglobal.h>
 
 QT_BEGIN_NAMESPACE
 
