@@ -25,8 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <QNetworkProxy>
 #endif
 
-#include "QtWebSockets/qwebsockets_global.h"
-#include "QtWebSockets/qwebsocketprotocol.h"
+#include "qwebsockets_global.h"
+#include "qwebsocketprotocol.h"
 
 QT_BEGIN_NAMESPACE
 
