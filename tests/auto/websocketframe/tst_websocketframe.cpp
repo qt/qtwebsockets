@@ -228,7 +228,8 @@ void tst_WebSocketFrame::tst_copyConstructorAndAssignment()
         QCOMPARE(other.rsv3(), frame.rsv3());
     }
     {
-        QWebSocketFrame other = frame;
+        QWebSocketFrame other;
+        other = frame;
         QCOMPARE(other.closeCode(), frame.closeCode());
         QCOMPARE(other.closeReason(), frame.closeReason());
         QCOMPARE(other.hasMask(), frame.hasMask());
