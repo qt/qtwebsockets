@@ -80,7 +80,7 @@ QWebSocketDataProcessor::~QWebSocketDataProcessor()
  */
 quint64 QWebSocketDataProcessor::maxMessageSize()
 {
-    return MAX_MESSAGE_SIZE_IN_BYTES;
+    return MAX_MESSAGE_SIZE_IN_BYTES;   //COV_NF_LINE
 }
 
 /*!
