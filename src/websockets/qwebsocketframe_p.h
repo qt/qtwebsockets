@@ -40,7 +40,7 @@ public:
     QWebSocketFrame();
     QWebSocketFrame(const QWebSocketFrame &other);
 
-    const QWebSocketFrame &operator =(const QWebSocketFrame &other);
+    QWebSocketFrame &operator =(const QWebSocketFrame &other);
 
     QWebSocketProtocol::CloseCode closeCode() const;
     QString closeReason() const;

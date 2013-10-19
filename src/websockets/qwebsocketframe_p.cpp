@@ -74,7 +74,7 @@ QWebSocketFrame::QWebSocketFrame(const QWebSocketFrame &other) :
 /*!
     \internal
  */
-const QWebSocketFrame &QWebSocketFrame::operator =(const QWebSocketFrame &other)
+QWebSocketFrame &QWebSocketFrame::operator =(const QWebSocketFrame &other)
 {
     m_closeCode = other.m_closeCode;
     m_closeReason = other.m_closeReason;
