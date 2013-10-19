@@ -11,7 +11,5 @@ QT = core testlib websockets websockets-private
 
 SOURCES += tst_dataprocessor.cpp
 
-QMAKE_CXXFLAGS_DEBUG += -O0
-
 requires(contains(QT_CONFIG, private_tests))
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0
