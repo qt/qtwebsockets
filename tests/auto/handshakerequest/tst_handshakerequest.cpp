@@ -106,6 +106,7 @@ void tst_HandshakeRequest::tst_initialization()
         QCOMPARE(request.headers().size(), 0);
         QCOMPARE(request.key().length(), 0);
         QCOMPARE(request.origin().length(), 0);
+        QCOMPARE(request.host().length(), 0);
         QVERIFY(request.requestUrl().isEmpty());
         QCOMPARE(request.resourceName().length(), 0);
         QCOMPARE(request.versions().length(), 0);
@@ -120,6 +121,7 @@ void tst_HandshakeRequest::tst_initialization()
         QCOMPARE(request.headers().size(), 0);
         QCOMPARE(request.key().length(), 0);
         QCOMPARE(request.origin().length(), 0);
+        QCOMPARE(request.host().length(), 0);
         QVERIFY(request.requestUrl().isEmpty());
         QCOMPARE(request.resourceName().length(), 0);
         QCOMPARE(request.versions().length(), 0);
@@ -135,6 +137,7 @@ void tst_HandshakeRequest::tst_initialization()
         QCOMPARE(request.headers().size(), 0);
         QCOMPARE(request.key().length(), 0);
         QCOMPARE(request.origin().length(), 0);
+        QCOMPARE(request.host().length(), 0);
         QVERIFY(request.requestUrl().isEmpty());
         QCOMPARE(request.resourceName().length(), 0);
         QCOMPARE(request.versions().length(), 0);
@@ -203,6 +206,7 @@ void tst_HandshakeRequest::tst_invalidStream()
     QCOMPARE(request.headers().size(), 0);
     QCOMPARE(request.key().length(), 0);
     QCOMPARE(request.origin().length(), 0);
+    QCOMPARE(request.host().length(), 0);
     QVERIFY(request.requestUrl().isEmpty());
     QCOMPARE(request.resourceName().length(), 0);
     QCOMPARE(request.versions().length(), 0);
@@ -235,6 +239,7 @@ void tst_HandshakeRequest::tst_multipleValuesInConnectionHeader()
     QCOMPARE(request.key().length(), 9);
     QCOMPARE(request.origin().length(), 0);
     QCOMPARE(request.requestUrl(), QUrl("ws://foo.com/test"));
+    QCOMPARE(request.host(), QStringLiteral("foo.com"));
     QCOMPARE(request.resourceName().length(), 5);
     QCOMPARE(request.versions().length(), 1);
     QCOMPARE(request.versions().at(0), QWebSocketProtocol::V_13);
@@ -269,6 +274,7 @@ void tst_HandshakeRequest::tst_multipleVersions()
     QCOMPARE(request.key(), QStringLiteral("AVDFBDDFF"));
     QCOMPARE(request.origin().length(), 0);
     QCOMPARE(request.requestUrl(), QUrl("ws://foo.com/test"));
+    QCOMPARE(request.host(), QStringLiteral("foo.com"));
     QCOMPARE(request.resourceName().length(), 5);
     QCOMPARE(request.versions().length(), 6);
     //should be 13 since the list is ordered in decreasing order
