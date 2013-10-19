@@ -39,5 +39,3 @@ SOURCES += \
     $$PWD/qwebsocketframe_p.cpp
 
 HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS
-
-QMAKE_CXXFLAGS_DEBUG += -O0
