@@ -153,6 +153,7 @@ private Q_SLOTS:
     void cleanup();
 
     void tst_initialization();
+    void tst_copyConstructorAndAssignment();
 
     void tst_goodFrames_data();
     void tst_goodFrames();
@@ -189,6 +190,60 @@ void tst_WebSocketFrame::tst_initialization()
     QWebSocketFrame frame;
     QVERIFY(!frame.isValid());
     QCOMPARE(frame.payload().length(), 0);
+}
+
+void tst_WebSocketFrame::tst_copyConstructorAndAssignment()
+{
+    FrameHelper frameHelper;
+    frameHelper.setRsv1(0);
+    frameHelper.setRsv2(0);
+    frameHelper.setRsv3(0);
+    frameHelper.setFinalFrame(true);
+    frameHelper.setMask(1234u);
+    frameHelper.setOpCode(QWebSocketProtocol::OC_BINARY);
+    frameHelper.setPayload(QByteArray("12345"));
+
+    QByteArray payload = frameHelper.wireRepresentation();
+    QBuffer buffer(&payload);
+    buffer.open(QIODevice::ReadOnly);
+
+    QWebSocketFrame frame = QWebSocketFrame::readFrame(&buffer);
+    buffer.close();
+
+    {
+        QWebSocketFrame other(frame);
+        QCOMPARE(other.closeCode(), frame.closeCode());
+        QCOMPARE(other.closeReason(), frame.closeReason());
+        QCOMPARE(other.hasMask(), frame.hasMask());
+        QCOMPARE(other.isContinuationFrame(), frame.isContinuationFrame());
+        QCOMPARE(other.isControlFrame(), frame.isControlFrame());
+        QCOMPARE(other.isDataFrame(), frame.isDataFrame());
+        QCOMPARE(other.isFinalFrame(), frame.isFinalFrame());
+        QCOMPARE(other.isValid(), frame.isValid());
+        QCOMPARE(other.mask(), frame.mask());
+        QCOMPARE(other.opCode(), frame.opCode());
+        QCOMPARE(other.payload(), frame.payload());
+        QCOMPARE(other.rsv1(), frame.rsv1());
+        QCOMPARE(other.rsv2(), frame.rsv2());
+        QCOMPARE(other.rsv3(), frame.rsv3());
+    }
+    {
+        QWebSocketFrame other = frame;
+        QCOMPARE(other.closeCode(), frame.closeCode());
+        QCOMPARE(other.closeReason(), frame.closeReason());
+        QCOMPARE(other.hasMask(), frame.hasMask());
+        QCOMPARE(other.isContinuationFrame(), frame.isContinuationFrame());
+        QCOMPARE(other.isControlFrame(), frame.isControlFrame());
+        QCOMPARE(other.isDataFrame(), frame.isDataFrame());
+        QCOMPARE(other.isFinalFrame(), frame.isFinalFrame());
+        QCOMPARE(other.isValid(), frame.isValid());
+        QCOMPARE(other.mask(), frame.mask());
+        QCOMPARE(other.opCode(), frame.opCode());
+        QCOMPARE(other.payload(), frame.payload());
+        QCOMPARE(other.rsv1(), frame.rsv1());
+        QCOMPARE(other.rsv2(), frame.rsv2());
+        QCOMPARE(other.rsv3(), frame.rsv3());
+    }
 }
 
 void tst_WebSocketFrame::tst_goodFrames_data()
@@ -286,7 +341,7 @@ void tst_WebSocketFrame::tst_goodFrames()
     buffer.open(QIODevice::ReadOnly);
     QWebSocketFrame frame = QWebSocketFrame::readFrame(&buffer);
     buffer.close();
-    QCOMPARE(frame.isValid(), true);
+    QVERIFY(frame.isValid());
     QCOMPARE(frame.rsv1(), rsv1);
     QCOMPARE(frame.rsv2(), rsv2);
     QCOMPARE(frame.rsv3(), rsv3);
