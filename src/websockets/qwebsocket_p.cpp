@@ -48,7 +48,7 @@ const quint64 FRAME_SIZE_IN_BYTES = 512 * 512 * 2;	//maximum size of a frame whe
 QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::Version version, QWebSocket *pWebSocket, QObject *parent) :
     QObject(parent),
     q_ptr(pWebSocket),
-    m_pSocket(new QTcpSocket(this)),
+    m_pSocket(Q_NULLPTR),
     m_errorString(),
     m_version(version),
     m_resourceName(),
@@ -65,7 +65,7 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
     m_dataProcessor()
 {
     Q_ASSERT(pWebSocket);
-    makeConnections(m_pSocket);
+    //makeConnections(m_pSocket);
     qsrand(static_cast<uint>(QDateTime::currentMSecsSinceEpoch()));
 }
 
@@ -184,7 +184,35 @@ qint64 QWebSocketPrivate::write(const QByteArray &data)
     return doWriteData(data, true);
 }
 
+#ifndef QT_NO_SSL
 /*!
+    \internal
+ */
+void QWebSocketPrivate::setSslConfiguration(const QSslConfiguration &sslConfiguration)
+{
+    m_sslConfiguration = sslConfiguration;
+}
+
+/*!
+    \internal
+ */
+QSslConfiguration QWebSocketPrivate::sslConfiguration() const
+{
+    return m_sslConfiguration;
+}
+
+/*!
+    \internal
+ */
+void QWebSocketPrivate::ignoreSslErrors(const QList<QSslError> &errors)
+{
+    m_ignoredSslErrors = errors;
+}
+
+#endif
+
+/*!
+  Called from QWebSocketServer
   \internal
  */
 QWebSocket *QWebSocketPrivate::upgradeFrom(QTcpSocket *pTcpSocket,
@@ -245,6 +273,8 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
  */
 void QWebSocketPrivate::open(const QUrl &url, bool mask)
 {
+    Q_Q(QWebSocket);
+
     m_dataProcessor.clear();
     m_isClosingHandshakeReceived = false;
     m_isClosingHandshakeSent = false;
@@ -266,9 +296,40 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
     setResourceName(resourceName);
     enableMasking(mask);
 
-    setSocketState(QAbstractSocket::ConnectingState);
+#ifndef QT_NO_SSL
+    if (url.scheme() == QStringLiteral("wss"))
+    {
+        if (!QSslSocket::supportsSsl())
+        {
+            qWarning() << tr("SSL Sockets are not supported on this platform.");
+            setErrorString(tr("SSL Sockets are not supported on this platform."));
+            emit q->error(QAbstractSocket::UnsupportedSocketOperationError);
+            return;
+        }
+        else
+        {
+            QSslSocket *sslSocket = new QSslSocket(this);
+            m_pSocket = sslSocket;
 
-    m_pSocket->connectToHost(url.host(), url.port(80));
+            makeConnections(m_pSocket);
+            connect(sslSocket, SIGNAL(encryptedBytesWritten(qint64)), q, SIGNAL(bytesWritten(qint64)));
+            setSocketState(QAbstractSocket::ConnectingState);
+
+            sslSocket->setSslConfiguration(m_sslConfiguration);
+            sslSocket->ignoreSslErrors(m_ignoredSslErrors);
+            sslSocket->connectToHostEncrypted(url.host(), url.port(443));
+        }
+    }
+    else
+#endif
+    {
+        m_pSocket = new QTcpSocket(this);
+
+        makeConnections(m_pSocket);
+        connect(m_pSocket, SIGNAL(bytesWritten(qint64)), q, SIGNAL(bytesWritten(qint64)));
+        setSocketState(QAbstractSocket::ConnectingState);
+        m_pSocket->connectToHost(url.host(), url.port(80));
+    }
 }
 
 /*!

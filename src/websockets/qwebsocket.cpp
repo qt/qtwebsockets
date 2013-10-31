@@ -107,6 +107,16 @@ not been filled in with new information when the signal returns.
 
     \sa close()
 */
+/*!
+    \fn void QWebSocket::bytesWritten(qint64 bytes)
+
+    This signal is emitted every time a payload of data has been written to the socket.
+    The \a bytes argument is set to the number of bytes that were written in this payload.
+
+    \note This signal has the same meaning both for secure and non-secure websockets.
+    As opposed to QSslSocket, bytesWritten() is only emitted when encrypted data is effectively written (\sa {{QSslSocket:}}{{encryptedBytesWritten}}).
+    \sa close()
+*/
 
 /*!
     \fn void QWebSocket::textFrameReceived(QString frame, bool isLastFrame);
