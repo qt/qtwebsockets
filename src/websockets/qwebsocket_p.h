@@ -35,6 +35,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef QT_NO_NETWORKPROXY
 #include <QNetworkProxy>
 #endif
+#ifndef QT_NO_SSL
+#include <QSslConfiguration>
+#include <QSslError>
+#endif
 #include <QTime>
 
 #include "qwebsocketprotocol.h"
@@ -98,6 +102,12 @@ public:
     qint64 write(const QString &message);	//send data as text
     qint64 write(const QByteArray &data);	//send data as binary
 
+#ifndef QT_NO_SSL
+    void ignoreSslErrors(const QList<QSslError> &errors);
+    void setSslConfiguration(const QSslConfiguration &sslConfiguration);
+    QSslConfiguration sslConfiguration() const;
+#endif
+
 public Q_SLOTS:
     void close(QWebSocketProtocol::CloseCode closeCode, QString reason);
     void open(const QUrl &url, bool mask);
@@ -113,6 +123,10 @@ private Q_SLOTS:
 
 private:
     QWebSocket * const q_ptr;
+#ifndef QT_NO_SSL
+    QSslConfiguration m_sslConfiguration;
+    QList<QSslError> m_ignoredSslErrors;
+#endif
 
     QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version, QWebSocket *pWebSocket, QObject *parent = Q_NULLPTR);
     void setVersion(QWebSocketProtocol::Version version);
