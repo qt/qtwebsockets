@@ -44,14 +44,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
     This example should ideally be used with the EchoServer example.
     \section1 Code
     We start by connecting to the `connected()` signal.
-    \snippet echoclient.cpp constructor
+    \snippet echoclient/echoclient.cpp constructor
     After the connection, we open the socket to the given \a url.
 
-    \snippet echoclient.cpp onConnected
+    \snippet echoclient/echoclient.cpp onConnected
     When the client is connected successfully, we connect to the `onTextMessageReceived()` signal, and send out "Hello, world!".
     If connected with the EchoServer, we will receive the same message back.
 
-    \snippet echoclient.cpp onTextMessageReceived
+    \snippet echoclient/echoclient.cpp onTextMessageReceived
     Whenever a message is received, we write it out.
 */
 
@@ -114,7 +114,7 @@ not been filled in with new information when the signal returns.
     The \a bytes argument is set to the number of bytes that were written in this payload.
 
     \note This signal has the same meaning both for secure and non-secure websockets.
-    As opposed to QSslSocket, bytesWritten() is only emitted when encrypted data is effectively written (\sa QSslSocket:encryptedBytesWritten()).
+    As opposed to QSslSocket, bytesWritten() is only emitted when encrypted data is effectively written (see QSslSocket:encryptedBytesWritten()).
     \sa close()
 */
 
@@ -165,6 +165,19 @@ not been filled in with new information when the signal returns.
     qRegisterMetaType().
 
     \sa error(), errorString()
+*/
+/*!
+    \fn void QWebSocket::sslErrors(const QList<QSslError> &errors)
+    QWebSocket emits this signal after the SSL handshake to indicate that one or more errors have occurred
+    while establishing the identity of the peer.
+    The errors are usually an indication that QWebSocket is unable to securely identify the peer.
+    Unless any action is taken, the connection will be dropped after this signal has been emitted.
+    If you want to continue connecting despite the errors that have occurred, you must call QWebSocket::ignoreSslErrors() from inside a slot connected to this signal.
+    If you need to access the error list at a later point, you can call sslErrors() (without arguments).
+
+    \a errors contains one or more errors that prevent QWebSocket from verifying the identity of the peer.
+
+    \note You cannot use Qt::QueuedConnection when connecting to this signal, or calling QWebSocket::ignoreSslErrors() will have no effect.
 */
 /*!
     \fn void QWebSocket::pong(quint64 elapsedTime, QByteArray payload)
@@ -375,7 +388,7 @@ void QWebSocket::ignoreSslErrors()
     If, for instance, you want to connect to a server that uses
     a self-signed certificate, consider the following snippet:
 
-    \snippet src_websockets_ssl_qwebsocket 6
+    \snippet src_websockets_ssl_qwebsocket.cpp 6
 
     Multiple calls to this function will replace the list of errors that
     were passed in previous calls.
@@ -388,6 +401,32 @@ void QWebSocket::ignoreSslErrors(const QList<QSslError> &errors)
 {
     Q_D(QWebSocket);
     d->ignoreSslErrors(errors);
+}
+
+/*!
+    Sets the socket's SSL configuration to be the contents of \a sslConfiguration.
+
+    This function sets the local certificate, the ciphers, the private key and the CA certificates to those stored in \a sslConfiguration.
+    It is not possible to set the SSL-state related fields.
+    \sa sslConfiguration()
+ */
+void QWebSocket::setSslConfiguration(const QSslConfiguration &sslConfiguration)
+{
+    Q_D(QWebSocket);
+    d->setSslConfiguration(sslConfiguration);
+}
+
+/*!
+    Returns the socket's SSL configuration state.
+    The default SSL configuration of a socket is to use the default ciphers, default CA certificates, no local private key or certificate.
+    The SSL configuration also contains fields that can change with time without notice.
+
+    \sa setSslConfiguration()
+ */
+QSslConfiguration QWebSocket::sslConfiguration() const
+{
+    Q_D(const QWebSocket);
+    return d->sslConfiguration();
 }
 
 #endif  //not QT_NO_SSL
