@@ -1,5 +1,5 @@
 TEMPLATE = subdirs
 
 SUBDIRS = echoclient \
-        echoserver \
-        qmlwebsocketclient
+        echoserver
+qtHaveModule(quick): SUBDIRS += qmlwebsocketclient
