@@ -160,7 +160,7 @@ void QWebSocketPrivate::abort()
  */
 QAbstractSocket::SocketError QWebSocketPrivate::error() const
 {
-    QAbstracktSocket::SocketError err = QAbstractSocket::OperationError;
+    QAbstractSocket::SocketError err = QAbstractSocket::OperationError;
     if (m_pSocket)
     {
         err = m_pSocket->error();
