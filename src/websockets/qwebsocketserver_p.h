@@ -68,8 +68,8 @@ public:
     QAbstractSocket::SocketError serverError() const;
     quint16 serverPort() const;
     void setMaxPendingConnections(int numConnections);
-    bool setSocketDescriptor(int socketDescriptor);
-    int socketDescriptor() const;
+    bool setSocketDescriptor(qintptr socketDescriptor);
+    qintptr socketDescriptor() const;
     bool waitForNewConnection(int msec = 0, bool *timedOut = Q_NULLPTR);
 
     QList<QWebSocketProtocol::Version> supportedVersions() const;
