@@ -2,7 +2,7 @@
 #define ECHOCLIENT_H
 
 #include <QObject>
-#include "qwebsocket.h"
+#include <QtWebSockets/QWebSocket>
 
 class EchoClient : public QObject
 {

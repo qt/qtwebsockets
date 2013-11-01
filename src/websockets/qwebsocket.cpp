@@ -114,7 +114,7 @@ not been filled in with new information when the signal returns.
     The \a bytes argument is set to the number of bytes that were written in this payload.
 
     \note This signal has the same meaning both for secure and non-secure websockets.
-    As opposed to QSslSocket, bytesWritten() is only emitted when encrypted data is effectively written (\sa {{QSslSocket:}}{{encryptedBytesWritten}}).
+    As opposed to QSslSocket, bytesWritten() is only emitted when encrypted data is effectively written (\sa QSslSocket:encryptedBytesWritten()).
     \sa close()
 */
 
@@ -338,6 +338,59 @@ void QWebSocket::ping(const QByteArray &payload)
     }
     d->ping(payload);
 }
+
+#ifndef QT_NO_SSL
+/*!
+    This slot tells QWebSocket to ignore errors during QWebSocket's
+    handshake phase and continue connecting. If you want to continue
+    with the connection even if errors occur during the handshake
+    phase, then you must call this slot, either from a slot connected
+    to sslErrors(), or before the handshake phase. If you don't call
+    this slot, either in response to errors or before the handshake,
+    the connection will be dropped after the sslErrors() signal has
+    been emitted.
+
+    \warning Be sure to always let the user inspect the errors
+    reported by the sslErrors() signal, and only call this method
+    upon confirmation from the user that proceeding is ok.
+    If there are unexpected errors, the connection should be aborted.
+    Calling this method without inspecting the actual errors will
+    most likely pose a security risk for your application. Use it
+    with great care!
+
+    \sa sslErrors(), QSslSocket::ignoreSslErrors(), QNetworkReply::ignoreSslErrors()
+*/
+void QWebSocket::ignoreSslErrors()
+{
+    Q_D(QWebSocket);
+    d->ignoreSslErrors();
+}
+
+/*!
+    \overload
+
+    This method tells QWebSocket to ignore the errors given in \a errors.
+
+    Note that you can set the expected certificate in the SSL error:
+    If, for instance, you want to connect to a server that uses
+    a self-signed certificate, consider the following snippet:
+
+    \snippet src_websockets_ssl_qwebsocket 6
+
+    Multiple calls to this function will replace the list of errors that
+    were passed in previous calls.
+    You can clear the list of errors you want to ignore by calling this
+    function with an empty list.
+
+    \sa sslErrors()
+*/
+void QWebSocket::ignoreSslErrors(const QList<QSslError> &errors)
+{
+    Q_D(QWebSocket);
+    d->ignoreSslErrors(errors);
+}
+
+#endif  //not QT_NO_SSL
 
 /*!
     \brief Returns the version the socket is currently using

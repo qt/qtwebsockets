@@ -96,6 +96,9 @@ public Q_SLOTS:
     void close(QWebSocketProtocol::CloseCode closeCode = QWebSocketProtocol::CC_NORMAL, const QString &reason = QString());
     void open(const QUrl &url, bool mask = true);
     void ping(const QByteArray &payload = QByteArray());
+#ifndef QT_NO_SSL
+    void ignoreSslErrors();
+#endif
 
 Q_SIGNALS:
     void aboutToClose();
@@ -113,6 +116,10 @@ Q_SIGNALS:
     void error(QAbstractSocket::SocketError error);
     void pong(quint64 elapsedTime, QByteArray payload);
     void bytesWritten(qint64 bytes);
+
+#ifndef QT_NO_SSL
+    void sslErrors(const QList<QSslError> &errors);
+#endif
 
 private:
     QWebSocket(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version, QObject *parent = Q_NULLPTR);

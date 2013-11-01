@@ -2,8 +2,9 @@
 #include <QtTest/qtestcase.h>
 #include <QSignalSpy>
 #include <QHostInfo>
+#include <QSslError>
 #include <QDebug>
-#include "qwebsocket.h"
+#include <QWebSocket>
 
 class tst_ComplianceTest : public QObject
 {
@@ -30,7 +31,7 @@ private:
 };
 
 tst_ComplianceTest::tst_ComplianceTest() :
-    m_url("ws://localhost:9001")
+    m_url("wss://localhost:9001")
 {
 }
 
@@ -56,7 +57,9 @@ void tst_ComplianceTest::runTestCase(int nbr, int total)
     {
         return;
     }
+
     QWebSocket *pWebSocket = new QWebSocket;
+    pWebSocket->ignoreSslErrors();
     QSignalSpy spy(pWebSocket, SIGNAL(disconnected()));
 
     //next for every case, connect to url
@@ -93,6 +96,7 @@ void tst_ComplianceTest::autobahnTest()
 {
     //connect to autobahn server at url ws://ipaddress:port/getCaseCount
     QWebSocket *pWebSocket = new QWebSocket;
+    pWebSocket->ignoreSslErrors();
     QUrl url = m_url;
     int numberOfTestCases = 0;
     QSignalSpy spy(pWebSocket, SIGNAL(disconnected()));
