@@ -1,14 +1,14 @@
-QT += network
-
+load(qt_build_config)
 TARGET = QtWebSockets
 
-TEMPLATE += lib
+QT += core network
+
+TEMPLATE = lib
 
 DEFINES += QTWEBSOCKETS_LIBRARY
 
-load(qt_module)
-
-QMAKE_DOCS = $$PWD/doc/qwebsockets.qdocconfig
+QMAKE_DOCS = $$PWD/doc/qtwebsockets.qdocconfig
+OTHER_FILES += doc/src/*.qdoc   # show .qdoc files in Qt Creator
 
 PUBLIC_HEADERS += \
     $$PWD/qwebsockets_global.h \
@@ -39,3 +39,5 @@ SOURCES += \
     $$PWD/qwebsocketframe_p.cpp
 
 HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS
+
+load(qt_module)
