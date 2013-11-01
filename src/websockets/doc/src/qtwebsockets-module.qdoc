@@ -1,0 +1,21 @@
+/*!
+	\module QtWebSockets
+	\title Qt WebSockets C++ Classes
+    \ingroup modules
+    \qtvariable websockets
+    \brief List of C++ classes that provice WebSockets communication.
+
+    To use these classes in your application, use the following include
+    statement:
+
+    \code
+    #include <QtWebSockets/QtWebSockets>
+    \endcode
+
+    To link against the module, add this line to your \l qmake \c
+    .pro file:
+
+    \code
+    QT += websockets
+    \endcode
+*/

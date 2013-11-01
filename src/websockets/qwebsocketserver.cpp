@@ -52,22 +52,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
   The echoserver example implements a web socket server that echoes back everything that is sent to it.
   \section1 Code
   We start by creating a QWebSocketServer (`new QWebSocketServer()`). After the creation, we listen on all local network interfaces (`QHostAddress::Any`) on the specified \a port.
-  \snippet echoserver.cpp constructor
+  \snippet echoserver/echoserver.cpp constructor
   If listening is successful, we connect the `newConnection()` signal to the slot `onNewConnection()`.
   The `newConnection()` signal will be thrown whenever a new web socket client is connected to our server.
 
-  \snippet echoserver.cpp onNewConnection
+  \snippet echoserver/echoserver.cpp onNewConnection
   When a new connection is received, the client QWebSocket is retrieved (`nextPendingConnection()`), and the signals we are interested in
   are connected to our slots (`textMessageReceived()`, `binaryMessageReceived()` and `disconnected()`).
   The client socket is remembered in a list, in case we would like to use it later (in this example, nothing is done with it).
 
-  \snippet echoserver.cpp processMessage
+  \snippet echoserver/echoserver.cpp processMessage
   Whenever `processMessage()` is triggered, we retrieve the sender, and if valid, send back the original message (`send()`).
   The same is done with binary messages.
-  \snippet echoserver.cpp processBinaryMessage
+  \snippet echoserver/echoserver.cpp processBinaryMessage
   The only difference is that the message now is a QByteArray instead of a QString.
 
-  \snippet echoserver.cpp socketDisconnected
+  \snippet echoserver/echoserver.cpp socketDisconnected
   Whenever a socket is disconnected, we remove it from the clients list and delete the socket.
   Note: it is best to use `deleteLater()` to delete the socket.
 */
