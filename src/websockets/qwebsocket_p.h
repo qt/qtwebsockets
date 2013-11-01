@@ -113,6 +113,10 @@ public Q_SLOTS:
     void open(const QUrl &url, bool mask);
     void ping(const QByteArray &payload);
 
+#ifndef QT_NO_SSL
+    void ignoreSslErrors();
+#endif
+
 private Q_SLOTS:
     void processData();
     void processPing(QByteArray data);
@@ -126,6 +130,7 @@ private:
 #ifndef QT_NO_SSL
     QSslConfiguration m_sslConfiguration;
     QList<QSslError> m_ignoredSslErrors;
+    bool m_ignoreSslErrors;
 #endif
 
     QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version, QWebSocket *pWebSocket, QObject *parent = Q_NULLPTR);

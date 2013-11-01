@@ -48,6 +48,11 @@ const quint64 FRAME_SIZE_IN_BYTES = 512 * 512 * 2;	//maximum size of a frame whe
 QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::Version version, QWebSocket *pWebSocket, QObject *parent) :
     QObject(parent),
     q_ptr(pWebSocket),
+#ifndef QT_NO_SSL
+    m_sslConfiguration(),
+    m_ignoredSslErrors(),
+    m_ignoreSslErrors(false),
+#endif
     m_pSocket(Q_NULLPTR),
     m_errorString(),
     m_version(version),
@@ -75,6 +80,11 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
 QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version, QWebSocket *pWebSocket, QObject *parent) :
     QObject(parent),
     q_ptr(pWebSocket),
+#ifndef QT_NO_SSL
+    m_sslConfiguration(),       //socket is already open, so we don't need to set the ssl configuration anymore
+    m_ignoredSslErrors(),       //socket is already open, so we don't need to set the ignored errors anymore
+    m_ignoreSslErrors(false),
+#endif
     m_pSocket(pTcpSocket),
     m_errorString(pTcpSocket->errorString()),
     m_version(version),
@@ -209,6 +219,14 @@ void QWebSocketPrivate::ignoreSslErrors(const QList<QSslError> &errors)
     m_ignoredSslErrors = errors;
 }
 
+/*!
+ * \internal
+ */
+void QWebSocketPrivate::ignoreSslErrors()
+{
+    m_ignoreSslErrors = true;
+}
+
 #endif
 
 /*!
@@ -301,10 +319,10 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
     {
         if (!QSslSocket::supportsSsl())
         {
-            qWarning() << tr("SSL Sockets are not supported on this platform.");
-            setErrorString(tr("SSL Sockets are not supported on this platform."));
+            const QString message = tr("SSL Sockets are not supported on this platform.");
+            qWarning() << message;
+            setErrorString(message);
             emit q->error(QAbstractSocket::UnsupportedSocketOperationError);
-            return;
         }
         else
         {
@@ -316,12 +334,20 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
             setSocketState(QAbstractSocket::ConnectingState);
 
             sslSocket->setSslConfiguration(m_sslConfiguration);
-            sslSocket->ignoreSslErrors(m_ignoredSslErrors);
+            if (m_ignoreSslErrors)
+            {
+                sslSocket->ignoreSslErrors();
+            }
+            else
+            {
+                sslSocket->ignoreSslErrors(m_ignoredSslErrors);
+            }
             sslSocket->connectToHostEncrypted(url.host(), url.port(443));
         }
     }
     else
 #endif
+    if (url.scheme() == QStringLiteral("ws"))
     {
         m_pSocket = new QTcpSocket(this);
 
@@ -329,6 +355,13 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
         connect(m_pSocket, SIGNAL(bytesWritten(qint64)), q, SIGNAL(bytesWritten(qint64)));
         setSocketState(QAbstractSocket::ConnectingState);
         m_pSocket->connectToHost(url.host(), url.port(80));
+    }
+    else
+    {
+        const QString message = tr("Unsupported websockets scheme: %1").arg(url.scheme());
+        qWarning() << message;
+        setErrorString(message);
+        emit q->error(QAbstractSocket::UnsupportedSocketOperationError);
     }
 }
 
