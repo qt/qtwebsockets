@@ -152,3 +152,5 @@ bool QWebSocketCorsAuthenticator::allowed() const
     Q_D(const QWebSocketCorsAuthenticator);
     return d->m_isAllowed;
 }
+
+QT_END_NAMESPACE

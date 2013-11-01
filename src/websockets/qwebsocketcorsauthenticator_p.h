@@ -66,4 +66,6 @@ public:
     bool m_isAllowed;
 };
 
+QT_END_NAMESPACE
+
 #endif // QWEBSOCKETCORSAUTHENTICATOR_P_H
