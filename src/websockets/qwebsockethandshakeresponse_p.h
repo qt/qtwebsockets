@@ -62,7 +62,7 @@ class QWebSocketHandshakeRequest;
 class QString;
 class QTextStream;
 
-class QWebSocketHandshakeResponse : public QObject
+class Q_AUTOTEST_EXPORT QWebSocketHandshakeResponse : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(QWebSocketHandshakeResponse)
@@ -104,7 +104,7 @@ private:
                                  const QList<QString> &supportedExtensions);
 
     QTextStream &writeToStream(QTextStream &textStream) const;
-    friend QTextStream &operator <<(QTextStream &stream, const QWebSocketHandshakeResponse &response);
+    friend QTextStream & Q_AUTOTEST_EXPORT operator <<(QTextStream &stream, const QWebSocketHandshakeResponse &response);
 };
 
 QT_END_NAMESPACE
