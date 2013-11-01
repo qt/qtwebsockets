@@ -102,7 +102,7 @@ private:
     QUrl m_requestUrl;
 };
 
-QTextStream & Q_AUTOTEST_EXPORT operator >>(QTextStream &stream, QWebSocketHandshakeRequest &request);
+Q_AUTOTEST_EXPORT QTextStream & operator >>(QTextStream &stream, QWebSocketHandshakeRequest &request);
 
 QT_END_NAMESPACE
 
