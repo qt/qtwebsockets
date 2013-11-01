@@ -201,7 +201,7 @@ void QWebSocketServerPrivate::setMaxPendingConnections(int numConnections)
 /*!
     \internal
  */
-bool QWebSocketServerPrivate::setSocketDescriptor(int socketDescriptor)
+bool QWebSocketServerPrivate::setSocketDescriptor(qintptr socketDescriptor)
 {
     return m_pTcpServer->setSocketDescriptor(socketDescriptor);
 }
@@ -209,7 +209,7 @@ bool QWebSocketServerPrivate::setSocketDescriptor(int socketDescriptor)
 /*!
     \internal
  */
-int QWebSocketServerPrivate::socketDescriptor() const
+qintptr QWebSocketServerPrivate::socketDescriptor() const
 {
     return m_pTcpServer->socketDescriptor();
 }
