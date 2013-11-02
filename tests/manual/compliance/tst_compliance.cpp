@@ -44,7 +44,7 @@
 #include <QHostInfo>
 #include <QSslError>
 #include <QDebug>
-#include <QWebSocket>
+#include <QtWebSockets/QWebSocket>
 
 class tst_ComplianceTest : public QObject
 {
