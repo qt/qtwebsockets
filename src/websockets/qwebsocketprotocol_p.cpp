@@ -176,10 +176,10 @@ void mask(char *payload, quint64 size, quint32 maskingKey)
     if (remainder)
     {
         const quint32 offset = i * static_cast<quint32>(sizeof(quint32));
-        const uchar *mask = reinterpret_cast<uchar *>(&maskingKey);
+        const char *mask = reinterpret_cast<const char *>(&maskingKey);
         for (quint32 i = 0; i < remainder; ++i)
         {
-            *(payload + offset + i) ^= static_cast<char>(mask[(i + offset) % 4]);
+            *(payload + offset + i) ^= (mask[(i + offset) % 4]);
         }
     }
 }
