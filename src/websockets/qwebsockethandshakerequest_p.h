@@ -88,7 +88,7 @@ public:
 
 private:
     QTextStream &readFromStream(QTextStream &textStream);
-    friend QTextStream &operator >>(QTextStream &stream, QWebSocketHandshakeRequest &request);
+    Q_AUTOTEST_EXPORT friend QTextStream &operator >>(QTextStream &stream, QWebSocketHandshakeRequest &request);
 
     int m_port;
     bool m_isSecure;
