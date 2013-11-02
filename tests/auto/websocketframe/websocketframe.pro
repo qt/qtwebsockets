@@ -1,5 +1,4 @@
 CONFIG += console
-CONFIG += c++11
 CONFIG += testcase
 CONFIG -= app_bundle
 
