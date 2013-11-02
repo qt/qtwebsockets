@@ -50,6 +50,7 @@
 #include <QSet>
 #include <QList>
 #include <QStringBuilder>   //for more efficient string concatenation
+#include <functional>   //for std::greater
 
 QT_BEGIN_NAMESPACE
 
