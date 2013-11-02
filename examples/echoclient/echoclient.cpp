@@ -41,6 +41,8 @@
 #include "echoclient.h"
 #include <QDebug>
 
+QT_USE_NAMESPACE
+
 //! [constructor]
 EchoClient::EchoClient(const QUrl &url, QObject *parent) :
     QObject(parent),

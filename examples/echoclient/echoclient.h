@@ -44,6 +44,8 @@
 #include <QObject>
 #include <QtWebSockets/QWebSocket>
 
+QT_FORWARD_DECLARE_CLASS(QWebSocket);
+
 class EchoClient : public QObject
 {
     Q_OBJECT

@@ -43,6 +43,8 @@
 #include "qwebsocket.h"
 #include <QDebug>
 
+QT_USE_NAMESPACE
+
 //! [constructor]
 EchoServer::EchoServer(quint16 port, QObject *parent) :
     QObject(parent),

@@ -45,8 +45,8 @@
 #include <QList>
 #include <QByteArray>
 
-class QWebSocketServer;
-class QWebSocket;
+QT_FORWARD_DECLARE_CLASS(QWebSocketServer);
+QT_FORWARD_DECLARE_CLASS(QWebSocket);
 
 class EchoServer : public QObject
 {
