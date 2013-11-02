@@ -44,10 +44,10 @@
 
 #include "qwebsocketprotocol.h"
 
+QT_USE_NAMESPACE
+
 Q_DECLARE_METATYPE(QWebSocketProtocol::CloseCode)
 Q_DECLARE_METATYPE(QWebSocketProtocol::OpCode)
-
-QT_USE_NAMESPACE
 
 class tst_WebSocketProtocol : public QObject
 {
