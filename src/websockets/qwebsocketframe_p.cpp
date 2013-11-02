@@ -53,6 +53,7 @@
  */
 
 #include "qwebsocketframe_p.h"
+#include "qwebsocketprotocol_p.h"
 
 #include <QtEndian>
 #include <QDebug>

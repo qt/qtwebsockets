@@ -39,7 +39,7 @@
 **
 ****************************************************************************/
 
-#include "qwebsocketprotocol.h"
+#include "private/qwebsocketprotocol_p.h"
 #include <QString>
 #include <QSet>
 #include <QtEndian>

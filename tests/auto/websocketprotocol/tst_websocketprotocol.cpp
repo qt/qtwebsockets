@@ -40,9 +40,12 @@
 ****************************************************************************/
 #include <QtTest/QtTest>
 #include <QtTest/qtestcase.h>
+#include <QtEndian>
+
 #include <QDebug>
 
 #include "qwebsocketprotocol.h"
+#include "private/qwebsocketprotocol_p.h"
 
 QT_USE_NAMESPACE
 
@@ -98,10 +101,10 @@ void tst_WebSocketProtocol::tst_validMasks_data()
     QTest::addColumn<QString>("inputdata");
     QTest::addColumn<QByteArray>("result");
 
-    QTest::newRow("Empty payload") << 0x12345678u << QString("") << QByteArray("");
-    QTest::newRow("ASCII payload of 8 characters") << 0x12345678u << QString("abcdefgh") << QByteArray("\x19\x34\x57\x76\x1D\x30\x53\x7A");
-    QTest::newRow("ASCII payload of 9 characters") << 0x12345678u << QString("abcdefghi") << QByteArray("\x19\x34\x57\x76\x1D\x30\x53\x7A\x11");
-    QTest::newRow("UTF-8 payload") << 0x12345678u << QString("∫∂ƒ©øØ") << QByteArray("\x47\x69\x0B\xBB\x80\x8E");
+    QTest::newRow("Empty payload") << qToBigEndian<quint32>(0x12345678u) << QString("") << QByteArray("");
+    QTest::newRow("ASCII payload of 8 characters") << qToBigEndian<quint32>(0x12345678u) << QString("abcdefgh") << QByteArray("\x19\x34\x57\x76\x1D\x30\x53\x7A");
+    QTest::newRow("ASCII payload of 9 characters") << qToBigEndian<quint32>(0x12345678u) << QString("abcdefghi") << QByteArray("\x19\x34\x57\x76\x1D\x30\x53\x7A\x11");
+    QTest::newRow("UTF-8 payload") << qToBigEndian<quint32>(0x12345678u) << QString("∫∂ƒ©øØ") << QByteArray("\x47\x69\x0B\xBB\x80\x8E");
 }
 
 void tst_WebSocketProtocol::tst_validMasks()
