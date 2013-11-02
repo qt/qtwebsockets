@@ -43,7 +43,7 @@
 #include <QSignalSpy>
 #include <QHostInfo>
 #include <QDebug>
-#include "qwebsocket.h"
+#include "QtWebSockets/QWebSocket"
 
 class tst_WebSocketsTest : public QObject
 {
@@ -104,9 +104,9 @@ tst_WebSocketsTest::tst_WebSocketsTest() :
 void tst_WebSocketsTest::initTestCase()
 {
     m_pWebSocket = new QWebSocket();
-    /*m_pWebSocket->open(m_url, true);
+    m_pWebSocket->open(m_url, true);
     QTRY_VERIFY_WITH_TIMEOUT(m_pWebSocket->state() == QAbstractSocket::ConnectedState, 1000);
-    QVERIFY(m_pWebSocket->isValid());*/
+    QVERIFY(m_pWebSocket->isValid());
 }
 
 void tst_WebSocketsTest::cleanupTestCase()
