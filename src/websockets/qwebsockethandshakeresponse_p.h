@@ -104,8 +104,10 @@ private:
                                  const QList<QString> &supportedExtensions);
 
     QTextStream &writeToStream(QTextStream &textStream) const;
-    friend QTextStream & Q_AUTOTEST_EXPORT operator <<(QTextStream &stream, const QWebSocketHandshakeResponse &response);
+    Q_AUTOTEST_EXPORT friend QTextStream & operator <<(QTextStream &stream, const QWebSocketHandshakeResponse &response);
 };
+
+Q_AUTOTEST_EXPORT QTextStream & operator <<(QTextStream &stream, const QWebSocketHandshakeResponse &response);
 
 QT_END_NAMESPACE
 
