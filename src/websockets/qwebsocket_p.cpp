@@ -41,6 +41,7 @@
 
 #include "qwebsocket.h"
 #include "qwebsocket_p.h"
+#include "qwebsocketprotocol_p.h"
 #include "qwebsockethandshakerequest_p.h"
 #include "qwebsockethandshakeresponse_p.h"
 #include <QUrl>

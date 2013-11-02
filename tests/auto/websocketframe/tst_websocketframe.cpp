@@ -45,6 +45,7 @@
 #include <QtEndian>
 
 #include "private/qwebsocketframe_p.h"
+#include "private/qwebsocketprotocol_p.h"
 #include "qwebsocketprotocol.h"
 
 QT_USE_NAMESPACE

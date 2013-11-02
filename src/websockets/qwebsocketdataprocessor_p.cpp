@@ -54,6 +54,7 @@
 */
 #include "qwebsocketdataprocessor_p.h"
 #include "qwebsocketprotocol.h"
+#include "qwebsocketprotocol_p.h"
 #include "qwebsocketframe_p.h"
 #include <QtEndian>
 #include <limits.h>

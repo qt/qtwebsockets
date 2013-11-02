@@ -21,6 +21,7 @@ PUBLIC_HEADERS += \
 PRIVATE_HEADERS += \
     $$PWD/qwebsocket_p.h \
     $$PWD/qwebsocketserver_p.h \
+    $$PWD/qwebsocketprotocol_p.h \
     $$PWD/qwebsockethandshakerequest_p.h \
     $$PWD/qwebsockethandshakeresponse_p.h \
     $$PWD/qwebsocketdataprocessor_p.h \
@@ -32,7 +33,7 @@ SOURCES += \
     $$PWD/qwebsocket_p.cpp \
     $$PWD/qwebsocketserver.cpp \
     $$PWD/qwebsocketserver_p.cpp \
-    $$PWD/qwebsocketprotocol.cpp \
+    $$PWD/qwebsocketprotocol_p.cpp \
     $$PWD/qwebsockethandshakerequest_p.cpp \
     $$PWD/qwebsockethandshakeresponse_p.cpp \
     $$PWD/qwebsocketdataprocessor_p.cpp \
