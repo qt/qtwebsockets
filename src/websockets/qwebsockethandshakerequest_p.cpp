@@ -46,6 +46,7 @@
 #include <QUrl>
 #include <QList>
 #include <QStringList>
+#include <functional>   //for std::greater
 #include "qwebsocketprotocol.h"
 
 QT_BEGIN_NAMESPACE
