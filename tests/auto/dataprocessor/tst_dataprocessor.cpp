@@ -305,7 +305,8 @@ void tst_DataProcessor::goodTextFrame_data()
     }
 
     //UC 6.2
-    QTest::newRow(QString::fromUtf8("Text frame containing Hello-µ@ßöäüàá-UTF-8!!").toLatin1().data()) << QByteArray::fromHex("48656c6c6f2dc2b540c39fc3b6c3a4c3bcc3a0c3a12d5554462d382121") << QStringLiteral("Hello-µ@ßöäüàá-UTF-8!!").size();
+    //QTest::newRow(QStringLiteral("Text frame containing Hello-µ@ßöäüàá-UTF-8!!").toStdString().data()) << QByteArray::fromHex("48656c6c6f2dc2b540c39fc3b6c3a4c3bcc3a0c3a12d5554462d382121") << QStringLiteral("Hello-µ@ßöäüàá-UTF-8!!").size();
+    QTest::newRow(QStringLiteral("Text frame containing Hello-µ@ßöäüàá-UTF-8!!").toStdString().data()) << QByteArray::fromHex("48656c6c6f2dc2b540c39fc3b6c3a4c3bcc3a0c3a12d5554462d382121") << QStringLiteral("Hello-\xC2\xB5\x40\xC3\x9F\xC3\xB6\xC3\xA4\xC3\xBC\xC3\xA0\xC3\xA1-UTF-8!!").size();
 }
 
 void tst_DataProcessor::goodTextFrame()
