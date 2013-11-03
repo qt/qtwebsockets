@@ -163,9 +163,9 @@ void mask(QByteArray *payload, quint32 maskingKey)
       Masks the \a payload of length \a size with the given \a maskingKey and stores the result back in \a payload.
       \internal
     */
-void mask(Q_DECL_ALIGN(4) char *payload, quint64 size, quint32 maskingKey)
+void mask(char *payload, quint64 size, quint32 maskingKey)
 {
-    quint32 *payloadData = reinterpret_cast<quint32 *>(payload);
+/*    quint32 *payloadData = reinterpret_cast<quint32 *>(payload);
     quint32 numIterations = static_cast<quint32>(size / sizeof(quint32));
     quint32 remainder = size % sizeof(quint32);
     const quint32 offset = numIterations * sizeof(quint32);
@@ -182,6 +182,16 @@ void mask(Q_DECL_ALIGN(4) char *payload, quint64 size, quint32 maskingKey)
         {
             *payload++ ^= *mask++;
         }
+    }*/
+    const quint8 mask[] = { static_cast<quint8>((maskingKey & 0xFF000000u) >> 24),
+                            static_cast<quint8>((maskingKey & 0x00FF0000u) >> 16),
+                            static_cast<quint8>((maskingKey & 0x0000FF00u) >> 8),
+                            static_cast<quint8>((maskingKey & 0x000000FFu))
+                          };
+    int i = 0;
+    while (size-- > 0)
+    {
+        *payload++ ^= mask[i++ % 4];
     }
 }
 }	//end namespace WebSocketProtocol

@@ -641,7 +641,9 @@ QByteArray QWebSocketPrivate::getFrameHeader(QWebSocketProtocol::OpCode opCode, 
         //Write mask
         if (maskingKey != 0)
         {
-            header.append(static_cast<const char *>(static_cast<const void *>(&maskingKey)), sizeof(quint32));
+            //TODO: to big endian?
+            const quint32 mask = qToBigEndian<quint32>(maskingKey);
+            header.append(static_cast<const char *>(static_cast<const void *>(&mask)), sizeof(quint32));
         }
     }
     else
