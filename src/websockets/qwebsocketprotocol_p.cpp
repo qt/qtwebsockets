@@ -163,7 +163,7 @@ void mask(QByteArray *payload, quint32 maskingKey)
       Masks the \a payload of length \a size with the given \a maskingKey and stores the result back in \a payload.
       \internal
     */
-void mask(char *payload, quint64 size, quint32 maskingKey)
+void mask(Q_DECL_ALIGN(4) char *payload, quint64 size, quint32 maskingKey)
 {
     quint32 *payloadData = reinterpret_cast<quint32 *>(payload);
     quint32 numIterations = static_cast<quint32>(size / sizeof(quint32));

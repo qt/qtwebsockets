@@ -67,7 +67,7 @@ inline bool isCloseCodeValid(int closeCode)
 }
 
 void Q_AUTOTEST_EXPORT mask(QByteArray *payload, quint32 maskingKey);
-void Q_AUTOTEST_EXPORT mask(char *payload, quint64 size, quint32 maskingKey);
+void Q_AUTOTEST_EXPORT mask(Q_DECL_ALIGN(4) char *payload, quint64 size, quint32 maskingKey);
 }	//end namespace QWebSocketProtocol
 
 QT_END_NAMESPACE
