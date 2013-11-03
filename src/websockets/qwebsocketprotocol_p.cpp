@@ -166,20 +166,21 @@ void mask(QByteArray *payload, quint32 maskingKey)
 void mask(char *payload, quint64 size, quint32 maskingKey)
 {
     quint32 *payloadData = reinterpret_cast<quint32 *>(payload);
-    const quint32 numIterations = static_cast<quint32>(size / sizeof(quint32));
-    const quint32 remainder = size % sizeof(quint32);
-    quint32 i;
-    for (i = 0; i < numIterations; ++i)
+    quint32 numIterations = static_cast<quint32>(size / sizeof(quint32));
+    quint32 remainder = size % sizeof(quint32);
+    const quint32 offset = numIterations * sizeof(quint32);
+    //maskingKey = qToBigEndian<quint32>(maskingKey);
+    while (numIterations--)
     {
-        *(payloadData + i) ^= maskingKey;
+        *payloadData++ ^= maskingKey;
     }
-    if (remainder)
+    if (remainder)  //remainder is < 4
     {
-        const quint32 offset = i * static_cast<quint32>(sizeof(quint32));
         const char *mask = reinterpret_cast<const char *>(&maskingKey);
-        for (quint32 i = 0; i < remainder; ++i)
+        payload += offset;
+        while (remainder--)
         {
-            *(payload + offset + i) ^= (mask[(i + offset) % 4]);
+            *payload++ ^= *mask++;
         }
     }
 }
