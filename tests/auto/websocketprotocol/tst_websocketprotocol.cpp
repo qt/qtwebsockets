@@ -101,10 +101,7 @@ void tst_WebSocketProtocol::tst_validMasks_data()
     QTest::addColumn<QString>("inputdata");
     QTest::addColumn<QByteArray>("result");
 
-    QTest::newRow("Empty payload") << qToBigEndian<quint32>(0x12345678u) << QString("") << QByteArray("");
-//    QTest::newRow("ASCII payload of 8 characters") << qToBigEndian<quint32>(0x12345678u) << QString("abcdefgh") << QByteArray("\x19\x34\x57\x76\x1D\x30\x53\x7A");
-//    QTest::newRow("ASCII payload of 9 characters") << qToBigEndian<quint32>(0x12345678u) << QString("abcdefghi") << QByteArray("\x19\x34\x57\x76\x1D\x30\x53\x7A\x11");
-//    QTest::newRow("UTF-8 payload") << qToBigEndian<quint32>(0x12345678u) << QString("∫∂ƒ©øØ") << QByteArray("\x47\x69\x0B\xBB\x80\x8E");
+    QTest::newRow("Empty payload") << 0x12345678u << QString("") << QByteArray("");
     QTest::newRow("ASCII payload of 8 characters") << 0x12345678u << QString("abcdefgh") << QByteArray("\x73\x56\x35\x1C\x77\x52\x31\x10");
     QTest::newRow("ASCII payload of 9 characters") << 0x12345678u << QString("abcdefghi") << QByteArray("\x73\x56\x35\x1C\x77\x52\x31\x10\x7B");
     QTest::newRow("UTF-8 payload") << 0x12345678u << QString("∫∂ƒ©øØ") << QByteArray("\x2D\x0B\x69\xD1\xEA\xEC");
@@ -116,7 +113,14 @@ void tst_WebSocketProtocol::tst_validMasks()
     QFETCH(QString, inputdata);
     QFETCH(QByteArray, result);
 
-    char *data = inputdata.toLatin1().data();
+    //put latin1 into an explicit array
+    //otherwise, the intermediate object is deleted and the data pointer becomes invalid
+    QByteArray latin1 = inputdata.toLatin1();
+    char *data = latin1.data();
+    //char *data = inputdata.toLatin1().data();
+
+    qDebug() << hex << mask;
+    qDebug() << QByteArray(data, inputdata.size()).toHex();
 
     QWebSocketProtocol::mask(data, inputdata.size(), mask);
     QCOMPARE(QByteArray::fromRawData(data, inputdata.size()), result);
