@@ -44,20 +44,24 @@
 #include "qwebsocketprotocol_p.h"
 #include "qwebsockethandshakerequest_p.h"
 #include "qwebsockethandshakeresponse_p.h"
-#include <QUrl>
-#include <QTcpSocket>
-#include <QByteArray>
-#include <QtEndian>
-#include <QCryptographicHash>
-#include <QRegularExpression>
-#include <QStringList>
-#include <QHostAddress>
-#include <QStringBuilder>   //for more efficient string concatenation
+#include <QtCore/QUrl>
+#include <QtNetwork/QTcpSocket>
+#include <QtCore/QByteArray>
+#include <QtCore/QtEndian>
+#include <QtCore/QCryptographicHash>
+#include <QtCore/QRegularExpression>
+#include <QtCore/QStringList>
+#include <QtNetwork/QHostAddress>
+#include <QtCore/QStringBuilder>   //for more efficient string concatenation
 #ifndef QT_NONETWORKPROXY
-#include <QNetworkProxy>
+#include <QtNetwork/QNetworkProxy>
+#endif
+#ifndef QT_NO_SSL
+#include <QtNetwork/QSslConfiguration>
+#include <QtNetwork/QSslError>
 #endif
 
-#include <QDebug>
+#include <QtCore/QDebug>
 
 #include <limits>
 
@@ -65,17 +69,24 @@ QT_BEGIN_NAMESPACE
 
 const quint64 FRAME_SIZE_IN_BYTES = 512 * 512 * 2;	//maximum size of a frame when sending a message
 
+QWebSocketConfiguration::QWebSocketConfiguration() :
+#ifndef QT_NO_SSL
+    m_sslConfiguration(QSslConfiguration::defaultConfiguration()),
+    m_ignoredSslErrors(),
+    m_ignoreSslErrors(false),
+#endif
+#ifndef QT_NONETWORKPROXY
+    m_proxy(QNetworkProxy::DefaultProxy)
+#endif
+{
+}
+
 /*!
     \internal
 */
 QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::Version version, QWebSocket *pWebSocket, QObject *parent) :
     QObject(parent),
     q_ptr(pWebSocket),
-#ifndef QT_NO_SSL
-    m_sslConfiguration(),
-    m_ignoredSslErrors(),
-    m_ignoreSslErrors(false),
-#endif
     m_pSocket(Q_NULLPTR),
     m_errorString(),
     m_version(version),
@@ -90,10 +101,10 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
     m_isClosingHandshakeSent(false),
     m_isClosingHandshakeReceived(false),
     m_pingTimer(),
-    m_dataProcessor()
+    m_dataProcessor(),
+    m_configuration()
 {
     Q_ASSERT(pWebSocket);
-    //makeConnections(m_pSocket);
     qsrand(static_cast<uint>(QDateTime::currentMSecsSinceEpoch()));
 }
 
@@ -103,11 +114,6 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
 QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version, QWebSocket *pWebSocket, QObject *parent) :
     QObject(parent),
     q_ptr(pWebSocket),
-#ifndef QT_NO_SSL
-    m_sslConfiguration(),       //socket is already open, so we don't need to set the ssl configuration anymore
-    m_ignoredSslErrors(),       //socket is already open, so we don't need to set the ignored errors anymore
-    m_ignoreSslErrors(false),
-#endif
     m_pSocket(pTcpSocket),
     m_errorString(pTcpSocket->errorString()),
     m_version(version),
@@ -122,7 +128,8 @@ QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol:
     m_isClosingHandshakeSent(false),
     m_isClosingHandshakeReceived(false),
     m_pingTimer(),
-    m_dataProcessor()
+    m_dataProcessor(),
+    m_configuration()
 {
     Q_ASSERT(pWebSocket);
     makeConnections(m_pSocket);
@@ -241,7 +248,7 @@ qint64 QWebSocketPrivate::write(const QByteArray &data)
  */
 void QWebSocketPrivate::setSslConfiguration(const QSslConfiguration &sslConfiguration)
 {
-    m_sslConfiguration = sslConfiguration;
+    m_configuration.m_sslConfiguration = sslConfiguration;
 }
 
 /*!
@@ -249,7 +256,7 @@ void QWebSocketPrivate::setSslConfiguration(const QSslConfiguration &sslConfigur
  */
 QSslConfiguration QWebSocketPrivate::sslConfiguration() const
 {
-    return m_sslConfiguration;
+    return m_configuration.m_sslConfiguration;
 }
 
 /*!
@@ -257,7 +264,7 @@ QSslConfiguration QWebSocketPrivate::sslConfiguration() const
  */
 void QWebSocketPrivate::ignoreSslErrors(const QList<QSslError> &errors)
 {
-    m_ignoredSslErrors = errors;
+    m_configuration.m_ignoredSslErrors = errors;
 }
 
 /*!
@@ -265,7 +272,15 @@ void QWebSocketPrivate::ignoreSslErrors(const QList<QSslError> &errors)
  */
 void QWebSocketPrivate::ignoreSslErrors()
 {
-    m_ignoreSslErrors = true;
+    m_configuration.m_ignoreSslErrors = true;
+    if (m_pSocket)
+    {
+        QSslSocket *pSslSocket = qobject_cast<QSslSocket *>(m_pSocket);
+        if (pSslSocket)
+        {
+            pSslSocket->ignoreSslErrors();
+        }
+    }
 }
 
 #endif
@@ -379,15 +394,18 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
                 connect(sslSocket, SIGNAL(encryptedBytesWritten(qint64)), q, SIGNAL(bytesWritten(qint64)));
                 setSocketState(QAbstractSocket::ConnectingState);
 
-                sslSocket->setSslConfiguration(m_sslConfiguration);
-                if (m_ignoreSslErrors)
+                sslSocket->setSslConfiguration(m_configuration.m_sslConfiguration);
+                if (m_configuration.m_ignoreSslErrors)
                 {
                     sslSocket->ignoreSslErrors();
                 }
                 else
                 {
-                    sslSocket->ignoreSslErrors(m_ignoredSslErrors);
+                    sslSocket->ignoreSslErrors(m_configuration.m_ignoredSslErrors);
                 }
+#ifndef QT_NO_NETWORKPROXY
+                sslSocket->setProxy(m_configuration.m_proxy);
+#endif
                 sslSocket->connectToHostEncrypted(url.host(), url.port(443));
             }
         }
@@ -400,6 +418,9 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
             makeConnections(m_pSocket);
             connect(m_pSocket, SIGNAL(bytesWritten(qint64)), q, SIGNAL(bytesWritten(qint64)));
             setSocketState(QAbstractSocket::ConnectingState);
+#ifndef QT_NO_NETWORKPROXY
+            m_pSocket->setProxy(m_configuration.m_proxy);
+#endif
             m_pSocket->connectToHost(url.host(), url.port(80));
         }
         else
@@ -786,9 +807,12 @@ QString QWebSocketPrivate::calculateAcceptKey(const QString &key) const
 qint64 QWebSocketPrivate::writeFrames(const QList<QByteArray> &frames)
 {
     qint64 written = 0;
-    for (int i = 0; i < frames.size(); ++i)
+    if (m_pSocket)
     {
-        written += writeFrame(frames[i]);
+        for (int i = 0; i < frames.size(); ++i)
+        {
+            written += writeFrame(frames[i]);
+        }
     }
     return written;
 }
@@ -813,17 +837,20 @@ QString readLine(QTcpSocket *pSocket)
 {
     Q_ASSERT(pSocket);
     QString line;
-    char c;
-    while (pSocket->getChar(&c))
+    if (pSocket)
     {
-        if (c == '\r')
+        char c;
+        while (pSocket->getChar(&c))
         {
-            pSocket->getChar(&c);
-            break;
-        }
-        else
-        {
-            line.append(QChar::fromLatin1(c));
+            if (c == '\r')
+            {
+                pSocket->getChar(&c);
+                break;
+            }
+            else
+            {
+                line.append(QChar::fromLatin1(c));
+            }
         }
     }
     return line;
@@ -1239,18 +1266,23 @@ quint16 QWebSocketPrivate::peerPort() const
     return port;
 }
 
+#ifndef QT_NO_NETWORKPROXY
 /*!
     \internal
  */
 QNetworkProxy QWebSocketPrivate::proxy() const
 {
-    QNetworkProxy proxy;
-    if (m_pSocket)
-    {
-        proxy = m_pSocket->proxy();
-    }
-    return proxy;
+    return m_configuration.m_proxy;
 }
+
+/*!
+    \internal
+ */
+void QWebSocketPrivate::setProxy(const QNetworkProxy &networkProxy)
+{
+    m_configuration.m_proxy = networkProxy;
+}
+#endif  //QT_NO_NETWORKPROXY
 
 /*!
     \internal
@@ -1284,17 +1316,6 @@ void QWebSocketPrivate::setPauseMode(QAbstractSocket::PauseModes pauseMode)
     if (m_pSocket)
     {
         m_pSocket->setPauseMode(pauseMode);
-    }
-}
-
-/*!
-    \internal
- */
-void QWebSocketPrivate::setProxy(const QNetworkProxy &networkProxy)
-{
-    if (m_pSocket)
-    {
-        m_pSocket->setProxy(networkProxy);
     }
 }
 

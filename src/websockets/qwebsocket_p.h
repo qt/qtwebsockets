@@ -52,16 +52,18 @@
 // We mean it.
 //
 
-#include <QUrl>
-#include <QHostAddress>
+#include <QtCore/QUrl>
+#include <QtNetwork/QTcpSocket>
+#include <QtNetwork/QHostAddress>
 #ifndef QT_NO_NETWORKPROXY
-#include <QNetworkProxy>
+#include <QtNetwork/QNetworkProxy>
 #endif
 #ifndef QT_NO_SSL
-#include <QSslConfiguration>
-#include <QSslError>
+#include <QtNetwork/QSslConfiguration>
+#include <QtNetwork/QSslError>
+#include <QtNetwork/QSslSocket>
 #endif
-#include <QTime>
+#include <QtCore/QTime>
 
 #include "qwebsocketprotocol.h"
 #include "qwebsocketdataprocessor_p.h"
@@ -72,6 +74,23 @@ class QWebSocketHandshakeRequest;
 class QWebSocketHandshakeResponse;
 class QTcpSocket;
 class QWebSocket;
+
+struct QWebSocketConfiguration
+{
+public:
+    QWebSocketConfiguration();
+
+public:
+#ifndef QT_NO_SSL
+    QSslConfiguration m_sslConfiguration;
+    QList<QSslError> m_ignoredSslErrors;
+    bool m_ignoreSslErrors;
+#endif
+#ifndef QT_NONETWORKPROXY
+    QNetworkProxy m_proxy;
+#endif
+    QTcpSocket *m_pSocket;
+};
 
 class QWebSocketPrivate : public QObject
 {
@@ -149,11 +168,6 @@ private Q_SLOTS:
 
 private:
     QWebSocket * const q_ptr;
-#ifndef QT_NO_SSL
-    QSslConfiguration m_sslConfiguration;
-    QList<QSslError> m_ignoredSslErrors;
-    bool m_ignoreSslErrors;
-#endif
 
     QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version, QWebSocket *pWebSocket, QObject *parent = Q_NULLPTR);
     void setVersion(QWebSocketProtocol::Version version);
@@ -213,6 +227,7 @@ private:
     QTime m_pingTimer;
 
     QWebSocketDataProcessor m_dataProcessor;
+    QWebSocketConfiguration m_configuration;
 
     friend class QWebSocketServerPrivate;
 };
