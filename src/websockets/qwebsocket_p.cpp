@@ -529,7 +529,8 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
 
     //catch signals
     connect(pTcpSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(processStateChanged(QAbstractSocket::SocketState)));
-    connect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(processData()));
+    //!!!important to use a QueuedConnection here; with QTcpSocket there is no problem, but with QSslSocket the processing hangs
+    connect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(processData()), Qt::QueuedConnection);
 
     connect(&m_dataProcessor, SIGNAL(textFrameReceived(QString,bool)), q, SIGNAL(textFrameReceived(QString,bool)));
     connect(&m_dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)), q, SIGNAL(binaryFrameReceived(QByteArray,bool)));

@@ -130,17 +130,25 @@
 #include <QtNetwork/QTcpSocket>
 #include <QtNetwork/QNetworkProxy>
 
+#ifndef QT_NO_SSL
+#include <QtNetwork/QSslConfiguration>
+#endif
+
 QT_BEGIN_NAMESPACE
 
 /*!
     Constructs a new WebSocketServer with the given \a serverName.
     The \a serverName will be used in the http handshake phase to identify the server.
 
+
     \a parent is passed to the QObject constructor.
  */
-QWebSocketServer::QWebSocketServer(const QString &serverName, QObject *parent) :
+QWebSocketServer::QWebSocketServer(const QString &serverName, SecureMode secureMode, QObject *parent) :
     QObject(parent),
-    d_ptr(new QWebSocketServerPrivate(serverName, this, this))
+    d_ptr(new QWebSocketServerPrivate(serverName,
+                                      (secureMode == SECURE_MODE) ? QWebSocketServerPrivate::SECURE_MODE : QWebSocketServerPrivate::NON_SECURE_MODE,
+                                      this,
+                                      this))
 {
 }
 
@@ -277,6 +285,34 @@ void QWebSocketServer::setProxy(const QNetworkProxy &networkProxy)
     d->setProxy(networkProxy);
 }
 #endif
+
+#ifndef QT_NO_SSL
+/*!
+    Sets the SSL configuration for the websocket server to \a sslConfiguration.
+    This method has no effect if QWebSocketServer runs in non-secure mode (QWebSocketServer::NON_SECURE_MODE).
+
+    \sa sslConfiguration(), SecureMode
+ */
+void QWebSocketServer::setSslConfiguration(const QSslConfiguration &sslConfiguration)
+{
+    Q_D(QWebSocketServer);
+    d->setSslConfiguration(sslConfiguration);
+}
+
+/*!
+    Returns the SSL configuration used by the websocket server.
+    If the server is not running in secure mode (QWebSocketServer::SECURE_MODE),
+    this method returns QSslConfiguration::defaultConfiguration().
+
+    \sa sslConfiguration(), SecureMode, QSslConfiguration::defaultConfiguration()
+ */
+QSslConfiguration QWebSocketServer::sslConfiguration() const
+{
+    Q_D(const QWebSocketServer);
+    return d->sslConfiguration();
+}
+#endif
+
 /*!
     Resumes accepting new connections.
     \sa pauseAccepting()
@@ -316,6 +352,18 @@ QHostAddress QWebSocketServer::serverAddress() const
 {
     Q_D(const QWebSocketServer);
     return d->serverAddress();
+}
+
+/*!
+    Returns the mode the server is running in.
+
+    \sa QWebSocketServer(), SecureMode
+ */
+QWebSocketServer::SecureMode QWebSocketServer::secureMode() const
+{
+    Q_D(const QWebSocketServer);
+    return (d->secureMode() == QWebSocketServerPrivate::SECURE_MODE) ?
+                QWebSocketServer::SECURE_MODE : QWebSocketServer::NON_SECURE_MODE;
 }
 
 /*!

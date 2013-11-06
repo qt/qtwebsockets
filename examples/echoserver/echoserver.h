@@ -41,12 +41,12 @@
 #ifndef ECHOSERVER_H
 #define ECHOSERVER_H
 
-#include <QObject>
-#include <QList>
-#include <QByteArray>
+#include <QtCore/QObject>
+#include <QtCore/QList>
+#include <QtCore/QByteArray>
 
-QT_FORWARD_DECLARE_CLASS(QWebSocketServer);
-QT_FORWARD_DECLARE_CLASS(QWebSocket);
+QT_FORWARD_DECLARE_CLASS(QWebSocketServer)
+QT_FORWARD_DECLARE_CLASS(QWebSocket)
 
 class EchoServer : public QObject
 {

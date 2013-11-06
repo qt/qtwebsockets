@@ -410,7 +410,6 @@ QWebSocketFrame QWebSocketFrame::readFrame(QIODevice *pIoDevice)
             {
                 if (pIoDevice->bytesAvailable() >= 4)
                 {
-                    //TODO: big endian conversion?
                     bytesRead = pIoDevice->read(reinterpret_cast<char *>(&frame.m_mask), sizeof(frame.m_mask));
                     if (bytesRead == -1)
                     {

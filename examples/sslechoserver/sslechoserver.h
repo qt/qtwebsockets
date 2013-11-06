@@ -38,30 +38,33 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef ECHOCLIENT_H
-#define ECHOCLIENT_H
+#ifndef SSLECHOSERVER_H
+#define SSLECHOSERVER_H
 
 #include <QtCore/QObject>
-#include <QtWebSockets/QWebSocket>
+#include <QtCore/QList>
+#include <QtCore/QByteArray>
 
+QT_FORWARD_DECLARE_CLASS(QWebSocketServer)
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
 
-class EchoClient : public QObject
+class SslEchoServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit EchoClient(const QUrl &url, QObject *parent = Q_NULLPTR);
+    explicit SslEchoServer(quint16 port, QObject *parent = Q_NULLPTR);
 
 Q_SIGNALS:
 
-public Q_SLOTS:
-
 private Q_SLOTS:
-    void onConnected();
-    void onTextMessageReceived(QString message);
+    void onNewConnection();
+    void processMessage(QString message);
+    void processBinaryMessage(QByteArray message);
+    void socketDisconnected();
 
 private:
-    QWebSocket m_webSocket;
+    QWebSocketServer *m_pWebSocketServer;
+    QList<QWebSocket *> m_clients;
 };
 
-#endif // ECHOCLIENT_H
+#endif //SSLECHOSERVER_H

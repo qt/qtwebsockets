@@ -41,6 +41,9 @@
 
 #include "qwebsocketserver.h"
 #include "qwebsocketserver_p.h"
+#ifndef QT_NO_SSL
+#include "qsslserver_p.h"
+#endif
 #include "qwebsocketprotocol.h"
 #include "qwebsockethandshakerequest_p.h"
 #include "qwebsockethandshakeresponse_p.h"
@@ -57,17 +60,32 @@ QT_BEGIN_NAMESPACE
 /*!
     \internal
  */
-QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName, QWebSocketServer * const pWebSocketServer, QObject *parent) :
+QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName, QWebSocketServerPrivate::SecureMode secureMode,
+                                                 QWebSocketServer * const pWebSocketServer, QObject *parent) :
     QObject(parent),
     q_ptr(pWebSocketServer),
     m_pTcpServer(Q_NULLPTR),
     m_serverName(serverName),
+    m_secureMode(secureMode),
     m_pendingConnections()
 {
     Q_ASSERT(pWebSocketServer);
-    m_pTcpServer = new QTcpServer(this);
+    if (m_secureMode == NON_SECURE_MODE)
+    {
+        m_pTcpServer = new QTcpServer(this);
+        connect(m_pTcpServer, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
+    }
+    else
+    {
+#ifndef QT_NO_SSL
+        QSslServer *pSslServer = new QSslServer(this);
+        m_pTcpServer = pSslServer;
+        connect(pSslServer, SIGNAL(newEncryptedConnection()), this, SLOT(onNewConnection()));
+        connect(pSslServer, SIGNAL(peerVerifyError(QSslError)), q_ptr, SIGNAL(peerVerifyError(QSslError)));
+        connect(pSslServer, SIGNAL(sslErrors(QList<QSslError>)), q_ptr, SIGNAL(sslErrors(QList<QSslError>)));
+#endif
+    }
     connect(m_pTcpServer, SIGNAL(acceptError(QAbstractSocket::SocketError)), q_ptr, SIGNAL(acceptError(QAbstractSocket::SocketError)));
-    connect(m_pTcpServer, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
 }
 
 /*!
@@ -287,6 +305,34 @@ void QWebSocketServerPrivate::setServerName(const QString &serverName)
 QString QWebSocketServerPrivate::serverName() const
 {
     return m_serverName;
+}
+
+/*!
+  \internal
+ */
+QWebSocketServerPrivate::SecureMode QWebSocketServerPrivate::secureMode() const
+{
+    return m_secureMode;
+}
+
+void QWebSocketServerPrivate::setSslConfiguration(const QSslConfiguration &sslConfiguration)
+{
+    if (m_secureMode == SECURE_MODE)
+    {
+        qobject_cast<QSslServer *>(m_pTcpServer)->setSslConfiguration(sslConfiguration);
+    }
+}
+
+QSslConfiguration QWebSocketServerPrivate::sslConfiguration() const
+{
+    if (m_secureMode == SECURE_MODE)
+    {
+        return qobject_cast<QSslServer *>(m_pTcpServer)->sslConfiguration();
+    }
+    else
+    {
+        return QSslConfiguration::defaultConfiguration();
+    }
 }
 
 /*!

@@ -38,32 +38,53 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "echoserver.h"
-#include "QtWebSockets/qwebsocketserver.h"
-#include "QtWebSockets/qwebsocket.h"
+#include "sslechoserver.h"
+#include "QtWebSockets/QWebSocketServer"
+#include "QtWebSockets/QWebSocket"
 #include <QtCore/QDebug>
+#include <QtCore/QFile>
+#include <QtNetwork/QSslCertificate>
+#include <QtNetwork/QSslKey>
 
 QT_USE_NAMESPACE
 
 //! [constructor]
-EchoServer::EchoServer(quint16 port, QObject *parent) :
+SslEchoServer::SslEchoServer(quint16 port, QObject *parent) :
     QObject(parent),
     m_pWebSocketServer(Q_NULLPTR),
     m_clients()
 {
-    m_pWebSocketServer = new QWebSocketServer("Echo Server", QWebSocketServer::NON_SECURE_MODE, this);
+    m_pWebSocketServer = new QWebSocketServer("SSL Echo Server", QWebSocketServer::SECURE_MODE, this);
+    QSslConfiguration sslConfiguration;
+    QFile certFile(QStringLiteral("./localhost.cert"));
+    QFile keyFile(QStringLiteral("./localhost.key"));
+    certFile.open(QIODevice::ReadOnly);
+    keyFile.open(QIODevice::ReadOnly);
+    QSslCertificate certificate(&certFile, QSsl::Pem);
+    QSslKey sslKey(&keyFile, QSsl::Rsa, QSsl::Pem);
+    certFile.close();
+    keyFile.close();
+    sslConfiguration.setProtocol(QSsl::AnyProtocol);
+    sslConfiguration.setPeerVerifyMode(QSslSocket::VerifyNone);
+    sslConfiguration.setLocalCertificate(certificate);
+    sslConfiguration.setPrivateKey(sslKey);
+    sslConfiguration.setProtocol(QSsl::TlsV1SslV3);
+    m_pWebSocketServer->setSslConfiguration(sslConfiguration);
+
     if (m_pWebSocketServer->listen(QHostAddress::Any, port))
     {
-        qDebug() << "Echoserver listening on port" << port;
+        qDebug() << "SSL Echo Server listening on port" << port;
         connect(m_pWebSocketServer, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
     }
 }
 //! [constructor]
 
 //! [onNewConnection]
-void EchoServer::onNewConnection()
+void SslEchoServer::onNewConnection()
 {
     QWebSocket *pSocket = m_pWebSocketServer->nextPendingConnection();
+
+    qDebug() << "Client connected:" << pSocket->peerName() << pSocket->origin();
 
     connect(pSocket, SIGNAL(textMessageReceived(QString)), this, SLOT(processMessage(QString)));
     connect(pSocket, SIGNAL(binaryMessageReceived(QByteArray)), this, SLOT(processBinaryMessage(QByteArray)));
@@ -75,7 +96,7 @@ void EchoServer::onNewConnection()
 //! [onNewConnection]
 
 //! [processMessage]
-void EchoServer::processMessage(QString message)
+void SslEchoServer::processMessage(QString message)
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     if (pClient)
@@ -86,7 +107,7 @@ void EchoServer::processMessage(QString message)
 //! [processMessage]
 
 //! [processBinaryMessage]
-void EchoServer::processBinaryMessage(QByteArray message)
+void SslEchoServer::processBinaryMessage(QByteArray message)
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     if (pClient)
@@ -97,8 +118,9 @@ void EchoServer::processBinaryMessage(QByteArray message)
 //! [processBinaryMessage]
 
 //! [socketDisconnected]
-void EchoServer::socketDisconnected()
+void SslEchoServer::socketDisconnected()
 {
+    qDebug() << "Client disconnected";
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     if (pClient)
     {

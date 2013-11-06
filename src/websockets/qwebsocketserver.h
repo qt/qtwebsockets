@@ -42,12 +42,17 @@
 #ifndef QWEBSOCKETSERVER_H
 #define QWEBSOCKETSERVER_H
 
+#include "QtWebSockets/qwebsockets_global.h"
+#include "QtWebSockets/qwebsocketprotocol.h"
+
 #include <QtCore/QObject>
 #include <QtCore/QString>
 #include <QtNetwork/QHostAddress>
 
-#include "QtWebSockets/qwebsockets_global.h"
-#include "QtWebSockets/qwebsocketprotocol.h"
+#ifndef QT_NO_SSL
+#include <QtNetwork/QSslConfiguration>
+#include <QtNetwork/QSslError>
+#endif
 
 QT_BEGIN_NAMESPACE
 
@@ -61,8 +66,17 @@ class Q_WEBSOCKETS_EXPORT QWebSocketServer : public QObject
     Q_DISABLE_COPY(QWebSocketServer)
     Q_DECLARE_PRIVATE(QWebSocketServer)
 
+    Q_ENUMS(SecureMode)
+
 public:
-    explicit QWebSocketServer(const QString &serverName, QObject *parent = Q_NULLPTR);
+    enum SecureMode {
+#ifndef QT_NO_SSL
+        SECURE_MODE,
+#endif
+        NON_SECURE_MODE
+    };
+
+    explicit QWebSocketServer(const QString &serverName, SecureMode secureMode, QObject *parent = Q_NULLPTR);
     virtual ~QWebSocketServer();
 
     bool listen(const QHostAddress &address = QHostAddress::Any, quint16 port = 0);
@@ -75,6 +89,8 @@ public:
 
     quint16 serverPort() const;
     QHostAddress serverAddress() const;
+
+    SecureMode secureMode() const;
 
     bool setSocketDescriptor(int socketDescriptor);
     int socketDescriptor() const;
@@ -96,6 +112,10 @@ public:
     void setProxy(const QNetworkProxy &networkProxy);
     QNetworkProxy proxy() const;
 #endif
+#ifndef QT_NO_SSL
+    void setSslConfiguration(const QSslConfiguration &sslConfiguration);
+    QSslConfiguration sslConfiguration() const;
+#endif
 
     QList<QWebSocketProtocol::Version> supportedVersions() const;
     QList<QString> supportedProtocols() const;
@@ -103,8 +123,13 @@ public:
 
 Q_SIGNALS:
     void acceptError(QAbstractSocket::SocketError socketError);
+    //TODO: should use a delegate iso of a synchronous signal
     void originAuthenticationRequired(QWebSocketCorsAuthenticator *pAuthenticator);
     void newConnection();
+#ifndef QT_NO_SSL
+    void peerVerifyError(const QSslError &error);
+    void sslErrors(const QList<QSslError> &errors);
+#endif
 
 private:
     QWebSocketServerPrivate * const d_ptr;

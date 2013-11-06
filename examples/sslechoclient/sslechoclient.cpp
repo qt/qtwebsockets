@@ -38,30 +38,33 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef ECHOCLIENT_H
-#define ECHOCLIENT_H
+#include "sslechoclient.h"
+#include <QtCore/QDebug>
 
-#include <QtCore/QObject>
-#include <QtWebSockets/QWebSocket>
+QT_USE_NAMESPACE
 
-QT_FORWARD_DECLARE_CLASS(QWebSocket)
-
-class EchoClient : public QObject
+//! [constructor]
+SslEchoClient::SslEchoClient(const QUrl &url, QObject *parent) :
+    QObject(parent),
+    m_webSocket()
 {
-    Q_OBJECT
-public:
-    explicit EchoClient(const QUrl &url, QObject *parent = Q_NULLPTR);
+    connect(&m_webSocket, SIGNAL(connected()), this, SLOT(onConnected()));
+    m_webSocket.open(QUrl(url));
+}
+//! [constructor]
 
-Q_SIGNALS:
+//! [onConnected]
+void SslEchoClient::onConnected()
+{
+    qDebug() << "Websocket connected";
+    connect(&m_webSocket, SIGNAL(textMessageReceived(QString)), this, SLOT(onTextMessageReceived(QString)));
+    m_webSocket.write("Hello, world!");
+}
+//! [onConnected]
 
-public Q_SLOTS:
-
-private Q_SLOTS:
-    void onConnected();
-    void onTextMessageReceived(QString message);
-
-private:
-    QWebSocket m_webSocket;
-};
-
-#endif // ECHOCLIENT_H
+//! [onTextMessageReceived]
+void SslEchoClient::onTextMessageReceived(QString message)
+{
+    qDebug() << "Message received:" << message;
+}
+//! [onTextMessageReceived]
