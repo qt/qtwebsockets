@@ -40,6 +40,11 @@ SOURCES += \
     $$PWD/qwebsocketcorsauthenticator.cpp \
     $$PWD/qwebsocketframe_p.cpp
 
+contains(QT_CONFIG, openssl) | contains(QT_CONFIG, openssl-linked) {
+    SOURCES += $$PWD/qsslserver_p.cpp
+    PRIVATE_HEADERS += $$PWD/qsslserver_p.h
+}
+
 HEADERS += $$PUBLIC_HEADERS $$PRIVATE_HEADERS
 
 load(qt_module)
