@@ -13,3 +13,5 @@ SOURCES += \
 
 HEADERS += \
     echoserver.h
+
+OTHER_FILES += echoclient.html
