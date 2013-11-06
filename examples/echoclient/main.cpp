@@ -38,7 +38,7 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include <QCoreApplication>
+#include <QtCore/QCoreApplication>
 #include "echoclient.h"
 
 int main(int argc, char *argv[])

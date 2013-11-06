@@ -38,30 +38,50 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef ECHOCLIENT_H
-#define ECHOCLIENT_H
 
-#include <QtCore/QObject>
-#include <QtWebSockets/QWebSocket>
+#include "qsslserver_p.h"
 
-QT_FORWARD_DECLARE_CLASS(QWebSocket)
+#include <QtNetwork/QSslSocket>
+#include <QtNetwork/QSslCipher>
 
-class EchoClient : public QObject
+QSslServer::QSslServer(QObject *parent) :
+    QTcpServer(parent),
+    m_sslConfiguration(QSslConfiguration::defaultConfiguration())
 {
-    Q_OBJECT
-public:
-    explicit EchoClient(const QUrl &url, QObject *parent = Q_NULLPTR);
+}
 
-Q_SIGNALS:
+QSslServer::~QSslServer()
+{
+}
 
-public Q_SLOTS:
+void QSslServer::setSslConfiguration(const QSslConfiguration &sslConfiguration)
+{
+    m_sslConfiguration = sslConfiguration;
+}
 
-private Q_SLOTS:
-    void onConnected();
-    void onTextMessageReceived(QString message);
+QSslConfiguration QSslServer::sslConfiguration() const
+{
+    return m_sslConfiguration;
+}
 
-private:
-    QWebSocket m_webSocket;
-};
+void QSslServer::incomingConnection(qintptr socket)
+{
+    QSslSocket *pSslSocket = new QSslSocket();
 
-#endif // ECHOCLIENT_H
+    pSslSocket->setSslConfiguration(m_sslConfiguration);
+
+    if (pSslSocket->setSocketDescriptor(socket))
+    {
+        connect(pSslSocket, SIGNAL(peerVerifyError(QSslError)), this, SIGNAL(peerVerifyError(QSslError)));
+        connect(pSslSocket, SIGNAL(sslErrors(QList<QSslError>)), this, SIGNAL(sslErrors(QList<QSslError>)));
+        connect(pSslSocket, SIGNAL(encrypted()), this, SIGNAL(newEncryptedConnection()));
+
+        addPendingConnection(pSslSocket);
+
+        pSslSocket->startServerEncryption();
+    }
+    else
+    {
+       delete pSslSocket;
+    }
+}

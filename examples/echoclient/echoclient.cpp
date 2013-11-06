@@ -39,7 +39,7 @@
 **
 ****************************************************************************/
 #include "echoclient.h"
-#include <QDebug>
+#include <QtCore/QDebug>
 
 QT_USE_NAMESPACE
 
