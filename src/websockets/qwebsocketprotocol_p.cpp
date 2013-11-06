@@ -39,10 +39,10 @@
 **
 ****************************************************************************/
 
-#include "private/qwebsocketprotocol_p.h"
-#include <QString>
-#include <QSet>
-#include <QtEndian>
+#include "qwebsocketprotocol_p.h"
+#include <QtCore/QString>
+#include <QtCore/QSet>
+#include <QtCore/QtEndian>
 
 /*!
     \enum QWebSocketProtocol::CloseCode

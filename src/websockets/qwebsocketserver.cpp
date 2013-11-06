@@ -121,13 +121,14 @@
     this signal, as the connection will always succeed.
 */
 
-#include <QTcpServer>
-#include <QTcpSocket>
-#include <QNetworkProxy>
 #include "qwebsocketprotocol.h"
 #include "qwebsocket.h"
 #include "qwebsocketserver.h"
 #include "qwebsocketserver_p.h"
+
+#include <QtNetwork/QTcpServer>
+#include <QtNetwork/QTcpSocket>
+#include <QtNetwork/QNetworkProxy>
 
 QT_BEGIN_NAMESPACE
 

@@ -42,7 +42,7 @@
 #ifndef QWEBSOCKETSGLOBAL_H
 #define QWEBSOCKETSGLOBAL_H
 
-#include <qglobal.h>
+#include <QtCore/qglobal.h>
 
 QT_BEGIN_NAMESPACE
 

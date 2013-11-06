@@ -40,14 +40,15 @@
 ****************************************************************************/
 
 #include "qwebsockethandshakerequest_p.h"
-#include <QString>
-#include <QMap>
-#include <QTextStream>
-#include <QUrl>
-#include <QList>
-#include <QStringList>
-#include <functional>   //for std::greater
 #include "qwebsocketprotocol.h"
+
+#include <QtCore/QString>
+#include <QtCore/QMap>
+#include <QtCore/QTextStream>
+#include <QtCore/QUrl>
+#include <QtCore/QList>
+#include <QtCore/QStringList>
+#include <functional>   //for std::greater
 
 QT_BEGIN_NAMESPACE
 

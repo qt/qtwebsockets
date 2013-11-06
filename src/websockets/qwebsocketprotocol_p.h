@@ -42,7 +42,7 @@
 #ifndef QWEBSOCKETPROTOCOL_P_H
 #define QWEBSOCKETPROTOCOL_P_H
 
-#include <qglobal.h>
+#include <QtCore/qglobal.h>
 #include "QtWebSockets/qwebsocketprotocol.h"
 
 QT_BEGIN_NAMESPACE

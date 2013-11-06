@@ -40,10 +40,10 @@
 ****************************************************************************/
 #include <QtTest/QtTest>
 #include <QtTest/qtestcase.h>
-#include <QSignalSpy>
-#include <QBuffer>
-#include <QByteArray>
-#include <QDebug>
+#include <QtTest/QSignalSpy>
+#include <QtCore/QBuffer>
+#include <QtCore/QByteArray>
+#include <QtCore/QDebug>
 
 #include "private/qwebsocketdataprocessor_p.h"
 #include "private/qwebsocketprotocol_p.h"

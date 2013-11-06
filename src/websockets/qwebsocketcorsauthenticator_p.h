@@ -41,8 +41,8 @@
 #ifndef QWEBSOCKETCORSAUTHENTICATOR_P_H
 #define QWEBSOCKETCORSAUTHENTICATOR_P_H
 
-#include <qglobal.h>    //for QT_BEGIN_NAMESPACE
-#include <QString>
+#include <QtCore/qglobal.h>
+#include <QtCore/QString>
 
 //
 //  W A R N I N G

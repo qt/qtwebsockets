@@ -42,13 +42,13 @@
 #ifndef QWEBSOCKET_H
 #define QWEBSOCKET_H
 
-#include <QUrl>
+#include <QtCore/QUrl>
 #ifndef QT_NO_NETWORKPROXY
-#include <QNetworkProxy>
+#include <QtNetwork/QNetworkProxy>
 #endif
 #ifndef QT_NO_SSL
-#include <QSslError>
-#include <QSslConfiguration>
+#include <QtNetwork/QSslError>
+#include <QtNetwork/QSslConfiguration>
 #endif
 #include "QtWebSockets/qwebsockets_global.h"
 #include "QtWebSockets/qwebsocketprotocol.h"
