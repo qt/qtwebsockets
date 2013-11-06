@@ -44,8 +44,7 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    //SslEchoClient client(QUrl("wss://localhost:1234"));
-    SslEchoClient client(QUrl("wss://echo.websocket.org"));
+    SslEchoClient client(QUrl("wss://localhost:1234"));
 
     Q_UNUSED(client);
 
