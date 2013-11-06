@@ -52,10 +52,10 @@
 // We mean it.
 //
 
-#include <QObject>
-#include <QMap>
-#include <QString>
-#include <QUrl>
+#include <QtCore/QObject>
+#include <QtCore/QMap>
+#include <QtCore/QString>
+#include <QtCore/QUrl>
 
 #include "qwebsocketprotocol.h"
 

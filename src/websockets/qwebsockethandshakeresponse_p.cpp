@@ -41,15 +41,17 @@
 
 #include "qwebsockethandshakeresponse_p.h"
 #include "qwebsockethandshakerequest_p.h"
-#include <QString>
-#include <QTextStream>
-#include <QByteArray>
-#include <QStringList>
-#include <QDateTime>
-#include <QCryptographicHash>
-#include <QSet>
-#include <QList>
-#include <QStringBuilder>   //for more efficient string concatenation
+
+#include <QtCore/QString>
+#include <QtCore/QTextStream>
+#include <QtCore/QByteArray>
+#include <QtCore/QStringList>
+#include <QtCore/QDateTime>
+#include <QtCore/QCryptographicHash>
+#include <QtCore/QSet>
+#include <QtCore/QList>
+#include <QtCore/QStringBuilder>   //for more efficient string concatenation
+
 #include <functional>   //for std::greater
 
 QT_BEGIN_NAMESPACE

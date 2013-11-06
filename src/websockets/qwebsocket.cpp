@@ -211,12 +211,13 @@ not been filled in with new information when the signal returns.
   */
 #include "qwebsocket.h"
 #include "qwebsocket_p.h"
-#include <QUrl>
-#include <QTcpSocket>
-#include <QByteArray>
-#include <QHostAddress>
 
-#include <QDebug>
+#include <QtCore/QUrl>
+#include <QtNetwork/QTcpSocket>
+#include <QtCore/QByteArray>
+#include <QtNetwork/QHostAddress>
+
+#include <QtCore/QDebug>
 
 #include <limits>
 

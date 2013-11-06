@@ -42,9 +42,9 @@
 #ifndef QWEBSOCKETSERVER_H
 #define QWEBSOCKETSERVER_H
 
-#include <QObject>
-#include <QString>
-#include <QHostAddress>
+#include <QtCore/QObject>
+#include <QtCore/QString>
+#include <QtNetwork/QHostAddress>
 
 #include "QtWebSockets/qwebsockets_global.h"
 #include "QtWebSockets/qwebsocketprotocol.h"

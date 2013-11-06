@@ -53,10 +53,10 @@
 // We mean it.
 //
 
-#include <QObject>
-#include <QByteArray>
-#include <QString>
-#include <QTextCodec>
+#include <QtCore/QObject>
+#include <QtCore/QByteArray>
+#include <QtCore/QString>
+#include <QtCore/QTextCodec>
 #include "qwebsocketprotocol.h"
 
 QT_BEGIN_NAMESPACE

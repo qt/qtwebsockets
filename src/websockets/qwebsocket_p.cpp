@@ -44,6 +44,7 @@
 #include "qwebsocketprotocol_p.h"
 #include "qwebsockethandshakerequest_p.h"
 #include "qwebsockethandshakeresponse_p.h"
+
 #include <QtCore/QUrl>
 #include <QtNetwork/QTcpSocket>
 #include <QtCore/QByteArray>

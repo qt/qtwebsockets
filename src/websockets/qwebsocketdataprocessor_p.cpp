@@ -56,11 +56,13 @@
 #include "qwebsocketprotocol.h"
 #include "qwebsocketprotocol_p.h"
 #include "qwebsocketframe_p.h"
-#include <QtEndian>
+
+#include <QtCore/QtEndian>
+#include <QtCore/QTextCodec>
+#include <QtCore/QTextDecoder>
+#include <QtCore/QDebug>
+
 #include <limits.h>
-#include <QTextCodec>
-#include <QTextDecoder>
-#include <QDebug>
 
 QT_BEGIN_NAMESPACE
 

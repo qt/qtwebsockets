@@ -52,10 +52,10 @@
 // We mean it.
 //
 
-#include <QObject>
-#include <QQueue>
-#include <QString>
-#include <QHostAddress>
+#include <QtCore/QObject>
+#include <QtCore/QQueue>
+#include <QtCore/QString>
+#include <QtNetwork/QHostAddress>
 #include "qwebsocket.h"
 
 QT_BEGIN_NAMESPACE

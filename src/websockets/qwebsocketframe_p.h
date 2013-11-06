@@ -42,8 +42,8 @@
 #ifndef QWEBSOCKETFRAME_P_H
 #define QWEBSOCKETFRAME_P_H
 
-#include <QString>
-#include <QByteArray>
+#include <QtCore/QString>
+#include <QtCore/QByteArray>
 #include <limits.h>
 
 #include "qwebsocketprotocol.h"

@@ -40,12 +40,12 @@
 ****************************************************************************/
 #include <QtTest/QtTest>
 #include <QtTest/qtestcase.h>
-#include <QDebug>
-#include <QByteArray>
-#include <QtEndian>
+#include <QtCore/QDebug>
+#include <QtCore/QByteArray>
+#include <QtCore/QtEndian>
 
 #include "private/qwebsockethandshakerequest_p.h"
-#include "qwebsocketprotocol.h"
+#include "QtWebSockets/qwebsocketprotocol.h"
 
 QT_USE_NAMESPACE
 

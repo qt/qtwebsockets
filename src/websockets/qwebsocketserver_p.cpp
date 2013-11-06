@@ -39,9 +39,6 @@
 **
 ****************************************************************************/
 
-#include <QTcpServer>
-#include <QTcpSocket>
-#include <QNetworkProxy>
 #include "qwebsocketserver.h"
 #include "qwebsocketserver_p.h"
 #include "qwebsocketprotocol.h"
@@ -50,6 +47,10 @@
 #include "qwebsocket.h"
 #include "qwebsocket_p.h"
 #include "qwebsocketcorsauthenticator.h"
+
+#include <QtNetwork/QTcpServer>
+#include <QtNetwork/QTcpSocket>
+#include <QtNetwork/QNetworkProxy>
 
 QT_BEGIN_NAMESPACE
 

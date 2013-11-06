@@ -52,8 +52,8 @@
 // We mean it.
 //
 
-#include <QObject>
-#include <QList>
+#include <QtCore/QObject>
+#include <QtCore/QList>
 #include "qwebsocketprotocol.h"
 
 QT_BEGIN_NAMESPACE
