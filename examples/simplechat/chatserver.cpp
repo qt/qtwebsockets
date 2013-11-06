@@ -51,7 +51,7 @@ ChatServer::ChatServer(quint16 port, QObject *parent) :
     m_pWebSocketServer(Q_NULLPTR),
     m_clients()
 {
-    m_pWebSocketServer = new QWebSocketServer("Chat Server", this);
+    m_pWebSocketServer = new QWebSocketServer("Chat Server", QWebSocketServer::NON_SECURE_MODE, this);
     if (m_pWebSocketServer->listen(QHostAddress::Any, port))
     {
         qDebug() << "Chat Server listening on port" << port;
