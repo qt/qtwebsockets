@@ -315,6 +315,7 @@ QWebSocketServerPrivate::SecureMode QWebSocketServerPrivate::secureMode() const
     return m_secureMode;
 }
 
+#ifndef QT_NO_SSL
 void QWebSocketServerPrivate::setSslConfiguration(const QSslConfiguration &sslConfiguration)
 {
     if (m_secureMode == SECURE_MODE)
@@ -334,6 +335,7 @@ QSslConfiguration QWebSocketServerPrivate::sslConfiguration() const
         return QSslConfiguration::defaultConfiguration();
     }
 }
+#endif
 
 /*!
     \internal
