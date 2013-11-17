@@ -40,18 +40,176 @@
 ****************************************************************************/
 
 #include "qqmlwebsocket.h"
+#include <QtWebSockets/QWebSocket>
 
 QQmlWebSocket::QQmlWebSocket(QObject *parent) :
-    QObject(parent)
+    QObject(parent),
+    m_webSocket(),
+    m_status(Closed),
+    m_url(),
+    m_isActive(false),
+    m_componentCompleted(true),
+    m_errorString()
 {
+}
+
+QQmlWebSocket::~QQmlWebSocket()
+{
+}
+
+void QQmlWebSocket::sendTextMessage(const QString &message)
+{
+    if (m_status != Open) {
+        setErrorString(tr("Messages can only be send when the socket has Open status."));
+        setStatus(Error);
+        return;
+    }
+    m_webSocket->write(message);
+}
+
+QUrl QQmlWebSocket::url() const
+{
+    return m_url;
+}
+
+void QQmlWebSocket::setUrl(const QUrl &url)
+{
+    if (m_url == url) {
+        return;
+    }
+    if (m_webSocket && (m_status == Open)) {
+        m_webSocket->close();
+    }
+    m_url = url;
+    Q_EMIT urlChanged();
+    if (m_webSocket) {
+        m_webSocket->open(m_url);
+    }
+}
+
+QQmlWebSocket::Status QQmlWebSocket::status() const
+{
+    return m_status;
+}
+
+QString QQmlWebSocket::errorString() const
+{
+    return m_errorString;
 }
 
 void QQmlWebSocket::classBegin()
 {
-
+    m_componentCompleted = false;
+    m_errorString = tr("QQmlWebSocket is not ready.");
+    m_status = Closed;
 }
 
 void QQmlWebSocket::componentComplete()
 {
+    m_webSocket.reset(new QWebSocket());
+    connect(m_webSocket.data(), SIGNAL(textMessageReceived(QString)), this, SIGNAL(textMessageReceived(QString)));
+    connect(m_webSocket.data(), SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onError(QAbstractSocket::SocketError)));
+    connect(m_webSocket.data(), SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(onStateChanged(QAbstractSocket::SocketState)));
 
+    m_componentCompleted = true;
+
+    open();
+}
+
+void QQmlWebSocket::onError(QAbstractSocket::SocketError error)
+{
+    Q_UNUSED(error)
+    setErrorString(m_webSocket->errorString());
+    setStatus(Error);
+}
+
+void QQmlWebSocket::onStateChanged(QAbstractSocket::SocketState state)
+{
+    switch (state)
+    {
+        case QAbstractSocket::ConnectingState:
+        case QAbstractSocket::BoundState:
+        case QAbstractSocket::HostLookupState:
+        {
+            setStatus(Connecting);
+            break;
+        }
+        case QAbstractSocket::UnconnectedState:
+        {
+            setStatus(Closed);
+            break;
+        }
+        case QAbstractSocket::ConnectedState:
+        {
+            setStatus(Open);
+            break;
+        }
+        case QAbstractSocket::ClosingState:
+        {
+            setStatus(Closing);
+            break;
+        }
+        default:
+        {
+            setStatus(Connecting);
+            break;
+        }
+    }
+}
+
+void QQmlWebSocket::setStatus(QQmlWebSocket::Status status)
+{
+    if (m_status == status) {
+        return;
+    }
+    m_status = status;
+    if (status != Error) {
+        setErrorString();
+    }
+    Q_EMIT statusChanged(m_status);
+}
+
+void QQmlWebSocket::setActive(bool active)
+{
+    if (m_isActive == active) {
+        return;
+    }
+    m_isActive = active;
+    Q_EMIT activeChanged(m_isActive);
+    if (!m_componentCompleted) {
+        return;
+    }
+    if (m_isActive) {
+        open();
+    } else {
+        close();
+    }
+}
+
+bool QQmlWebSocket::isActive() const
+{
+    return m_isActive;
+}
+
+void QQmlWebSocket::open()
+{
+    if (m_componentCompleted && m_isActive && m_url.isValid() && m_webSocket) {
+        m_webSocket->open(m_url);
+    }
+}
+
+void QQmlWebSocket::close()
+{
+    if (m_componentCompleted && m_webSocket) {
+        m_webSocket->close();
+    }
+}
+
+void QQmlWebSocket::setErrorString(QString errorString)
+{
+    if (m_errorString == errorString) {
+        return;
+    }
+    m_errorString = errorString;
+    Q_EMIT errorStringChanged(m_errorString);
 }
