@@ -44,6 +44,9 @@
 
 #include <QObject>
 #include <QQmlParserStatus>
+#include <QtQml>
+#include <QScopedPointer>
+#include <QWebSocket>
 
 class QQmlWebSocket : public QObject, public QQmlParserStatus
 {
@@ -51,12 +54,61 @@ class QQmlWebSocket : public QObject, public QQmlParserStatus
     Q_DISABLE_COPY(QQmlWebSocket)
     Q_INTERFACES(QQmlParserStatus)
 
+    Q_ENUMS(ReadyState)
+    Q_ENUMS(Exception)
+    Q_PROPERTY(QUrl url READ url WRITE setUrl NOTIFY urlChanged)
+    Q_PROPERTY(ReadyState readyState READ readyState NOTIFY stateChanged)
+
 public:
     explicit QQmlWebSocket(QObject *parent = Q_NULLPTR);
+    virtual ~QQmlWebSocket();
+
+    enum ReadyState
+    {
+        CONNECTING  = 0,
+        OPEN        = 1,
+        CLOSING     = 2,
+        CLOSED      = 3
+    };
+    enum Exception
+    {
+        SyntaxError,
+        SecurityError,
+        InvalidAccessError,
+        InvalidStateError
+    };
+
+    Q_INVOKABLE void sendTextMessage(const QString &message);
+    Q_INVOKABLE void sendBinaryMessage(const QByteArray &message);
+    Q_INVOKABLE void close(quint16 code = 1000, const QString &reason = QString());
+
+    QUrl url() const;
+    void setUrl(const QUrl &url);
+    ReadyState readyState() const;
+
+Q_SIGNALS:
+    void connected();
+    void errorOccurred(quint16 errno, QString message);
+    void closed(bool wasClean, quint16 code, QString reason);
+    void textMessage(QString message);
+    void binaryMessage(QByteArray message);
+    void exception(Exception exception);
+    void stateChanged(ReadyState readyState);
+    void urlChanged();
 
 public:
     void classBegin() Q_DECL_OVERRIDE;
     void componentComplete() Q_DECL_OVERRIDE;
+
+private Q_SLOTS:
+    void onError(QAbstractSocket::SocketError error);
+    void onStateChanged(QAbstractSocket::SocketState state);
+    void onDisconnected();
+
+private:
+    QScopedPointer<QWebSocket> m_webSocket;
+    ReadyState m_readyState;
+    QUrl m_url;
 };
 
 #endif // QQMLWEBSOCKET_H
