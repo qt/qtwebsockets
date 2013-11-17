@@ -137,6 +137,8 @@ public:
     QString origin() const;
     QString protocol() const;
     QString extension() const;
+    QWebSocketProtocol::CloseCode closeCode() const;
+    QString closeReason() const;
 
     qint64 write(const char *message);		//send data as text
     qint64 write(const char *message, qint64 maxSize);		//send data as text
@@ -223,6 +225,8 @@ private:
 
     bool m_isClosingHandshakeSent;
     bool m_isClosingHandshakeReceived;
+    QWebSocketProtocol::CloseCode m_closeCode;
+    QString m_closeReason;
 
     QTime m_pingTimer;
 

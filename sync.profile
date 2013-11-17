@@ -15,4 +15,5 @@
 
 %dependencies = (
     "qtbase" => "",
+    "qtdeclarative" => "",
 );

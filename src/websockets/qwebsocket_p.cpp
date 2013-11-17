@@ -101,6 +101,8 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
     m_mustMask(true),
     m_isClosingHandshakeSent(false),
     m_isClosingHandshakeReceived(false),
+    m_closeCode(QWebSocketProtocol::CC_NORMAL),
+    m_closeReason(),
     m_pingTimer(),
     m_dataProcessor(),
     m_configuration()
@@ -128,6 +130,8 @@ QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol:
     m_mustMask(true),
     m_isClosingHandshakeSent(false),
     m_isClosingHandshakeReceived(false),
+    m_closeCode(QWebSocketProtocol::CC_NORMAL),
+    m_closeReason(),
     m_pingTimer(),
     m_dataProcessor(),
     m_configuration()
@@ -617,6 +621,22 @@ QString QWebSocketPrivate::protocol() const
 QString QWebSocketPrivate::extension() const
 {
     return m_extension;
+}
+
+/*!
+ * \internal
+ */
+QWebSocketProtocol::CloseCode QWebSocketPrivate::closeCode() const
+{
+    return m_closeCode;
+}
+
+/*!
+ * \internal
+ */
+QString QWebSocketPrivate::closeReason() const
+{
+    return m_closeReason;
 }
 
 /*!
