@@ -40,18 +40,39 @@
 ****************************************************************************/
 
 import QtQuick 2.0
-import Qt.Playground.WebSockets 1.0
+import Qt.WebSockets 1.0
 
 Rectangle {
     width: 360
     height: 360
 
     WebSocket {
+        id: socket
+        url: "ws://echo.websocket.org"
+        onTextMessage: {
+            messageBox.text += "\nReceived message: " + message
+        }
+        onErrorOccurred: console.log("Error: "+ message)
+        onConnected: {
+            socket.sendTextMessage("Hello World")
+        }
+    }
 
+    WebSocket {
+        id: secureWebSocket
+        url: "wss://echo.websocket.org"
+        onTextMessage: {
+            messageBox.text += "\nReceived secure message: " + message
+        }
+        onErrorOccurred: console.log("Error: "+ message)
+        onConnected: {
+            secureWebSocket.sendTextMessage("Hello Secure World")
+        }
     }
 
     Text {
-        text: qsTr("Hello World")
+        id: messageBox
+        text: qsTr("Sending...")
         anchors.centerIn: parent
     }
 
