@@ -509,6 +509,26 @@ QString QWebSocket::extension() const
 }
 
 /*!
+    \brief Returns the code indicating why the socket was closed.
+    \sa QWebSocketProtocol::CloseCode, closeReason()
+ */
+QWebSocketProtocol::CloseCode QWebSocket::closeCode() const
+{
+    Q_D(const QWebSocket);
+    return d->closeCode();
+}
+
+/*!
+    \brief Returns the reason why the socket was closed.
+    \sa closeCode()
+ */
+QString QWebSocket::closeReason() const
+{
+    Q_D(const QWebSocket);
+    return d->closeReason();
+}
+
+/*!
     \brief Returns the current state of the socket
  */
 QAbstractSocket::SocketState QWebSocket::state() const
