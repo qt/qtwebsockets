@@ -1,3 +1,2 @@
-module Qt.Playground.WebSockets
-
+module Qt.WebSockets
 plugin declarative_qmlwebsockets
