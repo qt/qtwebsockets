@@ -40,25 +40,64 @@
 ****************************************************************************/
 
 import QtQuick 2.0
-import Qt.Playground.WebSockets 1.0
+import Qt.WebSockets 1.0
 
 Rectangle {
     width: 360
     height: 360
 
     WebSocket {
+        id: socket
+        url: "ws://echo.websocket.org"
+        onTextMessageReceived: {
+            messageBox.text = messageBox.text + "\nReceived message: " + message
+        }
+        onStatusChanged: if (socket.status == Error) { console.log("Error: "+ socket.errorString) }
+        onActiveChanged: {
+            if (active)
+            {
+                socket.sendTextMessage("Hello World")
+            }
+            else
+            {
+                messageBox.text += "\nSocket closed";
+            }
+        }
+        active: false;
+    }
 
+    WebSocket {
+        id: secureWebSocket
+        url: "wss://echo.websocket.org"
+        onTextMessageReceived: {
+            messageBox.text = messageBox.text + "\nReceived message: " + message
+        }
+        onStatusChanged: if (secureWebSocket.status == Error) { console.log("Error: "+ secureWebSocket.errorString) }
+        onActiveChanged: {
+            if (secureWebSocket.active)
+            {
+                secureWebSocket.sendTextMessage("Hello Secure World")
+            }
+            else
+            {
+                messageBox.text += "\nSecure Socket closed";
+            }
+        }
+        active: false;
     }
 
     Text {
-        text: qsTr("Hello World")
+        id: messageBox
+        text: socket.status == WebSocket.Open ? qsTr("Sending...") : qsTr("Welcome!")
         anchors.centerIn: parent
     }
 
     MouseArea {
         anchors.fill: parent
         onClicked: {
-            Qt.quit();
+            socket.active = !socket.active;
+            secureWebSocket.active =  !secureWebSocket.active;
+            //Qt.quit();
         }
     }
 }
