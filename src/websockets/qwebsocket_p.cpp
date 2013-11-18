@@ -88,7 +88,7 @@ QWebSocketConfiguration::QWebSocketConfiguration() :
 QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::Version version, QWebSocket *pWebSocket, QObject *parent) :
     QObject(parent),
     q_ptr(pWebSocket),
-    m_pSocket(Q_NULLPTR),
+    m_pSocket(),
     m_errorString(),
     m_version(version),
     m_resourceName(),
@@ -137,7 +137,7 @@ QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol:
     m_configuration()
 {
     Q_ASSERT(pWebSocket);
-    makeConnections(m_pSocket);
+    makeConnections(m_pSocket.data());
 }
 
 /*!
@@ -151,9 +151,9 @@ QWebSocketPrivate::~QWebSocketPrivate()
         {
             close(QWebSocketProtocol::CC_GOING_AWAY, tr("Connection closed"));
         }
-        releaseConnections(m_pSocket);
-        m_pSocket->deleteLater();
-        m_pSocket = Q_NULLPTR;
+        releaseConnections(m_pSocket.data());
+//        m_pSocket->deleteLater();
+//        m_pSocket = Q_NULLPTR;
     }
 }
 
@@ -280,7 +280,7 @@ void QWebSocketPrivate::ignoreSslErrors()
     m_configuration.m_ignoreSslErrors = true;
     if (m_pSocket)
     {
-        QSslSocket *pSslSocket = qobject_cast<QSslSocket *>(m_pSocket);
+        QSslSocket *pSslSocket = qobject_cast<QSslSocket *>(m_pSocket.data());
         if (pSslSocket)
         {
             pSslSocket->ignoreSslErrors();
@@ -355,6 +355,14 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
  */
 void QWebSocketPrivate::open(const QUrl &url, bool mask)
 {
+    //m_pSocket.reset();  //just delete the old socket for the moment; later, we can add more 'intelligent' handling by looking at the url
+    QTcpSocket *pTcpSocket = m_pSocket.take();
+    if (pTcpSocket)
+    {
+        releaseConnections(pTcpSocket);
+        pTcpSocket->deleteLater();
+    }
+    //if (m_url != url)
     if (!m_pSocket)
     {
         Q_Q(QWebSocket);
@@ -393,9 +401,9 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
             else
             {
                 QSslSocket *sslSocket = new QSslSocket(this);
-                m_pSocket = sslSocket;
+                m_pSocket.reset(sslSocket);
 
-                makeConnections(m_pSocket);
+                makeConnections(m_pSocket.data());
                 connect(sslSocket, SIGNAL(encryptedBytesWritten(qint64)), q, SIGNAL(bytesWritten(qint64)));
                 setSocketState(QAbstractSocket::ConnectingState);
 
@@ -418,10 +426,10 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
     #endif
         if (url.scheme() == QStringLiteral("ws"))
         {
-            m_pSocket = new QTcpSocket(this);
+            m_pSocket.reset(new QTcpSocket(this));
 
-            makeConnections(m_pSocket);
-            connect(m_pSocket, SIGNAL(bytesWritten(qint64)), q, SIGNAL(bytesWritten(qint64)));
+            makeConnections(m_pSocket.data());
+            connect(m_pSocket.data(), SIGNAL(bytesWritten(qint64)), q, SIGNAL(bytesWritten(qint64)));
             setSocketState(QAbstractSocket::ConnectingState);
 #ifndef QT_NO_NETWORKPROXY
             m_pSocket->setProxy(m_configuration.m_proxy);
@@ -1071,11 +1079,11 @@ void QWebSocketPrivate::processData()
     {
         if (state() == QAbstractSocket::ConnectingState)
         {
-            processHandshake(m_pSocket);
+            processHandshake(m_pSocket.data());
         }
         else
         {
-            m_dataProcessor.process(m_pSocket);
+            m_dataProcessor.process(m_pSocket.data());
         }
     }
 }
