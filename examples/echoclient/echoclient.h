@@ -62,6 +62,7 @@ private Q_SLOTS:
 
 private:
     QWebSocket m_webSocket;
+    QUrl m_url;
 };
 
 #endif // ECHOCLIENT_H
