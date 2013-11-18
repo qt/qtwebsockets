@@ -208,7 +208,7 @@ private:
     qint64 writeFrames(const QList<QByteArray> &frames);
     qint64 writeFrame(const QByteArray &frame);
 
-    QTcpSocket *m_pSocket;
+    QScopedPointer<QTcpSocket> m_pSocket;
     QString m_errorString;
     QWebSocketProtocol::Version m_version;
     QUrl m_resource;

@@ -46,7 +46,8 @@ QT_USE_NAMESPACE
 //! [constructor]
 EchoClient::EchoClient(const QUrl &url, QObject *parent) :
     QObject(parent),
-    m_webSocket()
+    m_webSocket(),
+    m_url(url)
 {
     connect(&m_webSocket, SIGNAL(connected()), this, SLOT(onConnected()));
     m_webSocket.open(QUrl(url));
@@ -66,5 +67,6 @@ void EchoClient::onConnected()
 void EchoClient::onTextMessageReceived(QString message)
 {
     qDebug() << "Message received:" << message;
+    m_webSocket.close();
 }
 //! [onTextMessageReceived]
