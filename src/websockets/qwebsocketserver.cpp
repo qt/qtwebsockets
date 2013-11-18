@@ -146,10 +146,17 @@ QT_BEGIN_NAMESPACE
 QWebSocketServer::QWebSocketServer(const QString &serverName, SecureMode secureMode, QObject *parent) :
     QObject(parent),
     d_ptr(new QWebSocketServerPrivate(serverName,
+                                      #ifndef QT_NO_SSL
                                       (secureMode == SECURE_MODE) ? QWebSocketServerPrivate::SECURE_MODE : QWebSocketServerPrivate::NON_SECURE_MODE,
+                                      #else
+                                      QWebSocketServerPrivate::NON_SECURE_MODE,
+                                      #endif
                                       this,
                                       this))
 {
+#ifdef QT_NO_SSL
+    Q_UNUSED(secureMode)
+#endif
 }
 
 /*!
@@ -362,8 +369,12 @@ QHostAddress QWebSocketServer::serverAddress() const
 QWebSocketServer::SecureMode QWebSocketServer::secureMode() const
 {
     Q_D(const QWebSocketServer);
+#ifndef QT_NO_SSL
     return (d->secureMode() == QWebSocketServerPrivate::SECURE_MODE) ?
                 QWebSocketServer::SECURE_MODE : QWebSocketServer::NON_SECURE_MODE;
+#else
+    return QWebSocketServer::NON_SECURE_MODE;
+#endif
 }
 
 /*!
