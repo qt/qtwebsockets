@@ -44,6 +44,8 @@
 #include <QtNetwork/QSslSocket>
 #include <QtNetwork/QSslCipher>
 
+QT_BEGIN_NAMESPACE
+
 QSslServer::QSslServer(QObject *parent) :
     QTcpServer(parent),
     m_sslConfiguration(QSslConfiguration::defaultConfiguration())
@@ -70,8 +72,7 @@ void QSslServer::incomingConnection(qintptr socket)
 
     pSslSocket->setSslConfiguration(m_sslConfiguration);
 
-    if (pSslSocket->setSocketDescriptor(socket))
-    {
+    if (pSslSocket->setSocketDescriptor(socket)) {
         connect(pSslSocket, SIGNAL(peerVerifyError(QSslError)), this, SIGNAL(peerVerifyError(QSslError)));
         connect(pSslSocket, SIGNAL(sslErrors(QList<QSslError>)), this, SIGNAL(sslErrors(QList<QSslError>)));
         connect(pSslSocket, SIGNAL(encrypted()), this, SIGNAL(newEncryptedConnection()));
@@ -79,9 +80,9 @@ void QSslServer::incomingConnection(qintptr socket)
         addPendingConnection(pSslSocket);
 
         pSslSocket->startServerEncryption();
-    }
-    else
-    {
+    } else {
        delete pSslSocket;
     }
 }
+
+QT_END_NAMESPACE

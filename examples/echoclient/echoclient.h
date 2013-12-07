@@ -53,6 +53,7 @@ public:
     explicit EchoClient(const QUrl &url, QObject *parent = Q_NULLPTR);
 
 Q_SIGNALS:
+    void closed();
 
 public Q_SLOTS:
 
