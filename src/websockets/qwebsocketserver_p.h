@@ -98,7 +98,7 @@ public:
 #endif
     void resumeAccepting();
     QHostAddress serverAddress() const;
-    QAbstractSocket::SocketError serverError() const;
+    QWebSocketProtocol::CloseCode serverError() const;
     quint16 serverPort() const;
     void setMaxPendingConnections(int numConnections);
     bool setSocketDescriptor(qintptr socketDescriptor);
@@ -106,8 +106,8 @@ public:
     bool waitForNewConnection(int msec = 0, bool *timedOut = Q_NULLPTR);
 
     QList<QWebSocketProtocol::Version> supportedVersions() const;
-    QList<QString> supportedProtocols() const;
-    QList<QString> supportedExtensions() const;
+    QStringList supportedProtocols() const;
+    QStringList supportedExtensions() const;
 
     void setServerName(const QString &serverName);
     QString serverName() const;
@@ -118,6 +118,8 @@ public:
     void setSslConfiguration(const QSslConfiguration &sslConfiguration);
     QSslConfiguration sslConfiguration() const;
 #endif
+
+    void setError(QWebSocketProtocol::CloseCode code, QString errorString);
 
 private Q_SLOTS:
     void onNewConnection();
@@ -131,6 +133,8 @@ private:
     QString m_serverName;
     SecureMode m_secureMode;
     QQueue<QWebSocket *> m_pendingConnections;
+    QWebSocketProtocol::CloseCode m_error;
+    QString m_errorString;
 
     void addPendingConnection(QWebSocket *pWebSocket);
 };

@@ -48,17 +48,26 @@ QT_USE_NAMESPACE
 //! [constructor]
 EchoServer::EchoServer(quint16 port, QObject *parent) :
     QObject(parent),
-    m_pWebSocketServer(Q_NULLPTR),
+    m_pWebSocketServer(new QWebSocketServer(QStringLiteral("Echo Server"),
+                                            QWebSocketServer::NON_SECURE_MODE, this)),
     m_clients()
 {
-    m_pWebSocketServer = new QWebSocketServer("Echo Server", QWebSocketServer::NON_SECURE_MODE, this);
-    if (m_pWebSocketServer->listen(QHostAddress::Any, port))
-    {
+    if (m_pWebSocketServer->listen(QHostAddress::Any, port)) {
         qDebug() << "Echoserver listening on port" << port;
         connect(m_pWebSocketServer, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
+        connect(m_pWebSocketServer, SIGNAL(closed()), this, SIGNAL(closed()));
     }
 }
 //! [constructor]
+
+EchoServer::~EchoServer()
+{
+    m_pWebSocketServer->close();
+    while (!m_clients.isEmpty()) {
+        QWebSocket *pWebSocket = m_clients.takeFirst();
+        delete pWebSocket;
+    }
+}
 
 //! [onNewConnection]
 void EchoServer::onNewConnection()
@@ -68,7 +77,6 @@ void EchoServer::onNewConnection()
     connect(pSocket, SIGNAL(textMessageReceived(QString)), this, SLOT(processMessage(QString)));
     connect(pSocket, SIGNAL(binaryMessageReceived(QByteArray)), this, SLOT(processBinaryMessage(QByteArray)));
     connect(pSocket, SIGNAL(disconnected()), this, SLOT(socketDisconnected()));
-    //connect(pSocket, SIGNAL(pong(quint64)), this, SLOT(processPong(quint64)));
 
     m_clients << pSocket;
 }
@@ -78,10 +86,10 @@ void EchoServer::onNewConnection()
 void EchoServer::processMessage(QString message)
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
-    if (pClient)
-    {
+    if (pClient) {
         pClient->write(message);
     }
+    m_pWebSocketServer->close();
 }
 //! [processMessage]
 
@@ -89,8 +97,7 @@ void EchoServer::processMessage(QString message)
 void EchoServer::processBinaryMessage(QByteArray message)
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
-    if (pClient)
-    {
+    if (pClient) {
         pClient->write(message);
     }
 }
@@ -100,8 +107,7 @@ void EchoServer::processBinaryMessage(QByteArray message)
 void EchoServer::socketDisconnected()
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
-    if (pClient)
-    {
+    if (pClient) {
         m_clients.removeAll(pClient);
         pClient->deleteLater();
     }

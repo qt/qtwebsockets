@@ -81,7 +81,7 @@ QWebSocketDataProcessor::QWebSocketDataProcessor(QObject *parent) :
     m_binaryMessage(),
     m_textMessage(),
     m_payloadLength(0),
-    m_pConverterState(0),
+    m_pConverterState(Q_NULLPTR),
     m_pTextCodec(QTextCodec::codecForName("UTF-8"))
 {
     clear();
@@ -93,10 +93,9 @@ QWebSocketDataProcessor::QWebSocketDataProcessor(QObject *parent) :
 QWebSocketDataProcessor::~QWebSocketDataProcessor()
 {
     clear();
-    if (m_pConverterState)
-    {
+    if (m_pConverterState) {
         delete m_pConverterState;
-        m_pConverterState = 0;
+        m_pConverterState = Q_NULLPTR;
     }
 }
 
@@ -123,81 +122,61 @@ void QWebSocketDataProcessor::process(QIODevice *pIoDevice)
 {
     bool isDone = false;
 
-    while (!isDone)
-    {
+    while (!isDone) {
         QWebSocketFrame frame = QWebSocketFrame::readFrame(pIoDevice);
-        if (frame.isValid())
-        {
-            if (frame.isControlFrame())
-            {
+        if (frame.isValid()) {
+            if (frame.isControlFrame()) {
                 isDone = processControlFrame(frame);
-            }
-            else    //we have a dataframe; opcode can be OC_CONTINUE, OC_TEXT or OC_BINARY
-            {
-                if (!m_isFragmented && frame.isContinuationFrame())
-                {
+            } else {
+                //we have a dataframe; opcode can be OC_CONTINUE, OC_TEXT or OC_BINARY
+                if (!m_isFragmented && frame.isContinuationFrame()) {
                     clear();
                     Q_EMIT errorEncountered(QWebSocketProtocol::CC_PROTOCOL_ERROR, tr("Received Continuation frame, while there is nothing to continue."));
                     return;
                 }
-                if (m_isFragmented && frame.isDataFrame() && !frame.isContinuationFrame())
-                {
+                if (m_isFragmented && frame.isDataFrame() && !frame.isContinuationFrame()) {
                     clear();
                     Q_EMIT errorEncountered(QWebSocketProtocol::CC_PROTOCOL_ERROR, tr("All data frames after the initial data frame must have opcode 0 (continuation)."));
                     return;
                 }
-                if (!frame.isContinuationFrame())
-                {
+                if (!frame.isContinuationFrame()) {
                     m_opCode = frame.opCode();
                     m_isFragmented = !frame.isFinalFrame();
                 }
                 quint64 messageLength = (quint64)(m_opCode == QWebSocketProtocol::OC_TEXT) ? m_textMessage.length() : m_binaryMessage.length();
-                if ((messageLength + quint64(frame.payload().length())) > MAX_MESSAGE_SIZE_IN_BYTES)
-                {
+                if ((messageLength + quint64(frame.payload().length())) > MAX_MESSAGE_SIZE_IN_BYTES) {
                     clear();
                     Q_EMIT errorEncountered(QWebSocketProtocol::CC_TOO_MUCH_DATA, tr("Received message is too big."));
                     return;
                 }
 
-                if (m_opCode == QWebSocketProtocol::OC_TEXT)
-                {
+                if (m_opCode == QWebSocketProtocol::OC_TEXT) {
                     QString frameTxt = m_pTextCodec->toUnicode(frame.payload().constData(), frame.payload().size(), m_pConverterState);
                     bool failed = (m_pConverterState->invalidChars != 0) || (frame.isFinalFrame() && (m_pConverterState->remainingChars != 0));
-                    if (failed)
-                    {
+                    if (failed) {
                         clear();
                         Q_EMIT errorEncountered(QWebSocketProtocol::CC_WRONG_DATATYPE, tr("Invalid UTF-8 code encountered."));
                         return;
-                    }
-                    else
-                    {
+                    } else {
                         m_textMessage.append(frameTxt);
                         Q_EMIT textFrameReceived(frameTxt, frame.isFinalFrame());
                     }
-                }
-                else
-                {
+                } else {
                     m_binaryMessage.append(frame.payload());
                     Q_EMIT binaryFrameReceived(frame.payload(), frame.isFinalFrame());
                 }
 
-                if (frame.isFinalFrame())
-                {
-                    if (m_opCode == QWebSocketProtocol::OC_TEXT)
-                    {
+                if (frame.isFinalFrame()) {
+                    if (m_opCode == QWebSocketProtocol::OC_TEXT) {
                         Q_EMIT textMessageReceived(m_textMessage);
-                    }
-                    else
-                    {
+                    } else {
                         Q_EMIT binaryMessageReceived(m_binaryMessage);
                     }
                     clear();
                     isDone = true;
                 }
             }
-        }
-        else
-        {
+        } else {
             Q_EMIT errorEncountered(frame.closeCode(), frame.closeReason());
             clear();
             isDone = true;
@@ -219,12 +198,10 @@ void QWebSocketDataProcessor::clear()
     m_binaryMessage.clear();
     m_textMessage.clear();
     m_payloadLength = 0;
-    if (m_pConverterState)
-    {
-        if ((m_pConverterState->remainingChars != 0) || (m_pConverterState->invalidChars != 0))
-        {
+    if (m_pConverterState) {
+        if ((m_pConverterState->remainingChars != 0) || (m_pConverterState->invalidChars != 0)) {
             delete m_pConverterState;
-            m_pConverterState = 0;
+            m_pConverterState = Q_NULLPTR;
         }
     }
     if (!m_pConverterState)
@@ -256,29 +233,23 @@ bool QWebSocketDataProcessor::processControlFrame(const QWebSocketFrame &frame)
             quint16 closeCode = QWebSocketProtocol::CC_NORMAL;
             QString closeReason;
             QByteArray payload = frame.payload();
-            if (payload.size() == 1)    //size is either 0 (no close code and no reason) or >= 2 (at least a close code of 2 bytes)
-            {
+            if (payload.size() == 1) {
+                //size is either 0 (no close code and no reason) or >= 2 (at least a close code of 2 bytes)
                 closeCode = QWebSocketProtocol::CC_PROTOCOL_ERROR;
                 closeReason = tr("Payload of close frame is too small.");
-            }
-            else if (payload.size() > 1)   //close frame can have a close code and reason
-            {
+            } else if (payload.size() > 1) {
+                //close frame can have a close code and reason
                 closeCode = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(payload.constData()));
-                if (!QWebSocketProtocol::isCloseCodeValid(closeCode))
-                {
+                if (!QWebSocketProtocol::isCloseCodeValid(closeCode)) {
                     closeCode = QWebSocketProtocol::CC_PROTOCOL_ERROR;
                     closeReason = tr("Invalid close code %1 detected.").arg(closeCode);
-                }
-                else
-                {
-                    if (payload.size() > 2)
-                    {
+                } else {
+                    if (payload.size() > 2) {
                         QTextCodec *tc = QTextCodec::codecForName("UTF-8");
                         QTextCodec::ConverterState state(QTextCodec::ConvertInvalidToNull);
                         closeReason = tc->toUnicode(payload.constData() + 2, payload.size() - 2, &state);
                         const bool failed = (state.invalidChars != 0) || (state.remainingChars != 0);
-                        if (failed)
-                        {
+                        if (failed) {
                             closeCode = QWebSocketProtocol::CC_WRONG_DATATYPE;
                             closeReason = tr("Invalid UTF-8 code encountered.");
                         }
@@ -308,7 +279,7 @@ bool QWebSocketDataProcessor::processControlFrame(const QWebSocketFrame &frame)
         }
         default:
         {
-            qDebug() << "DataProcessor::processControlFrame: Invalid opcode detected:" << static_cast<int>(frame.opCode());
+            Q_EMIT errorEncountered(QWebSocketProtocol::CC_PROTOCOL_ERROR, tr("Invalid opcode detected: %1").arg(int(frame.opCode())));
             //Do nothing
             break;
         }

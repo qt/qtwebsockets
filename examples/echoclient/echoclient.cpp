@@ -50,6 +50,7 @@ EchoClient::EchoClient(const QUrl &url, QObject *parent) :
     m_url(url)
 {
     connect(&m_webSocket, SIGNAL(connected()), this, SLOT(onConnected()));
+    connect(&m_webSocket, SIGNAL(disconnected()), this, SIGNAL(closed()));
     m_webSocket.open(QUrl(url));
 }
 //! [constructor]
