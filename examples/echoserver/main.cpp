@@ -44,9 +44,8 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    EchoServer server(1234);
-
-    Q_UNUSED(server);
+    EchoServer *server = new EchoServer(1234);
+    QObject::connect(server, SIGNAL(closed()), &a, SLOT(quit()));
 
     return a.exec();
 }

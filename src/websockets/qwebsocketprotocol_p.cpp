@@ -140,10 +140,8 @@ Version versionFromString(const QString &versionString)
     const int ver = versionString.toInt(&ok);
     QSet<Version> supportedVersions;
     supportedVersions << V_0 << V_4 << V_5 << V_6 << V_7 << V_8 << V_13;
-    if (ok)
-    {
-        if (supportedVersions.contains(static_cast<Version>(ver)))
-        {
+    if (ok) {
+        if (supportedVersions.contains(static_cast<Version>(ver))) {
             version = static_cast<Version>(ver);
         }
     }
@@ -156,6 +154,7 @@ Version versionFromString(const QString &versionString)
     */
 void mask(QByteArray *payload, quint32 maskingKey)
 {
+    Q_ASSERT(payload);
     mask(payload->data(), payload->size(), maskingKey);
 }
 
@@ -165,14 +164,14 @@ void mask(QByteArray *payload, quint32 maskingKey)
     */
 void mask(char *payload, quint64 size, quint32 maskingKey)
 {
-    const quint8 mask[] = { static_cast<quint8>((maskingKey & 0xFF000000u) >> 24),
-                            static_cast<quint8>((maskingKey & 0x00FF0000u) >> 16),
-                            static_cast<quint8>((maskingKey & 0x0000FF00u) >> 8),
-                            static_cast<quint8>((maskingKey & 0x000000FFu))
+    Q_ASSERT(payload);
+    const quint8 mask[] = { quint8((maskingKey & 0xFF000000u) >> 24),
+                            quint8((maskingKey & 0x00FF0000u) >> 16),
+                            quint8((maskingKey & 0x0000FF00u) >> 8),
+                            quint8((maskingKey & 0x000000FFu))
                           };
     int i = 0;
-    while (size-- > 0)
-    {
+    while (size-- > 0) {
         *payload++ ^= mask[i++ % 4];
     }
 }
