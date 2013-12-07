@@ -99,7 +99,7 @@ public:
     bool hasPendingConnections() const;
     virtual QWebSocket *nextPendingConnection();
 
-    QAbstractSocket::SocketError serverError() const;
+    QWebSocketProtocol::CloseCode error() const;
     QString errorString() const;
 
     void pauseAccepting();
@@ -118,11 +118,12 @@ public:
 #endif
 
     QList<QWebSocketProtocol::Version> supportedVersions() const;
-    QList<QString> supportedProtocols() const;
-    QList<QString> supportedExtensions() const;
+    QStringList supportedProtocols() const;
+    QStringList supportedExtensions() const;
 
 Q_SIGNALS:
     void acceptError(QAbstractSocket::SocketError socketError);
+    void serverError(QWebSocketProtocol::CloseCode closeCode);
     //TODO: should use a delegate iso of a synchronous signal
     void originAuthenticationRequired(QWebSocketCorsAuthenticator *pAuthenticator);
     void newConnection();
@@ -130,6 +131,7 @@ Q_SIGNALS:
     void peerVerifyError(const QSslError &error);
     void sslErrors(const QList<QSslError> &errors);
 #endif
+    void closed();
 
 private:
     QWebSocketServerPrivate * const d_ptr;
