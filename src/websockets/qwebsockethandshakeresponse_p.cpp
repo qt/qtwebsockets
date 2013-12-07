@@ -127,11 +127,11 @@ QString QWebSocketHandshakeResponse::calculateAcceptKey(const QString &key) cons
     \internal
  */
 QString QWebSocketHandshakeResponse::getHandshakeResponse(const QWebSocketHandshakeRequest &request,
-                                                const QString &serverName,
-                                                bool isOriginAllowed,
-                                                const QList<QWebSocketProtocol::Version> &supportedVersions,
-                                                const QList<QString> &supportedProtocols,
-                                                const QList<QString> &supportedExtensions)
+                                                          const QString &serverName,
+                                                          bool isOriginAllowed,
+                                                          const QList<QWebSocketProtocol::Version> &supportedVersions,
+                                                          const QList<QString> &supportedProtocols,
+                                                          const QList<QString> &supportedExtensions)
 {
     QStringList response;
     m_canUpgrade = false;
