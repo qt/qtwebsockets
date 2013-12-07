@@ -64,6 +64,13 @@ public:
 
     QWebSocketFrame &operator =(const QWebSocketFrame &other);
 
+#ifdef Q_COMPILER_RVALUE_REFS
+    QWebSocketFrame(QWebSocketFrame &&other);
+    QWebSocketFrame &operator =(QWebSocketFrame &&other);
+#endif
+
+    void swap(QWebSocketFrame &other);
+
     QWebSocketProtocol::CloseCode closeCode() const;
     QString closeReason() const;
     bool isFinalFrame() const;
