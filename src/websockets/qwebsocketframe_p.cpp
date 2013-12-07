@@ -291,7 +291,7 @@ void QWebSocketFrame::clear()
     m_isFinalFrame = true;
     m_mask = 0;
     m_rsv1 = 0;
-    m_rsv2 =0;
+    m_rsv2 = 0;
     m_rsv3 = 0;
     m_opCode = QWebSocketProtocol::OC_RESERVED_C;
     m_length = 0;
