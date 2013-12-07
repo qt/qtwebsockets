@@ -368,10 +368,6 @@ void QWebSocket::open(const QUrl &url, bool mask)
 void QWebSocket::ping(const QByteArray &payload)
 {
     Q_D(QWebSocket);
-    if (payload.length() > 125)
-    {
-        payload.left(125);
-    }
     d->ping(payload);
 }
 
