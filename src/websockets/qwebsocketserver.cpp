@@ -103,10 +103,25 @@
 */
 
 /*!
+    \fn void QWebSocketServer::serverError(QNetworkProtocol::CloseCode closeCode)
+    This signal is emitted when an error occurs during the setup of a web socket connection.
+    The \a closeCode parameter describes the type of error that occurred
+
+    \sa errorString()
+*/
+
+/*!
     \fn void QWebSocketServer::newConnection()
     This signal is emitted every time a new connection is available.
 
     \sa hasPendingConnections(), nextPendingConnection()
+*/
+
+/*!
+    \fn void QWebSocketServer::closed()
+    This signal is emitted when the server closed it's connection.
+
+    \sa close()
 */
 
 /*!
@@ -381,7 +396,7 @@ QWebSocketServer::SecureMode QWebSocketServer::secureMode() const
     Returns an error code for the last error that occurred.
     \sa errorString()
  */
-QAbstractSocket::SocketError QWebSocketServer::serverError() const
+QWebSocketProtocol::CloseCode QWebSocketServer::error() const
 {
     Q_D(const QWebSocketServer);
     return d->serverError();
@@ -468,7 +483,7 @@ QList<QWebSocketProtocol::Version> QWebSocketServer::supportedVersions() const
 /*!
   Returns a list of websocket subprotocols that this server supports.
  */
-QList<QString> QWebSocketServer::supportedProtocols() const
+QStringList QWebSocketServer::supportedProtocols() const
 {
     Q_D(const QWebSocketServer);
     return d->supportedProtocols();
@@ -477,7 +492,7 @@ QList<QString> QWebSocketServer::supportedProtocols() const
 /*!
   Returns a list of websocket extensions that this server supports.
  */
-QList<QString> QWebSocketServer::supportedExtensions() const
+QStringList QWebSocketServer::supportedExtensions() const
 {
     Q_D(const QWebSocketServer);
     return d->supportedExtensions();

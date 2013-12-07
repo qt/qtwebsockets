@@ -83,6 +83,9 @@ public:
     QString acceptedExtension() const;
     QWebSocketProtocol::Version acceptedVersion() const;
 
+    QWebSocketProtocol::CloseCode error() const;
+    QString errorString() const;
+
 public Q_SLOTS:
 
 Q_SIGNALS:
@@ -94,6 +97,8 @@ private:
     QString m_acceptedProtocol;
     QString m_acceptedExtension;
     QWebSocketProtocol::Version m_acceptedVersion;
+    QWebSocketProtocol::CloseCode m_error;
+    QString m_errorString;
 
     QString calculateAcceptKey(const QString &key) const;
     QString getHandshakeResponse(const QWebSocketHandshakeRequest &request,
