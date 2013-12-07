@@ -77,6 +77,8 @@ class QWebSocket;
 
 struct QWebSocketConfiguration
 {
+    Q_DISABLE_COPY(QWebSocketConfiguration)
+
 public:
     QWebSocketConfiguration();
 
@@ -154,7 +156,7 @@ public:
 public Q_SLOTS:
     void close(QWebSocketProtocol::CloseCode closeCode, QString reason);
     void open(const QUrl &url, bool mask);
-    void ping(const QByteArray &payload);
+    void ping(QByteArray payload);
 
 #ifndef QT_NO_SSL
     void ignoreSslErrors();
@@ -182,13 +184,12 @@ private:
     void setSocketState(QAbstractSocket::SocketState state);
     void setErrorString(const QString &errorString);
 
-    qint64 doWriteData(const QByteArray &data, bool isBinary);
     qint64 doWriteFrames(const QByteArray &data, bool isBinary);
 
     void makeConnections(const QTcpSocket *pTcpSocket);
     void releaseConnections(const QTcpSocket *pTcpSocket);
 
-    QByteArray getFrameHeader(QWebSocketProtocol::OpCode opCode, quint64 payloadLength, quint32 maskingKey, bool lastFrame) const;
+    QByteArray getFrameHeader(QWebSocketProtocol::OpCode opCode, quint64 payloadLength, quint32 maskingKey, bool lastFrame);
     QString calculateAcceptKey(const QString &key) const;
     QString createHandShakeRequest(QString resourceName,
                                    QString host,

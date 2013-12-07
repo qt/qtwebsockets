@@ -117,10 +117,6 @@ void tst_WebSocketProtocol::tst_validMasks()
     //otherwise, the intermediate object is deleted and the data pointer becomes invalid
     QByteArray latin1 = inputdata.toLatin1();
     char *data = latin1.data();
-    //char *data = inputdata.toLatin1().data();
-
-    qDebug() << hex << mask;
-    qDebug() << QByteArray(data, inputdata.size()).toHex();
 
     QWebSocketProtocol::mask(data, inputdata.size(), mask);
     QCOMPARE(QByteArray::fromRawData(data, inputdata.size()), result);
