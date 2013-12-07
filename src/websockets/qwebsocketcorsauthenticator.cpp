@@ -93,10 +93,6 @@ QWebSocketCorsAuthenticator::QWebSocketCorsAuthenticator(const QString &origin) 
  */
 QWebSocketCorsAuthenticator::~QWebSocketCorsAuthenticator()
 {
-    if (d_ptr)
-    {
-        delete d_ptr;
-    }
 }
 
 /*!
@@ -119,6 +115,26 @@ QWebSocketCorsAuthenticator &QWebSocketCorsAuthenticator::operator =(const QWebS
         d->m_isAllowed = other.d_ptr->m_isAllowed;
     }
     return *this;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+QWebSocketCorsAuthenticator::QWebSocketCorsAuthenticator(QWebSocketCorsAuthenticator &&other) :
+    d_ptr(other.d_ptr.take())
+{}
+
+QWebSocketCorsAuthenticator &QWebSocketCorsAuthenticator::operator =(QWebSocketCorsAuthenticator &&other)
+{
+    qSwap(d_ptr, other.d_ptr);
+    return *this;
+}
+
+#endif
+
+void QWebSocketCorsAuthenticator::swap(QWebSocketCorsAuthenticator &other)
+{
+    if (&other != this) {
+        qSwap(d_ptr, other.d_ptr);
+    }
 }
 
 /*!

@@ -116,13 +116,13 @@ void tst_ComplianceTest::runTestCase(int nbr, int total)
     url.setPath("/runCase?");
     QUrlQuery query;
     query.addQueryItem("case", QString::number(nbr + 1));
-    query.addQueryItem("agent", "QWebSockets/0.9");
+    query.addQueryItem("agent", "QtWebSockets/1.0");
     url.setQuery(query);
     pWebSocket->open(url);
     spy.wait(60000);
     pWebSocket->close();
     delete pWebSocket;
-    pWebSocket = 0;
+    pWebSocket = Q_NULLPTR;
     runTestCase(nbr + 1, total);
 }
 
@@ -148,7 +148,6 @@ void tst_ComplianceTest::autobahnTest()
     QVERIFY(numberOfTestCases > 0);
 
     QObject::disconnect(pWebSocket, &QWebSocket::textMessageReceived, 0, 0);
-
     runTestCases(0, numberOfTestCases);
 
     url.setPath("/updateReports?");
@@ -158,7 +157,6 @@ void tst_ComplianceTest::autobahnTest()
     pWebSocket->open(url);
     spy.wait(60000);
     delete pWebSocket;
-    pWebSocket = 0;
 }
 
 QTEST_MAIN(tst_ComplianceTest)

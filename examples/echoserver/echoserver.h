@@ -53,8 +53,10 @@ class EchoServer : public QObject
     Q_OBJECT
 public:
     explicit EchoServer(quint16 port, QObject *parent = Q_NULLPTR);
+    ~EchoServer();
 
 Q_SIGNALS:
+    void closed();
 
 private Q_SLOTS:
     void onNewConnection();
