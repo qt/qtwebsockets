@@ -2,7 +2,11 @@ TEMPLATE = subdirs
 
 SUBDIRS = echoclient \
           echoserver \
-          sslechoserver \
-          sslechoclient \
           simplechat
 qtHaveModule(quick): SUBDIRS += qmlwebsocketclient
+
+contains(QT_CONFIG, openssl) | contains(QT_CONFIG, openssl-linked) {
+SUBDIRS +=  \
+            sslechoserver \
+            sslechoclient
+}
