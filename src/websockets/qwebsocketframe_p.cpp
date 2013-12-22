@@ -345,7 +345,7 @@ QWebSocketFrame QWebSocketFrame::readFrame(QIODevice *pIoDevice)
             }
             case PS_READ_HEADER:
             {
-                if (pIoDevice->bytesAvailable() >= 2) {
+                if (Q_LIKELY(pIoDevice->bytesAvailable() >= 2)) {
                     //FIN, RSV1-3, Opcode
                     char header[2] = {0};
                     bytesRead = pIoDevice->read(header, 2);
@@ -389,15 +389,15 @@ QWebSocketFrame QWebSocketFrame::readFrame(QIODevice *pIoDevice)
 
             case PS_READ_PAYLOAD_LENGTH:
             {
-                if (pIoDevice->bytesAvailable() >= 2) {
+                if (Q_LIKELY(pIoDevice->bytesAvailable() >= 2)) {
                     uchar length[2] = {0};
                     bytesRead = pIoDevice->read(reinterpret_cast<char *>(length), 2);
-                    if (bytesRead == -1) {
+                    if (Q_UNLIKELY(bytesRead == -1)) {
                         frame.setError(QWebSocketProtocol::CC_GOING_AWAY, QObject::tr("Error occurred while reading from the network: %1").arg(pIoDevice->errorString()));
                         processingState = PS_DISPATCH_RESULT;
                     } else {
                         payloadLength = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(length));
-                        if (payloadLength < 126) {
+                        if (Q_UNLIKELY(payloadLength < 126)) {
                             //see http://tools.ietf.org/html/rfc6455#page-28 paragraph 5.2
                             //"in all cases, the minimal number of bytes MUST be used to encode
                             //the length, for example, the length of a 124-byte-long string
@@ -416,17 +416,19 @@ QWebSocketFrame QWebSocketFrame::readFrame(QIODevice *pIoDevice)
 
             case PS_READ_BIG_PAYLOAD_LENGTH:
             {
-                if (pIoDevice->bytesAvailable() >= 8) {
+                if (Q_LIKELY(pIoDevice->bytesAvailable() >= 8)) {
                     uchar length[8] = {0};
                     bytesRead = pIoDevice->read(reinterpret_cast<char *>(length), 8);
-                    if (bytesRead < 8) {
+                    if (Q_UNLIKELY(bytesRead < 8)) {
                         frame.setError(QWebSocketProtocol::CC_ABNORMAL_DISCONNECTION, QObject::tr("Something went wrong during reading from the network."));
                         processingState = PS_DISPATCH_RESULT;
                     } else {
                         //Most significant bit must be set to 0 as per http://tools.ietf.org/html/rfc6455#section-5.2
-                        //We don't check for that. We just strip off the highest bit
-                        payloadLength = qFromBigEndian<quint64>(length) & ~(1ULL << 63);
-                        if (payloadLength <= 0xFFFFu) {
+                        payloadLength = qFromBigEndian<quint64>(length);
+                        if (Q_UNLIKELY(payloadLength & (quint64(1) << 63))) {
+                            frame.setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, QObject::tr("Highest bit of payload length is not 0."));
+                            processingState = PS_DISPATCH_RESULT;
+                        } else if (Q_UNLIKELY(payloadLength <= 0xFFFFu)) {
                             //see http://tools.ietf.org/html/rfc6455#page-28 paragraph 5.2
                             //"in all cases, the minimal number of bytes MUST be used to encode
                             //the length, for example, the length of a 124-byte-long string
@@ -446,7 +448,7 @@ QWebSocketFrame QWebSocketFrame::readFrame(QIODevice *pIoDevice)
 
             case PS_READ_MASK:
             {
-                if (pIoDevice->bytesAvailable() >= 4) {
+                if (Q_LIKELY(pIoDevice->bytesAvailable() >= 4)) {
                     bytesRead = pIoDevice->read(reinterpret_cast<char *>(&frame.m_mask), sizeof(frame.m_mask));
                     if (bytesRead == -1) {
                         frame.setError(QWebSocketProtocol::CC_GOING_AWAY, QObject::tr("Error while reading from the network: %1.").arg(pIoDevice->errorString()));
@@ -465,7 +467,7 @@ QWebSocketFrame QWebSocketFrame::readFrame(QIODevice *pIoDevice)
             {
                 if (!payloadLength) {
                     processingState = PS_DISPATCH_RESULT;
-                } else if (payloadLength > MAX_FRAME_SIZE_IN_BYTES) {
+                } else if (Q_UNLIKELY(payloadLength > MAX_FRAME_SIZE_IN_BYTES)) {
                     frame.setError(QWebSocketProtocol::CC_TOO_MUCH_DATA, QObject::tr("Maximum framesize exceeded."));
                     processingState = PS_DISPATCH_RESULT;
                 } else {
@@ -473,7 +475,7 @@ QWebSocketFrame QWebSocketFrame::readFrame(QIODevice *pIoDevice)
                     if (bytesAvailable >= payloadLength) {
                         frame.m_payload = pIoDevice->read(payloadLength);
                         //payloadLength can be safely cast to an integer, as the MAX_FRAME_SIZE_IN_BYTES = MAX_INT
-                        if (frame.m_payload.length() != int(payloadLength)) {
+                        if (Q_UNLIKELY(frame.m_payload.length() != int(payloadLength))) {
                             //some error occurred; refer to the Qt documentation of QIODevice::read()
                             frame.setError(QWebSocketProtocol::CC_ABNORMAL_DISCONNECTION, QObject::tr("Some serious error occurred while reading from the network."));
                             processingState = PS_DISPATCH_RESULT;
@@ -530,14 +532,14 @@ bool QWebSocketFrame::checkValidity()
     if (isValid()) {
         return true;
     }
-    if (m_rsv1 || m_rsv2 || m_rsv3) {
+    if (Q_UNLIKELY(m_rsv1 || m_rsv2 || m_rsv3)) {
         setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, QObject::tr("Rsv field is non-zero"));
-    } else if (QWebSocketProtocol::isOpCodeReserved(m_opCode)) {
+    } else if (Q_UNLIKELY(QWebSocketProtocol::isOpCodeReserved(m_opCode))) {
         setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, QObject::tr("Used reserved opcode"));
     } else if (isControlFrame()) {
-        if (m_length > 125) {
+        if (Q_UNLIKELY(m_length > 125)) {
             setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, QObject::tr("Controle frame is larger than 125 bytes"));
-        } else if (!m_isFinalFrame) {
+        } else if (Q_UNLIKELY(!m_isFinalFrame)) {
             setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, QObject::tr("Controle frames cannot be fragmented"));
         } else {
             m_isValid = true;

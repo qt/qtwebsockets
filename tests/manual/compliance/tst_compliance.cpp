@@ -152,7 +152,7 @@ void tst_ComplianceTest::autobahnTest()
 
     url.setPath("/updateReports?");
     QUrlQuery query;
-    query.addQueryItem("agent", "QWebSockets");
+    query.addQueryItem("agent", "QtWebSockets");
     url.setQuery(query);
     pWebSocket->open(url);
     spy.wait(60000);

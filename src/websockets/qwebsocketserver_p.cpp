@@ -74,15 +74,20 @@ QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName, QWeb
     Q_ASSERT(pWebSocketServer);
     if (m_secureMode == NON_SECURE_MODE) {
         m_pTcpServer = new QTcpServer(this);
-        connect(m_pTcpServer, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
-    } else
-    {
+        if (Q_LIKELY(m_pTcpServer)) {
+            connect(m_pTcpServer, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
+        } else {
+            qFatal("Could not allocate memory for tcp server.");
+        }
+    } else {
 #ifndef QT_NO_SSL
         QSslServer *pSslServer = new QSslServer(this);
         m_pTcpServer = pSslServer;
-        connect(pSslServer, SIGNAL(newEncryptedConnection()), this, SLOT(onNewConnection()));
-        connect(pSslServer, SIGNAL(peerVerifyError(QSslError)), q_ptr, SIGNAL(peerVerifyError(QSslError)));
-        connect(pSslServer, SIGNAL(sslErrors(QList<QSslError>)), q_ptr, SIGNAL(sslErrors(QList<QSslError>)));
+        if (Q_LIKELY(m_pTcpServer)) {
+            connect(pSslServer, SIGNAL(newEncryptedConnection()), this, SLOT(onNewConnection()));
+            connect(pSslServer, SIGNAL(peerVerifyError(QSslError)), q_ptr, SIGNAL(peerVerifyError(QSslError)));
+            connect(pSslServer, SIGNAL(sslErrors(QList<QSslError>)), q_ptr, SIGNAL(sslErrors(QList<QSslError>)));
+        }
 #else
         qFatal("SSL not supported on this platform.");
 #endif
@@ -176,7 +181,7 @@ void QWebSocketServerPrivate::addPendingConnection(QWebSocket *pWebSocket)
 QWebSocket *QWebSocketServerPrivate::nextPendingConnection()
 {
     QWebSocket *pWebSocket = Q_NULLPTR;
-    if (!m_pendingConnections.isEmpty()) {
+    if (Q_LIKELY(!m_pendingConnections.isEmpty())) {
         pWebSocket = m_pendingConnections.dequeue();
     }
     return pWebSocket;
@@ -286,7 +291,7 @@ QList<QWebSocketProtocol::Version> QWebSocketServerPrivate::supportedVersions() 
  */
 QStringList QWebSocketServerPrivate::supportedProtocols() const
 {
-    QList<QString> supportedProtocols;
+    QStringList supportedProtocols;
     return supportedProtocols;	//no protocols are currently supported
 }
 
@@ -295,7 +300,7 @@ QStringList QWebSocketServerPrivate::supportedProtocols() const
  */
 QStringList QWebSocketServerPrivate::supportedExtensions() const
 {
-    QList<QString> supportedExtensions;
+    QStringList supportedExtensions;
     return supportedExtensions;	//no extensions are currently supported
 }
 
@@ -370,7 +375,7 @@ void QWebSocketServerPrivate::onNewConnection()
 void QWebSocketServerPrivate::onCloseConnection()
 {
     QTcpSocket *pTcpSocket = qobject_cast<QTcpSocket*>(sender());
-    if (pTcpSocket) {
+    if (Q_LIKELY(pTcpSocket)) {
         pTcpSocket->close();
     }
 }
@@ -382,7 +387,7 @@ void QWebSocketServerPrivate::handshakeReceived()
 {
     Q_Q(QWebSocketServer);
     QTcpSocket *pTcpSocket = qobject_cast<QTcpSocket*>(sender());
-    if (pTcpSocket) {
+    if (Q_LIKELY(pTcpSocket)) {
         bool success = false;
         bool isSecure = false;
 
