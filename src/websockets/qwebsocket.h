@@ -65,7 +65,9 @@ class Q_WEBSOCKETS_EXPORT QWebSocket : public QObject
     Q_DECLARE_PRIVATE(QWebSocket)
 
 public:
-    explicit QWebSocket(const QString &origin = QString(), QWebSocketProtocol::Version version = QWebSocketProtocol::V_LATEST, QObject *parent = Q_NULLPTR);
+    explicit QWebSocket(const QString &origin = QString(),
+                        QWebSocketProtocol::Version version = QWebSocketProtocol::V_LATEST,
+                        QObject *parent = Q_NULLPTR);
     virtual ~QWebSocket();
 
     void abort();

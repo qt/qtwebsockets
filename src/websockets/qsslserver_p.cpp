@@ -70,18 +70,20 @@ void QSslServer::incomingConnection(qintptr socket)
 {
     QSslSocket *pSslSocket = new QSslSocket();
 
-    pSslSocket->setSslConfiguration(m_sslConfiguration);
+    if (Q_LIKELY(pSslSocket)) {
+        pSslSocket->setSslConfiguration(m_sslConfiguration);
 
-    if (pSslSocket->setSocketDescriptor(socket)) {
-        connect(pSslSocket, SIGNAL(peerVerifyError(QSslError)), this, SIGNAL(peerVerifyError(QSslError)));
-        connect(pSslSocket, SIGNAL(sslErrors(QList<QSslError>)), this, SIGNAL(sslErrors(QList<QSslError>)));
-        connect(pSslSocket, SIGNAL(encrypted()), this, SIGNAL(newEncryptedConnection()));
+        if (Q_LIKELY(pSslSocket->setSocketDescriptor(socket))) {
+            connect(pSslSocket, SIGNAL(peerVerifyError(QSslError)), this, SIGNAL(peerVerifyError(QSslError)));
+            connect(pSslSocket, SIGNAL(sslErrors(QList<QSslError>)), this, SIGNAL(sslErrors(QList<QSslError>)));
+            connect(pSslSocket, SIGNAL(encrypted()), this, SIGNAL(newEncryptedConnection()));
 
-        addPendingConnection(pSslSocket);
+            addPendingConnection(pSslSocket);
 
-        pSslSocket->startServerEncryption();
-    } else {
-       delete pSslSocket;
+            pSslSocket->startServerEncryption();
+        } else {
+           delete pSslSocket;
+        }
     }
 }
 
