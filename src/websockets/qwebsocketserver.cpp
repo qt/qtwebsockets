@@ -103,7 +103,7 @@
 */
 
 /*!
-    \fn void QWebSocketServer::serverError(QNetworkProtocol::CloseCode closeCode)
+    \fn void QWebSocketServer::serverError(QWebSocketProtocol::CloseCode closeCode)
     This signal is emitted when an error occurs during the setup of a web socket connection.
     The \a closeCode parameter describes the type of error that occurred
 
@@ -136,6 +136,47 @@
     this signal, as the connection will always succeed.
 */
 
+/*!
+    \fn void QWebSocketServer::peerVerifyError(const QSslError &error)
+
+    QWebSocketServer can emit this signal several times during the SSL handshake,
+    before encryption has been established, to indicate that an error has
+    occurred while establishing the identity of the peer. The \a error is
+    usually an indication that QWebSocketServer is unable to securely identify the
+    peer.
+
+    This signal provides you with an early indication when something's wrong.
+    By connecting to this signal, you can manually choose to tear down the
+    connection from inside the connected slot before the handshake has
+    completed. If no action is taken, QWebSocketServer will proceed to emitting
+    QWebSocketServer::sslErrors().
+
+    \sa sslErrors()
+*/
+
+/*!
+    \fn void QWebSocketServer::sslErrors(const QList<QSslError> &errors)
+
+    QWebSocketServer emits this signal after the SSL handshake to indicate that one
+    or more errors have occurred while establishing the identity of the
+    peer. The errors are usually an indication that QWebSocketServer is unable to
+    securely identify the peer. Unless any action is taken, the connection
+    will be dropped after this signal has been emitted.
+
+    \a errors contains one or more errors that prevent QSslSocket from
+    verifying the identity of the peer.
+
+    \sa peerVerifyError()
+*/
+
+/*!
+  \enum QWebSocketServer::SecureMode
+  Indicates whether the server operates over wss (SECURE_MODE) or ws (NON_SECURE_MODE)
+
+  \value SECURE_MODE The server operates in secure mode (over wss)
+  \value NON_SECURE_MODE The server operates in non-secure mode (over ws)
+  */
+
 #include "qwebsocketprotocol.h"
 #include "qwebsocket.h"
 #include "qwebsocketserver.h"
@@ -154,7 +195,8 @@ QT_BEGIN_NAMESPACE
 /*!
     Constructs a new WebSocketServer with the given \a serverName.
     The \a serverName will be used in the http handshake phase to identify the server.
-
+    The \a secureMode parameter indicates whether the server operates over wss (\l{SECURE_MODE})
+    or over ws (\l{NON_SECURE_MODE}).
 
     \a parent is passed to the QObject constructor.
  */
@@ -326,7 +368,7 @@ void QWebSocketServer::setSslConfiguration(const QSslConfiguration &sslConfigura
     If the server is not running in secure mode (QWebSocketServer::SECURE_MODE),
     this method returns QSslConfiguration::defaultConfiguration().
 
-    \sa sslConfiguration(), SecureMode, QSslConfiguration::defaultConfiguration()
+    \sa setSslConfiguration(), SecureMode, QSslConfiguration::defaultConfiguration()
  */
 QSslConfiguration QWebSocketServer::sslConfiguration() const
 {

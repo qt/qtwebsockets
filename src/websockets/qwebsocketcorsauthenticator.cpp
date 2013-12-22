@@ -74,7 +74,7 @@ QWebSocketCorsAuthenticatorPrivate::QWebSocketCorsAuthenticatorPrivate(const QSt
 {}
 
 /*!
-  \internal
+  Destroys the object.
  */
 QWebSocketCorsAuthenticatorPrivate::~QWebSocketCorsAuthenticatorPrivate()
 {}
@@ -89,14 +89,14 @@ QWebSocketCorsAuthenticator::QWebSocketCorsAuthenticator(const QString &origin) 
 }
 
 /*!
-  Destructs the object
+  Destroys the object
  */
 QWebSocketCorsAuthenticator::~QWebSocketCorsAuthenticator()
 {
 }
 
 /*!
-  Constructs a coy of \a other
+  Constructs a copy of \a other
  */
 QWebSocketCorsAuthenticator::QWebSocketCorsAuthenticator(const QWebSocketCorsAuthenticator &other) :
     d_ptr(new QWebSocketCorsAuthenticatorPrivate(other.d_ptr->m_origin, other.d_ptr->m_isAllowed))
@@ -118,10 +118,17 @@ QWebSocketCorsAuthenticator &QWebSocketCorsAuthenticator::operator =(const QWebS
 }
 
 #ifdef Q_COMPILER_RVALUE_REFS
+/*!
+  Move-constructs a QWebSocketCorsAuthenticator, making it point at the same
+  object \a other was pointing to.
+ */
 QWebSocketCorsAuthenticator::QWebSocketCorsAuthenticator(QWebSocketCorsAuthenticator &&other) :
     d_ptr(other.d_ptr.take())
 {}
 
+/*!
+  Move-assigns \a other to this instance.
+ */
 QWebSocketCorsAuthenticator &QWebSocketCorsAuthenticator::operator =(QWebSocketCorsAuthenticator &&other)
 {
     qSwap(d_ptr, other.d_ptr);
@@ -130,6 +137,11 @@ QWebSocketCorsAuthenticator &QWebSocketCorsAuthenticator::operator =(QWebSocketC
 
 #endif
 
+/*!
+  Swaps \a other with this authenticator.
+
+  This operation is very fast and never fails.
+ */
 void QWebSocketCorsAuthenticator::swap(QWebSocketCorsAuthenticator &other)
 {
     if (&other != this) {

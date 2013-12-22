@@ -46,14 +46,14 @@
     \brief Implements a TCP socket that talks the websocket protocol.
 
     WebSockets is a web technology providing full-duplex communications channels over a single TCP connection.
-    The WebSocket protocol was standardized by the IETF as RFC 6455 in 2011 (see http://tools.ietf.org/html/rfc6455).
+    The WebSocket protocol was standardized by the IETF as \l {http://tools.ietf.org/html/rfc6455} {RFC 6455} in 2011.
     It can both be used in a client application and server application.
 
     This class was modeled after QAbstractSocket.
 
     \sa QAbstractSocket, QTcpSocket
 
-    \sa echoclient.html
+    \sa {QWebSocket client example}
 */
 
 /*!
@@ -226,9 +226,9 @@ QT_BEGIN_NAMESPACE
 /*!
  * \brief Creates a new QWebSocket with the given \a origin, the \a version of the protocol to use and \a parent.
  *
- * The \a origin of the client is as specified in http://tools.ietf.org/html/rfc6454.
- * (The \a origin is not required for non-web browser clients (see RFC 6455)).
- * \note Currently only V13 (RFC 6455) is supported
+ * The \a origin of the client is as specified \l {http://tools.ietf.org/html/rfc6454} {RFC 6454}.
+ * (The \a origin is not required for non-web browser clients (see \l {http://tools.ietf.org/html/rfc6455} {RFC 6455})).
+ * \note Currently only V13 (\l {http://tools.ietf.org/html/rfc6455} {RFC 6455}) is supported
  */
 QWebSocket::QWebSocket(const QString &origin, QWebSocketProtocol::Version version, QObject *parent) :
     QObject(parent),

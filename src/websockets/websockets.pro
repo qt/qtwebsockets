@@ -10,6 +10,7 @@ DEFINES += QTWEBSOCKETS_LIBRARY
 QMAKE_DOCS = $$PWD/doc/qtwebsockets.qdocconfig
 OTHER_FILES += doc/src/*.qdoc   # show .qdoc files in Qt Creator
 OTHER_FILES += doc/snippets/*.cpp
+OTHER_FILES += doc/qtwebsockets.qdocconfig
 
 PUBLIC_HEADERS += \
     $$PWD/qwebsockets_global.h \

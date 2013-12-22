@@ -24,3 +24,13 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+//! [6]
+QList<QSslCertificate> cert = QSslCertificate::fromPath(QLatin1String("server-certificate.pem"));
+QSslError error(QSslError::SelfSignedCertificate, cert.at(0));
+QList<QSslError> expectedSslErrors;
+expectedSslErrors.append(error);
+
+QWebSocket socket;
+socket.ignoreSslErrors(expectedSslErrors);
+socket.open("wss://myserver.at.home");
+//! [6]
