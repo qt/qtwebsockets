@@ -150,7 +150,7 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(const QWebSocketHandsh
             QList<QWebSocketProtocol::Version> matchingVersions = request.versions().toSet().intersect(supportedVersions.toSet()).toList();
             std::sort(matchingVersions.begin(), matchingVersions.end(), std::greater<QWebSocketProtocol::Version>());    //sort in descending order
 
-            if (matchingVersions.isEmpty()) {
+            if (Q_UNLIKELY(matchingVersions.isEmpty())) {
                 m_error = QWebSocketProtocol::CC_PROTOCOL_ERROR;
                 m_errorString = tr("Unsupported version requested.");
                 m_canUpgrade = false;
@@ -186,7 +186,7 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(const QWebSocketHandsh
             m_errorString = tr("Bad handshake request received.");
             m_canUpgrade = false;
         }
-        if (!m_canUpgrade) {
+        if (Q_UNLIKELY(!m_canUpgrade)) {
             response << QStringLiteral("HTTP/1.1 400 Bad Request");
             QStringList versions;
             Q_FOREACH (QWebSocketProtocol::Version version, supportedVersions) {
@@ -204,7 +204,7 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(const QWebSocketHandsh
  */
 QTextStream &QWebSocketHandshakeResponse::writeToStream(QTextStream &textStream) const
 {
-    if (!m_response.isEmpty()) {
+    if (Q_LIKELY(!m_response.isEmpty())) {
         textStream << m_response.toLatin1().constData();
     } else {
         textStream.setStatus(QTextStream::WriteFailed);
