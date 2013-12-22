@@ -425,8 +425,8 @@ QHostAddress QWebSocketServer::serverAddress() const
  */
 QWebSocketServer::SecureMode QWebSocketServer::secureMode() const
 {
-    Q_D(const QWebSocketServer);
 #ifndef QT_NO_SSL
+    Q_D(const QWebSocketServer);
     return (d->secureMode() == QWebSocketServerPrivate::SECURE_MODE) ?
                 QWebSocketServer::SECURE_MODE : QWebSocketServer::NON_SECURE_MODE;
 #else

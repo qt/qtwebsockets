@@ -109,8 +109,7 @@ QWebSocketCorsAuthenticator::QWebSocketCorsAuthenticator(const QWebSocketCorsAut
 QWebSocketCorsAuthenticator &QWebSocketCorsAuthenticator::operator =(const QWebSocketCorsAuthenticator &other)
 {
     Q_D(QWebSocketCorsAuthenticator);
-    if (this != &other)
-    {
+    if (this != &other) {
         d->m_origin = other.d_ptr->m_origin;
         d->m_isAllowed = other.d_ptr->m_isAllowed;
     }
