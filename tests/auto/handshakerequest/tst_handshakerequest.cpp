@@ -158,32 +158,38 @@ void tst_HandshakeRequest::tst_invalidStream_data()
     QTest::newRow("Invalid \\0 character in header") << "V R\0 P";
     QTest::newRow("Invalid http version in header") << "V R HTTP/invalid";
     QTest::newRow("Empty header field") << "GET . HTTP/1.1\r\nHEADER: ";
-    QTest::newRow("All zeros") << QString(QByteArray(10, char(0)));
+    QTest::newRow("All zeros") << QString::fromUtf8(QByteArray(10, char(0)));
     QTest::newRow("Invalid hostname") << "GET . HTTP/1.1\r\nHost: \xFF\xFF";
-    QTest::newRow("Complete heaer - Invalid websocket version") << "GET . HTTP/1.1\r\nHost: foo\r\nSec-WebSocket-Version: \xFF\xFF\r\n" \
-                                                                   "Sec-WebSocket-Key: AVDFBDDFF\r\n" \
-                                                                   "Upgrade: websocket\r\n" \
-                                                                   "Connection: Upgrade\r\n\r\n";
-    QTest::newRow("Complete header - Invalid verb") << "XXX . HTTP/1.1\r\nHost: foo\r\nSec-WebSocket-Version: 13\r\n" \
-                                                       "Sec-WebSocket-Key: AVDFBDDFF\r\n" \
-                                                       "Upgrade: websocket\r\n" \
-                                                       "Connection: Upgrade\r\n\r\n";
-    QTest::newRow("Complete header - Invalid http version") << "GET . HTTP/a.1\r\nHost: foo\r\nSec-WebSocket-Version: 13\r\n" \
-                                                               "Sec-WebSocket-Key: AVDFBDDFF\r\n" \
-                                                               "Upgrade: websocket\r\n" \
-                                                               "Connection: Upgrade\r\n\r\n";
-    QTest::newRow("Complete header - Invalid connection") << "GET . HTTP/1.1\r\nHost: foo\r\nSec-WebSocket-Version: 13\r\n" \
-                                                             "Sec-WebSocket-Key: AVDFBDDFF\r\n" \
-                                                             "Upgrade: websocket\r\n" \
-                                                             "Connection: xxxxxxx\r\n\r\n";
-    QTest::newRow("Complete header - Invalid upgrade") << "GET . HTTP/1.1\r\nHost: foo\r\nSec-WebSocket-Version: 13\r\n" \
-                                                          "Sec-WebSocket-Key: AVDFBDDFF\r\n" \
-                                                          "Upgrade: wabsocket\r\n" \
-                                                          "Connection: Upgrade\r\n\r\n";
-    QTest::newRow("Complete header - Upgrade contains too many values") << "GET . HTTP/1.1\r\nHost: foo\r\nSec-WebSocket-Version: 13\r\n" \
-                                                          "Sec-WebSocket-Key: AVDFBDDFF\r\n" \
-                                                          "Upgrade: websocket,ftp\r\n" \
-                                                          "Connection: Upgrade\r\n\r\n";
+    QTest::newRow("Complete header - Invalid websocket version")
+            << QStringLiteral("GET . HTTP/1.1\r\nHost: foo\r\nSec-WebSocket-Version: \xFF\xFF\r\n"
+                              "Sec-WebSocket-Key: AVDFBDDFF\r\n"
+                              "Upgrade: websocket\r\n"
+                              "Connection: Upgrade\r\n\r\n");
+    QTest::newRow("Complete header - Invalid verb")
+            << QStringLiteral("XXX . HTTP/1.1\r\nHost: foo\r\nSec-WebSocket-Version: 13\r\n"
+                              "Sec-WebSocket-Key: AVDFBDDFF\r\n"
+                              "Upgrade: websocket\r\n"
+                              "Connection: Upgrade\r\n\r\n");
+    QTest::newRow("Complete header - Invalid http version")
+            << QStringLiteral("GET . HTTP/a.1\r\nHost: foo\r\nSec-WebSocket-Version: 13\r\n"
+                              "Sec-WebSocket-Key: AVDFBDDFF\r\n"
+                              "Upgrade: websocket\r\n"
+                              "Connection: Upgrade\r\n\r\n");
+    QTest::newRow("Complete header - Invalid connection")
+            << QStringLiteral("GET . HTTP/1.1\r\nHost: foo\r\nSec-WebSocket-Version: 13\r\n"
+                              "Sec-WebSocket-Key: AVDFBDDFF\r\n"
+                              "Upgrade: websocket\r\n"
+                              "Connection: xxxxxxx\r\n\r\n");
+    QTest::newRow("Complete header - Invalid upgrade")
+            << QStringLiteral("GET . HTTP/1.1\r\nHost: foo\r\nSec-WebSocket-Version: 13\r\n"
+                              "Sec-WebSocket-Key: AVDFBDDFF\r\n"
+                              "Upgrade: wabsocket\r\n"
+                              "Connection: Upgrade\r\n\r\n");
+    QTest::newRow("Complete header - Upgrade contains too many values")
+            << QStringLiteral("GET . HTTP/1.1\r\nHost: foo\r\nSec-WebSocket-Version: 13\r\n"
+                              "Sec-WebSocket-Key: AVDFBDDFF\r\n"
+                              "Upgrade: websocket,ftp\r\n"
+                              "Connection: Upgrade\r\n\r\n");
 }
 
 void tst_HandshakeRequest::tst_invalidStream()
@@ -218,10 +224,10 @@ void tst_HandshakeRequest::tst_invalidStream()
  */
 void tst_HandshakeRequest::tst_multipleValuesInConnectionHeader()
 {
-    QString header = "GET /test HTTP/1.1\r\nHost: foo.com\r\nSec-WebSocket-Version: 13\r\n" \
-                     "Sec-WebSocket-Key: AVDFBDDFF\r\n" \
-                     "Upgrade: websocket\r\n" \
-                     "Connection: Upgrade,keepalive\r\n\r\n";
+    QString header = QStringLiteral("GET /test HTTP/1.1\r\nHost: foo.com\r\nSec-WebSocket-Version: 13\r\n" \
+                                    "Sec-WebSocket-Key: AVDFBDDFF\r\n" \
+                                    "Upgrade: websocket\r\n" \
+                                    "Connection: Upgrade,keepalive\r\n\r\n");
     QByteArray data;
     QTextStream textStream(&data);
     QWebSocketHandshakeRequest request(80, false);
@@ -247,11 +253,11 @@ void tst_HandshakeRequest::tst_multipleValuesInConnectionHeader()
 
 void tst_HandshakeRequest::tst_multipleVersions()
 {
-    QString header = "GET /test HTTP/1.1\r\nHost: foo.com\r\n" \
-                     "Sec-WebSocket-Version: 4, 5, 6, 7, 8, 13\r\n" \
-                     "Sec-WebSocket-Key: AVDFBDDFF\r\n" \
-                     "Upgrade: websocket\r\n" \
-                     "Connection: Upgrade,keepalive\r\n\r\n";
+    QString header = QStringLiteral("GET /test HTTP/1.1\r\nHost: foo.com\r\n" \
+                                    "Sec-WebSocket-Version: 4, 5, 6, 7, 8, 13\r\n" \
+                                    "Sec-WebSocket-Key: AVDFBDDFF\r\n" \
+                                    "Upgrade: websocket\r\n" \
+                                    "Connection: Upgrade,keepalive\r\n\r\n");
     QByteArray data;
     QTextStream textStream(&data);
     QWebSocketHandshakeRequest request(80, false);
