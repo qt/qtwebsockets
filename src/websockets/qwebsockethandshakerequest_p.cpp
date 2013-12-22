@@ -196,12 +196,12 @@ QTextStream &QWebSocketHandshakeRequest::readFromStream(QTextStream &textStream)
 {
     m_isValid = false;
     clear();
-    if (textStream.status() != QTextStream::Ok) {
+    if (Q_UNLIKELY(textStream.status() != QTextStream::Ok)) {
         return textStream;
     }
     const QString requestLine = textStream.readLine();
     const QStringList tokens = requestLine.split(' ', QString::SkipEmptyParts);
-    if (tokens.length() < 3) {
+    if (Q_UNLIKELY(tokens.length() < 3)) {
         m_isValid = false;
         clear();
         return textStream;
@@ -212,7 +212,7 @@ QTextStream &QWebSocketHandshakeRequest::readFromStream(QTextStream &textStream)
     bool conversionOk = false;
     const float httpVersion = httpProtocol.midRef(5).toFloat(&conversionOk);
 
-    if (!conversionOk) {
+    if (Q_UNLIKELY(!conversionOk)) {
         clear();
         m_isValid = false;
         return textStream;
@@ -221,7 +221,7 @@ QTextStream &QWebSocketHandshakeRequest::readFromStream(QTextStream &textStream)
     m_headers.clear();
     while (!headerLine.isEmpty()) {
         const QStringList headerField = headerLine.split(QStringLiteral(": "), QString::SkipEmptyParts);
-        if (headerField.length() < 2) {
+        if (Q_UNLIKELY(headerField.length() < 2)) {
             clear();
             return textStream;
         }
@@ -293,7 +293,7 @@ QTextStream &QWebSocketHandshakeRequest::readFromStream(QTextStream &textStream)
                   (!conversionOk || (httpVersion < 1.1f)) ||
                   (upgrade.toLower() != QStringLiteral("websocket")) ||
                   (!connectionValues.contains(QStringLiteral("upgrade"), Qt::CaseInsensitive)));
-    if (!m_isValid) {
+    if (Q_UNLIKELY(!m_isValid)) {
         clear();
     }
     return textStream;

@@ -101,10 +101,11 @@ void tst_WebSocketProtocol::tst_validMasks_data()
     QTest::addColumn<QString>("inputdata");
     QTest::addColumn<QByteArray>("result");
 
-    QTest::newRow("Empty payload") << 0x12345678u << QString("") << QByteArray("");
-    QTest::newRow("ASCII payload of 8 characters") << 0x12345678u << QString("abcdefgh") << QByteArray("\x73\x56\x35\x1C\x77\x52\x31\x10");
-    QTest::newRow("ASCII payload of 9 characters") << 0x12345678u << QString("abcdefghi") << QByteArray("\x73\x56\x35\x1C\x77\x52\x31\x10\x7B");
-    QTest::newRow("UTF-8 payload") << 0x12345678u << QString("∫∂ƒ©øØ") << QByteArray("\x2D\x0B\x69\xD1\xEA\xEC");
+    QTest::newRow("Empty payload") << 0x12345678u << QStringLiteral("") << QByteArrayLiteral("");
+    QTest::newRow("ASCII payload of 8 characters") << 0x12345678u << QStringLiteral("abcdefgh") << QByteArrayLiteral("\x73\x56\x35\x1C\x77\x52\x31\x10");
+    QTest::newRow("ASCII payload of 9 characters") << 0x12345678u << QStringLiteral("abcdefghi") << QByteArrayLiteral("\x73\x56\x35\x1C\x77\x52\x31\x10\x7B");
+    //MSVC doesn't like UTF-8 in source code; the following text is represented in the string below: ∫∂ƒ©øØ
+    QTest::newRow("UTF-8 payload") << 0x12345678u << QString::fromUtf8("\xE2\x88\xAB\xE2\x88\x82\xC6\x92\xC2\xA9\xC3\xB8\xC3\x98") << QByteArrayLiteral("\x2D\x0B\x69\xD1\xEA\xEC");
 }
 
 void tst_WebSocketProtocol::tst_validMasks()
@@ -162,12 +163,12 @@ void tst_WebSocketProtocol::tst_closeCodes_data()
 
     for (int i = 0; i < 1000; ++i)
     {
-        QTest::newRow(QString("Close code %1").arg(i).toLatin1().constData()) << i << false;
+        QTest::newRow(QStringLiteral("Close code %1").arg(i).toLatin1().constData()) << i << false;
     }
 
     for (int i = 1000; i < 1004; ++i)
     {
-        QTest::newRow(QString("Close code %1").arg(i).toLatin1().constData()) << i << true;
+        QTest::newRow(QStringLiteral("Close code %1").arg(i).toLatin1().constData()) << i << true;
     }
 
     QTest::newRow("Close code 1004") << 1004 << false;
@@ -176,17 +177,17 @@ void tst_WebSocketProtocol::tst_closeCodes_data()
 
     for (int i = 1007; i < 1012; ++i)
     {
-        QTest::newRow(QString("Close code %1").arg(i).toLatin1().constData()) << i << true;
+        QTest::newRow(QStringLiteral("Close code %1").arg(i).toLatin1().constData()) << i << true;
     }
 
     for (int i = 1013; i < 3000; ++i)
     {
-        QTest::newRow(QString("Close code %1").arg(i).toLatin1().constData()) << i << false;
+        QTest::newRow(QStringLiteral("Close code %1").arg(i).toLatin1().constData()) << i << false;
     }
 
     for (int i = 3000; i < 5000; ++i)
     {
-        QTest::newRow(QString("Close code %1").arg(i).toLatin1().constData()) << i << true;
+        QTest::newRow(QStringLiteral("Close code %1").arg(i).toLatin1().constData()) << i << true;
     }
 
     QTest::newRow("Close code 5000") << 1004 << false;
