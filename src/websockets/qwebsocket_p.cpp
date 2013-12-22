@@ -170,7 +170,7 @@ void QWebSocketPrivate::abort()
 QAbstractSocket::SocketError QWebSocketPrivate::error() const
 {
     QAbstractSocket::SocketError err = QAbstractSocket::OperationError;
-    if (m_pSocket) {
+    if (Q_LIKELY(m_pSocket)) {
         err = m_pSocket->error();
     }
     return err;
@@ -196,7 +196,7 @@ QString QWebSocketPrivate::errorString() const
 bool QWebSocketPrivate::flush()
 {
     bool result = true;
-    if (m_pSocket) {
+    if (Q_LIKELY(m_pSocket)) {
         result = m_pSocket->flush();
     }
     return result;
@@ -207,9 +207,7 @@ bool QWebSocketPrivate::flush()
  */
 qint64 QWebSocketPrivate::write(const char *message)
 {
-    //TODO: create a QByteArray from message, and directly call doWriteFrames
-    //now the data is converted to a string, and then converted back to a bytearray
-    return write(QString::fromUtf8(message));
+    return doWriteFrames(QByteArray::fromRawData(message, qstrlen(message)), false);
 }
 
 /*!
@@ -217,9 +215,7 @@ qint64 QWebSocketPrivate::write(const char *message)
  */
 qint64 QWebSocketPrivate::write(const char *message, qint64 maxSize)
 {
-    //TODO: create a QByteArray from message, and directly call doWriteFrames
-    //now the data is converted to a string, and then converted back to a bytearray
-    return write(QString::fromUtf8(message, static_cast<int>(maxSize)));
+    return write(QByteArray::fromRawData(message, maxSize), false);
 }
 
 /*!
@@ -269,9 +265,9 @@ void QWebSocketPrivate::ignoreSslErrors(const QList<QSslError> &errors)
 void QWebSocketPrivate::ignoreSslErrors()
 {
     m_configuration.m_ignoreSslErrors = true;
-    if (m_pSocket) {
+    if (Q_LIKELY(m_pSocket)) {
         QSslSocket *pSslSocket = qobject_cast<QSslSocket *>(m_pSocket.data());
-        if (pSslSocket) {
+        if (Q_LIKELY(pSslSocket)) {
             pSslSocket->ignoreSslErrors();
         }
     }
@@ -289,13 +285,15 @@ QWebSocket *QWebSocketPrivate::upgradeFrom(QTcpSocket *pTcpSocket,
                                            QObject *parent)
 {
     QWebSocket *pWebSocket = new QWebSocket(pTcpSocket, response.acceptedVersion(), parent);
-    pWebSocket->d_func()->setExtension(response.acceptedExtension());
-    pWebSocket->d_func()->setOrigin(request.origin());
-    pWebSocket->d_func()->setRequestUrl(request.requestUrl());
-    pWebSocket->d_func()->setProtocol(response.acceptedProtocol());
-    pWebSocket->d_func()->setResourceName(request.requestUrl().toString(QUrl::RemoveUserInfo));
-    //a server should not send masked frames
-    pWebSocket->d_func()->enableMasking(false);
+    if (Q_LIKELY(pWebSocket)) {
+        pWebSocket->d_func()->setExtension(response.acceptedExtension());
+        pWebSocket->d_func()->setOrigin(request.origin());
+        pWebSocket->d_func()->setRequestUrl(request.requestUrl());
+        pWebSocket->d_func()->setProtocol(response.acceptedProtocol());
+        pWebSocket->d_func()->setResourceName(request.requestUrl().toString(QUrl::RemoveUserInfo));
+        //a server should not send masked frames
+        pWebSocket->d_func()->enableMasking(false);
+    }
 
     return pWebSocket;
 }
@@ -305,7 +303,7 @@ QWebSocket *QWebSocketPrivate::upgradeFrom(QTcpSocket *pTcpSocket,
  */
 void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString reason)
 {
-    if (!m_pSocket) {
+    if (Q_UNLIKELY(!m_pSocket)) {
         return;
     }
     if (!m_isClosingHandshakeSent) {
@@ -347,7 +345,7 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
         pTcpSocket->deleteLater();
     }
     //if (m_url != url)
-    if (!m_pSocket) {
+    if (Q_LIKELY(!m_pSocket)) {
         Q_Q(QWebSocket);
 
         m_dataProcessor.clear();
@@ -377,34 +375,50 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
             } else {
                 QSslSocket *sslSocket = new QSslSocket(this);
                 m_pSocket.reset(sslSocket);
+                if (Q_LIKELY(m_pSocket)) {
+                    m_pSocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
+                    m_pSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
 
-                makeConnections(m_pSocket.data());
-                connect(sslSocket, SIGNAL(encryptedBytesWritten(qint64)), q, SIGNAL(bytesWritten(qint64)));
-                setSocketState(QAbstractSocket::ConnectingState);
+                    makeConnections(m_pSocket.data());
+                    connect(sslSocket, SIGNAL(encryptedBytesWritten(qint64)), q, SIGNAL(bytesWritten(qint64)));
+                    setSocketState(QAbstractSocket::ConnectingState);
 
-                sslSocket->setSslConfiguration(m_configuration.m_sslConfiguration);
-                if (m_configuration.m_ignoreSslErrors) {
-                    sslSocket->ignoreSslErrors();
+                    sslSocket->setSslConfiguration(m_configuration.m_sslConfiguration);
+                    if (Q_UNLIKELY(m_configuration.m_ignoreSslErrors)) {
+                        sslSocket->ignoreSslErrors();
+                    } else {
+                        sslSocket->ignoreSslErrors(m_configuration.m_ignoredSslErrors);
+                    }
+    #ifndef QT_NO_NETWORKPROXY
+                    sslSocket->setProxy(m_configuration.m_proxy);
+    #endif
+                    sslSocket->connectToHostEncrypted(url.host(), url.port(443));
                 } else {
-                    sslSocket->ignoreSslErrors(m_configuration.m_ignoredSslErrors);
+                    const QString message = tr("Out of memory.");
+                    setErrorString(message);
+                    emit q->error(QAbstractSocket::SocketResourceError);
                 }
-#ifndef QT_NO_NETWORKPROXY
-                sslSocket->setProxy(m_configuration.m_proxy);
-#endif
-                sslSocket->connectToHostEncrypted(url.host(), url.port(443));
             }
         } else
     #endif
         if (url.scheme() == QStringLiteral("ws")) {
             m_pSocket.reset(new QTcpSocket(this));
+            if (Q_LIKELY(m_pSocket)) {
+                m_pSocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
+                m_pSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
 
-            makeConnections(m_pSocket.data());
-            connect(m_pSocket.data(), SIGNAL(bytesWritten(qint64)), q, SIGNAL(bytesWritten(qint64)));
-            setSocketState(QAbstractSocket::ConnectingState);
-#ifndef QT_NO_NETWORKPROXY
-            m_pSocket->setProxy(m_configuration.m_proxy);
-#endif
-            m_pSocket->connectToHost(url.host(), url.port(80));
+                makeConnections(m_pSocket.data());
+                connect(m_pSocket.data(), SIGNAL(bytesWritten(qint64)), q, SIGNAL(bytesWritten(qint64)));
+                setSocketState(QAbstractSocket::ConnectingState);
+    #ifndef QT_NO_NETWORKPROXY
+                m_pSocket->setProxy(m_configuration.m_proxy);
+    #endif
+                m_pSocket->connectToHost(url.host(), url.port(80));
+            } else {
+                const QString message = tr("Out of memory.");
+                setErrorString(message);
+                emit q->error(QAbstractSocket::SocketResourceError);
+            }
         } else {
             const QString message = tr("Unsupported websockets scheme: %1").arg(url.scheme());
             setErrorString(message);
@@ -424,7 +438,7 @@ void QWebSocketPrivate::ping(QByteArray payload)
     m_pingTimer.restart();
     QByteArray pingFrame = getFrameHeader(QWebSocketProtocol::OC_PING, payload.size(), 0 /*do not mask*/, true);
     pingFrame.append(payload);
-    writeFrame(pingFrame);
+    (void)writeFrame(pingFrame);
 }
 
 /*!
@@ -507,7 +521,7 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
     Q_ASSERT(pTcpSocket);
     Q_Q(QWebSocket);
 
-    if (pTcpSocket) {
+    if (Q_LIKELY(pTcpSocket)) {
         //pass through signals
         connect(pTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), q, SIGNAL(error(QAbstractSocket::SocketError)));
         connect(pTcpSocket, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)), q, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)));
@@ -535,7 +549,7 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
  */
 void QWebSocketPrivate::releaseConnections(const QTcpSocket *pTcpSocket)
 {
-    if (pTcpSocket) {
+    if (Q_LIKELY(pTcpSocket)) {
         disconnect(pTcpSocket);
     }
     disconnect(&m_dataProcessor);
@@ -614,7 +628,7 @@ QByteArray QWebSocketPrivate::getFrameHeader(QWebSocketProtocol::OpCode opCode, 
     quint8 byte = 0x00;
     bool ok = payloadLength <= 0x7FFFFFFFFFFFFFFFULL;
 
-    if (ok) {
+    if (Q_LIKELY(ok)) {
         //FIN, RSV1-3, opcode
         byte = static_cast<quint8>((opCode & 0x0F) | (lastFrame ? 0x80 : 0x00));	//FIN, opcode
         //RSV-1, RSV-2 and RSV-3 are zero
@@ -657,7 +671,7 @@ QByteArray QWebSocketPrivate::getFrameHeader(QWebSocketProtocol::OpCode opCode, 
 qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
 {
     qint64 payloadWritten = 0;
-    if (!m_pSocket) {
+    if (Q_UNLIKELY(!m_pSocket)) {
         return payloadWritten;
     }
     Q_Q(QWebSocket);
@@ -666,16 +680,15 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
 
     int numFrames = data.size() / FRAME_SIZE_IN_BYTES;
     QByteArray tmpData(data);
-    //TODO: really necessary?
     tmpData.detach();
     char *payload = tmpData.data();
     quint64 sizeLeft = quint64(data.size()) % FRAME_SIZE_IN_BYTES;
-    if (sizeLeft) {
+    if (Q_LIKELY(sizeLeft)) {
         ++numFrames;
     }
     //catch the case where the payload is zero bytes;
     //in this case, we still need to send a frame
-    if (numFrames == 0) {
+    if (Q_UNLIKELY(numFrames == 0)) {
         numFrames = 1;
     }
     quint64 currentPosition = 0;
@@ -698,13 +711,13 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
         bytesWritten += m_pSocket->write(getFrameHeader(opcode, size, maskingKey, isLastFrame));
 
         //write payload
-        if (size > 0) {
+        if (Q_LIKELY(size > 0)) {
             char *currentData = payload + currentPosition;
             if (m_mustMask) {
                 QWebSocketProtocol::mask(currentData, size, maskingKey);
             }
             qint64 written = m_pSocket->write(currentData, static_cast<qint64>(size));
-            if (written > 0) {
+            if (Q_LIKELY(written > 0)) {
                 bytesWritten += written;
                 payloadWritten += written;
             } else {
@@ -717,7 +730,7 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
         currentPosition += size;
         bytesLeft -= size;
     }
-    if (payloadWritten != data.size()) {
+    if (Q_UNLIKELY(payloadWritten != data.size())) {
         setErrorString(tr("Bytes written %1 != %2.").arg(payloadWritten).arg(data.size()));
         Q_EMIT q->error(QAbstractSocket::NetworkError);
     }
@@ -759,11 +772,11 @@ QByteArray QWebSocketPrivate::generateKey() const
 /*!
     \internal
  */
-QString QWebSocketPrivate::calculateAcceptKey(const QString &key) const
+QString QWebSocketPrivate::calculateAcceptKey(const QByteArray &key) const
 {
-    const QString tmpKey = key % QStringLiteral("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
-    const QByteArray hash = QCryptographicHash::hash(tmpKey.toLatin1(), QCryptographicHash::Sha1);
-    return QString::fromLatin1(hash.toBase64());
+    const QByteArray tmpKey = key + QByteArrayLiteral("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
+    const QByteArray hash = QCryptographicHash::hash(tmpKey, QCryptographicHash::Sha1).toBase64();
+    return QString::fromLatin1(hash);
 }
 
 /*!
@@ -772,7 +785,7 @@ QString QWebSocketPrivate::calculateAcceptKey(const QString &key) const
 qint64 QWebSocketPrivate::writeFrames(const QList<QByteArray> &frames)
 {
     qint64 written = 0;
-    if (m_pSocket) {
+    if (Q_LIKELY(m_pSocket)) {
         QList<QByteArray>::const_iterator it;
         for (it = frames.cbegin(); it < frames.cend(); ++it) {
             written += writeFrame(*it);
@@ -787,7 +800,7 @@ qint64 QWebSocketPrivate::writeFrames(const QList<QByteArray> &frames)
 qint64 QWebSocketPrivate::writeFrame(const QByteArray &frame)
 {
     qint64 written = 0;
-    if (m_pSocket) {
+    if (Q_LIKELY(m_pSocket)) {
         written = m_pSocket->write(frame);
     }
     return written;
@@ -800,15 +813,13 @@ QString readLine(QTcpSocket *pSocket)
 {
     Q_ASSERT(pSocket);
     QString line;
-    if (pSocket) {
-        char c;
-        while (pSocket->getChar(&c)) {
-            if (c == char('\r')) {
-                pSocket->getChar(&c);
-                break;
-            } else {
-                line.append(QChar::fromLatin1(c));
-            }
+    char c;
+    while (pSocket->getChar(&c)) {
+        if (c == char('\r')) {
+            pSocket->getChar(&c);
+            break;
+        } else {
+            line.append(QChar::fromLatin1(c));
         }
     }
     return line;
@@ -835,7 +846,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
     int httpStatusCode;
     QString httpStatusMessage;
     const QRegularExpressionMatch match = regExp.match(statusLine);
-    if (match.hasMatch()) {
+    if (Q_LIKELY(match.hasMatch())) {
         QStringList tokens = match.capturedTexts();
         tokens.removeFirst();	//remove the search string
         if (tokens.length() == 3) {
@@ -845,7 +856,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
             ok = true;
         }
     }
-    if (!ok) {
+    if (Q_UNLIKELY(!ok)) {
         errorDescription = tr("Invalid statusline in response: %1.").arg(statusLine);
     } else {
         QString headerLine = readLine(pSocket);
@@ -864,7 +875,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
         //const QString protocol = headers.value(QStringLiteral("Sec-WebSocket-Protocol"), QStringLiteral(""));
         const QString version = headers.value(QStringLiteral("Sec-WebSocket-Version"), QStringLiteral(""));
 
-        if (httpStatusCode == 101) {
+        if (Q_LIKELY(httpStatusCode == 101)) {
             //HTTP/x.y 101 Switching Protocols
             bool conversionOk = false;
             const float version = httpProtocol.midRef(5).toFloat(&conversionOk);
@@ -874,7 +885,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
                    (upgrade.toLower() != QStringLiteral("websocket")) ||
                    (connection.toLower() != QStringLiteral("upgrade")));
             if (ok) {
-                const QString accept = calculateAcceptKey(QString::fromLatin1(m_key));
+                const QString accept = calculateAcceptKey(m_key);
                 ok = (accept == acceptKey);
                 if (!ok) {
                     errorDescription = tr("Accept-Key received from server %1 does not match the client key %2.").arg(acceptKey).arg(accept);
@@ -1070,7 +1081,7 @@ QAbstractSocket::SocketState QWebSocketPrivate::state() const
 bool QWebSocketPrivate::waitForConnected(int msecs)
 {
     bool result = false;
-    if (m_pSocket) {
+    if (Q_LIKELY(m_pSocket)) {
         result = m_pSocket->waitForConnected(msecs);
     }
     return result;
@@ -1082,7 +1093,7 @@ bool QWebSocketPrivate::waitForConnected(int msecs)
 bool QWebSocketPrivate::waitForDisconnected(int msecs)
 {
     bool result = false;
-    if (m_pSocket) {
+    if (Q_LIKELY(m_pSocket)) {
         result = m_pSocket->waitForDisconnected(msecs);
     }
     return result;
@@ -1116,7 +1127,7 @@ void QWebSocketPrivate::setErrorString(const QString &errorString)
 QHostAddress QWebSocketPrivate::localAddress() const
 {
     QHostAddress address;
-    if (m_pSocket) {
+    if (Q_LIKELY(m_pSocket)) {
         address = m_pSocket->localAddress();
     }
     return address;
@@ -1128,7 +1139,7 @@ QHostAddress QWebSocketPrivate::localAddress() const
 quint16 QWebSocketPrivate::localPort() const
 {
     quint16 port = 0;
-    if (m_pSocket) {
+    if (Q_LIKELY(m_pSocket)) {
         port = m_pSocket->localPort();
     }
     return port;
@@ -1140,7 +1151,7 @@ quint16 QWebSocketPrivate::localPort() const
 QAbstractSocket::PauseModes QWebSocketPrivate::pauseMode() const
 {
     QAbstractSocket::PauseModes mode = QAbstractSocket::PauseNever;
-    if (m_pSocket) {
+    if (Q_LIKELY(m_pSocket)) {
         mode = m_pSocket->pauseMode();
     }
     return mode;
@@ -1152,7 +1163,7 @@ QAbstractSocket::PauseModes QWebSocketPrivate::pauseMode() const
 QHostAddress QWebSocketPrivate::peerAddress() const
 {
     QHostAddress address;
-    if (m_pSocket) {
+    if (Q_LIKELY(m_pSocket)) {
         address = m_pSocket->peerAddress();
     }
     return address;
@@ -1164,7 +1175,7 @@ QHostAddress QWebSocketPrivate::peerAddress() const
 QString QWebSocketPrivate::peerName() const
 {
     QString name;
-    if (m_pSocket) {
+    if (Q_LIKELY(m_pSocket)) {
         name = m_pSocket->peerName();
     }
     return name;
@@ -1176,7 +1187,7 @@ QString QWebSocketPrivate::peerName() const
 quint16 QWebSocketPrivate::peerPort() const
 {
     quint16 port = 0;
-    if (m_pSocket) {
+    if (Q_LIKELY(m_pSocket)) {
         port = m_pSocket->peerPort();
     }
     return port;
@@ -1208,7 +1219,7 @@ void QWebSocketPrivate::setProxy(const QNetworkProxy &networkProxy)
 qint64 QWebSocketPrivate::readBufferSize() const
 {
     qint64 size = 0;
-    if (m_pSocket) {
+    if (Q_LIKELY(m_pSocket)) {
         size = m_pSocket->readBufferSize();
     }
     return size;
@@ -1219,7 +1230,7 @@ qint64 QWebSocketPrivate::readBufferSize() const
  */
 void QWebSocketPrivate::resume()
 {
-    if (m_pSocket) {
+    if (Q_LIKELY(m_pSocket)) {
         m_pSocket->resume();
     }
 }
@@ -1229,7 +1240,7 @@ void QWebSocketPrivate::resume()
  */
 void QWebSocketPrivate::setPauseMode(QAbstractSocket::PauseModes pauseMode)
 {
-    if (m_pSocket) {
+    if (Q_LIKELY(m_pSocket)) {
         m_pSocket->setPauseMode(pauseMode);
     }
 }
@@ -1239,7 +1250,7 @@ void QWebSocketPrivate::setPauseMode(QAbstractSocket::PauseModes pauseMode)
  */
 void QWebSocketPrivate::setReadBufferSize(qint64 size)
 {
-    if (m_pSocket) {
+    if (Q_LIKELY(m_pSocket)) {
         m_pSocket->setReadBufferSize(size);
     }
 }
@@ -1249,7 +1260,7 @@ void QWebSocketPrivate::setReadBufferSize(qint64 size)
  */
 void QWebSocketPrivate::setSocketOption(QAbstractSocket::SocketOption option, const QVariant &value)
 {
-    if (m_pSocket) {
+    if (Q_LIKELY(m_pSocket)) {
         m_pSocket->setSocketOption(option, value);
     }
 }
@@ -1260,7 +1271,7 @@ void QWebSocketPrivate::setSocketOption(QAbstractSocket::SocketOption option, co
 QVariant QWebSocketPrivate::socketOption(QAbstractSocket::SocketOption option)
 {
     QVariant val;
-    if (m_pSocket) {
+    if (Q_LIKELY(m_pSocket)) {
         val = m_pSocket->socketOption(option);
     }
     return val;
