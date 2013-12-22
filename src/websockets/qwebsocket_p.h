@@ -142,10 +142,10 @@ public:
     QWebSocketProtocol::CloseCode closeCode() const;
     QString closeReason() const;
 
-    qint64 write(const char *message);		//send data as text
-    qint64 write(const char *message, qint64 maxSize);		//send data as text
-    qint64 write(const QString &message);	//send data as text
-    qint64 write(const QByteArray &data);	//send data as binary
+    qint64 write(const char *message) Q_REQUIRED_RESULT;
+    qint64 write(const char *message, qint64 maxSize) Q_REQUIRED_RESULT;
+    qint64 write(const QString &message) Q_REQUIRED_RESULT;
+    qint64 write(const QByteArray &data) Q_REQUIRED_RESULT;    //send data as binary
 
 #ifndef QT_NO_SSL
     void ignoreSslErrors(const QList<QSslError> &errors);
@@ -184,13 +184,13 @@ private:
     void setSocketState(QAbstractSocket::SocketState state);
     void setErrorString(const QString &errorString);
 
-    qint64 doWriteFrames(const QByteArray &data, bool isBinary);
+    qint64 doWriteFrames(const QByteArray &data, bool isBinary) Q_REQUIRED_RESULT;
 
     void makeConnections(const QTcpSocket *pTcpSocket);
     void releaseConnections(const QTcpSocket *pTcpSocket);
 
     QByteArray getFrameHeader(QWebSocketProtocol::OpCode opCode, quint64 payloadLength, quint32 maskingKey, bool lastFrame);
-    QString calculateAcceptKey(const QString &key) const;
+    QString calculateAcceptKey(const QByteArray &key) const;
     QString createHandShakeRequest(QString resourceName,
                                    QString host,
                                    QString origin,
@@ -201,13 +201,13 @@ private:
     static QWebSocket *upgradeFrom(QTcpSocket *tcpSocket,
                                    const QWebSocketHandshakeRequest &request,
                                    const QWebSocketHandshakeResponse &response,
-                                   QObject *parent = Q_NULLPTR);
+                                   QObject *parent = Q_NULLPTR) Q_REQUIRED_RESULT;
 
     quint32 generateMaskingKey() const;
     QByteArray generateKey() const;
     quint32 generateRandomNumber() const;
-    qint64 writeFrames(const QList<QByteArray> &frames);
-    qint64 writeFrame(const QByteArray &frame);
+    qint64 writeFrames(const QList<QByteArray> &frames) Q_REQUIRED_RESULT;
+    qint64 writeFrame(const QByteArray &frame) Q_REQUIRED_RESULT;
 
     QScopedPointer<QTcpSocket> m_pSocket;
     QString m_errorString;
