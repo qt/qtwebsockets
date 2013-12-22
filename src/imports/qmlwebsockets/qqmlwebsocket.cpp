@@ -59,6 +59,8 @@
 #include "qqmlwebsocket.h"
 #include <QtWebSockets/QWebSocket>
 
+QT_BEGIN_NAMESPACE
+
 QQmlWebSocket::QQmlWebSocket(QObject *parent) :
     QObject(parent),
     m_webSocket(),
@@ -74,14 +76,14 @@ QQmlWebSocket::~QQmlWebSocket()
 {
 }
 
-void QQmlWebSocket::sendTextMessage(const QString &message)
+qint64 QQmlWebSocket::sendTextMessage(const QString &message)
 {
     if (m_status != Open) {
         setErrorString(tr("Messages can only be send when the socket has Open status."));
         setStatus(Error);
-        return;
+        return 0;
     }
-    m_webSocket->write(message);
+    return m_webSocket->write(message);
 }
 
 QUrl QQmlWebSocket::url() const
@@ -123,14 +125,16 @@ void QQmlWebSocket::classBegin()
 
 void QQmlWebSocket::componentComplete()
 {
-    m_webSocket.reset(new QWebSocket());
-    connect(m_webSocket.data(), SIGNAL(textMessageReceived(QString)), this, SIGNAL(textMessageReceived(QString)));
-    connect(m_webSocket.data(), SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onError(QAbstractSocket::SocketError)));
-    connect(m_webSocket.data(), SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(onStateChanged(QAbstractSocket::SocketState)));
+    m_webSocket.reset(new (std::nothrow) QWebSocket());
+    if (Q_LIKELY(m_webSocket)) {
+        connect(m_webSocket.data(), SIGNAL(textMessageReceived(QString)), this, SIGNAL(textMessageReceived(QString)));
+        connect(m_webSocket.data(), SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onError(QAbstractSocket::SocketError)));
+        connect(m_webSocket.data(), SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(onStateChanged(QAbstractSocket::SocketState)));
 
-    m_componentCompleted = true;
+        m_componentCompleted = true;
 
-    open();
+        open();
+    }
 }
 
 void QQmlWebSocket::onError(QAbstractSocket::SocketError error)
@@ -210,14 +214,14 @@ bool QQmlWebSocket::isActive() const
 
 void QQmlWebSocket::open()
 {
-    if (m_componentCompleted && m_isActive && m_url.isValid() && m_webSocket) {
+    if (m_componentCompleted && m_isActive && m_url.isValid() && Q_LIKELY(m_webSocket)) {
         m_webSocket->open(m_url);
     }
 }
 
 void QQmlWebSocket::close()
 {
-    if (m_componentCompleted && m_webSocket) {
+    if (m_componentCompleted && Q_LIKELY(m_webSocket)) {
         m_webSocket->close();
     }
 }
@@ -230,3 +234,5 @@ void QQmlWebSocket::setErrorString(QString errorString)
     m_errorString = errorString;
     Q_EMIT errorStringChanged(m_errorString);
 }
+
+QT_END_NAMESPACE
