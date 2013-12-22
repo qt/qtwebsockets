@@ -140,7 +140,7 @@ Version versionFromString(const QString &versionString)
     const int ver = versionString.toInt(&ok);
     QSet<Version> supportedVersions;
     supportedVersions << V_0 << V_4 << V_5 << V_6 << V_7 << V_8 << V_13;
-    if (ok) {
+    if (Q_LIKELY(ok)) {
         if (supportedVersions.contains(static_cast<Version>(ver))) {
             version = static_cast<Version>(ver);
         }

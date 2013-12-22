@@ -48,6 +48,8 @@
 #include <QScopedPointer>
 #include <QWebSocket>
 
+QT_BEGIN_NAMESPACE
+
 class QQmlWebSocket : public QObject, public QQmlParserStatus
 {
     Q_OBJECT
@@ -81,8 +83,7 @@ public:
     void setActive(bool active);
     bool isActive() const;
 
-public Q_SLOTS:
-    void sendTextMessage(const QString &message);
+    Q_INVOKABLE qint64 sendTextMessage(const QString &message);
 
 
 Q_SIGNALS:
@@ -113,5 +114,7 @@ private:
     void close();
     void setErrorString(QString errorString = QString());
 };
+
+QT_END_NAMESPACE
 
 #endif // QQMLWEBSOCKET_H
