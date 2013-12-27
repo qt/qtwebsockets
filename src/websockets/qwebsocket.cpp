@@ -47,7 +47,7 @@
 
     WebSockets is a web technology providing full-duplex communications channels over a single TCP connection.
     The WebSocket protocol was standardized by the IETF as \l {http://tools.ietf.org/html/rfc6455} {RFC 6455} in 2011.
-    It can both be used in a client application and server application.
+    QWebSocket can both be used in a client application and server application.
 
     This class was modeled after QAbstractSocket.
 
@@ -300,7 +300,12 @@ bool QWebSocket::flush()
 
 /*!
     Sends the given \a message over the socket as a text message and returns the number of bytes actually sent.
-    \a message must be '\\0' terminated.
+    \a message must be '\\0' terminated and is considered to be in UTF-8 encoded format.
+
+    \note When \a message is null or has zero length, zero is returned.
+    \note The maximum size of message, is limited by \l {QString::}{size_type}.
+
+    \sa QString::fromUtf8(), QString::size_type
  */
 qint64 QWebSocket::write(const char *message)
 {
@@ -310,6 +315,13 @@ qint64 QWebSocket::write(const char *message)
 
 /*!
     Sends the most \a maxSize bytes of the given \a message over the socket as a text message and returns the number of bytes actually sent.
+    \a message is considered to be in UTF-8 encoded format.
+
+    \note When \a message is null, has zero length or \a maxSize < 0, zero is returned.
+    \note The maximum size of message, is limited by \l {QString::}{size_type}. It the message is larger,
+    it is truncated to the maximum value of \l {QString::}{size_type}.
+
+    \sa QString::fromUtf8(), QString::size_type
  */
 qint64 QWebSocket::write(const char *message, qint64 maxSize)
 {
@@ -537,17 +549,17 @@ QAbstractSocket::SocketState QWebSocket::state() const
     \brief Waits until the socket is connected, up to \a msecs milliseconds. If the connection has been established, this function returns true; otherwise it returns false. In the case where it returns false, you can call error() to determine the cause of the error.
     The following example waits up to one second for a connection to be established:
 
-    ~~~{.cpp}
+    \code
     socket->open("ws://localhost:1234", false);
     if (socket->waitForConnected(1000))
     {
         qDebug("Connected!");
     }
-    ~~~
+    \endcode
 
     If \a msecs is -1, this function will not time out.
-    @note This function may wait slightly longer than msecs, depending on the time it takes to complete the host lookup.
-    @note Multiple calls to this functions do not accumulate the time. If the function times out, the connecting process will be aborted.
+    \note This function may wait slightly longer than msecs, depending on the time it takes to complete the host lookup.
+    \note Multiple calls to this functions do not accumulate the time. If the function times out, the connecting process will be aborted.
 
     \sa connected(), open(), state()
  */
