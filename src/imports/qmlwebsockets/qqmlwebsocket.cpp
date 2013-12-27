@@ -51,9 +51,49 @@
 */
 
 /*!
-  \qmlproperty url QQmlWebSocket::url
+  \qmlproperty QUrl WebSocket::url
   Server url to connect to. The url must have one of 2 schemes: {ws://} or {wss://}.
   When not supplied, then {ws://} is used.
+  */
+
+/*!
+  \qmlproperty Status WebSocket::status
+  Status of the WebSocket.
+
+  The status can have the following values:
+  \list
+  \li WebSockets.Connecting
+  \li WebSockets.Open
+  \li WebSockets.Closing
+  \li WebSockets.Closed
+  \li WebSockets.Error
+  \endlist
+  */
+
+/*!
+  \qmlproperty QString WebSocket::errorString
+  Contains a description of the last error that occurred. When no error occurrred,
+  this string is empty.
+  */
+
+/*!
+  \qmlproperty bool WebSocket::active
+  When set to true, a connection is made to the server with the given url.
+  When set to false, the connection is closed.
+  The default value is false.
+  */
+
+/*!
+  \qmlsignal WebSocket::textMessageReceived(QString message)
+  This signal is emitted when a text message is received.
+  */
+
+/*!
+  \qmlsignal WebSocket::statusChanged(Status status)
+  This signal is emitted when the status of the WebSocket changes.
+  the \l {WebSocket::status}{status} argument provides the current status.
+
+  \sa WebSocket::status
   */
 
 #include "qqmlwebsocket.h"
