@@ -65,6 +65,7 @@ QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName, QWeb
     QObject(parent),
     q_ptr(pWebSocketServer),
     m_pTcpServer(Q_NULLPTR),
+    m_pNewTcpSocket(Q_NULLPTR),
     m_serverName(serverName),
     m_secureMode(secureMode),
     m_pendingConnections(),
@@ -273,7 +274,14 @@ qintptr QWebSocketServerPrivate::socketDescriptor() const
  */
 bool QWebSocketServerPrivate::waitForNewConnection(int msec, bool *timedOut)
 {
-    return m_pTcpServer->waitForNewConnection(msec, timedOut);
+    if (m_pTcpServer->waitForNewConnection(msec, timedOut)) {
+        Q_ASSERT(m_pNewTcpSocket);
+        // Wait until the handshake is received.
+        m_pNewTcpSocket->waitForReadyRead(-1);
+        m_pNewTcpSocket = Q_NULLPTR;
+        return true;
+    }
+    return false;
 }
 
 /*!
@@ -365,8 +373,8 @@ void QWebSocketServerPrivate::setError(QWebSocketProtocol::CloseCode code, QStri
  */
 void QWebSocketServerPrivate::onNewConnection()
 {
-    QTcpSocket *pTcpSocket = m_pTcpServer->nextPendingConnection();
-    connect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(handshakeReceived()));
+    m_pNewTcpSocket = m_pTcpServer->nextPendingConnection();
+    connect(m_pNewTcpSocket, SIGNAL(readyRead()), this, SLOT(handshakeReceived()));
 }
 
 /*!

@@ -130,6 +130,7 @@ private:
     QWebSocketServer * const q_ptr;
 
     QTcpServer *m_pTcpServer;
+    QTcpSocket *m_pNewTcpSocket;
     QString m_serverName;
     SecureMode m_secureMode;
     QQueue<QWebSocket *> m_pendingConnections;
