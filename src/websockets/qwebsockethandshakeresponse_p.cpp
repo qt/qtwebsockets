@@ -168,9 +168,8 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(const QWebSocketHandsh
                     response << QStringLiteral("Sec-WebSocket-Extensions: ") % m_acceptedExtension;
                 }
                 QString origin = request.origin().trimmed();
-                if (origin.isEmpty()) {
+                if (origin.isEmpty())
                     origin = QStringLiteral("*");
-                }
                 response << QStringLiteral("Server: ") % serverName    <<
                             QStringLiteral("Access-Control-Allow-Credentials: false")       <<    //do not allow credentialed request (containing cookies)
                             QStringLiteral("Access-Control-Allow-Methods: GET")             <<    //only GET is allowed during handshaking
@@ -189,9 +188,8 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(const QWebSocketHandsh
         if (Q_UNLIKELY(!m_canUpgrade)) {
             response << QStringLiteral("HTTP/1.1 400 Bad Request");
             QStringList versions;
-            Q_FOREACH (QWebSocketProtocol::Version version, supportedVersions) {
+            Q_FOREACH (QWebSocketProtocol::Version version, supportedVersions)
                 versions << QString::number(static_cast<int>(version));
-            }
             response << QStringLiteral("Sec-WebSocket-Version: ") % versions.join(QStringLiteral(", "));
         }
     }
@@ -204,11 +202,10 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(const QWebSocketHandsh
  */
 QTextStream &QWebSocketHandshakeResponse::writeToStream(QTextStream &textStream) const
 {
-    if (Q_LIKELY(!m_response.isEmpty())) {
+    if (Q_LIKELY(!m_response.isEmpty()))
         textStream << m_response.toLatin1().constData();
-    } else {
+    else
         textStream.setStatus(QTextStream::WriteFailed);
-    }
     return textStream;
 }
 
