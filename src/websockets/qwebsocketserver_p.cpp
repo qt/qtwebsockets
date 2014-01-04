@@ -74,11 +74,10 @@ QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName, QWeb
     Q_ASSERT(pWebSocketServer);
     if (m_secureMode == NON_SECURE_MODE) {
         m_pTcpServer = new QTcpServer(this);
-        if (Q_LIKELY(m_pTcpServer)) {
+        if (Q_LIKELY(m_pTcpServer))
             connect(m_pTcpServer, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
-        } else {
+        else
             qFatal("Could not allocate memory for tcp server.");
-        }
     } else {
 #ifndef QT_NO_SSL
         QSslServer *pSslServer = new QSslServer(this);
@@ -126,11 +125,10 @@ void QWebSocketServerPrivate::close()
  */
 QString QWebSocketServerPrivate::errorString() const
 {
-    if (m_errorString.isEmpty()) {
+    if (m_errorString.isEmpty())
         return m_pTcpServer->errorString();
-    } else {
+    else
         return m_errorString;
-    }
 }
 
 /*!
@@ -170,9 +168,8 @@ int QWebSocketServerPrivate::maxPendingConnections() const
  */
 void QWebSocketServerPrivate::addPendingConnection(QWebSocket *pWebSocket)
 {
-    if (m_pendingConnections.size() < maxPendingConnections()) {
+    if (m_pendingConnections.size() < maxPendingConnections())
         m_pendingConnections.enqueue(pWebSocket);
-    }
 }
 
 /*!
@@ -181,9 +178,8 @@ void QWebSocketServerPrivate::addPendingConnection(QWebSocket *pWebSocket)
 QWebSocket *QWebSocketServerPrivate::nextPendingConnection()
 {
     QWebSocket *pWebSocket = Q_NULLPTR;
-    if (Q_LIKELY(!m_pendingConnections.isEmpty())) {
+    if (Q_LIKELY(!m_pendingConnections.isEmpty()))
         pWebSocket = m_pendingConnections.dequeue();
-    }
     return pWebSocket;
 }
 
@@ -309,9 +305,8 @@ QStringList QWebSocketServerPrivate::supportedExtensions() const
  */
 void QWebSocketServerPrivate::setServerName(const QString &serverName)
 {
-    if (m_serverName != serverName) {
+    if (m_serverName != serverName)
         m_serverName = serverName;
-    }
 }
 
 /*!
@@ -333,20 +328,18 @@ QWebSocketServerPrivate::SecureMode QWebSocketServerPrivate::secureMode() const
 #ifndef QT_NO_SSL
 void QWebSocketServerPrivate::setSslConfiguration(const QSslConfiguration &sslConfiguration)
 {
-    if (m_secureMode == SECURE_MODE) {
+    if (m_secureMode == SECURE_MODE)
         qobject_cast<QSslServer *>(m_pTcpServer)->setSslConfiguration(sslConfiguration);
-    } else {
+    else
         qWarning() << tr("Cannot set SSL configuration for non-secure server.");
-    }
 }
 
 QSslConfiguration QWebSocketServerPrivate::sslConfiguration() const
 {
-    if (m_secureMode == SECURE_MODE) {
+    if (m_secureMode == SECURE_MODE)
         return qobject_cast<QSslServer *>(m_pTcpServer)->sslConfiguration();
-    } else {
+    else
         return QSslConfiguration::defaultConfiguration();
-    }
 }
 #endif
 
@@ -375,9 +368,8 @@ void QWebSocketServerPrivate::onNewConnection()
 void QWebSocketServerPrivate::onCloseConnection()
 {
     QTcpSocket *pTcpSocket = qobject_cast<QTcpSocket*>(sender());
-    if (Q_LIKELY(pTcpSocket)) {
+    if (Q_LIKELY(pTcpSocket))
         pTcpSocket->close();
-    }
 }
 
 /*!
