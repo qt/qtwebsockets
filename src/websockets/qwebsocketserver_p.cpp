@@ -385,6 +385,13 @@ void QWebSocketServerPrivate::handshakeReceived()
 
         disconnect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(handshakeReceived()));
 
+        if (m_pendingConnections.length() >= maxPendingConnections()) {
+            pTcpSocket->close();
+            qWarning() << tr("Too many pending connections: new websocket connection not accepted.");
+            setError(QWebSocketProtocol::CC_ABNORMAL_DISCONNECTION, tr("Too many pending connections."));
+            return;
+        }
+
         QWebSocketHandshakeRequest request(pTcpSocket->peerPort(), isSecure);
         QTextStream textStream(pTcpSocket);
         textStream >> request;
