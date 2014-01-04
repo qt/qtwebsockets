@@ -143,9 +143,8 @@ QWebSocketCorsAuthenticator &QWebSocketCorsAuthenticator::operator =(QWebSocketC
  */
 void QWebSocketCorsAuthenticator::swap(QWebSocketCorsAuthenticator &other)
 {
-    if (&other != this) {
+    if (&other != this)
         qSwap(d_ptr, other.d_ptr);
-    }
 }
 
 /*!
