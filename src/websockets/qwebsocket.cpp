@@ -80,6 +80,8 @@
 /*!
   \fn void QWebSocket::connected()
   \brief Emitted when a connection is successfully established.
+  A connection is successfully established when the socket is connected
+  and the handshake was successful.
   \sa open(), disconnected()
 */
 /*!
@@ -115,6 +117,9 @@ not been filled in with new information when the signal returns.
 
     This signal is emitted whenever QWebSocket's state changes.
     The \a state parameter is the new state.
+
+    \note QAbstractSocket::ConnectedState is emitted after the handshake has
+    with the server has succeeded.
 
     QAbstractSocket::SocketState is not a registered metatype, so for queued
     connections, you will have to register it with Q_REGISTER_METATYPE() and
