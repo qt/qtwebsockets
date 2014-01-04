@@ -140,11 +140,8 @@ Version versionFromString(const QString &versionString)
     const int ver = versionString.toInt(&ok);
     QSet<Version> supportedVersions;
     supportedVersions << V_0 << V_4 << V_5 << V_6 << V_7 << V_8 << V_13;
-    if (Q_LIKELY(ok)) {
-        if (supportedVersions.contains(static_cast<Version>(ver))) {
-            version = static_cast<Version>(ver);
-        }
-    }
+    if (Q_LIKELY(ok) && (supportedVersions.contains(static_cast<Version>(ver))))
+        version = static_cast<Version>(ver);
     return version;
 }
 
@@ -171,9 +168,8 @@ void mask(char *payload, quint64 size, quint32 maskingKey)
                             quint8((maskingKey & 0x000000FFu))
                           };
     int i = 0;
-    while (size-- > 0) {
+    while (size-- > 0)
         *payload++ ^= mask[i++ % 4];
-    }
 }
 }	//end namespace WebSocketProtocol
 
