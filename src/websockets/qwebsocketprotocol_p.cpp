@@ -130,9 +130,9 @@ QT_BEGIN_NAMESPACE
 namespace QWebSocketProtocol
 {
 /*!
-        Parses the \a versionString and converts it to a Version value
-        \internal
-    */
+    Parses the \a versionString and converts it to a Version value
+    \internal
+*/
 Version versionFromString(const QString &versionString)
 {
     bool ok = false;
@@ -146,9 +146,9 @@ Version versionFromString(const QString &versionString)
 }
 
 /*!
-      Mask the \a payload with the given \a maskingKey and stores the result back in \a payload.
-      \internal
-    */
+    Mask the \a payload with the given \a maskingKey and stores the result back in \a payload.
+    \internal
+*/
 void mask(QByteArray *payload, quint32 maskingKey)
 {
     Q_ASSERT(payload);
@@ -156,9 +156,9 @@ void mask(QByteArray *payload, quint32 maskingKey)
 }
 
 /*!
-      Masks the \a payload of length \a size with the given \a maskingKey and stores the result back in \a payload.
-      \internal
-    */
+    Masks the \a payload of length \a size with the given \a maskingKey and stores the result back in \a payload.
+    \internal
+*/
 void mask(char *payload, quint64 size, quint32 maskingKey)
 {
     Q_ASSERT(payload);
