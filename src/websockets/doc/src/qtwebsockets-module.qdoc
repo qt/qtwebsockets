@@ -29,7 +29,7 @@
     \title Qt WebSockets C++ Classes
     \ingroup modules
     \qtvariable websockets
-    \brief List of C++ classes that provice WebSockets communication.
+    \brief List of C++ classes that provide WebSockets communication.
 
     To use these classes in your application, use the following include
     statement:
