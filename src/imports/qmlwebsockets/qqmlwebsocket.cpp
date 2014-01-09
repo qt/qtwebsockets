@@ -122,7 +122,7 @@ QQmlWebSocket::~QQmlWebSocket()
 qint64 QQmlWebSocket::sendTextMessage(const QString &message)
 {
     if (m_status != Open) {
-        setErrorString(tr("Messages can only be send when the socket has Open status."));
+        setErrorString(tr("Messages can only be sent when the socket has Open status."));
         setStatus(Error);
         return 0;
     }
