@@ -44,6 +44,7 @@
     \instantiates QQmlWebSocket
 
     \inqmlmodule Qt.WebSockets
+    \ingroup websockets-qml
     \brief QML interface to QWebSocket.
 
     WebSockets is a web technology providing full-duplex communications channels over a single TCP connection.

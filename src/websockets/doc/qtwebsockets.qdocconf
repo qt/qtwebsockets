@@ -27,13 +27,13 @@ qhp.QtWebSockets.subprojects.classes.sortPages      = true
 
 qhp.QtWebSockets.subprojects.qml.title              = QML Types
 qhp.QtWebSockets.subprojects.qml.indexTitle         = Qt WebSockets QML Types
-qhp.QtWebSockets.subprojects.qml.selectors          = fake:headerfile
+qhp.QtWebSockets.subprojects.qml.selectors          = fake:qmlclass
 qhp.QtWebSockets.subprojects.qml.sortPages          = true
 
-#qhp.QtWebSockets.subprojects.examples.title         = Examples
-#qhp.QtWebSockets.subprojects.examples.indexTitle    = Qt WebSockets Examples
-#qhp.QtWebSockets.subprojects.examples.selectors     = class fake:example
-#qhp.QtWebSockets.subprojects.examples.sortPages     = true
+qhp.QtWebSockets.subprojects.examples.title         = Examples
+qhp.QtWebSockets.subprojects.examples.indexTitle    = Qt WebSockets Examples
+qhp.QtWebSockets.subprojects.examples.selectors     = fake:example
+qhp.QtWebSockets.subprojects.examples.sortPages     = true
 
 
 tagfile                                             = ../../../doc/qtwebsockets/qtwebsockets.tags
