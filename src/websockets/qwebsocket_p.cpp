@@ -46,6 +46,7 @@
 #include "qwebsockethandshakeresponse_p.h"
 
 #include <QtCore/QUrl>
+#include <QtNetwork/QAuthenticator>
 #include <QtNetwork/QTcpSocket>
 #include <QtCore/QByteArray>
 #include <QtCore/QtEndian>
@@ -375,7 +376,7 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
                     m_pSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
 
                     makeConnections(m_pSocket.data());
-                    connect(sslSocket, SIGNAL(encryptedBytesWritten(qint64)), q, SIGNAL(bytesWritten(qint64)));
+                    connect(sslSocket, &QSslSocket::encryptedBytesWritten, q, &QWebSocket::bytesWritten);
                     setSocketState(QAbstractSocket::ConnectingState);
 
                     sslSocket->setSslConfiguration(m_configuration.m_sslConfiguration);
@@ -402,7 +403,7 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
                 m_pSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
 
                 makeConnections(m_pSocket.data());
-                connect(m_pSocket.data(), SIGNAL(bytesWritten(qint64)), q, SIGNAL(bytesWritten(qint64)));
+                connect(m_pSocket.data(), &QAbstractSocket::bytesWritten, q, &QWebSocket::bytesWritten);
                 setSocketState(QAbstractSocket::ConnectingState);
     #ifndef QT_NO_NETWORKPROXY
                 m_pSocket->setProxy(m_configuration.m_proxy);
@@ -509,25 +510,26 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
 
     if (Q_LIKELY(pTcpSocket)) {
         //pass through signals
-        connect(pTcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), q, SIGNAL(error(QAbstractSocket::SocketError)));
-        connect(pTcpSocket, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)), q, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)));
-        connect(pTcpSocket, SIGNAL(readChannelFinished()), q, SIGNAL(readChannelFinished()));
-        connect(pTcpSocket, SIGNAL(aboutToClose()), q, SIGNAL(aboutToClose()));
+        connect(pTcpSocket, static_cast<void (QAbstractSocket::*)(QAbstractSocket::SocketError)>(&QAbstractSocket::error),
+                q, static_cast<void (QWebSocket::*)(QAbstractSocket::SocketError)>(&QWebSocket::error));
+        connect(pTcpSocket, &QAbstractSocket::proxyAuthenticationRequired, q, &QWebSocket::proxyAuthenticationRequired);
+        connect(pTcpSocket, &QAbstractSocket::readChannelFinished, q, &QWebSocket::readChannelFinished);
+        connect(pTcpSocket, &QAbstractSocket::aboutToClose, q, &QWebSocket::aboutToClose);
 
         //catch signals
-        connect(pTcpSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(processStateChanged(QAbstractSocket::SocketState)));
+        connect(pTcpSocket, &QAbstractSocket::stateChanged, this, &QWebSocketPrivate::processStateChanged);
         //!!!important to use a QueuedConnection here; with QTcpSocket there is no problem, but with QSslSocket the processing hangs
-        connect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(processData()), Qt::QueuedConnection);
+        connect(pTcpSocket, &QAbstractSocket::readyRead, this, &QWebSocketPrivate::processData, Qt::QueuedConnection);
     }
 
-    connect(&m_dataProcessor, SIGNAL(textFrameReceived(QString,bool)), q, SIGNAL(textFrameReceived(QString,bool)));
-    connect(&m_dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)), q, SIGNAL(binaryFrameReceived(QByteArray,bool)));
-    connect(&m_dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)), q, SIGNAL(binaryMessageReceived(QByteArray)));
-    connect(&m_dataProcessor, SIGNAL(textMessageReceived(QString)), q, SIGNAL(textMessageReceived(QString)));
-    connect(&m_dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)), this, SLOT(close(QWebSocketProtocol::CloseCode,QString)));
-    connect(&m_dataProcessor, SIGNAL(pingReceived(QByteArray)), this, SLOT(processPing(QByteArray)));
-    connect(&m_dataProcessor, SIGNAL(pongReceived(QByteArray)), this, SLOT(processPong(QByteArray)));
-    connect(&m_dataProcessor, SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)), this, SLOT(processClose(QWebSocketProtocol::CloseCode,QString)));
+    connect(&m_dataProcessor, &QWebSocketDataProcessor::textFrameReceived, q, &QWebSocket::textFrameReceived);
+    connect(&m_dataProcessor, &QWebSocketDataProcessor::binaryFrameReceived, q, &QWebSocket::binaryFrameReceived);
+    connect(&m_dataProcessor, &QWebSocketDataProcessor::binaryMessageReceived, q, &QWebSocket::binaryMessageReceived);
+    connect(&m_dataProcessor, &QWebSocketDataProcessor::textMessageReceived, q, &QWebSocket::textMessageReceived);
+    connect(&m_dataProcessor, &QWebSocketDataProcessor::errorEncountered, this, &QWebSocketPrivate::close);
+    connect(&m_dataProcessor, &QWebSocketDataProcessor::pingReceived, this, &QWebSocketPrivate::processPing);
+    connect(&m_dataProcessor, &QWebSocketDataProcessor::pongReceived, this, &QWebSocketPrivate::processPong);
+    connect(&m_dataProcessor, &QWebSocketDataProcessor::closeReceived, this, &QWebSocketPrivate::processClose);
 }
 
 /*!
