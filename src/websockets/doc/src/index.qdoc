@@ -52,6 +52,7 @@
     \section1 Related information
     \list
     \li \l{Qt WebSockets C++ Classes}{C++ Classes}
+    \li \l{Qt WebSockets QML Types}{QML Types}
     \li \l{Qt WebSockets Examples}{Examples}
     \endlist
 */
