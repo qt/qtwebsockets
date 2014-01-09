@@ -44,6 +44,14 @@
 #include <QtCore/QSet>
 #include <QtCore/QtEndian>
 
+QT_BEGIN_NAMESPACE
+
+/*!
+  \namespace QWebSocketProtocol
+  \inmodule QtWebSockets
+  \brief Contains constants related to the WebSocket standard.
+*/
+
 /*!
     \enum QWebSocketProtocol::CloseCode
 
@@ -65,7 +73,7 @@
     \value CC_BAD_OPERATION             Internal server error
     \value CC_TLS_HANDSHAKE_FAILED      TLS handshake failed
 
-    \sa \l{QWebSocket::} {close()}
+    \sa QWebSocket::close()
 */
 /*!
     \enum QWebSocketProtocol::Version
@@ -122,18 +130,11 @@
   \internal
 */
 
-QT_BEGIN_NAMESPACE
-
-/**
- * @brief Contains constants related to the WebSocket standard.
- */
-namespace QWebSocketProtocol
-{
 /*!
     Parses the \a versionString and converts it to a Version value
     \internal
 */
-Version versionFromString(const QString &versionString)
+QWebSocketProtocol::Version QWebSocketProtocol::versionFromString(const QString &versionString)
 {
     bool ok = false;
     Version version = V_Unknow;
@@ -149,7 +150,7 @@ Version versionFromString(const QString &versionString)
     Mask the \a payload with the given \a maskingKey and stores the result back in \a payload.
     \internal
 */
-void mask(QByteArray *payload, quint32 maskingKey)
+void QWebSocketProtocol::mask(QByteArray *payload, quint32 maskingKey)
 {
     Q_ASSERT(payload);
     mask(payload->data(), payload->size(), maskingKey);
@@ -159,7 +160,7 @@ void mask(QByteArray *payload, quint32 maskingKey)
     Masks the \a payload of length \a size with the given \a maskingKey and stores the result back in \a payload.
     \internal
 */
-void mask(char *payload, quint64 size, quint32 maskingKey)
+void QWebSocketProtocol::mask(char *payload, quint64 size, quint32 maskingKey)
 {
     Q_ASSERT(payload);
     const quint8 mask[] = { quint8((maskingKey & 0xFF000000u) >> 24),
@@ -171,6 +172,5 @@ void mask(char *payload, quint64 size, quint32 maskingKey)
     while (size-- > 0)
         *payload++ ^= mask[i++ % 4];
 }
-}	//end namespace WebSocketProtocol
 
 QT_END_NAMESPACE

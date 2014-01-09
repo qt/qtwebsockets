@@ -34,7 +34,7 @@ SOURCES += \
     $$PWD/qwebsocket_p.cpp \
     $$PWD/qwebsocketserver.cpp \
     $$PWD/qwebsocketserver_p.cpp \
-    $$PWD/qwebsocketprotocol_p.cpp \
+    $$PWD/qwebsocketprotocol.cpp \
     $$PWD/qwebsockethandshakerequest_p.cpp \
     $$PWD/qwebsockethandshakeresponse_p.cpp \
     $$PWD/qwebsocketdataprocessor_p.cpp \
