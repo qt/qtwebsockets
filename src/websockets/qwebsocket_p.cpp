@@ -367,7 +367,7 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
             if (!QSslSocket::supportsSsl()) {
                 const QString message = tr("SSL Sockets are not supported on this platform.");
                 setErrorString(message);
-                emit q->error(QAbstractSocket::UnsupportedSocketOperationError);
+                Q_EMIT q->error(QAbstractSocket::UnsupportedSocketOperationError);
             } else {
                 QSslSocket *sslSocket = new QSslSocket(this);
                 m_pSocket.reset(sslSocket);
@@ -391,7 +391,7 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
                 } else {
                     const QString message = tr("Out of memory.");
                     setErrorString(message);
-                    emit q->error(QAbstractSocket::SocketResourceError);
+                    Q_EMIT q->error(QAbstractSocket::SocketResourceError);
                 }
             }
         } else
@@ -412,12 +412,12 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
             } else {
                 const QString message = tr("Out of memory.");
                 setErrorString(message);
-                emit q->error(QAbstractSocket::SocketResourceError);
+                Q_EMIT q->error(QAbstractSocket::SocketResourceError);
             }
         } else {
             const QString message = tr("Unsupported websockets scheme: %1").arg(url.scheme());
             setErrorString(message);
-            emit q->error(QAbstractSocket::UnsupportedSocketOperationError);
+            Q_EMIT q->error(QAbstractSocket::UnsupportedSocketOperationError);
         }
     }
 }
