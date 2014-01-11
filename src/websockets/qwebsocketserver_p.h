@@ -103,7 +103,6 @@ public:
     void setMaxPendingConnections(int numConnections);
     bool setSocketDescriptor(qintptr socketDescriptor);
     qintptr socketDescriptor() const;
-    bool waitForNewConnection(int msec = 0, bool *timedOut = Q_NULLPTR);
 
     QList<QWebSocketProtocol::Version> supportedVersions() const;
     QStringList supportedProtocols() const;

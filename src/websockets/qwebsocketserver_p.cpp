@@ -267,14 +267,6 @@ qintptr QWebSocketServerPrivate::socketDescriptor() const
 /*!
     \internal
  */
-bool QWebSocketServerPrivate::waitForNewConnection(int msec, bool *timedOut)
-{
-    return m_pTcpServer->waitForNewConnection(msec, timedOut);
-}
-
-/*!
-    \internal
- */
 QList<QWebSocketProtocol::Version> QWebSocketServerPrivate::supportedVersions() const
 {
     QList<QWebSocketProtocol::Version> supportedVersions;

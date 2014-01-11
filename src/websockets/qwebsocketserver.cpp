@@ -58,7 +58,6 @@
     If an error occurs, serverError() returns the type of error, and errorString() can be called to get a human readable description of what happened.
     When listening for connections, the address and port on which the server is listening are available as serverAddress() and serverPort().
     Calling close() makes QWebSocketServer stop listening for incoming connections.
-    Although QWebSocketServer is mostly designed for use with an event loop, it's possible to use it without one. In that case, you must use waitForNewConnection(), which blocks until either a connection is available or a timeout expires.
 
     \sa echoserver.html
 
@@ -492,25 +491,6 @@ int QWebSocketServer::socketDescriptor() const
 {
     Q_D(const QWebSocketServer);
     return d->socketDescriptor();
-}
-
-/*!
-    Waits for at most \a msec milliseconds or until an incoming connection is available.
-    Returns true if a connection is available; otherwise returns false.
-    If the operation timed out and \a timedOut is not 0, \a timedOut will be set to true.
-
-    \note This is a blocking function call.
-    \note Its use is disadvised in a single-threaded GUI application, since the whole application will stop responding until the function returns. waitForNewConnection() is mostly useful when there is no event loop available.
-    \note The non-blocking alternative is to connect to the newConnection() signal.
-
-    If \a msec is -1, this function will not time out.
-
-    \sa hasPendingConnections(), nextPendingConnection()
-*/
-bool QWebSocketServer::waitForNewConnection(int msec, bool *timedOut)
-{
-    Q_D(QWebSocketServer);
-    return d->waitForNewConnection(msec, timedOut);
 }
 
 /*!
