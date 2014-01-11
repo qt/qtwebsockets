@@ -95,7 +95,6 @@ public:
     bool setSocketDescriptor(int socketDescriptor);
     int socketDescriptor() const;
 
-    bool waitForNewConnection(int msec = 0, bool *timedOut = 0);
     bool hasPendingConnections() const;
     virtual QWebSocket *nextPendingConnection();
 

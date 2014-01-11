@@ -551,44 +551,6 @@ QAbstractSocket::SocketState QWebSocket::state() const
 }
 
 /*!
-    \brief Waits until the socket is connected, up to \a msecs milliseconds. If the connection has been established, this function returns true; otherwise it returns false. In the case where it returns false, you can call error() to determine the cause of the error.
-    The following example waits up to one second for a connection to be established:
-
-    \code
-    socket->open("ws://localhost:1234", false);
-    if (socket->waitForConnected(1000))
-    {
-        qDebug("Connected!");
-    }
-    \endcode
-
-    If \a msecs is -1, this function will not time out.
-    \note This function may wait slightly longer than msecs, depending on the time it takes to complete the host lookup.
-    \note Multiple calls to this functions do not accumulate the time. If the function times out, the connecting process will be aborted.
-
-    \sa connected(), open(), state()
- */
-bool QWebSocket::waitForConnected(int msecs)
-{
-    Q_D(QWebSocket);
-    return d->waitForConnected(msecs);
-}
-
-/*!
-  Waits \a msecs for the socket to be disconnected.
-  If the socket was successfully disconnected within time, this method returns true.
-  Otherwise false is returned.
-  When \a msecs is -1, this function will block until the socket is disconnected.
-
-  \sa close(), state()
-*/
-bool QWebSocket::waitForDisconnected(int msecs)
-{
-    Q_D(QWebSocket);
-    return d->waitForDisconnected(msecs);
-}
-
-/*!
     Returns the local address
  */
 QHostAddress QWebSocket::localAddress() const

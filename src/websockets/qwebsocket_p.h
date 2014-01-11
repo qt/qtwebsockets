@@ -130,9 +130,6 @@ public:
     QVariant socketOption(QAbstractSocket::SocketOption option);
     QAbstractSocket::SocketState state() const;
 
-    bool waitForConnected(int msecs);
-    bool waitForDisconnected(int msecs);
-
     QWebSocketProtocol::Version version() const;
     QString resourceName() const;
     QUrl requestUrl() const;

@@ -1042,28 +1042,6 @@ QAbstractSocket::SocketState QWebSocketPrivate::state() const
 /*!
     \internal
  */
-bool QWebSocketPrivate::waitForConnected(int msecs)
-{
-    bool result = false;
-    if (Q_LIKELY(m_pSocket))
-        result = m_pSocket->waitForConnected(msecs);
-    return result;
-}
-
-/*!
-    \internal
- */
-bool QWebSocketPrivate::waitForDisconnected(int msecs)
-{
-    bool result = false;
-    if (Q_LIKELY(m_pSocket))
-        result = m_pSocket->waitForDisconnected(msecs);
-    return result;
-}
-
-/*!
-    \internal
- */
 void QWebSocketPrivate::setSocketState(QAbstractSocket::SocketState state)
 {
     Q_Q(QWebSocket);
