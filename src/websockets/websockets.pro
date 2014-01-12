@@ -35,14 +35,14 @@ SOURCES += \
     $$PWD/qwebsocketserver.cpp \
     $$PWD/qwebsocketserver_p.cpp \
     $$PWD/qwebsocketprotocol.cpp \
-    $$PWD/qwebsockethandshakerequest_p.cpp \
-    $$PWD/qwebsockethandshakeresponse_p.cpp \
-    $$PWD/qwebsocketdataprocessor_p.cpp \
+    $$PWD/qwebsockethandshakerequest.cpp \
+    $$PWD/qwebsockethandshakeresponse.cpp \
+    $$PWD/qwebsocketdataprocessor.cpp \
     $$PWD/qwebsocketcorsauthenticator.cpp \
-    $$PWD/qwebsocketframe_p.cpp
+    $$PWD/qwebsocketframe.cpp
 
 contains(QT_CONFIG, openssl) | contains(QT_CONFIG, openssl-linked) {
-    SOURCES += $$PWD/qsslserver_p.cpp
+    SOURCES += $$PWD/qsslserver.cpp
     PRIVATE_HEADERS += $$PWD/qsslserver_p.h
 }
 
