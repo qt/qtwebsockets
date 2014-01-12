@@ -88,7 +88,8 @@ public:
 
 private:
     QTextStream &readFromStream(QTextStream &textStream);
-    Q_AUTOTEST_EXPORT friend QTextStream &operator >>(QTextStream &stream, QWebSocketHandshakeRequest &request);
+    Q_AUTOTEST_EXPORT friend QTextStream &operator >>(QTextStream &stream,
+                                                      QWebSocketHandshakeRequest &request);
 
     int m_port;
     bool m_isSecure;
@@ -102,7 +103,8 @@ private:
     QUrl m_requestUrl;
 };
 
-Q_AUTOTEST_EXPORT QTextStream & operator >>(QTextStream &stream, QWebSocketHandshakeRequest &request);
+Q_AUTOTEST_EXPORT QTextStream & operator >>(QTextStream &stream,
+                                            QWebSocketHandshakeRequest &request);
 
 QT_END_NAMESPACE
 

@@ -46,7 +46,8 @@
 
     \brief Implements a websocket-based server.
 
-    It is modeled after QTcpServer, and behaves the same. So, if you know how to use QTcpServer, you know how to use QWebSocketServer.
+    It is modeled after QTcpServer, and behaves the same. So, if you know how to use QTcpServer,
+    you know how to use QWebSocketServer.
     This class makes it possible to accept incoming websocket connections.
     You can specify the port or have QWebSocketServer pick one automatically.
     You can listen on a specific address or on all the machine's addresses.
@@ -54,9 +55,12 @@
 
     The newConnection() signal is then emitted each time a client connects to the server.
     Call nextPendingConnection() to accept the pending connection as a connected QWebSocket.
-    The function returns a pointer to a QWebSocket in QAbstractSocket::ConnectedState that you can use for communicating with the client.
-    If an error occurs, serverError() returns the type of error, and errorString() can be called to get a human readable description of what happened.
-    When listening for connections, the address and port on which the server is listening are available as serverAddress() and serverPort().
+    The function returns a pointer to a QWebSocket in QAbstractSocket::ConnectedState that you can
+    use for communicating with the client.
+    If an error occurs, serverError() returns the type of error, and errorString() can be called
+    to get a human readable description of what happened.
+    When listening for connections, the address and port on which the server is listening are
+    available as serverAddress() and serverPort().
     Calling close() makes QWebSocketServer stop listening for incoming connections.
 
     \sa echoserver.html
@@ -70,20 +74,27 @@
   \brief A sample websocket server echoing back messages sent to it.
 
   \section1 Description
-  The echoserver example implements a web socket server that echoes back everything that is sent to it.
+  The echoserver example implements a web socket server that echoes back everything that is sent
+  to it.
   \section1 Code
-  We start by creating a QWebSocketServer (`new QWebSocketServer()`). After the creation, we listen on all local network interfaces (`QHostAddress::Any`) on the specified \a port.
+  We start by creating a QWebSocketServer (`new QWebSocketServer()`). After the creation, we listen
+  on all local network interfaces (`QHostAddress::Any`) on the specified \a port.
   \snippet echoserver/echoserver.cpp constructor
-  If listening is successful, we connect the `newConnection()` signal to the slot `onNewConnection()`.
-  The `newConnection()` signal will be thrown whenever a new web socket client is connected to our server.
+  If listening is successful, we connect the `newConnection()` signal to the slot
+  `onNewConnection()`.
+  The `newConnection()` signal will be thrown whenever a new web socket client is connected to our
+  server.
 
   \snippet echoserver/echoserver.cpp onNewConnection
-  When a new connection is received, the client QWebSocket is retrieved (`nextPendingConnection()`), and the signals we are interested in
-  are connected to our slots (`textMessageReceived()`, `binaryMessageReceived()` and `disconnected()`).
-  The client socket is remembered in a list, in case we would like to use it later (in this example, nothing is done with it).
+  When a new connection is received, the client QWebSocket is retrieved (`nextPendingConnection()`),
+  and the signals we are interested in are connected to our slots
+  (`textMessageReceived()`, `binaryMessageReceived()` and `disconnected()`).
+  The client socket is remembered in a list, in case we would like to use it later
+  (in this example, nothing is done with it).
 
   \snippet echoserver/echoserver.cpp processMessage
-  Whenever `processMessage()` is triggered, we retrieve the sender, and if valid, send back the original message (`send()`).
+  Whenever `processMessage()` is triggered, we retrieve the sender, and if valid, send back the
+  original message (`send()`).
   The same is done with binary messages.
   \snippet echoserver/echoserver.cpp processBinaryMessage
   The only difference is that the message now is a QByteArray instead of a QString.
@@ -126,8 +137,9 @@
 /*!
     \fn void QWebSocketServer::originAuthenticationRequired(QWebSocketCorsAuthenticator *authenticator)
     This signal is emitted when a new connection is requested.
-    The slot connected to this signal should indicate whether the origin (which can be determined by the origin() call)
-    is allowed in the \a authenticator object (by issuing \l{QWebSocketCorsAuthenticator::}{setAllowed()})
+    The slot connected to this signal should indicate whether the origin
+    (which can be determined by the origin() call) is allowed in the \a authenticator object
+    (by issuing \l{QWebSocketCorsAuthenticator::}{setAllowed()})
 
     If no slot is connected to this signal, all origins will be accepted by default.
 
@@ -199,11 +211,14 @@ QT_BEGIN_NAMESPACE
 
     \a parent is passed to the QObject constructor.
  */
-QWebSocketServer::QWebSocketServer(const QString &serverName, SecureMode secureMode, QObject *parent) :
+QWebSocketServer::QWebSocketServer(const QString &serverName, SecureMode secureMode,
+                                   QObject *parent) :
     QObject(parent),
     d_ptr(new QWebSocketServerPrivate(serverName,
                                       #ifndef QT_NO_SSL
-                                      (secureMode == SECURE_MODE) ? QWebSocketServerPrivate::SECURE_MODE : QWebSocketServerPrivate::NON_SECURE_MODE,
+                                      (secureMode == SECURE_MODE) ?
+                                          QWebSocketServerPrivate::SECURE_MODE :
+                                          QWebSocketServerPrivate::NON_SECURE_MODE,
                                       #else
                                       QWebSocketServerPrivate::NON_SECURE_MODE,
                                       #endif
@@ -216,7 +231,8 @@ QWebSocketServer::QWebSocketServer(const QString &serverName, SecureMode secureM
 }
 
 /*!
-    Destroys the WebSocketServer object. If the server is listening for connections, the socket is automatically closed.
+    Destroys the WebSocketServer object. If the server is listening for connections,
+    the socket is automatically closed.
     Any client WebSockets that are still connected are closed and deleted.
 
     \sa close()
@@ -258,7 +274,8 @@ bool QWebSocketServer::hasPendingConnections() const
 }
 
 /*!
-    Returns true if the server is currently listening for incoming connections; otherwise returns false.
+    Returns true if the server is currently listening for incoming connections;
+    otherwise returns false.
 
     \sa listen()
  */
@@ -296,8 +313,11 @@ int QWebSocketServer::maxPendingConnections() const
 
 /*!
     Returns the next pending connection as a connected WebSocket object.
-    The socket is created as a child of the server, which means that it is automatically deleted when the WebSocketServer object is destroyed. It is still a good idea to delete the object explicitly when you are done with it, to avoid wasting memory.
-    0 is returned if this function is called when there are no pending connections.
+    The socket is created as a child of the server, which means that it is automatically
+    deleted when the WebSocketServer object is destroyed.
+    It is still a good idea to delete the object explicitly when you are done with it,
+    to avoid wasting memory.
+    Q_NULLPTR is returned if this function is called when there are no pending connections.
 
     Note: The returned WebSocket object cannot be used from another thread..
 
@@ -352,7 +372,8 @@ void QWebSocketServer::setProxy(const QNetworkProxy &networkProxy)
 #ifndef QT_NO_SSL
 /*!
     Sets the SSL configuration for the websocket server to \a sslConfiguration.
-    This method has no effect if QWebSocketServer runs in non-secure mode (QWebSocketServer::NON_SECURE_MODE).
+    This method has no effect if QWebSocketServer runs in non-secure mode
+    (QWebSocketServer::NON_SECURE_MODE).
 
     \sa sslConfiguration(), SecureMode
  */
@@ -387,7 +408,8 @@ void QWebSocketServer::resumeAccepting()
 }
 
 /*!
-    Sets the server name that will be used during the http handshake phase to the given \a serverName.
+    Sets the server name that will be used during the http handshake phase to the given
+    \a serverName.
     Existing connected clients will not be notified of this change, only newly connecting clients
     will see this new name.
  */
@@ -407,7 +429,8 @@ QString QWebSocketServer::serverName() const
 }
 
 /*!
-    Returns the server's address if the server is listening for connections; otherwise returns QHostAddress::Null.
+    Returns the server's address if the server is listening for connections; otherwise returns
+    QHostAddress::Null.
 
     \sa serverPort(), listen()
  */
@@ -435,6 +458,7 @@ QWebSocketServer::SecureMode QWebSocketServer::secureMode() const
 
 /*!
     Returns an error code for the last error that occurred.
+
     \sa errorString()
  */
 QWebSocketProtocol::CloseCode QWebSocketServer::error() const
@@ -445,6 +469,7 @@ QWebSocketProtocol::CloseCode QWebSocketServer::error() const
 
 /*!
     Returns the server's port if the server is listening for connections; otherwise returns 0.
+
     \sa serverAddress(), listen()
  */
 quint16 QWebSocketServer::serverPort() const
@@ -455,10 +480,15 @@ quint16 QWebSocketServer::serverPort() const
 
 /*!
     Sets the maximum number of pending accepted connections to \a numConnections.
-    WebSocketServer will accept no more than \a numConnections incoming connections before nextPendingConnection() is called.
+    WebSocketServer will accept no more than \a numConnections incoming connections before
+    nextPendingConnection() is called.
     By default, the limit is 30 pending connections.
 
-    Clients may still able to connect after the server has reached its maximum number of pending connections (i.e., WebSocket can still emit the connected() signal). WebSocketServer will stop accepting the new connections, but the operating system may still keep them in queue.
+    Clients may still able to connect after the server has reached its maximum number of
+    pending connections (i.e., WebSocket can still emit the connected() signal).
+    WebSocketServer will stop accepting the new connections, but the operating system may still
+    keep them in queue.
+
     \sa maxPendingConnections(), hasPendingConnections()
  */
 void QWebSocketServer::setMaxPendingConnections(int numConnections)
@@ -468,7 +498,8 @@ void QWebSocketServer::setMaxPendingConnections(int numConnections)
 }
 
 /*!
-    Sets the socket descriptor this server should use when listening for incoming connections to \a socketDescriptor.
+    Sets the socket descriptor this server should use when listening for incoming connections to
+    \a socketDescriptor.
 
     Returns true if the socket is set successfully; otherwise returns false.
     The socket is assumed to be in listening state.
@@ -482,8 +513,10 @@ bool QWebSocketServer::setSocketDescriptor(int socketDescriptor)
 }
 
 /*!
-    Returns the native socket descriptor the server uses to listen for incoming instructions, or -1 if the server is not listening.
-    If the server is using QNetworkProxy, the returned descriptor may not be usable with native socket functions.
+    Returns the native socket descriptor the server uses to listen for incoming instructions,
+    or -1 if the server is not listening.
+    If the server is using QNetworkProxy, the returned descriptor may not be usable with
+    native socket functions.
 
     \sa setSocketDescriptor(), isListening()
  */

@@ -86,7 +86,8 @@ QWebSocketConfiguration::QWebSocketConfiguration() :
 /*!
     \internal
 */
-QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::Version version, QWebSocket *pWebSocket, QObject *parent) :
+QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::Version version,
+                                     QWebSocket *pWebSocket, QObject *parent) :
     QObject(parent),
     q_ptr(pWebSocket),
     m_pSocket(),
@@ -115,7 +116,8 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
 /*!
     \internal
 */
-QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version, QWebSocket *pWebSocket, QObject *parent) :
+QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version,
+                                     QWebSocket *pWebSocket, QObject *parent) :
     QObject(parent),
     q_ptr(pWebSocket),
     m_pSocket(pTcpSocket),
@@ -318,7 +320,8 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
             payload.append(reason.toUtf8());
         if (m_mustMask)
             QWebSocketProtocol::mask(payload.data(), payload.size(), maskingKey);
-        QByteArray frame = getFrameHeader(QWebSocketProtocol::OC_CLOSE, payload.size(), maskingKey, true);
+        QByteArray frame = getFrameHeader(QWebSocketProtocol::OC_CLOSE,
+                                          payload.size(), maskingKey, true);
         frame.append(payload);
         m_pSocket->write(frame);
         m_pSocket->flush();
@@ -335,7 +338,9 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
  */
 void QWebSocketPrivate::open(const QUrl &url, bool mask)
 {
-    //m_pSocket.reset();  //just delete the old socket for the moment; later, we can add more 'intelligent' handling by looking at the url
+    //just delete the old socket for the moment;
+    //later, we can add more 'intelligent' handling by looking at the url
+    //m_pSocket.reset();
     QTcpSocket *pTcpSocket = m_pSocket.take();
     if (pTcpSocket) {
         releaseConnections(pTcpSocket);
@@ -376,7 +381,8 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
                     m_pSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
 
                     makeConnections(m_pSocket.data());
-                    connect(sslSocket, &QSslSocket::encryptedBytesWritten, q, &QWebSocket::bytesWritten);
+                    connect(sslSocket, &QSslSocket::encryptedBytesWritten, q,
+                            &QWebSocket::bytesWritten);
                     setSocketState(QAbstractSocket::ConnectingState);
 
                     sslSocket->setSslConfiguration(m_configuration.m_sslConfiguration);
@@ -403,7 +409,8 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
                 m_pSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
 
                 makeConnections(m_pSocket.data());
-                connect(m_pSocket.data(), &QAbstractSocket::bytesWritten, q, &QWebSocket::bytesWritten);
+                connect(m_pSocket.data(), &QAbstractSocket::bytesWritten, q,
+                        &QWebSocket::bytesWritten);
                 setSocketState(QAbstractSocket::ConnectingState);
     #ifndef QT_NO_NETWORKPROXY
                 m_pSocket->setProxy(m_configuration.m_proxy);
@@ -430,14 +437,16 @@ void QWebSocketPrivate::ping(QByteArray payload)
     if (payload.length() > 125)
         payload.truncate(125);
     m_pingTimer.restart();
-    QByteArray pingFrame = getFrameHeader(QWebSocketProtocol::OC_PING, payload.size(), 0 /*do not mask*/, true);
+    QByteArray pingFrame = getFrameHeader(QWebSocketProtocol::OC_PING, payload.size(),
+                                          0 /*do not mask*/, true);
     pingFrame.append(payload);
     (void)writeFrame(pingFrame);
 }
 
 /*!
   \internal
-    Sets the version to use for the websocket protocol; this must be set before the socket is opened.
+    Sets the version to use for the websocket protocol;
+    this must be set before the socket is opened.
 */
 void QWebSocketPrivate::setVersion(QWebSocketProtocol::Version version)
 {
@@ -510,26 +519,42 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
 
     if (Q_LIKELY(pTcpSocket)) {
         //pass through signals
-        connect(pTcpSocket, static_cast<void (QAbstractSocket::*)(QAbstractSocket::SocketError)>(&QAbstractSocket::error),
-                q, static_cast<void (QWebSocket::*)(QAbstractSocket::SocketError)>(&QWebSocket::error));
-        connect(pTcpSocket, &QAbstractSocket::proxyAuthenticationRequired, q, &QWebSocket::proxyAuthenticationRequired);
-        connect(pTcpSocket, &QAbstractSocket::readChannelFinished, q, &QWebSocket::readChannelFinished);
+        typedef void (QAbstractSocket:: *ASErrorSignal)(QAbstractSocket::SocketError);
+        typedef void (QWebSocket:: *WSErrorSignal)(QAbstractSocket::SocketError);
+        connect(pTcpSocket,
+                static_cast<ASErrorSignal>(&QAbstractSocket::error),
+                q, static_cast<WSErrorSignal>(&QWebSocket::error));
+        connect(pTcpSocket, &QAbstractSocket::proxyAuthenticationRequired, q,
+                &QWebSocket::proxyAuthenticationRequired);
+        connect(pTcpSocket, &QAbstractSocket::readChannelFinished, q,
+                &QWebSocket::readChannelFinished);
         connect(pTcpSocket, &QAbstractSocket::aboutToClose, q, &QWebSocket::aboutToClose);
 
         //catch signals
-        connect(pTcpSocket, &QAbstractSocket::stateChanged, this, &QWebSocketPrivate::processStateChanged);
-        //!!!important to use a QueuedConnection here; with QTcpSocket there is no problem, but with QSslSocket the processing hangs
-        connect(pTcpSocket, &QAbstractSocket::readyRead, this, &QWebSocketPrivate::processData, Qt::QueuedConnection);
+        connect(pTcpSocket, &QAbstractSocket::stateChanged, this,
+                &QWebSocketPrivate::processStateChanged);
+        //!!!important to use a QueuedConnection here;
+        //with QTcpSocket there is no problem, but with QSslSocket the processing hangs
+        connect(pTcpSocket, &QAbstractSocket::readyRead, this,
+                &QWebSocketPrivate::processData, Qt::QueuedConnection);
     }
 
-    connect(&m_dataProcessor, &QWebSocketDataProcessor::textFrameReceived, q, &QWebSocket::textFrameReceived);
-    connect(&m_dataProcessor, &QWebSocketDataProcessor::binaryFrameReceived, q, &QWebSocket::binaryFrameReceived);
-    connect(&m_dataProcessor, &QWebSocketDataProcessor::binaryMessageReceived, q, &QWebSocket::binaryMessageReceived);
-    connect(&m_dataProcessor, &QWebSocketDataProcessor::textMessageReceived, q, &QWebSocket::textMessageReceived);
-    connect(&m_dataProcessor, &QWebSocketDataProcessor::errorEncountered, this, &QWebSocketPrivate::close);
-    connect(&m_dataProcessor, &QWebSocketDataProcessor::pingReceived, this, &QWebSocketPrivate::processPing);
-    connect(&m_dataProcessor, &QWebSocketDataProcessor::pongReceived, this, &QWebSocketPrivate::processPong);
-    connect(&m_dataProcessor, &QWebSocketDataProcessor::closeReceived, this, &QWebSocketPrivate::processClose);
+    connect(&m_dataProcessor, &QWebSocketDataProcessor::textFrameReceived, q,
+            &QWebSocket::textFrameReceived);
+    connect(&m_dataProcessor, &QWebSocketDataProcessor::binaryFrameReceived, q,
+            &QWebSocket::binaryFrameReceived);
+    connect(&m_dataProcessor, &QWebSocketDataProcessor::binaryMessageReceived, q,
+            &QWebSocket::binaryMessageReceived);
+    connect(&m_dataProcessor, &QWebSocketDataProcessor::textMessageReceived, q,
+            &QWebSocket::textMessageReceived);
+    connect(&m_dataProcessor, &QWebSocketDataProcessor::errorEncountered, this,
+            &QWebSocketPrivate::close);
+    connect(&m_dataProcessor, &QWebSocketDataProcessor::pingReceived, this,
+            &QWebSocketPrivate::processPing);
+    connect(&m_dataProcessor, &QWebSocketDataProcessor::pongReceived, this,
+            &QWebSocketPrivate::processPong);
+    connect(&m_dataProcessor, &QWebSocketDataProcessor::closeReceived, this,
+            &QWebSocketPrivate::processClose);
 }
 
 /*!
@@ -609,7 +634,9 @@ QString QWebSocketPrivate::closeReason() const
 /*!
  * \internal
  */
-QByteArray QWebSocketPrivate::getFrameHeader(QWebSocketProtocol::OpCode opCode, quint64 payloadLength, quint32 maskingKey, bool lastFrame)
+QByteArray QWebSocketPrivate::getFrameHeader(QWebSocketProtocol::OpCode opCode,
+                                             quint64 payloadLength, quint32 maskingKey,
+                                             bool lastFrame)
 {
     QByteArray header;
     quint8 byte = 0x00;
@@ -641,7 +668,8 @@ QByteArray QWebSocketPrivate::getFrameHeader(QWebSocketProtocol::OpCode opCode, 
 
         if (maskingKey != 0) {
             const quint32 mask = qToBigEndian<quint32>(maskingKey);
-            header.append(static_cast<const char *>(static_cast<const void *>(&mask)), sizeof(quint32));
+            header.append(static_cast<const char *>(static_cast<const void *>(&mask)),
+                          sizeof(quint32));
         }
     } else {
         setErrorString(QStringLiteral("WebSocket::getHeader: payload too big!"));
@@ -689,7 +717,8 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
         const bool isFirstFrame = (i == 0);
 
         const quint64 size = qMin(bytesLeft, FRAME_SIZE_IN_BYTES);
-        const QWebSocketProtocol::OpCode opcode = isFirstFrame ? firstOpCode : QWebSocketProtocol::OC_CONTINUE;
+        const QWebSocketProtocol::OpCode opcode = isFirstFrame ? firstOpCode
+                                                               : QWebSocketProtocol::OC_CONTINUE;
 
         //write header
         bytesWritten += m_pSocket->write(getFrameHeader(opcode, size, maskingKey, isLastFrame));
@@ -705,7 +734,8 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
                 payloadWritten += written;
             } else {
                 m_pSocket->flush();
-                setErrorString(tr("Error writing bytes to socket: %1.").arg(m_pSocket->errorString()));
+                setErrorString(tr("Error writing bytes to socket: %1.")
+                               .arg(m_pSocket->errorString()));
                 Q_EMIT q->error(QAbstractSocket::NetworkError);
                 break;
             }
@@ -842,18 +872,23 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
         QString headerLine = readLine(pSocket);
         QMap<QString, QString> headers;
         while (!headerLine.isEmpty()) {
-            const QStringList headerField = headerLine.split(QStringLiteral(": "), QString::SkipEmptyParts);
+            const QStringList headerField = headerLine.split(QStringLiteral(": "),
+                                                             QString::SkipEmptyParts);
             headers.insertMulti(headerField[0], headerField[1]);
             headerLine = readLine(pSocket);
         }
 
-        const QString acceptKey = headers.value(QStringLiteral("Sec-WebSocket-Accept"), QStringLiteral(""));
+        const QString acceptKey = headers.value(QStringLiteral("Sec-WebSocket-Accept"),
+                                                QStringLiteral(""));
         const QString upgrade = headers.value(QStringLiteral("Upgrade"), QStringLiteral(""));
         const QString connection = headers.value(QStringLiteral("Connection"), QStringLiteral(""));
-        //unused for the moment
-        //const QString extensions = headers.value(QStringLiteral("Sec-WebSocket-Extensions"), QStringLiteral(""));
-        //const QString protocol = headers.value(QStringLiteral("Sec-WebSocket-Protocol"), QStringLiteral(""));
-        const QString version = headers.value(QStringLiteral("Sec-WebSocket-Version"), QStringLiteral(""));
+//        unused for the moment
+//        const QString extensions = headers.value(QStringLiteral("Sec-WebSocket-Extensions"),
+//                                                 QStringLiteral(""));
+//        const QString protocol = headers.value(QStringLiteral("Sec-WebSocket-Protocol"),
+//                                               QStringLiteral(""));
+        const QString version = headers.value(QStringLiteral("Sec-WebSocket-Version"),
+                                              QStringLiteral(""));
 
         if (Q_LIKELY(httpStatusCode == 101)) {
             //HTTP/x.y 101 Switching Protocols
@@ -868,27 +903,38 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
                 const QString accept = calculateAcceptKey(m_key);
                 ok = (accept == acceptKey);
                 if (!ok)
-                    errorDescription = tr("Accept-Key received from server %1 does not match the client key %2.").arg(acceptKey).arg(accept);
+                    errorDescription =
+                      tr("Accept-Key received from server %1 does not match the client key %2.")
+                            .arg(acceptKey).arg(accept);
             } else {
-                errorDescription = tr("QWebSocketPrivate::processHandshake: Invalid statusline in response: %1.").arg(statusLine);
+                errorDescription =
+                    tr("QWebSocketPrivate::processHandshake: Invalid statusline in response: %1.")
+                        .arg(statusLine);
             }
         } else if (httpStatusCode == 400) {
             //HTTP/1.1 400 Bad Request
             if (!version.isEmpty()) {
-                const QStringList versions = version.split(QStringLiteral(", "), QString::SkipEmptyParts);
+                const QStringList versions = version.split(QStringLiteral(", "),
+                                                           QString::SkipEmptyParts);
                 if (!versions.contains(QString::number(QWebSocketProtocol::currentVersion()))) {
                     //if needed to switch protocol version, then we are finished here
                     //because we cannot handle other protocols than the RFC one (v13)
-                    errorDescription = tr("Handshake: Server requests a version that we don't support: %1.").arg(versions.join(QStringLiteral(", ")));
+                    errorDescription =
+                            tr("Handshake: Server requests a version that we don't support: %1.")
+                            .arg(versions.join(QStringLiteral(", ")));
                     ok = false;
                 } else {
                     //we tried v13, but something different went wrong
-                    errorDescription = tr("QWebSocketPrivate::processHandshake: Unknown error condition encountered. Aborting connection.");
+                    errorDescription =
+                        tr("QWebSocketPrivate::processHandshake: Unknown error condition " \
+                           "encountered. Aborting connection.");
                     ok = false;
                 }
             }
         } else {
-            errorDescription = tr("QWebSocketPrivate::processHandshake: Unhandled http status code: %1 (%2).").arg(httpStatusCode).arg(httpStatusMessage);
+            errorDescription =
+                    tr("QWebSocketPrivate::processHandshake: Unhandled http status code: %1 (%2).")
+                    .arg(httpStatusCode).arg(httpStatusMessage);
             ok = false;
         }
 
@@ -915,7 +961,15 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
     case QAbstractSocket::ConnectedState:
         if (webSocketState == QAbstractSocket::ConnectingState) {
             m_key = generateKey();
-            const QString handshake = createHandShakeRequest(m_resourceName, m_requestUrl.host() % QStringLiteral(":") % QString::number(m_requestUrl.port(80)), origin(), QStringLiteral(""), QStringLiteral(""), m_key);
+            const QString handshake =
+                    createHandShakeRequest(m_resourceName,
+                                           m_requestUrl.host()
+                                                % QStringLiteral(":")
+                                                % QString::number(m_requestUrl.port(80)),
+                                           origin(),
+                                           QStringLiteral(""),
+                                           QStringLiteral(""),
+                                           m_key);
             m_pSocket->write(handshake.toLatin1());
         }
         break;
@@ -944,15 +998,6 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
     }
 }
 
-//order of events:
-//connectToHost is called
-//our socket state is set to "connecting", and tcpSocket->connectToHost is called
-//the tcpsocket is opened, a handshake message is sent; a readyRead signal is thrown
-//this signal is catched by processData
-//when OUR socket state is in the "connecting state", this means that
-//we have received data from the server (response to handshake), and that we
-//should "upgrade" our socket to a websocket (connected state)
-//if our socket was already upgraded, then we need to process websocket data
 /*!
  \internal
  */
@@ -1021,7 +1066,8 @@ QString QWebSocketPrivate::createHandShakeRequest(QString resourceName,
                         QStringLiteral("Sec-WebSocket-Key: ") % QString::fromLatin1(key);
     if (!origin.isEmpty())
         handshakeRequest << QStringLiteral("Origin: ") % origin;
-    handshakeRequest << QStringLiteral("Sec-WebSocket-Version: ") % QString::number(QWebSocketProtocol::currentVersion());
+    handshakeRequest << QStringLiteral("Sec-WebSocket-Version: ")
+                            % QString::number(QWebSocketProtocol::currentVersion());
     if (extensions.length() > 0)
         handshakeRequest << QStringLiteral("Sec-WebSocket-Extensions: ") % extensions;
     if (protocols.length() > 0)

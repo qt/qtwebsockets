@@ -170,7 +170,8 @@ private Q_SLOTS:
 private:
     QWebSocket * const q_ptr;
 
-    QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version, QWebSocket *pWebSocket, QObject *parent = Q_NULLPTR);
+    QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version,
+                      QWebSocket *pWebSocket, QObject *parent = Q_NULLPTR);
     void setVersion(QWebSocketProtocol::Version version);
     void setResourceName(const QString &resourceName);
     void setRequestUrl(const QUrl &requestUrl);
@@ -186,7 +187,8 @@ private:
     void makeConnections(const QTcpSocket *pTcpSocket);
     void releaseConnections(const QTcpSocket *pTcpSocket);
 
-    QByteArray getFrameHeader(QWebSocketProtocol::OpCode opCode, quint64 payloadLength, quint32 maskingKey, bool lastFrame);
+    QByteArray getFrameHeader(QWebSocketProtocol::OpCode opCode, quint64 payloadLength,
+                              quint32 maskingKey, bool lastFrame);
     QString calculateAcceptKey(const QByteArray &key) const;
     QString createHandShakeRequest(QString resourceName,
                                    QString host,

@@ -219,7 +219,8 @@ QTextStream &QWebSocketHandshakeRequest::readFromStream(QTextStream &textStream)
     QString headerLine = textStream.readLine();
     m_headers.clear();
     while (!headerLine.isEmpty()) {
-        const QStringList headerField = headerLine.split(QStringLiteral(": "), QString::SkipEmptyParts);
+        const QStringList headerField = headerLine.split(QStringLiteral(": "),
+                                                         QString::SkipEmptyParts);
         if (Q_UNLIKELY(headerField.length() < 2)) {
             clear();
             return textStream;
@@ -247,7 +248,8 @@ QTextStream &QWebSocketHandshakeRequest::readFromStream(QTextStream &textStream)
                 clear();
                 return textStream;
             }
-            const QWebSocketProtocol::Version ver = QWebSocketProtocol::versionFromString((*i).trimmed());
+            const QWebSocketProtocol::Version ver =
+                    QWebSocketProtocol::versionFromString((*i).trimmed());
             m_versions << ver;
         }
     }
@@ -258,7 +260,8 @@ QTextStream &QWebSocketHandshakeRequest::readFromStream(QTextStream &textStream)
     const QString upgrade = m_headers.value(QStringLiteral("Upgrade"), QStringLiteral(""));
     //must be equal to "websocket", case-insensitive
     const QString connection = m_headers.value(QStringLiteral("Connection"), QStringLiteral(""));
-    const QStringList connectionLine = connection.split(QStringLiteral(","), QString::SkipEmptyParts);
+    const QStringList connectionLine = connection.split(QStringLiteral(","),
+                                                        QString::SkipEmptyParts);
     QStringList connectionValues;
     for (QStringList::const_iterator c = connectionLine.begin(); c != connectionLine.end(); ++c)
         connectionValues << (*c).trimmed();
@@ -272,7 +275,8 @@ QTextStream &QWebSocketHandshakeRequest::readFromStream(QTextStream &textStream)
             m_protocols << (*p).trimmed();
     }
     const QStringList extensionLines = m_headers.values(QStringLiteral("Sec-WebSocket-Extensions"));
-    for (QStringList::const_iterator el = extensionLines.begin(); el != extensionLines.end(); ++el) {
+    for (QStringList::const_iterator el = extensionLines.begin();
+         el != extensionLines.end(); ++el) {
         QStringList extensions = (*el).split(QStringLiteral(","), QString::SkipEmptyParts);
         for (QStringList::const_iterator e = extensions.begin(); e != extensions.end(); ++e)
             m_extensions << (*e).trimmed();
