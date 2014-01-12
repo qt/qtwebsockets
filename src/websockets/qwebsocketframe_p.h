@@ -85,7 +85,7 @@ public:
     QWebSocketProtocol::OpCode opCode() const;
     QByteArray payload() const;
 
-    void clear();       //resets all member variables, and invalidates the object
+    void clear();
 
     bool isValid() const;
 
@@ -96,12 +96,12 @@ private:
     QString m_closeReason;
     bool m_isFinalFrame;
     quint32 m_mask;
-    int m_rsv1; //reserved field 1
-    int m_rsv2; //reserved field 2
-    int m_rsv3; //reserved field 3
+    int m_rsv1;
+    int m_rsv2;
+    int m_rsv3;
     QWebSocketProtocol::OpCode m_opCode;
 
-    quint8 m_length;        //length field as read from the header; this is 1 byte, which when 126 or 127, indicates a large payload
+    quint8 m_length;
     QByteArray m_payload;
 
     bool m_isValid;

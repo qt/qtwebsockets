@@ -86,52 +86,58 @@ QT_BEGIN_NAMESPACE
     <http://code.google.com/p/pywebsocket/wiki/WebSocketProtocolSpec>
 
     \value V_Unknow
-    \value V_0          hixie76: http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76 & hybi-00: http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-00.
-                        Works with key1, key2 and a key in the payload.
-                        Attribute: Sec-WebSocket-Draft value 0.
-    \value V_4          hybi-04: http://tools.ietf.org/id/draft-ietf-hybi-thewebsocketprotocol-04.txt.
-                        Changed handshake: key1, key2, key3 ==> Sec-WebSocket-Key, Sec-WebSocket-Nonce, Sec-WebSocket-Accept
-                        Sec-WebSocket-Draft renamed to Sec-WebSocket-Version
-                        Sec-WebSocket-Version = 4
-    \value V_5          hybi-05: http://tools.ietf.org/id/draft-ietf-hybi-thewebsocketprotocol-05.txt.
-                        Sec-WebSocket-Version = 5
-                        Removed Sec-WebSocket-Nonce
-                        Added Sec-WebSocket-Accept
-    \value V_6          Sec-WebSocket-Version = 6.
-    \value V_7          hybi-07: http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-07.
-                        Sec-WebSocket-Version = 7
-    \value V_8          hybi-8, hybi-9, hybi-10, hybi-11 and hybi-12.
-                        Status codes 1005 and 1006 are added and all codes are now unsigned
-                        Internal error results in 1006
-    \value V_13         hybi-13, hybi14, hybi-15, hybi-16, hybi-17 and RFC 6455.
-                        Sec-WebSocket-Version = 13
-                        Status code 1004 is now reserved
-                        Added 1008, 1009 and 1010
-                        Must support TLS
-                        Clarify multiple version support
-    \value V_LATEST     Refers to the latest know version to QWebSockets.
+    \value V_0        hixie76: http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76 &
+                      hybi-00: http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-00.
+                      Works with key1, key2 and a key in the payload.
+                      Attribute: Sec-WebSocket-Draft value 0.
+    \value V_4        hybi-04: http://tools.ietf.org/id/draft-ietf-hybi-thewebsocketprotocol-04.txt.
+                      Changed handshake: key1, key2, key3
+                      ==> Sec-WebSocket-Key, Sec-WebSocket-Nonce, Sec-WebSocket-Accept
+                      Sec-WebSocket-Draft renamed to Sec-WebSocket-Version
+                      Sec-WebSocket-Version = 4
+    \value V_5        hybi-05: http://tools.ietf.org/id/draft-ietf-hybi-thewebsocketprotocol-05.txt.
+                      Sec-WebSocket-Version = 5
+                      Removed Sec-WebSocket-Nonce
+                      Added Sec-WebSocket-Accept
+    \value V_6        Sec-WebSocket-Version = 6.
+    \value V_7        hybi-07: http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-07.
+                      Sec-WebSocket-Version = 7
+    \value V_8        hybi-8, hybi-9, hybi-10, hybi-11 and hybi-12.
+                      Status codes 1005 and 1006 are added and all codes are now unsigned
+                      Internal error results in 1006
+    \value V_13       hybi-13, hybi14, hybi-15, hybi-16, hybi-17 and RFC 6455.
+                      Sec-WebSocket-Version = 13
+                      Status code 1004 is now reserved
+                      Added 1008, 1009 and 1010
+                      Must support TLS
+                      Clarify multiple version support
+    \value V_LATEST   Refers to the latest know version to QWebSockets.
 */
 
 /*!
   \fn QWebSocketProtocol::isOpCodeReserved(OpCode code)
   Checks if \a code is a valid OpCode
+
   \internal
 */
 
 /*!
   \fn QWebSocketProtocol::isCloseCodeValid(int closeCode)
   Checks if \a closeCode is a valid web socket close code
+
   \internal
 */
 
 /*!
   \fn QWebSocketProtocol::currentVersion()
   Returns the latest version that WebSocket is supporting
+
   \internal
 */
 
 /*!
     Parses the \a versionString and converts it to a Version value
+
     \internal
 */
 QWebSocketProtocol::Version QWebSocketProtocol::versionFromString(const QString &versionString)
@@ -148,6 +154,7 @@ QWebSocketProtocol::Version QWebSocketProtocol::versionFromString(const QString 
 
 /*!
     Mask the \a payload with the given \a maskingKey and stores the result back in \a payload.
+
     \internal
 */
 void QWebSocketProtocol::mask(QByteArray *payload, quint32 maskingKey)
@@ -157,7 +164,9 @@ void QWebSocketProtocol::mask(QByteArray *payload, quint32 maskingKey)
 }
 
 /*!
-    Masks the \a payload of length \a size with the given \a maskingKey and stores the result back in \a payload.
+    Masks the \a payload of length \a size with the given \a maskingKey and
+    stores the result back in \a payload.
+
     \internal
 */
 void QWebSocketProtocol::mask(char *payload, quint64 size, quint32 maskingKey)

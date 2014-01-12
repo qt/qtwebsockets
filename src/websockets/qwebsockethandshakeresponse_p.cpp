@@ -60,12 +60,13 @@ QT_BEGIN_NAMESPACE
 /*!
     \internal
  */
-QWebSocketHandshakeResponse::QWebSocketHandshakeResponse(const QWebSocketHandshakeRequest &request,
-                                     const QString &serverName,
-                                     bool isOriginAllowed,
-                                     const QList<QWebSocketProtocol::Version> &supportedVersions,
-                                     const QList<QString> &supportedProtocols,
-                                     const QList<QString> &supportedExtensions) :
+QWebSocketHandshakeResponse::QWebSocketHandshakeResponse(
+        const QWebSocketHandshakeRequest &request,
+        const QString &serverName,
+        bool isOriginAllowed,
+        const QList<QWebSocketProtocol::Version> &supportedVersions,
+        const QList<QString> &supportedProtocols,
+        const QList<QString> &supportedExtensions) :
     m_isValid(false),
     m_canUpgrade(false),
     m_response(),
@@ -126,12 +127,13 @@ QString QWebSocketHandshakeResponse::calculateAcceptKey(const QString &key) cons
 /*!
     \internal
  */
-QString QWebSocketHandshakeResponse::getHandshakeResponse(const QWebSocketHandshakeRequest &request,
-                                                          const QString &serverName,
-                                                          bool isOriginAllowed,
-                                                          const QList<QWebSocketProtocol::Version> &supportedVersions,
-                                                          const QList<QString> &supportedProtocols,
-                                                          const QList<QString> &supportedExtensions)
+QString QWebSocketHandshakeResponse::getHandshakeResponse(
+        const QWebSocketHandshakeRequest &request,
+        const QString &serverName,
+        bool isOriginAllowed,
+        const QList<QWebSocketProtocol::Version> &supportedVersions,
+        const QList<QString> &supportedProtocols,
+        const QList<QString> &supportedExtensions)
 {
     QStringList response;
     m_canUpgrade = false;
@@ -145,10 +147,14 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(const QWebSocketHandsh
     } else {
         if (request.isValid()) {
             const QString acceptKey = calculateAcceptKey(request.key());
-            const QList<QString> matchingProtocols = supportedProtocols.toSet().intersect(request.protocols().toSet()).toList();
-            const QList<QString> matchingExtensions = supportedExtensions.toSet().intersect(request.extensions().toSet()).toList();
-            QList<QWebSocketProtocol::Version> matchingVersions = request.versions().toSet().intersect(supportedVersions.toSet()).toList();
-            std::sort(matchingVersions.begin(), matchingVersions.end(), std::greater<QWebSocketProtocol::Version>());    //sort in descending order
+            const QList<QString> matchingProtocols =
+                    supportedProtocols.toSet().intersect(request.protocols().toSet()).toList();
+            const QList<QString> matchingExtensions =
+                    supportedExtensions.toSet().intersect(request.extensions().toSet()).toList();
+            QList<QWebSocketProtocol::Version> matchingVersions =
+                    request.versions().toSet().intersect(supportedVersions.toSet()).toList();
+            std::sort(matchingVersions.begin(), matchingVersions.end(),
+                      std::greater<QWebSocketProtocol::Version>());    //sort in descending order
 
             if (Q_UNLIKELY(matchingVersions.isEmpty())) {
                 m_error = QWebSocketProtocol::CC_PROTOCOL_ERROR;
@@ -170,12 +176,14 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(const QWebSocketHandsh
                 QString origin = request.origin().trimmed();
                 if (origin.isEmpty())
                     origin = QStringLiteral("*");
-                response << QStringLiteral("Server: ") % serverName    <<
-                            QStringLiteral("Access-Control-Allow-Credentials: false")       <<    //do not allow credentialed request (containing cookies)
-                            QStringLiteral("Access-Control-Allow-Methods: GET")             <<    //only GET is allowed during handshaking
-                            QStringLiteral("Access-Control-Allow-Headers: content-type")    <<    //this is OK; only the content-type header is allowed, no other headers are accepted
-                            QStringLiteral("Access-Control-Allow-Origin: ") % origin    <<
-                            QStringLiteral("Date: ") % QDateTime::currentDateTimeUtc().toString(QStringLiteral("ddd, dd MMM yyyy hh:mm:ss 'GMT'"));
+                response << QStringLiteral("Server: ") % serverName                      <<
+                            QStringLiteral("Access-Control-Allow-Credentials: false")    <<
+                            QStringLiteral("Access-Control-Allow-Methods: GET")          <<
+                            QStringLiteral("Access-Control-Allow-Headers: content-type") <<
+                            QStringLiteral("Access-Control-Allow-Origin: ") % origin     <<
+                            QStringLiteral("Date: ") %
+                                QDateTime::currentDateTimeUtc()
+                                    .toString(QStringLiteral("ddd, dd MMM yyyy hh:mm:ss 'GMT'"));
 
                 m_acceptedVersion = QWebSocketProtocol::currentVersion();
                 m_canUpgrade = true;
@@ -190,7 +198,8 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(const QWebSocketHandsh
             QStringList versions;
             Q_FOREACH (QWebSocketProtocol::Version version, supportedVersions)
                 versions << QString::number(static_cast<int>(version));
-            response << QStringLiteral("Sec-WebSocket-Version: ") % versions.join(QStringLiteral(", "));
+            response << QStringLiteral("Sec-WebSocket-Version: ")
+                                % versions.join(QStringLiteral(", "));
         }
     }
     response << QStringLiteral("\r\n");    //append empty line at end of header

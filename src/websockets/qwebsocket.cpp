@@ -45,8 +45,10 @@
     \inmodule QtWebSockets
     \brief Implements a TCP socket that talks the websocket protocol.
 
-    WebSockets is a web technology providing full-duplex communications channels over a single TCP connection.
-    The WebSocket protocol was standardized by the IETF as \l {http://tools.ietf.org/html/rfc6455} {RFC 6455} in 2011.
+    WebSockets is a web technology providing full-duplex communications channels over
+    a single TCP connection.
+    The WebSocket protocol was standardized by the IETF as
+    \l {http://tools.ietf.org/html/rfc6455} {RFC 6455} in 2011.
     QWebSocket can both be used in a client application and server application.
 
     This class was modeled after QAbstractSocket.
@@ -59,10 +61,12 @@
 /*!
     \page echoclient.html example
     \title QWebSocket client example
-    \brief A sample websocket client that sends a message and displays the message that it receives back.
+    \brief A sample websocket client that sends a message and displays the message that
+    it receives back.
 
     \section1 Description
-    The EchoClient example implements a web socket client that sends a message to a websocket server and dumps the answer that it gets back.
+    The EchoClient example implements a web socket client that sends a message to a websocket server
+    and dumps the answer that it gets back.
     This example should ideally be used with the EchoServer example.
     \section1 Code
     We start by connecting to the `connected()` signal.
@@ -70,7 +74,8 @@
     After the connection, we open the socket to the given \a url.
 
     \snippet echoclient/echoclient.cpp onConnected
-    When the client is connected successfully, we connect to the `onTextMessageReceived()` signal, and send out "Hello, world!".
+    When the client is connected successfully, we connect to the `onTextMessageReceived()` signal,
+    and send out "Hello, world!".
     If connected with the EchoServer, we will receive the same message back.
 
     \snippet echoclient/echoclient.cpp onTextMessageReceived
@@ -130,7 +135,8 @@ not been filled in with new information when the signal returns.
 /*!
     \fn void QWebSocket::readChannelFinished()
 
-    This signal is emitted when the input (reading) stream is closed in this device. It is emitted as soon as the closing is detected.
+    This signal is emitted when the input (reading) stream is closed in this device.
+    It is emitted as soon as the closing is detected.
 
     \sa close()
 */
@@ -141,7 +147,8 @@ not been filled in with new information when the signal returns.
     The \a bytes argument is set to the number of bytes that were written in this payload.
 
     \note This signal has the same meaning both for secure and non-secure websockets.
-    As opposed to QSslSocket, bytesWritten() is only emitted when encrypted data is effectively written (see QSslSocket:encryptedBytesWritten()).
+    As opposed to QSslSocket, bytesWritten() is only emitted when encrypted data is effectively
+    written (see QSslSocket:encryptedBytesWritten()).
     \sa close()
 */
 
@@ -151,8 +158,8 @@ not been filled in with new information when the signal returns.
     This signal is emitted whenever a text frame is received. The \a frame contains the data and
     \a isLastFrame indicates whether this is the last frame of the complete message.
 
-    This signal can be used to process large messages frame by frame, instead of waiting for the complete
-    message to arrive.
+    This signal can be used to process large messages frame by frame, instead of waiting for the
+    complete message to arrive.
 
     \sa binaryFrameReceived()
 */
@@ -162,22 +169,24 @@ not been filled in with new information when the signal returns.
     This signal is emitted whenever a binary frame is received. The \a frame contains the data and
     \a isLastFrame indicates whether this is the last frame of the complete message.
 
-    This signal can be used to process large messages frame by frame, instead of waiting for the complete
-    message to arrive.
+    This signal can be used to process large messages frame by frame, instead of waiting for the
+    complete message to arrive.
 
     \sa textFrameReceived()
 */
 /*!
     \fn void QWebSocket::textMessageReceived(QString message);
 
-    This signal is emitted whenever a text message is received. The \a message contains the received text.
+    This signal is emitted whenever a text message is received. The \a message contains the
+    received text.
 
     \sa binaryMessageReceived()
 */
 /*!
     \fn void QWebSocket::binaryMessageReceived(QByteArray message);
 
-    This signal is emitted whenever a binary message is received. The \a message contains the received bytes.
+    This signal is emitted whenever a binary message is received. The \a message contains the
+    received bytes.
 
     \sa textMessageReceived()
 */
@@ -195,22 +204,27 @@ not been filled in with new information when the signal returns.
 */
 /*!
     \fn void QWebSocket::sslErrors(const QList<QSslError> &errors)
-    QWebSocket emits this signal after the SSL handshake to indicate that one or more errors have occurred
-    while establishing the identity of the peer.
+    QWebSocket emits this signal after the SSL handshake to indicate that one or more errors have
+    occurred while establishing the identity of the peer.
     The errors are usually an indication that QWebSocket is unable to securely identify the peer.
     Unless any action is taken, the connection will be dropped after this signal has been emitted.
-    If you want to continue connecting despite the errors that have occurred, you must call QWebSocket::ignoreSslErrors() from inside a slot connected to this signal.
-    If you need to access the error list at a later point, you can call sslErrors() (without arguments).
+    If you want to continue connecting despite the errors that have occurred, you must call
+    QWebSocket::ignoreSslErrors() from inside a slot connected to this signal.
+    If you need to access the error list at a later point, you can call sslErrors()
+    (without arguments).
 
-    \a errors contains one or more errors that prevent QWebSocket from verifying the identity of the peer.
+    \a errors contains one or more errors that prevent QWebSocket from verifying the identity of
+    the peer.
 
-    \note You cannot use Qt::QueuedConnection when connecting to this signal, or calling QWebSocket::ignoreSslErrors() will have no effect.
+    \note You cannot use Qt::QueuedConnection when connecting to this signal, or calling
+    QWebSocket::ignoreSslErrors() will have no effect.
 */
 /*!
     \fn void QWebSocket::pong(quint64 elapsedTime, QByteArray payload)
 
     Emitted when a pong message is received in reply to a previous ping.
-    \a elapsedTime contains the roundtrip time in milliseconds and \a payload contains an optional payload that was sent with the ping.
+    \a elapsedTime contains the roundtrip time in milliseconds and \a payload contains an optional
+    payload that was sent with the ping.
 
     \sa ping()
   */
@@ -229,20 +243,25 @@ not been filled in with new information when the signal returns.
 QT_BEGIN_NAMESPACE
 
 /*!
- * \brief Creates a new QWebSocket with the given \a origin, the \a version of the protocol to use and \a parent.
+ * \brief Creates a new QWebSocket with the given \a origin,
+ * the \a version of the protocol to use and \a parent.
  *
- * The \a origin of the client is as specified \l {http://tools.ietf.org/html/rfc6454} {RFC 6454}.
- * (The \a origin is not required for non-web browser clients (see \l {http://tools.ietf.org/html/rfc6455} {RFC 6455})).
+ * The \a origin of the client is as specified \l {http://tools.ietf.org/html/rfc6454}{RFC 6454}.
+ * (The \a origin is not required for non-web browser clients
+ * (see \l {http://tools.ietf.org/html/rfc6455}{RFC 6455})).
  * \note Currently only V13 (\l {http://tools.ietf.org/html/rfc6455} {RFC 6455}) is supported
  */
-QWebSocket::QWebSocket(const QString &origin, QWebSocketProtocol::Version version, QObject *parent) :
+QWebSocket::QWebSocket(const QString &origin,
+                       QWebSocketProtocol::Version version,
+                       QObject *parent) :
     QObject(parent),
     d_ptr(new QWebSocketPrivate(origin, version, this, this))
 {
 }
 
 /*!
- * \brief Destroys the QWebSocket. Closes the socket if it is still open, and releases any used resources.
+ * \brief Destroys the QWebSocket. Closes the socket if it is still open,
+ * and releases any used resources.
  */
 QWebSocket::~QWebSocket()
 {
@@ -250,7 +269,9 @@ QWebSocket::~QWebSocket()
 }
 
 /*!
- * \brief Aborts the current socket and resets the socket. Unlike close(), this function immediately closes the socket, discarding any pending data in the write buffer.
+ * \brief Aborts the current socket and resets the socket.
+ * Unlike close(), this function immediately closes the socket,
+ * discarding any pending data in the write buffer.
  */
 void QWebSocket::abort()
 {
@@ -272,7 +293,8 @@ QAbstractSocket::SocketError QWebSocket::error() const
 /*!
   \internal
  */
-QWebSocket::QWebSocket(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version, QObject *parent) :
+QWebSocket::QWebSocket(QTcpSocket *pTcpSocket,
+                       QWebSocketProtocol::Version version, QObject *parent) :
     QObject(parent),
     d_ptr(new QWebSocketPrivate(pTcpSocket, version, this, this))
 {
@@ -290,11 +312,14 @@ QString QWebSocket::errorString() const
 }
 
 /*!
-    This function writes as much as possible from the internal write buffer to the underlying network socket, without blocking.
+    This function writes as much as possible from the internal write buffer
+    to the underlying network socket, without blocking.
     If any data was written, this function returns true; otherwise false is returned.
     Call this function if you need QWebSocket to start sending buffered data immediately.
     The number of bytes successfully written depends on the operating system.
-    In most cases, you do not need to call this function, because QWebSocket will start sending data automatically once control goes back to the event loop.
+    In most cases, you do not need to call this function,
+    because QWebSocket will start sending data automatically
+    once control goes back to the event loop.
     In the absence of an event loop, call waitForBytesWritten() instead.
 */
 bool QWebSocket::flush()
@@ -304,7 +329,8 @@ bool QWebSocket::flush()
 }
 
 /*!
-    Sends the given \a message over the socket as a text message and returns the number of bytes actually sent.
+    Sends the given \a message over the socket as a text message and returns the number of bytes
+    actually sent.
     \a message must be '\\0' terminated and is considered to be in UTF-8 encoded format.
 
     \note When \a message is null or has zero length, zero is returned.
@@ -319,12 +345,13 @@ qint64 QWebSocket::write(const char *message)
 }
 
 /*!
-    Sends the most \a maxSize bytes of the given \a message over the socket as a text message and returns the number of bytes actually sent.
+    Sends the most \a maxSize bytes of the given \a message over the socket as a text message
+    and returns the number of bytes actually sent.
     \a message is considered to be in UTF-8 encoded format.
 
     \note When \a message is null, has zero length or \a maxSize < 0, zero is returned.
-    \note The maximum size of message, is limited by \l {QString::}{size_type}. It the message is larger,
-    it is truncated to the maximum value of \l {QString::}{size_type}.
+    \note The maximum size of message, is limited by \l {QString::}{size_type}.
+    If the message is larger, it is truncated to the maximum value of \l {QString::}{size_type}.
 
     \sa QString::fromUtf8(), QString::size_type
  */
@@ -335,7 +362,8 @@ qint64 QWebSocket::write(const char *message, qint64 maxSize)
 }
 
 /*!
-    \brief Sends the given \a message over the socket as a text message and returns the number of bytes actually sent.
+    \brief Sends the given \a message over the socket as a text message and
+    returns the number of bytes actually sent.
  */
 qint64 QWebSocket::write(const QString &message)
 {
@@ -344,7 +372,8 @@ qint64 QWebSocket::write(const QString &message)
 }
 
 /*!
-    \brief Sends the given \a data over the socket as a binary message and returns the number of bytes actually sent.
+    \brief Sends the given \a data over the socket as a binary message and
+    returns the number of bytes actually sent.
  */
 qint64 QWebSocket::write(const QByteArray &data)
 {
@@ -353,7 +382,9 @@ qint64 QWebSocket::write(const QByteArray &data)
 }
 
 /*!
-    \brief Gracefully closes the socket with the given \a closeCode and \a reason. Any data in the write buffer is flushed before the socket is closed.
+    \brief Gracefully closes the socket with the given \a closeCode and \a reason.
+
+    Any data in the write buffer is flushed before the socket is closed.
     The \a closeCode is a QWebSocketProtocol::CloseCode indicating the reason to close, and
     \a reason describes the reason of the closure more in detail
  */
@@ -365,8 +396,9 @@ void QWebSocket::close(QWebSocketProtocol::CloseCode closeCode, const QString &r
 
 /*!
     \brief Opens a websocket connection using the given \a url.
-    If \a mask is true, all frames will be masked; this is only necessary for client side sockets; servers should never mask
-    \note A client socket must *always* mask its frames; servers may *never* mask its frames
+    If \a mask is true, all frames will be masked; this is only necessary for client side sockets;
+    servers should never mask.
+    \note A client socket must *always* mask its frames; servers may *never* mask its frames.
  */
 void QWebSocket::open(const QUrl &url, bool mask)
 {
@@ -378,7 +410,8 @@ void QWebSocket::open(const QUrl &url, bool mask)
     \brief Pings the server to indicate that the connection is still alive.
     Additional \a payload can be sent along the ping message.
 
-    The size of the \a payload cannot be bigger than 125. If it is larger, the \a payload is clipped to 125 bytes.
+    The size of the \a payload cannot be bigger than 125.
+    If it is larger, the \a payload is clipped to 125 bytes.
 
     \sa pong()
  */
@@ -442,7 +475,8 @@ void QWebSocket::ignoreSslErrors(const QList<QSslError> &errors)
 /*!
     Sets the socket's SSL configuration to be the contents of \a sslConfiguration.
 
-    This function sets the local certificate, the ciphers, the private key and the CA certificates to those stored in \a sslConfiguration.
+    This function sets the local certificate, the ciphers, the private key and
+    the CA certificates to those stored in \a sslConfiguration.
     It is not possible to set the SSL-state related fields.
     \sa sslConfiguration()
  */
@@ -454,7 +488,8 @@ void QWebSocket::setSslConfiguration(const QSslConfiguration &sslConfiguration)
 
 /*!
     Returns the socket's SSL configuration state.
-    The default SSL configuration of a socket is to use the default ciphers, default CA certificates, no local private key or certificate.
+    The default SSL configuration of a socket is to use the default ciphers,
+    default CA certificates, no local private key or certificate.
     The SSL configuration also contains fields that can change with time without notice.
 
     \sa setSslConfiguration()
@@ -650,6 +685,7 @@ void QWebSocket::resume()
 /*!
     Controls whether to pause upon receiving a notification. The \a pauseMode parameter specifies
     the conditions in which the socket should be paused.
+
     The only notification currently supported is sslErrors().
     If set to PauseOnSslErrors, data transfer on the socket will be paused
     and needs to be enabled explicitly again by calling resume().
@@ -666,9 +702,15 @@ void QWebSocket::setPauseMode(QAbstractSocket::PauseModes pauseMode)
 
 /*!
     Sets the size of QWebSocket's internal read buffer to be \a size bytes.
-    If the buffer size is limited to a certain size, QWebSocket won't buffer more than this size of data.
-    Exceptionally, a buffer size of 0 means that the read buffer is unlimited and all incoming data is buffered. This is the default.
-    This option is useful if you only read the data at certain points in time (e.g., in a real-time streaming application) or if you want to protect your socket against receiving too much data, which may eventually cause your application to run out of memory.
+
+    If the buffer size is limited to a certain size, QWebSocket won't buffer more than
+    this size of data.
+    Exceptionally, a buffer size of 0 means that the read buffer is unlimited and
+    all incoming data is buffered. This is the default.
+    This option is useful if you only read the data at certain points in time
+    (e.g., in a real-time streaming application) or if you want to protect your socket against
+    receiving too much data, which may eventually cause your application to run out of memory.
+
     \sa readBufferSize()
 */
 void QWebSocket::setReadBufferSize(qint64 size)

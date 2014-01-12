@@ -81,7 +81,9 @@ public:
         NON_SECURE_MODE
     };
 
-    explicit QWebSocketServerPrivate(const QString &serverName, SecureMode secureMode, QWebSocketServer * const pWebSocketServer, QObject *parent = Q_NULLPTR);
+    explicit QWebSocketServerPrivate(const QString &serverName, SecureMode secureMode,
+                                     QWebSocketServer * const pWebSocketServer,
+                                     QObject *parent = Q_NULLPTR);
     virtual ~QWebSocketServerPrivate();
 
     void close();

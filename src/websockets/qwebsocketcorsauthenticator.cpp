@@ -43,14 +43,19 @@
     \class QWebSocketCorsAuthenticator
 
     \inmodule QtWebSockets
-    \brief The QWebSocketCorsAuthenticator class provides an authenticator object for Cross Origin Requests (CORS).
+    \brief The QWebSocketCorsAuthenticator class provides an authenticator object for
+    Cross Origin Requests (CORS).
 
-    The QWebSocketCorsAuthenticator class is used in the \l{QWebSocketServer::}{originAuthenticationRequired()} signal.
+    The QWebSocketCorsAuthenticator class is used in the
+    \l{QWebSocketServer::}{originAuthenticationRequired()} signal.
     The class provides a way to pass back the required information to the QWebSocketServer.
-    It provides applications with fine-grained control over which origin URLs are allowed and which aren't.
+    It provides applications with fine-grained control over which origin URLs are allowed
+    and which aren't.
     By default, every origin is accepted.
-    To get fine grained control, an application connects the \l{QWebSocketServer::}{originAuthenticationRequired()} signal to
-    a slot. When the origin (QWebSocketCorsAuthenticator::origin()) is accepted, it calls QWebSocketCorsAuthenticator::setAllowed(true)
+    To get fine grained control, an application connects the
+    \l{QWebSocketServer::}{originAuthenticationRequired()} signal to a slot.
+    When the origin (QWebSocketCorsAuthenticator::origin()) is accepted,
+    it calls QWebSocketCorsAuthenticator::setAllowed(true)
 
     \note Checking on the origin does not make much sense when the server is accessed
     via a non-browser client, as that client can set whatever origin header it likes.
@@ -68,7 +73,8 @@ QT_BEGIN_NAMESPACE
 /*!
   \internal
  */
-QWebSocketCorsAuthenticatorPrivate::QWebSocketCorsAuthenticatorPrivate(const QString &origin, bool allowed) :
+QWebSocketCorsAuthenticatorPrivate::QWebSocketCorsAuthenticatorPrivate(const QString &origin,
+                                                                       bool allowed) :
     m_origin(origin),
     m_isAllowed(allowed)
 {}
@@ -84,7 +90,7 @@ QWebSocketCorsAuthenticatorPrivate::~QWebSocketCorsAuthenticatorPrivate()
   \note By default, allowed() returns true. This means that per default every origin is accepted.
  */
 QWebSocketCorsAuthenticator::QWebSocketCorsAuthenticator(const QString &origin) :
-    d_ptr(new QWebSocketCorsAuthenticatorPrivate(origin, true))  //all origins are per default allowed
+    d_ptr(new QWebSocketCorsAuthenticatorPrivate(origin, true))
 {
 }
 
@@ -106,7 +112,8 @@ QWebSocketCorsAuthenticator::QWebSocketCorsAuthenticator(const QWebSocketCorsAut
 /*!
   Assigns \a other to this authenticator object
  */
-QWebSocketCorsAuthenticator &QWebSocketCorsAuthenticator::operator =(const QWebSocketCorsAuthenticator &other)
+QWebSocketCorsAuthenticator &
+QWebSocketCorsAuthenticator::operator =(const QWebSocketCorsAuthenticator &other)
 {
     Q_D(QWebSocketCorsAuthenticator);
     if (this != &other) {
@@ -128,7 +135,8 @@ QWebSocketCorsAuthenticator::QWebSocketCorsAuthenticator(QWebSocketCorsAuthentic
 /*!
   Move-assigns \a other to this instance.
  */
-QWebSocketCorsAuthenticator &QWebSocketCorsAuthenticator::operator =(QWebSocketCorsAuthenticator &&other)
+QWebSocketCorsAuthenticator &
+QWebSocketCorsAuthenticator::operator =(QWebSocketCorsAuthenticator &&other)
 {
     qSwap(d_ptr, other.d_ptr);
     return *this;
@@ -157,7 +165,9 @@ QString QWebSocketCorsAuthenticator::origin() const
 }
 
 /*!
-  Allows or disallows the origin. Setting \a allowed to true, will accept the connection request for the given origin.
+  Allows or disallows the origin. Setting \a allowed to true, will accept the connection request
+  for the given origin.
+
   Setting \a allowed to false, will reject the connection request.
 
   \note By default, all origins are accepted.

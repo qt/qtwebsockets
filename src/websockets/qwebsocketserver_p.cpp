@@ -60,8 +60,10 @@ QT_BEGIN_NAMESPACE
 /*!
     \internal
  */
-QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName, QWebSocketServerPrivate::SecureMode secureMode,
-                                                 QWebSocketServer * const pWebSocketServer, QObject *parent) :
+QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName,
+                                                 QWebSocketServerPrivate::SecureMode secureMode,
+                                                 QWebSocketServer * const pWebSocketServer,
+                                                 QObject *parent) :
     QObject(parent),
     q_ptr(pWebSocketServer),
     m_pTcpServer(Q_NULLPTR),
@@ -84,14 +86,17 @@ QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName, QWeb
         m_pTcpServer = pSslServer;
         if (Q_LIKELY(m_pTcpServer)) {
             connect(pSslServer, SIGNAL(newEncryptedConnection()), this, SLOT(onNewConnection()));
-            connect(pSslServer, SIGNAL(peerVerifyError(QSslError)), q_ptr, SIGNAL(peerVerifyError(QSslError)));
-            connect(pSslServer, SIGNAL(sslErrors(QList<QSslError>)), q_ptr, SIGNAL(sslErrors(QList<QSslError>)));
+            connect(pSslServer, SIGNAL(peerVerifyError(QSslError)), q_ptr,
+                    SIGNAL(peerVerifyError(QSslError)));
+            connect(pSslServer, SIGNAL(sslErrors(QList<QSslError>)), q_ptr,
+                    SIGNAL(sslErrors(QList<QSslError>)));
         }
 #else
         qFatal("SSL not supported on this platform.");
 #endif
     }
-    connect(m_pTcpServer, SIGNAL(acceptError(QAbstractSocket::SocketError)), q_ptr, SIGNAL(acceptError(QAbstractSocket::SocketError)));
+    connect(m_pTcpServer, SIGNAL(acceptError(QAbstractSocket::SocketError)), q_ptr,
+            SIGNAL(acceptError(QAbstractSocket::SocketError)));
 }
 
 /*!
@@ -379,8 +384,10 @@ void QWebSocketServerPrivate::handshakeReceived()
 
         if (m_pendingConnections.length() >= maxPendingConnections()) {
             pTcpSocket->close();
-            qWarning() << tr("Too many pending connections: new websocket connection not accepted.");
-            setError(QWebSocketProtocol::CC_ABNORMAL_DISCONNECTION, tr("Too many pending connections."));
+            qWarning() <<
+                tr("Too many pending connections: new websocket connection not accepted.");
+            setError(QWebSocketProtocol::CC_ABNORMAL_DISCONNECTION,
+                     tr("Too many pending connections."));
             return;
         }
 
@@ -405,14 +412,17 @@ void QWebSocketServerPrivate::handshakeReceived()
                 httpStream.flush();
 
                 if (response.canUpgrade()) {
-                    QWebSocket *pWebSocket = QWebSocketPrivate::upgradeFrom(pTcpSocket, request, response);
+                    QWebSocket *pWebSocket = QWebSocketPrivate::upgradeFrom(pTcpSocket,
+                                                                            request,
+                                                                            response);
                     if (pWebSocket) {
                         pWebSocket->setParent(this);
                         addPendingConnection(pWebSocket);
                         Q_EMIT q->newConnection();
                         success = true;
                     } else {
-                        setError(QWebSocketProtocol::CC_ABNORMAL_DISCONNECTION, tr("Upgrading to websocket failed."));
+                        setError(QWebSocketProtocol::CC_ABNORMAL_DISCONNECTION,
+                                 tr("Upgrading to websocket failed."));
                     }
                 }
                 else {
@@ -427,7 +437,8 @@ void QWebSocketServerPrivate::handshakeReceived()
             pTcpSocket->close();
         }
     } else {
-        qWarning() << tr("Sender socket is NULL. This should not happen, otherwise it is a Qt bug!!!");
+        qWarning() <<
+            tr("Sender socket is NULL. This should not happen, otherwise it is a Qt bug!!!");
     }
 }
 

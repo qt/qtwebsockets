@@ -104,10 +104,10 @@ public:
     QWebSocketProtocol::CloseCode closeCode() const;
     QString closeReason() const;
 
-    qint64 write(const char *message);		//send data as text
-    qint64 write(const char *message, qint64 maxSize);		//send data as text
-    qint64 write(const QString &message);	//send data as text
-    qint64 write(const QByteArray &data);	//send data as binary
+    qint64 write(const char *message) Q_REQUIRED_RESULT;
+    qint64 write(const char *message, qint64 maxSize) Q_REQUIRED_RESULT;
+    qint64 write(const QString &message) Q_REQUIRED_RESULT;
+    qint64 write(const QByteArray &data) Q_REQUIRED_RESULT;
 
 #ifndef QT_NO_SSL
     void ignoreSslErrors(const QList<QSslError> &errors);
@@ -116,7 +116,8 @@ public:
 #endif
 
 public Q_SLOTS:
-    void close(QWebSocketProtocol::CloseCode closeCode = QWebSocketProtocol::CC_NORMAL, const QString &reason = QString());
+    void close(QWebSocketProtocol::CloseCode closeCode = QWebSocketProtocol::CC_NORMAL,
+               const QString &reason = QString());
     void open(const QUrl &url, bool mask = true);
     void ping(const QByteArray &payload = QByteArray());
 #ifndef QT_NO_SSL
@@ -145,7 +146,8 @@ Q_SIGNALS:
 #endif
 
 private:
-    QWebSocket(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version, QObject *parent = Q_NULLPTR);
+    QWebSocket(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version,
+               QObject *parent = Q_NULLPTR);
     QWebSocketPrivate * const d_ptr;
 };
 

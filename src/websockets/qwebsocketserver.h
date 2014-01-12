@@ -76,7 +76,8 @@ public:
         NON_SECURE_MODE
     };
 
-    explicit QWebSocketServer(const QString &serverName, SecureMode secureMode, QObject *parent = Q_NULLPTR);
+    explicit QWebSocketServer(const QString &serverName, SecureMode secureMode,
+                              QObject *parent = Q_NULLPTR);
     virtual ~QWebSocketServer();
 
     bool listen(const QHostAddress &address = QHostAddress::Any, quint16 port = 0);
