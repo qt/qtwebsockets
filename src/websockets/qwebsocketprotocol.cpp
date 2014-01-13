@@ -115,6 +115,33 @@ QT_BEGIN_NAMESPACE
 */
 
 /*!
+    \enum QWebSocketProtocol::OpCode
+
+    \inmodule QtWebSockets
+
+    The frame opcodes as defined by the WebSockets standard
+
+    \value OC_CONTINUE		Continuation frame
+    \value OC_TEXT			Text frame
+    \value OC_BINARY		Binary frame
+    \value OC_RESERVED_3	Reserved
+    \value OC_RESERVED_4	Reserved
+    \value OC_RESERVED_5	Reserved
+    \value OC_RESERVED_6	Reserved
+    \value OC_RESERVED_7	Reserved
+    \value OC_CLOSE         Close frame
+    \value OC_PING			Ping frame
+    \value OC_PONG			Pong frame
+    \value OC_RESERVED_B	Reserved
+    \value OC_RESERVED_C	Reserved
+    \value OC_RESERVED_D	Reserved
+    \value OC_RESERVED_E	Reserved
+    \value OC_RESERVED_F	Reserved
+
+    \internal
+*/
+
+/*!
   \fn QWebSocketProtocol::isOpCodeReserved(OpCode code)
   Checks if \a code is a valid OpCode
 
