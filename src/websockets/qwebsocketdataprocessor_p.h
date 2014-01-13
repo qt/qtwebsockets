@@ -58,6 +58,7 @@
 #include <QtCore/QString>
 #include <QtCore/QTextCodec>
 #include "qwebsocketprotocol.h"
+#include "qwebsocketprotocol_p.h"
 
 QT_BEGIN_NAMESPACE
 
