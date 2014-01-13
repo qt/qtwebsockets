@@ -74,11 +74,12 @@ void QSslServer::incomingConnection(qintptr socket)
         pSslSocket->setSslConfiguration(m_sslConfiguration);
 
         if (Q_LIKELY(pSslSocket->setSocketDescriptor(socket))) {
-            connect(pSslSocket, SIGNAL(peerVerifyError(QSslError)),
-                    this, SIGNAL(peerVerifyError(QSslError)));
-            connect(pSslSocket, SIGNAL(sslErrors(QList<QSslError>)),
-                    this, SIGNAL(sslErrors(QList<QSslError>)));
-            connect(pSslSocket, SIGNAL(encrypted()), this, SIGNAL(newEncryptedConnection()));
+            connect(pSslSocket, &QSslSocket::peerVerifyError, this, &QSslServer::peerVerifyError);
+
+            typedef void (QSslSocket::* sslErrorsSignal)(const QList<QSslError> &);
+            connect(pSslSocket, static_cast<sslErrorsSignal>(&QSslSocket::sslErrors),
+                    this, &QSslServer::sslErrors);
+            connect(pSslSocket, &QSslSocket::encrypted, this, &QSslServer::newEncryptedConnection);
 
             addPendingConnection(pSslSocket);
 

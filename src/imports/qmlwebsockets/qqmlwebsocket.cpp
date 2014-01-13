@@ -168,9 +168,13 @@ void QQmlWebSocket::componentComplete()
 {
     m_webSocket.reset(new (std::nothrow) QWebSocket());
     if (Q_LIKELY(m_webSocket)) {
-        connect(m_webSocket.data(), SIGNAL(textMessageReceived(QString)), this, SIGNAL(textMessageReceived(QString)));
-        connect(m_webSocket.data(), SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onError(QAbstractSocket::SocketError)));
-        connect(m_webSocket.data(), SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(onStateChanged(QAbstractSocket::SocketState)));
+        connect(m_webSocket.data(), &QWebSocket::textMessageReceived,
+                this, &QQmlWebSocket::textMessageReceived);
+        typedef void (QWebSocket::* ErrorSignal)(QAbstractSocket::SocketError);
+        connect(m_webSocket.data(), static_cast<ErrorSignal>(&QWebSocket::error),
+                this, &QQmlWebSocket::onError);
+        connect(m_webSocket.data(), &QWebSocket::stateChanged,
+                this, &QQmlWebSocket::onStateChanged);
 
         m_componentCompleted = true;
 

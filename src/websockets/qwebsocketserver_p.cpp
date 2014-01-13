@@ -77,7 +77,8 @@ QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName,
     if (m_secureMode == NON_SECURE_MODE) {
         m_pTcpServer = new QTcpServer(this);
         if (Q_LIKELY(m_pTcpServer))
-            connect(m_pTcpServer, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
+            connect(m_pTcpServer, &QTcpServer::newConnection,
+                    this, &QWebSocketServerPrivate::onNewConnection);
         else
             qFatal("Could not allocate memory for tcp server.");
     } else {
@@ -85,18 +86,18 @@ QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName,
         QSslServer *pSslServer = new QSslServer(this);
         m_pTcpServer = pSslServer;
         if (Q_LIKELY(m_pTcpServer)) {
-            connect(pSslServer, SIGNAL(newEncryptedConnection()), this, SLOT(onNewConnection()));
-            connect(pSslServer, SIGNAL(peerVerifyError(QSslError)), q_ptr,
-                    SIGNAL(peerVerifyError(QSslError)));
-            connect(pSslServer, SIGNAL(sslErrors(QList<QSslError>)), q_ptr,
-                    SIGNAL(sslErrors(QList<QSslError>)));
+            connect(pSslServer, &QSslServer::newEncryptedConnection,
+                    this, &QWebSocketServerPrivate::onNewConnection);
+            connect(pSslServer, &QSslServer::peerVerifyError,
+                    q_ptr, &QWebSocketServer::peerVerifyError);
+            connect(pSslServer, &QSslServer::sslErrors,
+                    q_ptr, &QWebSocketServer::sslErrors);
         }
 #else
         qFatal("SSL not supported on this platform.");
 #endif
     }
-    connect(m_pTcpServer, SIGNAL(acceptError(QAbstractSocket::SocketError)), q_ptr,
-            SIGNAL(acceptError(QAbstractSocket::SocketError)));
+    connect(m_pTcpServer, &QTcpServer::acceptError, q_ptr, &QWebSocketServer::acceptError);
 }
 
 /*!
@@ -356,7 +357,7 @@ void QWebSocketServerPrivate::setError(QWebSocketProtocol::CloseCode code, QStri
 void QWebSocketServerPrivate::onNewConnection()
 {
     QTcpSocket *pTcpSocket = m_pTcpServer->nextPendingConnection();
-    connect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(handshakeReceived()));
+    connect(pTcpSocket, &QTcpSocket::readyRead, this, &QWebSocketServerPrivate::handshakeReceived);
 }
 
 /*!
@@ -380,7 +381,8 @@ void QWebSocketServerPrivate::handshakeReceived()
         bool success = false;
         bool isSecure = false;
 
-        disconnect(pTcpSocket, SIGNAL(readyRead()), this, SLOT(handshakeReceived()));
+        disconnect(pTcpSocket, &QTcpSocket::readyRead,
+                   this, &QWebSocketServerPrivate::handshakeReceived);
 
         if (m_pendingConnections.length() >= maxPendingConnections()) {
             pTcpSocket->close();
