@@ -46,6 +46,7 @@
 
 #include "QtWebSockets/qwebsocketcorsauthenticator.h"
 #include "QtWebSockets/qwebsocketprotocol.h"
+#include "private/qwebsocketprotocol_p.h"
 
 QT_USE_NAMESPACE
 

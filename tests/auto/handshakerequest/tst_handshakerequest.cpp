@@ -45,6 +45,7 @@
 #include <QtCore/QtEndian>
 
 #include "private/qwebsockethandshakerequest_p.h"
+#include "private/qwebsocketprotocol_p.h"
 #include "QtWebSockets/qwebsocketprotocol.h"
 
 QT_USE_NAMESPACE
