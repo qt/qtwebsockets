@@ -47,14 +47,16 @@
     \ingroup websockets-qml
     \brief QML interface to QWebSocket.
 
-    WebSockets is a web technology providing full-duplex communications channels over a single TCP connection.
-    The WebSocket protocol was standardized by the IETF as RFC 6455 in 2011 (see http://tools.ietf.org/html/rfc6455).
+    WebSockets is a web technology providing full-duplex communications channels over a
+    single TCP connection.
+    The WebSocket protocol was standardized by the IETF as
+    \l {http://tools.ietf.org/html/rfc6455} {RFC 6455} in 2011.
 */
 
 /*!
   \qmlproperty QUrl WebSocket::url
-  Server url to connect to. The url must have one of 2 schemes: {ws://} or {wss://}.
-  When not supplied, then {ws://} is used.
+  Server url to connect to. The url must have one of 2 schemes: \e ws:// or \e wss://.
+  When not supplied, then \e ws:// is used.
   */
 
 /*!
