@@ -46,8 +46,9 @@
 #include <QtCore/QByteArray>
 #include <limits.h>
 
-#include "qwebsocketprotocol.h"
 #include "qwebsockets_global.h"
+#include "qwebsocketprotocol.h"
+#include "qwebsocketprotocol_p.h"
 
 QT_BEGIN_NAMESPACE
 

@@ -52,6 +52,26 @@ class QByteArray;
 
 namespace QWebSocketProtocol
 {
+enum OpCode
+{
+    OC_CONTINUE     = 0x0,
+    OC_TEXT         = 0x1,
+    OC_BINARY       = 0x2,
+    OC_RESERVED_3   = 0x3,
+    OC_RESERVED_4   = 0x4,
+    OC_RESERVED_5   = 0x5,
+    OC_RESERVED_6   = 0x6,
+    OC_RESERVED_7   = 0x7,
+    OC_CLOSE        = 0x8,
+    OC_PING         = 0x9,
+    OC_PONG         = 0xA,
+    OC_RESERVED_B   = 0xB,
+    OC_RESERVED_C   = 0xC,
+    OC_RESERVED_D   = 0xD,
+    OC_RESERVED_E   = 0xE,
+    OC_RESERVED_F   = 0xF
+};
+
 inline bool isOpCodeReserved(OpCode code)
 {
     return ((code > OC_BINARY) && (code < OC_CLOSE)) || (code > OC_PONG);
