@@ -1,0 +1,6 @@
+Code-Review+1: Simon Hausmann <simon.hausmann@digia.com>
+Sanity-Review+1: Qt Sanity Bot <qt_sanitybot@qt-project.org>
+Code-Review+2: Kurt Pattyn <pattyn.kurt@gmail.com>
+Reviewed-on: https://codereview.qt-project.org/75816
+Project: playground/websockets
+Branch: refs/heads/master
