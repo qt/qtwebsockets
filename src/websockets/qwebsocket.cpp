@@ -153,7 +153,7 @@ not been filled in with new information when the signal returns.
 */
 
 /*!
-    \fn void QWebSocket::textFrameReceived(QString frame, bool isLastFrame);
+    \fn void QWebSocket::textFrameReceived(const QString &frame, bool isLastFrame);
 
     This signal is emitted whenever a text frame is received. The \a frame contains the data and
     \a isLastFrame indicates whether this is the last frame of the complete message.
@@ -164,7 +164,7 @@ not been filled in with new information when the signal returns.
     \sa binaryFrameReceived()
 */
 /*!
-    \fn void QWebSocket::binaryFrameReceived(QByteArray frame, bool isLastFrame);
+    \fn void QWebSocket::binaryFrameReceived(const QByteArray &frame, bool isLastFrame);
 
     This signal is emitted whenever a binary frame is received. The \a frame contains the data and
     \a isLastFrame indicates whether this is the last frame of the complete message.
@@ -175,7 +175,7 @@ not been filled in with new information when the signal returns.
     \sa textFrameReceived()
 */
 /*!
-    \fn void QWebSocket::textMessageReceived(QString message);
+    \fn void QWebSocket::textMessageReceived(const QString &message);
 
     This signal is emitted whenever a text message is received. The \a message contains the
     received text.
@@ -183,7 +183,7 @@ not been filled in with new information when the signal returns.
     \sa binaryMessageReceived()
 */
 /*!
-    \fn void QWebSocket::binaryMessageReceived(QByteArray message);
+    \fn void QWebSocket::binaryMessageReceived(const QByteArray &message);
 
     This signal is emitted whenever a binary message is received. The \a message contains the
     received bytes.
@@ -220,7 +220,7 @@ not been filled in with new information when the signal returns.
     QWebSocket::ignoreSslErrors() will have no effect.
 */
 /*!
-    \fn void QWebSocket::pong(quint64 elapsedTime, QByteArray payload)
+    \fn void QWebSocket::pong(quint64 elapsedTime, const QByteArray &payload)
 
     Emitted when a pong message is received in reply to a previous ping.
     \a elapsedTime contains the roundtrip time in milliseconds and \a payload contains an optional
