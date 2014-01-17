@@ -318,16 +318,16 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
         return;
     if (!m_isClosingHandshakeSent) {
         Q_Q(QWebSocket);
-        quint32 maskingKey = 0;
-        if (m_mustMask)
-            maskingKey = generateMaskingKey();
         const quint16 code = qToBigEndian<quint16>(closeCode);
         QByteArray payload;
         payload.append(static_cast<const char *>(static_cast<const void *>(&code)), 2);
         if (!reason.isEmpty())
             payload.append(reason.toUtf8());
-        if (m_mustMask)
+        quint32 maskingKey = 0;
+        if (m_mustMask) {
+            maskingKey = generateMaskingKey();
             QWebSocketProtocol::mask(payload.data(), payload.size(), maskingKey);
+        }
         QByteArray frame = getFrameHeader(QWebSocketProtocol::OC_CLOSE,
                                           payload.size(), maskingKey, true);
         frame.append(payload);
