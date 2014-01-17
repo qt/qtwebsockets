@@ -107,6 +107,7 @@ public:
                                QObject *parent = Q_NULLPTR);
     virtual ~QWebSocketPrivate();
 
+    void init();
     void abort();
     QAbstractSocket::SocketError error() const;
     QString errorString() const;
