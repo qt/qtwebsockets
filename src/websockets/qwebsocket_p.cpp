@@ -109,8 +109,7 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
     m_dataProcessor(),
     m_configuration()
 {
-    Q_ASSERT(pWebSocket);
-    qsrand(static_cast<uint>(QDateTime::currentMSecsSinceEpoch()));
+    init();
 }
 
 /*!
@@ -139,8 +138,17 @@ QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol:
     m_dataProcessor(),
     m_configuration()
 {
-    Q_ASSERT(pWebSocket);
+    init();
     makeConnections(m_pSocket.data());
+}
+
+/*!
+    \internal
+*/
+void QWebSocketPrivate::init()
+{
+    Q_ASSERT(pWebSocket);
+    qsrand(static_cast<uint>(QDateTime::currentMSecsSinceEpoch()));
 }
 
 /*!
