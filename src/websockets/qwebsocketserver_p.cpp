@@ -341,7 +341,7 @@ QSslConfiguration QWebSocketServerPrivate::sslConfiguration() const
 }
 #endif
 
-void QWebSocketServerPrivate::setError(QWebSocketProtocol::CloseCode code, QString errorString)
+void QWebSocketServerPrivate::setError(QWebSocketProtocol::CloseCode code, const QString &errorString)
 {
     if ((m_error != code) || (m_errorString != errorString)) {
         Q_Q(QWebSocketServer);

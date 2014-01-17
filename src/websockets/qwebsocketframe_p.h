@@ -118,7 +118,7 @@ private:
         PS_WAIT_FOR_MORE_DATA
     };
 
-    void setError(QWebSocketProtocol::CloseCode code, QString closeReason);
+    void setError(QWebSocketProtocol::CloseCode code, const QString &closeReason);
     bool checkValidity();
 };
 

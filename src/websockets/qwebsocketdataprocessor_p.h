@@ -78,14 +78,14 @@ public:
     static quint64 maxFrameSize();
 
 Q_SIGNALS:
-    void pingReceived(QByteArray data);
-    void pongReceived(QByteArray data);
-    void closeReceived(QWebSocketProtocol::CloseCode closeCode, QString closeReason);
-    void textFrameReceived(QString frame, bool lastFrame);
-    void binaryFrameReceived(QByteArray frame, bool lastFrame);
-    void textMessageReceived(QString message);
-    void binaryMessageReceived(QByteArray message);
-    void errorEncountered(QWebSocketProtocol::CloseCode code, QString description);
+    void pingReceived(const QByteArray &data);
+    void pongReceived(const QByteArray &data);
+    void closeReceived(QWebSocketProtocol::CloseCode closeCode, const QString &closeReason);
+    void textFrameReceived(const QString &frame, bool lastFrame);
+    void binaryFrameReceived(const QByteArray &frame, bool lastFrame);
+    void textMessageReceived(const QString &message);
+    void binaryMessageReceived(const QByteArray &message);
+    void errorEncountered(QWebSocketProtocol::CloseCode code, const QString &description);
 
 public Q_SLOTS:
     void process(QIODevice *pIoDevice);

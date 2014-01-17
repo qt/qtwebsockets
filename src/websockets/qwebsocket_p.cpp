@@ -440,14 +440,13 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
 /*!
     \internal
  */
-void QWebSocketPrivate::ping(QByteArray payload)
+void QWebSocketPrivate::ping(const QByteArray &payload)
 {
-    if (payload.length() > 125)
-        payload.truncate(125);
+    QByteArray payloadTruncated = payload.left(125);
     m_pingTimer.restart();
-    QByteArray pingFrame = getFrameHeader(QWebSocketProtocol::OC_PING, payload.size(),
+    QByteArray pingFrame = getFrameHeader(QWebSocketProtocol::OC_PING, payloadTruncated.size(),
                                           0 /*do not mask*/, true);
-    pingFrame.append(payload);
+    pingFrame.append(payloadTruncated);
     qint64 ret = writeFrame(pingFrame);
     Q_UNUSED(ret);
 }
@@ -1024,7 +1023,7 @@ void QWebSocketPrivate::processData()
 /*!
  \internal
  */
-void QWebSocketPrivate::processPing(QByteArray data)
+void QWebSocketPrivate::processPing(const QByteArray &data)
 {
     Q_ASSERT(m_pSocket);
     quint32 maskingKey = 0;
@@ -1032,16 +1031,17 @@ void QWebSocketPrivate::processPing(QByteArray data)
         maskingKey = generateMaskingKey();
     m_pSocket->write(getFrameHeader(QWebSocketProtocol::OC_PONG, data.size(), maskingKey, true));
     if (data.size() > 0) {
+        QByteArray maskedData = data;
         if (m_mustMask)
-            QWebSocketProtocol::mask(&data, maskingKey);
-        m_pSocket->write(data);
+            QWebSocketProtocol::mask(&maskedData, maskingKey);
+        m_pSocket->write(maskedData);
     }
 }
 
 /*!
  \internal
  */
-void QWebSocketPrivate::processPong(QByteArray data)
+void QWebSocketPrivate::processPong(const QByteArray &data)
 {
     Q_Q(QWebSocket);
     Q_EMIT q->pong(static_cast<quint64>(m_pingTimer.elapsed()), data);
