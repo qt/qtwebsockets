@@ -320,7 +320,6 @@ QString QWebSocket::errorString() const
     In most cases, you do not need to call this function,
     because QWebSocket will start sending data automatically
     once control goes back to the event loop.
-    In the absence of an event loop, call waitForBytesWritten() instead.
 */
 bool QWebSocket::flush()
 {
