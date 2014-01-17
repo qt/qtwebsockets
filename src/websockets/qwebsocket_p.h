@@ -154,7 +154,7 @@ public:
 public Q_SLOTS:
     void close(QWebSocketProtocol::CloseCode closeCode, QString reason);
     void open(const QUrl &url, bool mask);
-    void ping(QByteArray payload);
+    void ping(const QByteArray &payload);
 
 #ifndef QT_NO_SSL
     void ignoreSslErrors();
@@ -162,8 +162,8 @@ public Q_SLOTS:
 
 private Q_SLOTS:
     void processData();
-    void processPing(QByteArray data);
-    void processPong(QByteArray data);
+    void processPing(const QByteArray &data);
+    void processPong(const QByteArray &data);
     void processClose(QWebSocketProtocol::CloseCode closeCode, QString closeReason);
     void processHandshake(QTcpSocket *pSocket);
     void processStateChanged(QAbstractSocket::SocketState socketState);

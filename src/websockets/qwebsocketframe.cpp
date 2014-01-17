@@ -523,7 +523,7 @@ QWebSocketFrame QWebSocketFrame::readFrame(QIODevice *pIoDevice)
 /*!
     \internal
  */
-void QWebSocketFrame::setError(QWebSocketProtocol::CloseCode code, QString closeReason)
+void QWebSocketFrame::setError(QWebSocketProtocol::CloseCode code, const QString &closeReason)
 {
     clear();
     m_closeCode = code;

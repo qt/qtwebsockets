@@ -120,7 +120,7 @@ public:
     QSslConfiguration sslConfiguration() const;
 #endif
 
-    void setError(QWebSocketProtocol::CloseCode code, QString errorString);
+    void setError(QWebSocketProtocol::CloseCode code, const QString &errorString);
 
 private Q_SLOTS:
     void onNewConnection();
