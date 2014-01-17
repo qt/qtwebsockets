@@ -133,12 +133,12 @@ Q_SIGNALS:
     void proxyAuthenticationRequired(const QNetworkProxy &proxy, QAuthenticator *pAuthenticator);
 #endif
     void readChannelFinished();
-    void textFrameReceived(QString frame, bool isLastFrame);
-    void binaryFrameReceived(QByteArray frame, bool isLastFrame);
-    void textMessageReceived(QString message);
-    void binaryMessageReceived(QByteArray message);
+    void textFrameReceived(const QString &frame, bool isLastFrame);
+    void binaryFrameReceived(const QByteArray &frame, bool isLastFrame);
+    void textMessageReceived(const QString &message);
+    void binaryMessageReceived(const QByteArray &message);
     void error(QAbstractSocket::SocketError error);
-    void pong(quint64 elapsedTime, QByteArray payload);
+    void pong(quint64 elapsedTime, const QByteArray &payload);
     void bytesWritten(qint64 bytes);
 
 #ifndef QT_NO_SSL
