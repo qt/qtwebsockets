@@ -206,7 +206,7 @@ void tst_HandshakeRequest::tst_invalidStream()
 
     textStream << dataStream;
     textStream.seek(0);
-    textStream >> request;
+    request.readHandshake(textStream);
 
     QVERIFY(!request.isValid());
     QCOMPARE(request.port(), 80);
@@ -238,7 +238,7 @@ void tst_HandshakeRequest::tst_multipleValuesInConnectionHeader()
 
     textStream << header;
     textStream.seek(0);
-    textStream >> request;
+    request.readHandshake(textStream);
 
     QVERIFY(request.isValid());
     QCOMPARE(request.port(), 80);
@@ -268,7 +268,7 @@ void tst_HandshakeRequest::tst_multipleVersions()
 
     textStream << header;
     textStream.seek(0);
-    textStream >> request;
+    request.readHandshake(textStream);
 
     QVERIFY(request.isValid());
     QCOMPARE(request.port(), 80);

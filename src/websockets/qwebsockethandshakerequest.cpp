@@ -192,18 +192,18 @@ QUrl QWebSocketHandshakeRequest::requestUrl() const
 /*!
     \internal
  */
-QTextStream &QWebSocketHandshakeRequest::readFromStream(QTextStream &textStream)
+void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream)
 {
     m_isValid = false;
     clear();
     if (Q_UNLIKELY(textStream.status() != QTextStream::Ok))
-        return textStream;
+        return;
     const QString requestLine = textStream.readLine();
     const QStringList tokens = requestLine.split(' ', QString::SkipEmptyParts);
     if (Q_UNLIKELY(tokens.length() < 3)) {
         m_isValid = false;
         clear();
-        return textStream;
+        return;
     }
     const QString verb(tokens.at(0));
     const QString resourceName(tokens.at(1));
@@ -214,7 +214,7 @@ QTextStream &QWebSocketHandshakeRequest::readFromStream(QTextStream &textStream)
     if (Q_UNLIKELY(!conversionOk)) {
         clear();
         m_isValid = false;
-        return textStream;
+        return;
     }
     QString headerLine = textStream.readLine();
     m_headers.clear();
@@ -223,7 +223,7 @@ QTextStream &QWebSocketHandshakeRequest::readFromStream(QTextStream &textStream)
                                                          QString::SkipEmptyParts);
         if (Q_UNLIKELY(headerField.length() < 2)) {
             clear();
-            return textStream;
+            return;
         }
         m_headers.insertMulti(headerField.at(0), headerField.at(1));
         headerLine = textStream.readLine();
@@ -246,7 +246,7 @@ QTextStream &QWebSocketHandshakeRequest::readFromStream(QTextStream &textStream)
             (void)(*i).toUInt(&ok);
             if (!ok) {
                 clear();
-                return textStream;
+                return;
             }
             const QWebSocketProtocol::Version ver =
                     QWebSocketProtocol::versionFromString((*i).trimmed());
@@ -294,15 +294,6 @@ QTextStream &QWebSocketHandshakeRequest::readFromStream(QTextStream &textStream)
                   (!connectionValues.contains(QStringLiteral("upgrade"), Qt::CaseInsensitive)));
     if (Q_UNLIKELY(!m_isValid))
         clear();
-    return textStream;
-}
-
-/*!
-    \internal
- */
-QTextStream &operator >>(QTextStream &stream, QWebSocketHandshakeRequest &request)
-{
-    return request.readFromStream(stream);
 }
 
 QT_END_NAMESPACE
