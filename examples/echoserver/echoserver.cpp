@@ -54,8 +54,9 @@ EchoServer::EchoServer(quint16 port, QObject *parent) :
 {
     if (m_pWebSocketServer->listen(QHostAddress::Any, port)) {
         qDebug() << "Echoserver listening on port" << port;
-        connect(m_pWebSocketServer, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
-        connect(m_pWebSocketServer, SIGNAL(closed()), this, SIGNAL(closed()));
+        connect(m_pWebSocketServer, &QWebSocketServer::newConnection,
+                this, &EchoServer::onNewConnection);
+        connect(m_pWebSocketServer, &QWebSocketServer::closed, this, &EchoServer::closed);
     }
 }
 //! [constructor]
@@ -74,10 +75,9 @@ void EchoServer::onNewConnection()
 {
     QWebSocket *pSocket = m_pWebSocketServer->nextPendingConnection();
 
-    connect(pSocket, SIGNAL(textMessageReceived(QString)), this, SLOT(processMessage(QString)));
-    connect(pSocket, SIGNAL(binaryMessageReceived(QByteArray)), this,
-            SLOT(processBinaryMessage(QByteArray)));
-    connect(pSocket, SIGNAL(disconnected()), this, SLOT(socketDisconnected()));
+    connect(pSocket, &QWebSocket::textMessageReceived, this, &EchoServer::processMessage);
+    connect(pSocket, &QWebSocket::binaryMessageReceived, this, &EchoServer::processBinaryMessage);
+    connect(pSocket, &QWebSocket::disconnected, this, &EchoServer::socketDisconnected);
 
     m_clients << pSocket;
 }

@@ -48,7 +48,7 @@ SslEchoClient::SslEchoClient(const QUrl &url, QObject *parent) :
     QObject(parent),
     m_webSocket()
 {
-    connect(&m_webSocket, SIGNAL(connected()), this, SLOT(onConnected()));
+    connect(&m_webSocket, &QWebSocket::connected, this, &SslEchoClient::onConnected);
     m_webSocket.open(QUrl(url));
 }
 //! [constructor]
@@ -57,8 +57,8 @@ SslEchoClient::SslEchoClient(const QUrl &url, QObject *parent) :
 void SslEchoClient::onConnected()
 {
     qDebug() << "Websocket connected";
-    connect(&m_webSocket, SIGNAL(textMessageReceived(QString)), this,
-            SLOT(onTextMessageReceived(QString)));
+    connect(&m_webSocket, &QWebSocket::textMessageReceived,
+            this, &SslEchoClient::onTextMessageReceived);
     m_webSocket.write("Hello, world!");
 }
 //! [onConnected]
