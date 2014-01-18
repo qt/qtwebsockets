@@ -125,6 +125,7 @@ Q_SIGNALS:
     void acceptError(QAbstractSocket::SocketError socketError);
     void serverError(QWebSocketProtocol::CloseCode closeCode);
     //TODO: should use a delegate iso of a synchronous signal
+    //see also QTBUG-16251
     void originAuthenticationRequired(QWebSocketCorsAuthenticator *pAuthenticator);
     void newConnection();
 #ifndef QT_NO_SSL
