@@ -92,7 +92,7 @@ void tst_WebSocketCorsAuthenticator::cleanup()
 void tst_WebSocketCorsAuthenticator::tst_initialization()
 {
     {
-        QWebSocketCorsAuthenticator authenticator(QStringLiteral(""));
+        QWebSocketCorsAuthenticator authenticator((QString()));
 
         QCOMPARE(authenticator.allowed(), true);
         QCOMPARE(authenticator.origin(), QString());

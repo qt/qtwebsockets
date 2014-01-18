@@ -229,7 +229,7 @@ void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream)
         headerLine = textStream.readLine();
     }
 
-    const QString host = m_headers.value(QStringLiteral("Host"), QStringLiteral(""));
+    const QString host = m_headers.value(QStringLiteral("Host"), QString());
     m_requestUrl = QUrl::fromEncoded(resourceName.toLatin1());
     if (m_requestUrl.isRelative())
         m_requestUrl.setHost(host);
@@ -255,11 +255,11 @@ void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream)
     }
     //sort in descending order
     std::sort(m_versions.begin(), m_versions.end(), std::greater<QWebSocketProtocol::Version>());
-    m_key = m_headers.value(QStringLiteral("Sec-WebSocket-Key"), QStringLiteral(""));
+    m_key = m_headers.value(QStringLiteral("Sec-WebSocket-Key"), QString());
     //must contain "Upgrade", case-insensitive
-    const QString upgrade = m_headers.value(QStringLiteral("Upgrade"), QStringLiteral(""));
+    const QString upgrade = m_headers.value(QStringLiteral("Upgrade"), QString());
     //must be equal to "websocket", case-insensitive
-    const QString connection = m_headers.value(QStringLiteral("Connection"), QStringLiteral(""));
+    const QString connection = m_headers.value(QStringLiteral("Connection"), QString());
     const QStringList connectionLine = connection.split(QStringLiteral(","),
                                                         QString::SkipEmptyParts);
     QStringList connectionValues;
@@ -267,7 +267,7 @@ void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream)
         connectionValues << (*c).trimmed();
 
     //optional headers
-    m_origin = m_headers.value(QStringLiteral("Sec-WebSocket-Origin"), QStringLiteral(""));
+    m_origin = m_headers.value(QStringLiteral("Sec-WebSocket-Origin"), QString());
     const QStringList protocolLines = m_headers.values(QStringLiteral("Sec-WebSocket-Protocol"));
     for (QStringList::const_iterator pl = protocolLines.begin(); pl != protocolLines.end(); ++pl) {
         QStringList protocols = (*pl).split(QStringLiteral(","), QString::SkipEmptyParts);
