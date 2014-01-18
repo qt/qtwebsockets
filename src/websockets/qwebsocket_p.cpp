@@ -887,16 +887,16 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
         }
 
         const QString acceptKey = headers.value(QStringLiteral("Sec-WebSocket-Accept"),
-                                                QStringLiteral(""));
-        const QString upgrade = headers.value(QStringLiteral("Upgrade"), QStringLiteral(""));
-        const QString connection = headers.value(QStringLiteral("Connection"), QStringLiteral(""));
+                                                QString());
+        const QString upgrade = headers.value(QStringLiteral("Upgrade"), QString());
+        const QString connection = headers.value(QStringLiteral("Connection"), QString());
 //        unused for the moment
 //        const QString extensions = headers.value(QStringLiteral("Sec-WebSocket-Extensions"),
-//                                                 QStringLiteral(""));
+//                                                 QString());
 //        const QString protocol = headers.value(QStringLiteral("Sec-WebSocket-Protocol"),
-//                                               QStringLiteral(""));
+//                                               QString());
         const QString version = headers.value(QStringLiteral("Sec-WebSocket-Version"),
-                                              QStringLiteral(""));
+                                              QString());
 
         if (Q_LIKELY(httpStatusCode == 101)) {
             //HTTP/x.y 101 Switching Protocols
@@ -975,8 +975,8 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
                                                 % QStringLiteral(":")
                                                 % QString::number(m_requestUrl.port(80)),
                                            origin(),
-                                           QStringLiteral(""),
-                                           QStringLiteral(""),
+                                           QString(),
+                                           QString(),
                                            m_key);
             m_pSocket->write(handshake.toLatin1());
         }

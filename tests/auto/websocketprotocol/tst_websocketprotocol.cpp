@@ -101,7 +101,7 @@ void tst_WebSocketProtocol::tst_validMasks_data()
     QTest::addColumn<QString>("inputdata");
     QTest::addColumn<QByteArray>("result");
 
-    QTest::newRow("Empty payload") << 0x12345678u << QStringLiteral("") << QByteArrayLiteral("");
+    QTest::newRow("Empty payload") << 0x12345678u << QString() << QByteArray();
     QTest::newRow("ASCII payload of 8 characters") << 0x12345678u << QStringLiteral("abcdefgh") << QByteArrayLiteral("\x73\x56\x35\x1C\x77\x52\x31\x10");
     QTest::newRow("ASCII payload of 9 characters") << 0x12345678u << QStringLiteral("abcdefghi") << QByteArrayLiteral("\x73\x56\x35\x1C\x77\x52\x31\x10\x7B");
     //MSVC doesn't like UTF-8 in source code; the following text is represented in the string below: ∫∂ƒ©øØ
