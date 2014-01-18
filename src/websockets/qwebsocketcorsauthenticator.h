@@ -53,9 +53,9 @@ class Q_WEBSOCKETS_EXPORT QWebSocketCorsAuthenticator
     Q_DECLARE_PRIVATE(QWebSocketCorsAuthenticator)
 
 public:
-    QWebSocketCorsAuthenticator(const QString &origin);
+    explicit QWebSocketCorsAuthenticator(const QString &origin);
     ~QWebSocketCorsAuthenticator();
-    QWebSocketCorsAuthenticator(const QWebSocketCorsAuthenticator &other);
+    explicit QWebSocketCorsAuthenticator(const QWebSocketCorsAuthenticator &other);
 
 #ifdef Q_COMPILER_RVALUE_REFS
     QWebSocketCorsAuthenticator(QWebSocketCorsAuthenticator &&other);
