@@ -216,7 +216,7 @@ QWebSocketServer::QWebSocketServer(const QString &serverName, SecureMode secureM
     QObject(parent),
     d_ptr(new QWebSocketServerPrivate(serverName,
                                       #ifndef QT_NO_SSL
-                                      (secureMode == SECURE_MODE) ?
+                                      (secureMode == SecureModeSecure) ?
                                           QWebSocketServerPrivate::SECURE_MODE :
                                           QWebSocketServerPrivate::NON_SECURE_MODE,
                                       #else
@@ -450,7 +450,7 @@ QWebSocketServer::SecureMode QWebSocketServer::secureMode() const
 #ifndef QT_NO_SSL
     Q_D(const QWebSocketServer);
     return (d->secureMode() == QWebSocketServerPrivate::SECURE_MODE) ?
-                QWebSocketServer::SECURE_MODE : QWebSocketServer::NON_SECURE_MODE;
+                QWebSocketServer::SecureModeSecure : QWebSocketServer::SecureModeNonSecure;
 #else
     return QWebSocketServer::NON_SECURE_MODE;
 #endif

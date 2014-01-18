@@ -49,7 +49,7 @@ QT_USE_NAMESPACE
 EchoServer::EchoServer(quint16 port, QObject *parent) :
     QObject(parent),
     m_pWebSocketServer(new QWebSocketServer(QStringLiteral("Echo Server"),
-                                            QWebSocketServer::NON_SECURE_MODE, this)),
+                                            QWebSocketServer::SecureModeNonSecure, this)),
     m_clients()
 {
     if (m_pWebSocketServer->listen(QHostAddress::Any, port)) {
