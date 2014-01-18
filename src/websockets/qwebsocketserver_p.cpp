@@ -70,7 +70,7 @@ QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName,
     m_serverName(serverName),
     m_secureMode(secureMode),
     m_pendingConnections(),
-    m_error(QWebSocketProtocol::CC_NORMAL),
+    m_error(QWebSocketProtocol::CloseCodeNormal),
     m_errorString()
 {
     Q_ASSERT(pWebSocketServer);
@@ -118,7 +118,7 @@ void QWebSocketServerPrivate::close()
     m_pTcpServer->close();
     while (!m_pendingConnections.isEmpty()) {
         QWebSocket *pWebSocket = m_pendingConnections.dequeue();
-        pWebSocket->close(QWebSocketProtocol::CC_GOING_AWAY, tr("Server closed."));
+        pWebSocket->close(QWebSocketProtocol::CloseCodeGoingAway, tr("Server closed."));
         pWebSocket->deleteLater();
     }
     //emit signal via the event queue, so the server gets time
@@ -388,7 +388,7 @@ void QWebSocketServerPrivate::handshakeReceived()
             pTcpSocket->close();
             qWarning() <<
                 tr("Too many pending connections: new websocket connection not accepted.");
-            setError(QWebSocketProtocol::CC_ABNORMAL_DISCONNECTION,
+            setError(QWebSocketProtocol::CloseCodeAbnormalDisconnection,
                      tr("Too many pending connections."));
             return;
         }
@@ -423,7 +423,7 @@ void QWebSocketServerPrivate::handshakeReceived()
                         Q_EMIT q->newConnection();
                         success = true;
                     } else {
-                        setError(QWebSocketProtocol::CC_ABNORMAL_DISCONNECTION,
+                        setError(QWebSocketProtocol::CloseCodeAbnormalDisconnection,
                                  tr("Upgrading to websocket failed."));
                     }
                 }
@@ -431,7 +431,7 @@ void QWebSocketServerPrivate::handshakeReceived()
                     setError(response.error(), response.errorString());
                 }
             } else {
-                setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, tr("Invalid response received."));
+                setError(QWebSocketProtocol::CloseCodeProtocolError, tr("Invalid response received."));
             }
         }
         if (!success) {
