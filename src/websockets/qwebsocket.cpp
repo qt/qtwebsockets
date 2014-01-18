@@ -328,39 +328,6 @@ bool QWebSocket::flush()
 }
 
 /*!
-    Sends the given \a message over the socket as a text message and returns the number of bytes
-    actually sent.
-    \a message must be '\\0' terminated and is considered to be in UTF-8 encoded format.
-
-    \note When \a message is null or has zero length, zero is returned.
-    \note The maximum size of message, is limited by \l {QString::}{size_type}.
-
-    \sa QString::fromUtf8(), QString::size_type
- */
-qint64 QWebSocket::write(const char *message)
-{
-    Q_D(QWebSocket);
-    return d->write(message);
-}
-
-/*!
-    Sends the most \a maxSize bytes of the given \a message over the socket as a text message
-    and returns the number of bytes actually sent.
-    \a message is considered to be in UTF-8 encoded format.
-
-    \note When \a message is null, has zero length or \a maxSize < 0, zero is returned.
-    \note The maximum size of message, is limited by \l {QString::}{size_type}.
-    If the message is larger, it is truncated to the maximum value of \l {QString::}{size_type}.
-
-    \sa QString::fromUtf8(), QString::size_type
- */
-qint64 QWebSocket::write(const char *message, qint64 maxSize)
-{
-    Q_D(QWebSocket);
-    return d->write(message, maxSize);
-}
-
-/*!
     \brief Sends the given \a message over the socket as a text message and
     returns the number of bytes actually sent.
  */

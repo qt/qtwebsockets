@@ -134,8 +134,7 @@ void tst_WebSocketsTest::testTextMessage()
 
     QSignalSpy spy(m_pWebSocket, SIGNAL(textMessageReceived(QString)));
 
-    QCOMPARE(m_pWebSocket->write(message), qint64(message.size()));
-
+    QCOMPARE(m_pWebSocket->write(message), qint64(message.length()));
     QTRY_VERIFY_WITH_TIMEOUT(spy.count() != 0, 1000);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.at(0).count(), 1);
