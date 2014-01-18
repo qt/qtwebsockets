@@ -78,7 +78,7 @@ QWebSocketDataProcessor::QWebSocketDataProcessor(QObject *parent) :
     m_processingState(PS_READ_HEADER),
     m_isFinalFrame(false),
     m_isFragmented(false),
-    m_opCode(QWebSocketProtocol::OC_CLOSE),
+    m_opCode(QWebSocketProtocol::OpCodeClose),
     m_isControlFrame(false),
     m_hasMask(false),
     m_mask(0),
@@ -135,7 +135,7 @@ void QWebSocketDataProcessor::process(QIODevice *pIoDevice)
                 //we have a dataframe; opcode can be OC_CONTINUE, OC_TEXT or OC_BINARY
                 if (Q_UNLIKELY(!m_isFragmented && frame.isContinuationFrame())) {
                     clear();
-                    Q_EMIT errorEncountered(QWebSocketProtocol::CC_PROTOCOL_ERROR,
+                    Q_EMIT errorEncountered(QWebSocketProtocol::CloseCodeProtocolError,
                                             tr("Received Continuation frame, while there is " \
                                                "nothing to continue."));
                     return;
@@ -143,7 +143,7 @@ void QWebSocketDataProcessor::process(QIODevice *pIoDevice)
                 if (Q_UNLIKELY(m_isFragmented && frame.isDataFrame() &&
                                !frame.isContinuationFrame())) {
                     clear();
-                    Q_EMIT errorEncountered(QWebSocketProtocol::CC_PROTOCOL_ERROR,
+                    Q_EMIT errorEncountered(QWebSocketProtocol::CloseCodeProtocolError,
                                             tr("All data frames after the initial data frame " \
                                                "must have opcode 0 (continuation)."));
                     return;
@@ -152,18 +152,18 @@ void QWebSocketDataProcessor::process(QIODevice *pIoDevice)
                     m_opCode = frame.opCode();
                     m_isFragmented = !frame.isFinalFrame();
                 }
-                quint64 messageLength = (quint64)(m_opCode == QWebSocketProtocol::OC_TEXT)
+                quint64 messageLength = (quint64)(m_opCode == QWebSocketProtocol::OpCodeText)
                         ? m_textMessage.length()
                         : m_binaryMessage.length();
                 if (Q_UNLIKELY((messageLength + quint64(frame.payload().length())) >
                                MAX_MESSAGE_SIZE_IN_BYTES)) {
                     clear();
-                    Q_EMIT errorEncountered(QWebSocketProtocol::CC_TOO_MUCH_DATA,
+                    Q_EMIT errorEncountered(QWebSocketProtocol::CloseCodeTooMuchData,
                                             tr("Received message is too big."));
                     return;
                 }
 
-                if (m_opCode == QWebSocketProtocol::OC_TEXT) {
+                if (m_opCode == QWebSocketProtocol::OpCodeText) {
                     QString frameTxt = m_pTextCodec->toUnicode(frame.payload().constData(),
                                                                frame.payload().size(),
                                                                m_pConverterState);
@@ -171,7 +171,7 @@ void QWebSocketDataProcessor::process(QIODevice *pIoDevice)
                             || (frame.isFinalFrame() && (m_pConverterState->remainingChars != 0));
                     if (Q_UNLIKELY(failed)) {
                         clear();
-                        Q_EMIT errorEncountered(QWebSocketProtocol::CC_WRONG_DATATYPE,
+                        Q_EMIT errorEncountered(QWebSocketProtocol::CloseCodeWrongDatatype,
                                                 tr("Invalid UTF-8 code encountered."));
                         return;
                     } else {
@@ -184,7 +184,7 @@ void QWebSocketDataProcessor::process(QIODevice *pIoDevice)
                 }
 
                 if (frame.isFinalFrame()) {
-                    if (m_opCode == QWebSocketProtocol::OC_TEXT)
+                    if (m_opCode == QWebSocketProtocol::OpCodeText)
                         Q_EMIT textMessageReceived(m_textMessage);
                     else
                         Q_EMIT binaryMessageReceived(m_binaryMessage);
@@ -208,7 +208,7 @@ void QWebSocketDataProcessor::clear()
     m_processingState = PS_READ_HEADER;
     m_isFinalFrame = false;
     m_isFragmented = false;
-    m_opCode = QWebSocketProtocol::OC_CLOSE;
+    m_opCode = QWebSocketProtocol::OpCodeClose;
     m_hasMask = false;
     m_mask = 0;
     m_binaryMessage.clear();
@@ -232,29 +232,29 @@ bool QWebSocketDataProcessor::processControlFrame(const QWebSocketFrame &frame)
 {
     bool mustStopProcessing = true; //control frames never expect additional frames to be processed
     switch (frame.opCode()) {
-    case QWebSocketProtocol::OC_PING:
+    case QWebSocketProtocol::OpCodePing:
         Q_EMIT pingReceived(frame.payload());
         break;
 
-    case QWebSocketProtocol::OC_PONG:
+    case QWebSocketProtocol::OpCodePong:
         Q_EMIT pongReceived(frame.payload());
         break;
 
-    case QWebSocketProtocol::OC_CLOSE:
+    case QWebSocketProtocol::OpCodeClose:
     {
-        quint16 closeCode = QWebSocketProtocol::CC_NORMAL;
+        quint16 closeCode = QWebSocketProtocol::CloseCodeNormal;
         QString closeReason;
         QByteArray payload = frame.payload();
         if (Q_UNLIKELY(payload.size() == 1)) {
             //size is either 0 (no close code and no reason)
             //or >= 2 (at least a close code of 2 bytes)
-            closeCode = QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            closeCode = QWebSocketProtocol::CloseCodeProtocolError;
             closeReason = tr("Payload of close frame is too small.");
         } else if (Q_LIKELY(payload.size() > 1)) {
             //close frame can have a close code and reason
             closeCode = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(payload.constData()));
             if (Q_UNLIKELY(!QWebSocketProtocol::isCloseCodeValid(closeCode))) {
-                closeCode = QWebSocketProtocol::CC_PROTOCOL_ERROR;
+                closeCode = QWebSocketProtocol::CloseCodeProtocolError;
                 closeReason = tr("Invalid close code %1 detected.").arg(closeCode);
             } else {
                 if (payload.size() > 2) {
@@ -263,7 +263,7 @@ bool QWebSocketDataProcessor::processControlFrame(const QWebSocketFrame &frame)
                     closeReason = tc->toUnicode(payload.constData() + 2, payload.size() - 2, &state);
                     const bool failed = (state.invalidChars != 0) || (state.remainingChars != 0);
                     if (Q_UNLIKELY(failed)) {
-                        closeCode = QWebSocketProtocol::CC_WRONG_DATATYPE;
+                        closeCode = QWebSocketProtocol::CloseCodeWrongDatatype;
                         closeReason = tr("Invalid UTF-8 code encountered.");
                     }
                 }
@@ -273,25 +273,25 @@ bool QWebSocketDataProcessor::processControlFrame(const QWebSocketFrame &frame)
         break;
     }
 
-    case QWebSocketProtocol::OC_CONTINUE:
-    case QWebSocketProtocol::OC_BINARY:
-    case QWebSocketProtocol::OC_TEXT:
-    case QWebSocketProtocol::OC_RESERVED_3:
-    case QWebSocketProtocol::OC_RESERVED_4:
-    case QWebSocketProtocol::OC_RESERVED_5:
-    case QWebSocketProtocol::OC_RESERVED_6:
-    case QWebSocketProtocol::OC_RESERVED_7:
-    case QWebSocketProtocol::OC_RESERVED_C:
-    case QWebSocketProtocol::OC_RESERVED_B:
-    case QWebSocketProtocol::OC_RESERVED_D:
-    case QWebSocketProtocol::OC_RESERVED_E:
-    case QWebSocketProtocol::OC_RESERVED_F:
+    case QWebSocketProtocol::OpCodeContinue:
+    case QWebSocketProtocol::OpCodeBinary:
+    case QWebSocketProtocol::OpCodeText:
+    case QWebSocketProtocol::OpCodeReserved3:
+    case QWebSocketProtocol::OpCodeReserved4:
+    case QWebSocketProtocol::OpCodeReserved5:
+    case QWebSocketProtocol::OpCodeReserved6:
+    case QWebSocketProtocol::OpCodeReserved7:
+    case QWebSocketProtocol::OpCodeReservedC:
+    case QWebSocketProtocol::OpCodeReservedB:
+    case QWebSocketProtocol::OpCodeReservedD:
+    case QWebSocketProtocol::OpCodeReservedE:
+    case QWebSocketProtocol::OpCodeReservedF:
         //do nothing
         //case statements added to make C++ compiler happy
         break;
 
     default:
-        Q_EMIT errorEncountered(QWebSocketProtocol::CC_PROTOCOL_ERROR,
+        Q_EMIT errorEncountered(QWebSocketProtocol::CloseCodeProtocolError,
                                 tr("Invalid opcode detected: %1").arg(int(frame.opCode())));
         //do nothing
         break;
