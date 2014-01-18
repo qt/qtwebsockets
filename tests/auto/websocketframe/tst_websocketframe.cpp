@@ -98,7 +98,8 @@ QByteArray FrameHelper::wireRepresentation()
     //FIN, opcode
     byte = static_cast<quint8>((m_opCode & 0x0F) | (m_isFinalFrame ? 0x80 : 0x00)); //FIN, opcode
     //RSV1-3
-    byte |= static_cast<quint8>(((m_rsv1 & 0x01) << 6) | ((m_rsv2 & 0x01) << 5) | ((m_rsv3 & 0x01) << 4));
+    byte |= static_cast<quint8>(((m_rsv1 & 0x01) << 6) | ((m_rsv2 & 0x01) << 5) |
+                                ((m_rsv3 & 0x01) << 4));
     wireRep.append(static_cast<char>(byte));
 
     byte = 0x00;
@@ -128,7 +129,8 @@ QByteArray FrameHelper::wireRepresentation()
     //Write mask
     if (m_mask != 0)
     {
-        wireRep.append(static_cast<const char *>(static_cast<const void *>(&m_mask)), sizeof(quint32));
+        wireRep.append(static_cast<const char *>(static_cast<const void *>(&m_mask)),
+                       sizeof(quint32));
     }
     QByteArray tmpData = m_payload;
     if (m_mask)
@@ -557,7 +559,8 @@ void tst_WebSocketFrame::tst_malformedFrames_data()
         uchar swapped[8] = {0};
         qToBigEndian<quint64>(payloadSize, swapped);
         QTest::newRow("Frame too big")
-                << wireRep.left(1).append(bigpayloadIndicator).append(reinterpret_cast<char *>(swapped), 8)
+                << wireRep.left(1).append(bigpayloadIndicator)
+                                  .append(reinterpret_cast<char *>(swapped), 8)
                 << QWebSocketProtocol::CloseCodeTooMuchData;
     }
     //invalid size field
@@ -567,13 +570,15 @@ void tst_WebSocketFrame::tst_malformedFrames_data()
         uchar swapped[8] = {0};
         qToBigEndian<quint64>(payloadSize, swapped);
         QTest::newRow("Highest bit of payload length is set")
-                << wireRep.left(1).append(bigpayloadIndicator).append(reinterpret_cast<char *>(swapped), 8)
+                << wireRep.left(1).append(bigpayloadIndicator)
+                                  .append(reinterpret_cast<char *>(swapped), 8)
                 << QWebSocketProtocol::CloseCodeProtocolError;
 
         payloadSize = 256;
         qToBigEndian<quint64>(payloadSize, swapped);
         QTest::newRow("Overlong 64-bit size field; should be 16-bit")
-                << wireRep.left(1).append(bigpayloadIndicator).append(reinterpret_cast<char *>(swapped), 8)
+                << wireRep.left(1).append(bigpayloadIndicator)
+                                  .append(reinterpret_cast<char *>(swapped), 8)
                 << QWebSocketProtocol::CloseCodeProtocolError;
     }
     //overlong size field
@@ -583,7 +588,8 @@ void tst_WebSocketFrame::tst_malformedFrames_data()
         uchar swapped[2] = {0};
         qToBigEndian<quint16>(payloadSize, swapped);
         QTest::newRow("Overlong 16-bit size field")
-                << wireRep.left(1).append(largepayloadIndicator).append(reinterpret_cast<char *>(swapped), 2)
+                << wireRep.left(1).append(largepayloadIndicator)
+                                  .append(reinterpret_cast<char *>(swapped), 2)
                 << QWebSocketProtocol::CloseCodeProtocolError;
     }
     {
@@ -592,13 +598,15 @@ void tst_WebSocketFrame::tst_malformedFrames_data()
         uchar swapped[8] = {0};
         qToBigEndian<quint64>(payloadSize, swapped);
         QTest::newRow("Overlong 64-bit size field; should be 7-bit")
-                << wireRep.left(1).append(bigpayloadIndicator).append(reinterpret_cast<char *>(swapped), 8)
+                << wireRep.left(1).append(bigpayloadIndicator)
+                                  .append(reinterpret_cast<char *>(swapped), 8)
                 << QWebSocketProtocol::CloseCodeProtocolError;
 
         payloadSize = 256;
         qToBigEndian<quint64>(payloadSize, swapped);
         QTest::newRow("Overlong 64-bit size field; should be 16-bit")
-                << wireRep.left(1).append(bigpayloadIndicator).append(reinterpret_cast<char *>(swapped), 8)
+                << wireRep.left(1).append(bigpayloadIndicator)
+                                  .append(reinterpret_cast<char *>(swapped), 8)
                 << QWebSocketProtocol::CloseCodeProtocolError;
     }
 }

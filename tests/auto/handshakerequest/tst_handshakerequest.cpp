@@ -151,9 +151,11 @@ void tst_HandshakeRequest::tst_invalidStream_data()
 
     QTest::newRow("garbage on 2 lines") << QStringLiteral("foofoofoo\r\nfoofoo\r\n\r\n");
     QTest::newRow("garbage on 1 line") << QStringLiteral("foofoofoofoofoo");
-    QTest::newRow("Correctly formatted but invalid fields") << QStringLiteral("VERB RESOURCE PROTOCOL");
+    QTest::newRow("Correctly formatted but invalid fields")
+            << QStringLiteral("VERB RESOURCE PROTOCOL");
 
-    //internally the fields are parsed and indexes are used to convert to a http version for instance
+    //internally the fields are parsed and indexes are used to convert
+    //to a http version for instance
     //this test checks if there doesn't occur an out-of-bounds exception
     QTest::newRow("Correctly formatted but invalid short fields") << QStringLiteral("V R P");
     QTest::newRow("Invalid \\0 character in header") << QStringLiteral("V R\0 P");
@@ -165,7 +167,8 @@ void tst_HandshakeRequest::tst_invalidStream_data()
     //MSVC 2010 complains when using concatenation literal strings about
     //concatenation of wide and narrow strings (error C2308)
     QTest::newRow("Complete header - Invalid websocket version")
-            << QStringLiteral("GET . HTTP/1.1\r\nHost: foo\r\nSec-WebSocket-Version: \xFF\xFF\r\n") +
+            << QStringLiteral("GET . HTTP/1.1\r\nHost: foo\r\nSec-WebSocket-Version: "
+                              "\xFF\xFF\r\n") +
                QStringLiteral("Sec-WebSocket-Key: AVDFBDDFF\r\n") +
                QStringLiteral("Upgrade: websocket\r\n") +
                QStringLiteral("Connection: Upgrade\r\n\r\n");
@@ -228,7 +231,8 @@ void tst_HandshakeRequest::tst_invalidStream()
  */
 void tst_HandshakeRequest::tst_multipleValuesInConnectionHeader()
 {
-    QString header = QStringLiteral("GET /test HTTP/1.1\r\nHost: foo.com\r\nSec-WebSocket-Version: 13\r\n") +
+    QString header = QStringLiteral("GET /test HTTP/1.1\r\nHost: foo.com\r\nSec-WebSocket-Version: "
+                                    "13\r\n") +
                      QStringLiteral("Sec-WebSocket-Key: AVDFBDDFF\r\n") +
                      QStringLiteral("Upgrade: websocket\r\n") +
                      QStringLiteral("Connection: Upgrade,keepalive\r\n\r\n");

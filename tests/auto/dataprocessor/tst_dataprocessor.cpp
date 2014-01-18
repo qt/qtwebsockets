@@ -77,30 +77,30 @@ private Q_SLOTS:
      * Happy Flows
      ***************************************************************************/
     /*!
-      \brief Tests all kinds of valid binary frames, including zero length frames
+      Tests all kinds of valid binary frames, including zero length frames
       */
     void goodBinaryFrame();
     void goodBinaryFrame_data();
 
     /*!
-      \brief Tests all kinds of valid text frames, including zero length frames
+      Tests all kinds of valid text frames, including zero length frames
       */
     void goodTextFrame();
     void goodTextFrame_data();
 
     /*!
-     * \brief Test all kinds of valid control frames.
+     * Test all kinds of valid control frames.
      */
     void goodControlFrame();
 
     /*!
-     * \brief Test all kinds of valid close frames.
+     * Test all kinds of valid close frames.
      */
     void goodCloseFrame();
     void goodCloseFrame_data();
 
     /*!
-     * \brief Test all valid opcodes
+     * Test all valid opcodes
      */
     void goodOpcodes();
     void goodOpcodes_data();
@@ -118,28 +118,30 @@ private Q_SLOTS:
      * Rainy Day Flows
      ***************************************************************************/
     /*!
-        \brief Tests the QWebSocketDataProcessor for correct handling of frames that don't contain the starting 2 bytes.
-        This test is a border case, where not enough bytes are received to even start parsing a frame.
+        Tests the QWebSocketDataProcessor for correct handling of frames that don't
+        contain the starting 2 bytes.
+        This test is a border case, where not enough bytes are received to even start parsing a
+        frame.
         This test does not test sequences of frames, only single frames are tested
      */
     void frameTooSmall();
 
     /*!
-        \brief Tests the QWebSocketDataProcessor for correct handling of frames that are oversized.
+        Tests the QWebSocketDataProcessor for correct handling of frames that are oversized.
         This test does not test sequences of frames, only single frames are tested
      */
     void frameTooBig();
     void frameTooBig_data();
 
     /*!
-        \brief Tests the QWebSocketDataProcessor for the correct handling of malformed frame headers.
+        Tests the QWebSocketDataProcessor for the correct handling of malformed frame headers.
         This test does not test sequences of frames, only single frames are tested
      */
     void invalidHeader();
     void invalidHeader_data();
 
     /*!
-        \brief Tests the QWebSocketDataProcessor for the correct handling of invalid control frames.
+        Tests the QWebSocketDataProcessor for the correct handling of invalid control frames.
         Invalid means: payload bigger than 125, frame is fragmented, ...
         This test does not test sequences of frames, only single frames are tested
      */
@@ -150,13 +152,14 @@ private Q_SLOTS:
     void invalidCloseFrame_data();
 
     /*!
-        \brief Tests the QWebSocketDataProcessor for the correct handling of incomplete size fields for large and big payloads.
+        Tests the QWebSocketDataProcessor for the correct handling of incomplete size fields
+        for large and big payloads.
      */
     void incompleteSizeField();
     void incompleteSizeField_data();
 
     /*!
-        \brief Tests the QWebSocketDataProcessor for the correct handling of incomplete payloads.
+        Tests the QWebSocketDataProcessor for the correct handling of incomplete payloads.
         This includes:
         - incomplete length bytes for large and big payloads (16- and 64-bit values),
         - minimum size representation (see RFC 6455 paragraph 5.2),
@@ -168,7 +171,7 @@ private Q_SLOTS:
     void incompletePayload_data();
 
     /*!
-        \brief Tests the QWebSocketDataProcessor for the correct handling of invalid UTF-8 payloads.
+        Tests the QWebSocketDataProcessor for the correct handling of invalid UTF-8 payloads.
         This test does not test sequences of frames, only single frames are tested
      */
     void invalidPayload();
@@ -178,7 +181,8 @@ private Q_SLOTS:
     void invalidPayloadInCloseFrame_data();
 
     /*!
-      Tests the QWebSocketDataProcessor for the correct handling of the minimum size representation requirement of RFC 6455 (see paragraph 5.2)
+      Tests the QWebSocketDataProcessor for the correct handling of the minimum size representation
+      requirement of RFC 6455 (see paragraph 5.2)
      */
     void minimumSizeRequirement();
     void minimumSizeRequirement_data();
@@ -188,14 +192,17 @@ private:
     void invalidUTF8(const char *dataTag, const char *utf8Sequence, bool isCloseFrame);
     //helper function that constructs a new row of test data for invalid leading field values
     void invalidField(const char *dataTag, quint8 invalidFieldValue);
-    //helper functions that construct a new row of test data for size fields that do not adhere to the minimum size requirement
+    //helper functions that construct a new row of test data for size fields that do not adhere
+    //to the minimum size requirement
     void minimumSize16Bit(quint16 sizeInBytes);
     void minimumSize64Bit(quint64 sizeInBytes);
-    //helper function to construct a new row of test data containing frames with a payload size smaller than indicated in the header
+    //helper function to construct a new row of test data containing frames with a payload size
+    //smaller than indicated in the header
     void incompleteFrame(quint8 controlCode, quint64 indicatedSize, quint64 actualPayloadSize);
     void insertIncompleteSizeFieldTest(quint8 payloadCode, quint8 numBytesFollowing);
 
-    //helper function to construct a new row of test data containing text frames containing  sequences
+    //helper function to construct a new row of test data containing text frames containing
+    //sequences
     void nonCharacterSequence(const char *sequence);
 
     void doTest();
@@ -229,7 +236,8 @@ void tst_DataProcessor::cleanup()
 void tst_DataProcessor::goodBinaryFrame_data()
 {
     QTest::addColumn<QByteArray>("payload");
-    for (int i = 0; i < (65536 + 256); i += 128)    //be sure to get small (< 126 bytes), large (> 125 bytes & < 64K) and big (>64K) frames
+    //be sure to get small (< 126 bytes), large (> 125 bytes & < 64K) and big (>64K) frames
+    for (int i = 0; i < (65536 + 256); i += 128)
     {
         QTest::newRow(QStringLiteral("Binary frame with %1 bytes").arg(i).toLatin1().constData())
                 << QByteArray(i, char(1));
@@ -258,13 +266,15 @@ void tst_DataProcessor::goodBinaryFrame()
     else if (payload.length() < 65536)
     {
         quint16 swapped = qToBigEndian<quint16>(payload.length());
-        const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
+        const char *wireRepresentation
+                = static_cast<const char *>(static_cast<const void *>(&swapped));
         data.append(char(126)).append(wireRepresentation, 2);
     }
     else
     {
         quint64 swapped = qToBigEndian<quint64>(payload.length());
-        const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
+        const char *wireRepresentation
+                = static_cast<const char *>(static_cast<const void *>(&swapped));
         data.append(char(127)).append(wireRepresentation, 8);
     }
 
@@ -272,8 +282,10 @@ void tst_DataProcessor::goodBinaryFrame()
     buffer.setData(data);
     buffer.open(QIODevice::ReadOnly);
 
-    QSignalSpy errorReceivedSpy(&dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
-    QSignalSpy closeReceivedSpy(&dataProcessor, SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
+    QSignalSpy errorReceivedSpy(&dataProcessor,
+                                SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
+    QSignalSpy closeReceivedSpy(&dataProcessor,
+                                SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
     QSignalSpy pingReceivedSpy(&dataProcessor, SIGNAL(pingReceived(QByteArray)));
     QSignalSpy pongReceivedSpy(&dataProcessor, SIGNAL(pongReceived(QByteArray)));
     QSignalSpy binaryFrameReceivedSpy(&dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)));
@@ -304,8 +316,8 @@ void tst_DataProcessor::goodTextFrame_data()
     //test frames with small (< 126), large ( < 65536) and big ( > 65535) payloads
     for (int i = 0; i < (65536 + 256); i += 128)
     {
-        QTest::newRow(QStringLiteral("Text frame with %1 ASCII characters").arg(i).toLatin1().constData())
-                << QByteArray(i, 'a') << i;
+        QTest::newRow(QStringLiteral("Text frame with %1 ASCII characters")
+                      .arg(i).toLatin1().constData()) << QByteArray(i, 'a') << i;
     }
     //test all valid ASCII characters
     for (int i = 0; i < 128; ++i)
@@ -317,8 +329,10 @@ void tst_DataProcessor::goodTextFrame_data()
 
     //the text string reads: Text frame containing Hello-µ@ßöäüàá-UTF-8!!
     //Visual Studio doesn't like UTF-8 in source code, so we use escape codes for the string
-    //The number 22 refers to the length of the string; the length was incorrectly calculated on Visual Studio
-    QTest::newRow(QStringLiteral("Text frame containing Hello-\xC2\xB5\x40\xC3\x9F\xC3\xB6\xC3\xA4\xC3\xBC\xC3\xA0\xC3\xA1-UTF-8!!").toLatin1().constData())
+    //The number 22 refers to the length of the string;
+    //the length was incorrectly calculated on Visual Studio
+    QTest::newRow(QStringLiteral("Text frame containing Hello-\xC2\xB5\x40\xC3\x9F\xC3\xB6\xC3\xA4"
+                                 "\xC3\xBC\xC3\xA0\xC3\xA1-UTF-8!!").toLatin1().constData())
             << QByteArray::fromHex("48656c6c6f2dc2b540c39fc3b6c3a4c3bcc3a0c3a12d5554462d382121")
             << 22;
 }
@@ -340,13 +354,15 @@ void tst_DataProcessor::goodTextFrame()
     else if (payload.length() < 65536)
     {
         quint16 swapped = qToBigEndian<quint16>(payload.length());
-        const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
+        const char *wireRepresentation
+                = static_cast<const char *>(static_cast<const void *>(&swapped));
         data.append(char(126)).append(wireRepresentation, 2);
     }
     else
     {
         quint64 swapped = qToBigEndian<quint64>(payload.length());
-        const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
+        const char *wireRepresentation
+                = static_cast<const char *>(static_cast<const void *>(&swapped));
         data.append(char(127)).append(wireRepresentation, 8);
     }
 
@@ -354,8 +370,10 @@ void tst_DataProcessor::goodTextFrame()
     buffer.setData(data);
     buffer.open(QIODevice::ReadOnly);
 
-    QSignalSpy errorReceivedSpy(&dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
-    QSignalSpy closeReceivedSpy(&dataProcessor, SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
+    QSignalSpy errorReceivedSpy(&dataProcessor,
+                                SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
+    QSignalSpy closeReceivedSpy(&dataProcessor,
+                                SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
     QSignalSpy pingReceivedSpy(&dataProcessor, SIGNAL(pingReceived(QByteArray)));
     QSignalSpy pongReceivedSpy(&dataProcessor, SIGNAL(pongReceived(QByteArray)));
     QSignalSpy textFrameReceivedSpy(&dataProcessor, SIGNAL(textFrameReceived(QString,bool)));
@@ -386,8 +404,10 @@ void tst_DataProcessor::goodControlFrame()
     QBuffer buffer;
     QWebSocketDataProcessor dataProcessor;
 
-    QSignalSpy closeFrameReceivedSpy(&dataProcessor, SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
-    QSignalSpy errorReceivedSpy(&dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
+    QSignalSpy closeFrameReceivedSpy(&dataProcessor,
+                                     SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
+    QSignalSpy errorReceivedSpy(&dataProcessor,
+                                SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
     QSignalSpy textFrameReceivedSpy(&dataProcessor, SIGNAL(textFrameReceived(QString,bool)));
     QSignalSpy textMessageReceivedSpy(&dataProcessor, SIGNAL(textMessageReceived(QString)));
     QSignalSpy binaryFrameReceivedSpy(&dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)));
@@ -433,11 +453,14 @@ void tst_DataProcessor::goodCloseFrame_data()
 {
     QTest::addColumn<QString>("payload");
     QTest::addColumn<QWebSocketProtocol::CloseCode>("closeCode");
-    //control frame data cannot exceed 125 bytes; smaller than 124, because we also need a 2 byte close code
+    //control frame data cannot exceed 125 bytes; smaller than 124,
+    //because we also need a 2 byte close code
     for (int i = 0; i < 124; ++i)
     {
-        QTest::newRow(QStringLiteral("Close frame with %1 ASCII characters").arg(i).toLatin1().constData())
-                << QString(i, 'a') << QWebSocketProtocol::CloseCodeNormal;
+        QTest::newRow(QStringLiteral("Close frame with %1 ASCII characters")
+                      .arg(i).toLatin1().constData())
+                << QString(i, 'a')
+                << QWebSocketProtocol::CloseCodeNormal;
     }
     for (int i = 0; i < 126; ++i)
     {
@@ -583,10 +606,12 @@ void tst_DataProcessor::goodCloseFrame()
     buffer.setData(data);
     buffer.open(QIODevice::ReadOnly);
 
-    QSignalSpy errorReceivedSpy(&dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
+    QSignalSpy errorReceivedSpy(&dataProcessor,
+                                SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
     QSignalSpy pingReceivedSpy(&dataProcessor, SIGNAL(pingReceived(QByteArray)));
     QSignalSpy pongReceivedSpy(&dataProcessor, SIGNAL(pongReceived(QByteArray)));
-    QSignalSpy closeFrameReceivedSpy(&dataProcessor, SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
+    QSignalSpy closeFrameReceivedSpy(&dataProcessor,
+                                     SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
     QSignalSpy textFrameReceivedSpy(&dataProcessor, SIGNAL(textFrameReceived(QString,bool)));
     QSignalSpy textMessageReceivedSpy(&dataProcessor, SIGNAL(textMessageReceived(QString)));
     QSignalSpy binaryFrameReceivedSpy(&dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)));
@@ -663,8 +688,10 @@ void tst_DataProcessor::nonCharacterCodes()
         QByteArray data;
         QBuffer buffer;
         QWebSocketDataProcessor dataProcessor;
-        QSignalSpy errorSpy(&dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
-        QSignalSpy closeSpy(&dataProcessor, SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
+        QSignalSpy errorSpy(&dataProcessor,
+                            SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
+        QSignalSpy closeSpy(&dataProcessor,
+                            SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
         QSignalSpy pingFrameSpy(&dataProcessor, SIGNAL(pingReceived(QByteArray)));
         QSignalSpy pongFrameSpy(&dataProcessor, SIGNAL(pongReceived(QByteArray)));
         QSignalSpy textFrameSpy(&dataProcessor, SIGNAL(textFrameReceived(QString,bool)));
@@ -706,12 +733,14 @@ void tst_DataProcessor::frameTooSmall()
     firstFrame.append(quint8(QWebSocketProtocol::OpCodeText)).append(char(1))
             .append(QByteArray(1, 'a'));
 
-    //with nothing in the buffer, the dataProcessor should time out and the error should be CloseCodeGoingAway
-    //meaning the socket will be closed
+    //with nothing in the buffer, the dataProcessor should time out
+    //and the error should be CloseCodeGoingAway meaning the socket will be closed
     buffer.setData(data);
     buffer.open(QIODevice::ReadOnly);
-    QSignalSpy errorSpy(&dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
-    QSignalSpy closeSpy(&dataProcessor, SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
+    QSignalSpy errorSpy(&dataProcessor,
+                        SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
+    QSignalSpy closeSpy(&dataProcessor,
+                        SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
     QSignalSpy pingMessageSpy(&dataProcessor, SIGNAL(pingReceived(QByteArray)));
     QSignalSpy pongMessageSpy(&dataProcessor, SIGNAL(pongReceived(QByteArray)));
     QSignalSpy textMessageSpy(&dataProcessor, SIGNAL(textMessageReceived(QString)));
@@ -881,7 +910,8 @@ void tst_DataProcessor::frameTooBig_data()
     const char *wireRepresentation = 0;
 
     //only data frames are checked for being too big
-    //control frames have explicit checking on a maximum payload size of 125, which is tested elsewhere
+    //control frames have explicit checking on a maximum payload size of 125,
+    //which is tested elsewhere
 
     swapped64 = qToBigEndian<quint64>(QWebSocketDataProcessor::maxFrameSize() + 1);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped64));
@@ -922,7 +952,8 @@ void tst_DataProcessor::invalidHeader_data()
     //The second byte contains the MaskFlag and the length of the frame
     QTest::addColumn<quint8>("firstByte");
     QTest::addColumn<quint8>("secondByte");
-    QTest::addColumn<QByteArray>("payload");    //superfluous, but present to be able to call doTest(), which expects a payload field
+    //superfluous, but present to be able to call doTest(), which expects a payload field
+    QTest::addColumn<QByteArray>("payload");
     QTest::addColumn<bool>("isContinuationFrame");
     QTest::addColumn<QWebSocketProtocol::CloseCode>("expectedCloseCode");
 
@@ -1217,11 +1248,18 @@ void tst_DataProcessor::invalidPayload_data(bool isControlFrame)
     invalidUTF8("case 6.12.5",  "80bf80bf", isControlFrame);
     invalidUTF8("case 6.12.6",  "80bf80bf80", isControlFrame);
     invalidUTF8("case 6.12.7",  "80bf80bf80bf", isControlFrame);
-    invalidUTF8("case 6.12.8",  "808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbe", isControlFrame);
+    invalidUTF8("case 6.12.8",
+                "808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a"
+                "7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbe",
+                isControlFrame);
 
     //6.13: lonely start characters
-    invalidUTF8("case 6.13.1",  "c020c120c220c320c420c520c620c720c820c920ca20cb20cc20cd20ce20cf20d020d120d220d320d420d520d620d720d820d920da20db20dc20dd20de20", isControlFrame);
-    invalidUTF8("case 6.13.2",  "e020e120e220e320e420e520e620e720e820e920ea20eb20ec20ed20ee20", isControlFrame);
+    invalidUTF8("case 6.13.1",
+                "c020c120c220c320c420c520c620c720c820c920ca20cb20cc20cd20ce20cf20d020d120d220"
+                "d320d420d520d620d720d820d920da20db20dc20dd20de20",
+                isControlFrame);
+    invalidUTF8("case 6.13.2",  "e020e120e220e320e420e520e620e720e820e920ea20eb20ec20ed20ee20",
+                isControlFrame);
     invalidUTF8("case 6.13.3",  "f020f120f220f320f420f520f620", isControlFrame);
     invalidUTF8("case 6.13.4",  "f820f920fa20", isControlFrame);
     invalidUTF8("case 6.13.5",  "fc20", isControlFrame);
@@ -1239,7 +1277,8 @@ void tst_DataProcessor::invalidPayload_data(bool isControlFrame)
     invalidUTF8("case 6.14.10", "fdbfbfbfbf", isControlFrame);
 
     //6.15: concatenation of incomplete sequences
-    invalidUTF8("case 6.15.1",  "c0e080f08080f8808080fc80808080dfefbff7bfbffbbfbfbffdbfbfbfbf", isControlFrame);
+    invalidUTF8("case 6.15.1",
+                "c0e080f08080f8808080fc80808080dfefbff7bfbffbbfbfbffdbfbfbfbf", isControlFrame);
 
     //6.16: impossible bytes
     invalidUTF8("case 6.16.1",  "fe", isControlFrame);
@@ -1310,8 +1349,10 @@ void tst_DataProcessor::invalidPayloadInCloseFrame()
     QByteArray data;
     QBuffer buffer;
     QWebSocketDataProcessor dataProcessor;
-    QSignalSpy closeSpy(&dataProcessor, SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
-    QSignalSpy errorSpy(&dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
+    QSignalSpy closeSpy(&dataProcessor,
+                        SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
+    QSignalSpy errorSpy(&dataProcessor,
+                        SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
     QSignalSpy pingMessageSpy(&dataProcessor, SIGNAL(pingReceived(QByteArray)));
     QSignalSpy pongMessageSpy(&dataProcessor, SIGNAL(pongReceived(QByteArray)));
     QSignalSpy textMessageSpy(&dataProcessor, SIGNAL(textMessageReceived(QString)));
@@ -1376,11 +1417,13 @@ void tst_DataProcessor::incompleteSizeField_data()
     QTest::addColumn<bool>("isContinuationFrame");
     QTest::addColumn<QWebSocketProtocol::CloseCode>("expectedCloseCode");
 
-    //for a frame length value of 126, there should be 2 bytes following to form a 16-bit frame length
+    //for a frame length value of 126
+    //there should be 2 bytes following to form a 16-bit frame length
     insertIncompleteSizeFieldTest(126, 0);
     insertIncompleteSizeFieldTest(126, 1);
 
-    //for a frame length value of 127, there should be 8 bytes following to form a 64-bit frame length
+    //for a frame length value of 127
+    //there should be 8 bytes following to form a 64-bit frame length
     insertIncompleteSizeFieldTest(127, 0);
     insertIncompleteSizeFieldTest(127, 1);
     insertIncompleteSizeFieldTest(127, 2);
@@ -1410,7 +1453,8 @@ void tst_DataProcessor::doTest()
     QByteArray data;
     QBuffer buffer;
     QWebSocketDataProcessor dataProcessor;
-    QSignalSpy errorSpy(&dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
+    QSignalSpy errorSpy(&dataProcessor,
+                        SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
     QSignalSpy textMessageSpy(&dataProcessor, SIGNAL(textMessageReceived(QString)));
     QSignalSpy binaryMessageSpy(&dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)));
     QSignalSpy textFrameSpy(&dataProcessor, SIGNAL(textFrameReceived(QString, bool)));
@@ -1418,7 +1462,9 @@ void tst_DataProcessor::doTest()
 
     if (isContinuationFrame)
     {
-        data.append(quint8(QWebSocketProtocol::OpCodeText)).append(char(1)).append(QByteArray(1, 'a'));
+        data.append(quint8(QWebSocketProtocol::OpCodeText))
+            .append(char(1))
+            .append(QByteArray(1, 'a'));
     }
     data.append(firstByte).append(secondByte);
     data.append(payload);
@@ -1450,8 +1496,10 @@ void tst_DataProcessor::doCloseFrameTest()
     QByteArray data;
     QBuffer buffer;
     QWebSocketDataProcessor dataProcessor;
-    QSignalSpy closeSpy(&dataProcessor, SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
-    QSignalSpy errorSpy(&dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
+    QSignalSpy closeSpy(&dataProcessor,
+                        SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
+    QSignalSpy errorSpy(&dataProcessor,
+                        SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
     QSignalSpy textMessageSpy(&dataProcessor, SIGNAL(textMessageReceived(QString)));
     QSignalSpy binaryMessageSpy(&dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)));
     QSignalSpy textFrameSpy(&dataProcessor, SIGNAL(textFrameReceived(QString, bool)));
@@ -1570,7 +1618,8 @@ QString tst_DataProcessor::opCodeToString(quint8 opCode)
 void tst_DataProcessor::minimumSize16Bit(quint16 sizeInBytes)
 {
     quint16 swapped16 = qToBigEndian<quint16>(sizeInBytes);
-    const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped16));
+    const char *wireRepresentation
+            = static_cast<const char *>(static_cast<const void *>(&swapped16));
     QTest::newRow(QStringLiteral("Text frame with payload size %1, represented in 2 bytes")
                   .arg(sizeInBytes).toLatin1().constData())
             << quint8(FIN | QWebSocketProtocol::OpCodeText)
@@ -1597,7 +1646,8 @@ void tst_DataProcessor::minimumSize16Bit(quint16 sizeInBytes)
 void tst_DataProcessor::minimumSize64Bit(quint64 sizeInBytes)
 {
     quint64 swapped64 = qToBigEndian<quint64>(sizeInBytes);
-    const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped64));
+    const char *wireRepresentation
+            = static_cast<const char *>(static_cast<const void *>(&swapped64));
 
     QTest::newRow(QStringLiteral("Text frame with payload size %1, represented in 8 bytes")
                   .arg(sizeInBytes).toLatin1().constData())
@@ -1624,14 +1674,16 @@ void tst_DataProcessor::minimumSize64Bit(quint64 sizeInBytes)
             << QWebSocketProtocol::CloseCodeProtocolError;
 }
 
-void tst_DataProcessor::invalidUTF8(const char *dataTag, const char *utf8Sequence, bool isCloseFrame)
+void tst_DataProcessor::invalidUTF8(const char *dataTag, const char *utf8Sequence,
+                                    bool isCloseFrame)
 {
     QByteArray payload = QByteArray::fromHex(utf8Sequence);
 
     if (isCloseFrame)
     {
         quint16 closeCode = qToBigEndian<quint16>(QWebSocketProtocol::CloseCodeNormal);
-        const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&closeCode));
+        const char *wireRepresentation
+                = static_cast<const char *>(static_cast<const void *>(&closeCode));
         QTest::newRow(QStringLiteral("Close frame with invalid UTF8-sequence: %1")
                       .arg(dataTag).toLatin1().constData())
                 << quint8(FIN | QWebSocketProtocol::OpCodeClose)
@@ -1667,7 +1719,8 @@ void tst_DataProcessor::invalidField(const char *dataTag, quint8 invalidFieldVal
                            << QByteArray()
                            << false
                            << QWebSocketProtocol::CloseCodeProtocolError;
-    QTest::newRow(QString::fromLatin1(dataTag).append(" with continuation frame").toLatin1().constData())
+    QTest::newRow(QString::fromLatin1(dataTag).append(" with continuation frame")
+                  .toLatin1().constData())
                             << quint8(FIN | invalidFieldValue)
                             << quint8(0x00)
                             << QByteArray()
@@ -1675,7 +1728,8 @@ void tst_DataProcessor::invalidField(const char *dataTag, quint8 invalidFieldVal
                             << QWebSocketProtocol::CloseCodeProtocolError;
 }
 
-void tst_DataProcessor::incompleteFrame(quint8 controlCode, quint64 indicatedSize, quint64 actualPayloadSize)
+void tst_DataProcessor::incompleteFrame(quint8 controlCode, quint64 indicatedSize,
+                                        quint64 actualPayloadSize)
 {
     QVERIFY(!QWebSocketProtocol::isOpCodeReserved(QWebSocketProtocol::OpCode(controlCode)));
     QVERIFY(indicatedSize > actualPayloadSize);
@@ -1685,8 +1739,10 @@ void tst_DataProcessor::incompleteFrame(quint8 controlCode, quint64 indicatedSiz
 
     if (indicatedSize < 126)
     {
-        QTest::newRow(frameType.append(QStringLiteral(" frame with payload size %1, but only %2 bytes of data")
-                                       .arg(indicatedSize).arg(actualPayloadSize)).toLatin1().constData())
+        QTest::newRow(frameType
+                      .append(QStringLiteral(" frame with payload size %1, but only %2 bytes"
+                                             " of data")
+                      .arg(indicatedSize).arg(actualPayloadSize)).toLatin1().constData())
                 << quint8(FIN | controlCode)
                 << quint8(indicatedSize)
                 << firstFrame.append(QByteArray(actualPayloadSize, 'a'))
@@ -1696,24 +1752,33 @@ void tst_DataProcessor::incompleteFrame(quint8 controlCode, quint64 indicatedSiz
     else if (indicatedSize <= 0xFFFFu)
     {
         quint16 swapped16 = qToBigEndian<quint16>(static_cast<quint16>(indicatedSize));
-        const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped16));
-        QTest::newRow(frameType.append(QStringLiteral(" frame with payload size %1, but only %2 bytes of data")
-                                       .arg(indicatedSize).arg(actualPayloadSize)).toLatin1().constData())
+        const char *wireRepresentation
+                = static_cast<const char *>(static_cast<const void *>(&swapped16));
+        QTest::newRow(
+                    frameType.append(QStringLiteral(" frame with payload size %1, but only %2 bytes"
+                                                    " of data")
+                                     .arg(indicatedSize)
+                                     .arg(actualPayloadSize)).toLatin1().constData())
                 << quint8(FIN | controlCode)
                 << quint8(126)
-                << firstFrame.append(QByteArray(wireRepresentation, 2).append(QByteArray(actualPayloadSize, 'a')))
+                << firstFrame.append(QByteArray(wireRepresentation, 2)
+                                     .append(QByteArray(actualPayloadSize, 'a')))
                 << (controlCode == QWebSocketProtocol::OpCodeContinue)
                 << QWebSocketProtocol::CloseCodeGoingAway;
     }
     else
     {
         quint64 swapped64 = qToBigEndian<quint64>(indicatedSize);
-        const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped64));
-        QTest::newRow(frameType.append(QStringLiteral(" frame with payload size %1, but only %2 bytes of data")
-                                       .arg(indicatedSize).arg(actualPayloadSize)).toLatin1().constData())
+        const char *wireRepresentation
+                = static_cast<const char *>(static_cast<const void *>(&swapped64));
+        QTest::newRow(frameType
+                      .append(QStringLiteral(" frame with payload size %1, but only %2 bytes of "
+                                             "data")
+                                .arg(indicatedSize).arg(actualPayloadSize)).toLatin1().constData())
                 << quint8(FIN | controlCode)
                 << quint8(127)
-                << firstFrame.append(QByteArray(wireRepresentation, 8).append(QByteArray(actualPayloadSize, 'a')))
+                << firstFrame.append(QByteArray(wireRepresentation, 8)
+                                     .append(QByteArray(actualPayloadSize, 'a')))
                 << (controlCode == QWebSocketProtocol::OpCodeContinue)
                 << QWebSocketProtocol::CloseCodeGoingAway;
     }
@@ -1723,14 +1788,16 @@ void tst_DataProcessor::nonCharacterSequence(const char *sequence)
 {
     QByteArray utf8Sequence = QByteArray::fromHex(sequence);
 
-    QTest::newRow(QStringLiteral("Text frame with payload containing the non-control character sequence 0x%1")
+    QTest::newRow(QStringLiteral("Text frame with payload containing the non-control character "
+                                 "sequence 0x%1")
                   .arg(QString::fromLocal8Bit(sequence)).toLatin1().constData())
             << quint8(FIN | QWebSocketProtocol::OpCodeText)
             << quint8(utf8Sequence.size())
             << utf8Sequence
             << false;
 
-    QTest::newRow(QStringLiteral("Continuation frame with payload containing the non-control character sequence 0x%1")
+    QTest::newRow(QStringLiteral("Continuation frame with payload containing the non-control "
+                                 "character sequence 0x%1")
                   .arg(QString::fromLocal8Bit(sequence)).toLatin1().constData())
             << quint8(FIN | QWebSocketProtocol::OpCodeContinue)
             << quint8(utf8Sequence.size())
@@ -1754,7 +1821,8 @@ void tst_DataProcessor::insertIncompleteSizeFieldTest(quint8 payloadCode, quint8
             << QByteArray(numBytesFollowing, quint8(1))
             << false
             << QWebSocketProtocol::CloseCodeGoingAway;
-    QTest::newRow(QStringLiteral("Continuation frame with payload size %1, with %2 bytes following.")
+    QTest::newRow(QStringLiteral("Continuation frame with payload size %1, with %2 bytes "
+                                 "following.")
                   .arg(payloadCode).arg(numBytesFollowing).toLatin1().constData())
             << quint8(FIN | QWebSocketProtocol::OpCodeContinue)
             << quint8(payloadCode)
@@ -1766,4 +1834,3 @@ void tst_DataProcessor::insertIncompleteSizeFieldTest(quint8 payloadCode, quint8
 QTEST_MAIN(tst_DataProcessor)
 
 #include "tst_dataprocessor.moc"
-
