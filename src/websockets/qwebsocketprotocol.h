@@ -53,38 +53,38 @@ namespace QWebSocketProtocol
 {
 enum Version
 {
-    V_Unknow = -1,
-    V_0 = 0,
+    VersionUnknown = -1,
+    Version0 = 0,
     //hybi-01, hybi-02 and hybi-03 not supported
-    V_4 = 4,
-    V_5 = 5,
-    V_6 = 6,
-    V_7 = 7,
-    V_8 = 8,
-    V_13 = 13,
-    V_LATEST = V_13
+    Version4 = 4,
+    Version5 = 5,
+    Version6 = 6,
+    Version7 = 7,
+    Version8 = 8,
+    Version13 = 13,
+    VersionLatest = Version13
 };
 
 Version versionFromString(const QString &versionString);
 
 enum CloseCode
 {
-    CC_NORMAL					= 1000,
-    CC_GOING_AWAY				= 1001,
-    CC_PROTOCOL_ERROR			= 1002,
-    CC_DATATYPE_NOT_SUPPORTED	= 1003,
-    CC_RESERVED_1004			= 1004,
-    CC_MISSING_STATUS_CODE		= 1005,
-    CC_ABNORMAL_DISCONNECTION	= 1006,
-    CC_WRONG_DATATYPE			= 1007,
-    CC_POLICY_VIOLATED			= 1008,
-    CC_TOO_MUCH_DATA			= 1009,
-    CC_MISSING_EXTENSION		= 1010,
-    CC_BAD_OPERATION			= 1011,
-    CC_TLS_HANDSHAKE_FAILED		= 1015
+    CloseCodeNormal					= 1000,
+    CloseCodeGoingAway				= 1001,
+    CloseCodeProtocolError			= 1002,
+    CloseCodeDatatypeNotSupported	= 1003,
+    CloseCodeReserved1004			= 1004,
+    CloseCodeMissingStatusCode		= 1005,
+    CloseCodeAbnormalDisconnection	= 1006,
+    CloseCodeWrongDatatype			= 1007,
+    CloseCodePolicyViolated			= 1008,
+    CloseCodeTooMuchData			= 1009,
+    CloseCodeMissingExtension		= 1010,
+    CloseCodeBadOperation			= 1011,
+    CloseCodeTlsHandshakeFailed		= 1015
 };
 
-inline Version currentVersion() { return V_LATEST; }
+inline Version currentVersion() { return VersionLatest; }
 
 }	//end namespace QWebSocketProtocol
 
