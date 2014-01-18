@@ -130,24 +130,15 @@ void tst_WebSocketsTest::cleanup()
 
 void tst_WebSocketsTest::testTextMessage()
 {
-    const char *message = "Hello world!";
+    const QString message = QStringLiteral("Hello world!");
 
     QSignalSpy spy(m_pWebSocket, SIGNAL(textMessageReceived(QString)));
 
-    QCOMPARE(m_pWebSocket->write(message), (qint64)strlen(message));
-
+    QCOMPARE(m_pWebSocket->write(message), qint64(message.length()));
     QTRY_VERIFY_WITH_TIMEOUT(spy.count() != 0, 1000);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.at(0).count(), 1);
-    QCOMPARE(spy.takeFirst().at(0).toString(), QString(message));
-
-    spy.clear();
-    QString qMessage(message);
-    QCOMPARE(m_pWebSocket->write(qMessage), (qint64)qMessage.length());
-    QTRY_VERIFY_WITH_TIMEOUT(spy.count() != 0, 1000);
-    QCOMPARE(spy.count(), 1);
-    QCOMPARE(spy.at(0).count(), 1);
-    QCOMPARE(spy.takeFirst().at(0).toString(), qMessage);
+    QCOMPARE(spy.takeFirst().at(0).toString(), message);
 }
 
 void tst_WebSocketsTest::testBinaryMessage()
