@@ -204,7 +204,7 @@ void tst_WebSocketFrame::tst_copyConstructorAndAssignment()
     frameHelper.setFinalFrame(true);
     frameHelper.setMask(1234u);
     frameHelper.setOpCode(QWebSocketProtocol::OpCodeBinary);
-    frameHelper.setPayload(QByteArray("12345"));
+    frameHelper.setPayload(QByteArrayLiteral("12345"));
 
     QByteArray payload = frameHelper.wireRepresentation();
     QBuffer buffer(&payload);

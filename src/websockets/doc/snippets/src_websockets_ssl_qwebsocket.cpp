@@ -32,5 +32,5 @@ expectedSslErrors.append(error);
 
 QWebSocket socket;
 socket.ignoreSslErrors(expectedSslErrors);
-socket.open("wss://myserver.at.home");
+socket.open(QUrl(QStringLiteral("wss://myserver.at.home")));
 //! [6]

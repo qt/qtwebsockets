@@ -1719,7 +1719,7 @@ void tst_DataProcessor::invalidField(const char *dataTag, quint8 invalidFieldVal
                            << QByteArray()
                            << false
                            << QWebSocketProtocol::CloseCodeProtocolError;
-    QTest::newRow(QString::fromLatin1(dataTag).append(" with continuation frame")
+    QTest::newRow(QString::fromLatin1(dataTag).append(QStringLiteral(" with continuation frame"))
                   .toLatin1().constData())
                             << quint8(FIN | invalidFieldValue)
                             << quint8(0x00)
