@@ -54,7 +54,8 @@ SslEchoServer::SslEchoServer(quint16 port, QObject *parent) :
     m_pWebSocketServer(Q_NULLPTR),
     m_clients()
 {
-    m_pWebSocketServer = new QWebSocketServer("SSL Echo Server", QWebSocketServer::SecureModeSecure, this);
+    m_pWebSocketServer = new QWebSocketServer("SSL Echo Server", QWebSocketServer::SecureModeSecure,
+                                              this);
     QSslConfiguration sslConfiguration;
     QFile certFile(QStringLiteral("./localhost.cert"));
     QFile keyFile(QStringLiteral("./localhost.key"));
