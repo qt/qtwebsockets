@@ -75,7 +75,8 @@ void EchoServer::onNewConnection()
     QWebSocket *pSocket = m_pWebSocketServer->nextPendingConnection();
 
     connect(pSocket, SIGNAL(textMessageReceived(QString)), this, SLOT(processMessage(QString)));
-    connect(pSocket, SIGNAL(binaryMessageReceived(QByteArray)), this, SLOT(processBinaryMessage(QByteArray)));
+    connect(pSocket, SIGNAL(binaryMessageReceived(QByteArray)), this,
+            SLOT(processBinaryMessage(QByteArray)));
     connect(pSocket, SIGNAL(disconnected()), this, SLOT(socketDisconnected()));
 
     m_clients << pSocket;

@@ -102,10 +102,20 @@ void tst_WebSocketProtocol::tst_validMasks_data()
     QTest::addColumn<QByteArray>("result");
 
     QTest::newRow("Empty payload") << 0x12345678u << QString() << QByteArray();
-    QTest::newRow("ASCII payload of 8 characters") << 0x12345678u << QStringLiteral("abcdefgh") << QByteArrayLiteral("\x73\x56\x35\x1C\x77\x52\x31\x10");
-    QTest::newRow("ASCII payload of 9 characters") << 0x12345678u << QStringLiteral("abcdefghi") << QByteArrayLiteral("\x73\x56\x35\x1C\x77\x52\x31\x10\x7B");
-    //MSVC doesn't like UTF-8 in source code; the following text is represented in the string below: ∫∂ƒ©øØ
-    QTest::newRow("UTF-8 payload") << 0x12345678u << QString::fromUtf8("\xE2\x88\xAB\xE2\x88\x82\xC6\x92\xC2\xA9\xC3\xB8\xC3\x98") << QByteArrayLiteral("\x2D\x0B\x69\xD1\xEA\xEC");
+    QTest::newRow("ASCII payload of 8 characters")
+            << 0x12345678u
+            << QStringLiteral("abcdefgh")
+            << QByteArrayLiteral("\x73\x56\x35\x1C\x77\x52\x31\x10");
+    QTest::newRow("ASCII payload of 9 characters")
+            << 0x12345678u
+            << QStringLiteral("abcdefghi")
+            << QByteArrayLiteral("\x73\x56\x35\x1C\x77\x52\x31\x10\x7B");
+    //MSVC doesn't like UTF-8 in source code;
+    //the following text is represented in the string below: ∫∂ƒ©øØ
+    QTest::newRow("UTF-8 payload")
+            << 0x12345678u
+            << QString::fromUtf8("\xE2\x88\xAB\xE2\x88\x82\xC6\x92\xC2\xA9\xC3\xB8\xC3\x98")
+            << QByteArrayLiteral("\x2D\x0B\x69\xD1\xEA\xEC");
 }
 
 void tst_WebSocketProtocol::tst_validMasks()
