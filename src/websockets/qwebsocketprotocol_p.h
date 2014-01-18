@@ -86,6 +86,8 @@ inline bool isCloseCodeValid(int closeCode)
             ((closeCode >= 3000) || (closeCode < 1012));
 }
 
+inline Version currentVersion() { return VersionLatest; }
+
 void Q_AUTOTEST_EXPORT mask(QByteArray *payload, quint32 maskingKey);
 void Q_AUTOTEST_EXPORT mask(char *payload, quint64 size, quint32 maskingKey);
 }	//end namespace QWebSocketProtocol
