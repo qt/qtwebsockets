@@ -229,7 +229,7 @@ void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream)
         headerLine = textStream.readLine();
     }
 
-    const QString host = m_headers.value(QStringLiteral("Host"), QStringLiteral(""));
+    const QString host = m_headers.value(QStringLiteral("Host"), QString());
     m_requestUrl = QUrl::fromEncoded(resourceName.toLatin1());
     if (m_requestUrl.isRelative())
         m_requestUrl.setHost(host);
