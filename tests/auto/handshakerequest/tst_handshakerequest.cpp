@@ -162,7 +162,7 @@ void tst_HandshakeRequest::tst_invalidStream_data()
     QTest::newRow("Invalid http version in header") << QStringLiteral("V R HTTP/invalid");
     QTest::newRow("Empty header field") << QStringLiteral("GET . HTTP/1.1\r\nHEADER: ");
     QTest::newRow("All zeros") << QString::fromUtf8(QByteArray(10, char(0)));
-    QTest::newRow("Invalid hostname") << "GET . HTTP/1.1\r\nHost: \xFF\xFF";
+    QTest::newRow("Invalid hostname") << QStringLiteral("GET . HTTP/1.1\r\nHost: \xFF\xFF");
     //doing extensive QStringLiteral concatenations here, because
     //MSVC 2010 complains when using concatenation literal strings about
     //concatenation of wide and narrow strings (error C2308)
