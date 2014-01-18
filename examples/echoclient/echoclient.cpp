@@ -49,8 +49,8 @@ EchoClient::EchoClient(const QUrl &url, QObject *parent) :
     m_webSocket(),
     m_url(url)
 {
-    connect(&m_webSocket, SIGNAL(connected()), this, SLOT(onConnected()));
-    connect(&m_webSocket, SIGNAL(disconnected()), this, SIGNAL(closed()));
+    connect(&m_webSocket, &QWebSocket::connected, this, &EchoClient::onConnected);
+    connect(&m_webSocket, &QWebSocket::disconnected, this, &EchoClient::closed);
     m_webSocket.open(QUrl(url));
 }
 //! [constructor]
@@ -59,8 +59,8 @@ EchoClient::EchoClient(const QUrl &url, QObject *parent) :
 void EchoClient::onConnected()
 {
     qDebug() << "Websocket connected";
-    connect(&m_webSocket, SIGNAL(textMessageReceived(QString)), this,
-            SLOT(onTextMessageReceived(QString)));
+    connect(&m_webSocket, &QWebSocket::textMessageReceived,
+            this, &EchoClient::onTextMessageReceived);
     m_webSocket.write("Hello, world!");
 }
 //! [onConnected]

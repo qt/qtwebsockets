@@ -75,7 +75,8 @@ SslEchoServer::SslEchoServer(quint16 port, QObject *parent) :
     if (m_pWebSocketServer->listen(QHostAddress::Any, port))
     {
         qDebug() << "SSL Echo Server listening on port" << port;
-        connect(m_pWebSocketServer, SIGNAL(newConnection()), this, SLOT(onNewConnection()));
+        connect(m_pWebSocketServer, &QWebSocketServer::newConnection,
+                this, &SslEchoServer::onNewConnection);
     }
 }
 //! [constructor]
@@ -87,10 +88,11 @@ void SslEchoServer::onNewConnection()
 
     qDebug() << "Client connected:" << pSocket->peerName() << pSocket->origin();
 
-    connect(pSocket, SIGNAL(textMessageReceived(QString)), this, SLOT(processMessage(QString)));
-    connect(pSocket, SIGNAL(binaryMessageReceived(QByteArray)), this, SLOT(processBinaryMessage(QByteArray)));
-    connect(pSocket, SIGNAL(disconnected()), this, SLOT(socketDisconnected()));
-    //connect(pSocket, SIGNAL(pong(quint64)), this, SLOT(processPong(quint64)));
+    connect(pSocket, &QWebSocket::textMessageReceived, this, &SslEchoServer::processMessage);
+    connect(pSocket, &QWebSocket::binaryMessageReceived,
+            this, &SslEchoServer::processBinaryMessage);
+    connect(pSocket, &QWebSocket::disconnected, this, &SslEchoServer::socketDisconnected);
+    //connect(pSocket, &QWebSocket::pong, this, &SslEchoServer::processPong);
 
     m_clients << pSocket;
 }
