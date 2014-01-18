@@ -97,7 +97,7 @@ private:
 
 tst_WebSocketsTest::tst_WebSocketsTest() :
     m_pWebSocket(0),
-    m_url("ws://localhost:9000")
+    m_url(QStringLiteral("ws://localhost:9000"))
 {
 }
 
@@ -130,24 +130,16 @@ void tst_WebSocketsTest::cleanup()
 
 void tst_WebSocketsTest::testTextMessage()
 {
-    const char *message = "Hello world!";
+    const QString message = QStringLiteral("Hello world!");
 
     QSignalSpy spy(m_pWebSocket, SIGNAL(textMessageReceived(QString)));
 
-    QCOMPARE(m_pWebSocket->write(message), (qint64)strlen(message));
+    QCOMPARE(m_pWebSocket->write(message), qint64(message.size()));
 
     QTRY_VERIFY_WITH_TIMEOUT(spy.count() != 0, 1000);
     QCOMPARE(spy.count(), 1);
     QCOMPARE(spy.at(0).count(), 1);
-    QCOMPARE(spy.takeFirst().at(0).toString(), QString(message));
-
-    spy.clear();
-    QString qMessage(message);
-    QCOMPARE(m_pWebSocket->write(qMessage), (qint64)qMessage.length());
-    QTRY_VERIFY_WITH_TIMEOUT(spy.count() != 0, 1000);
-    QCOMPARE(spy.count(), 1);
-    QCOMPARE(spy.at(0).count(), 1);
-    QCOMPARE(spy.takeFirst().at(0).toString(), qMessage);
+    QCOMPARE(spy.takeFirst().at(0).toString(), message);
 }
 
 void tst_WebSocketsTest::testBinaryMessage()
@@ -156,7 +148,7 @@ void tst_WebSocketsTest::testBinaryMessage()
 
     QByteArray data("Hello world!");
 
-    QCOMPARE(m_pWebSocket->write(data), (qint64)data.size());
+    QCOMPARE(m_pWebSocket->write(data), qint64(data.size()));
 
     QTRY_VERIFY_WITH_TIMEOUT(spy.count() != 0, 1000);
     QCOMPARE(spy.count(), 1);
@@ -166,7 +158,7 @@ void tst_WebSocketsTest::testBinaryMessage()
 
 void tst_WebSocketsTest::testLocalAddress()
 {
-    QCOMPARE(m_pWebSocket->localAddress().toString(), QString("127.0.0.1"));
+    QCOMPARE(m_pWebSocket->localAddress().toString(), QStringLiteral("127.0.0.1"));
     quint16 localPort = m_pWebSocket->localPort();
     QVERIFY2(localPort > 0, "Local port is invalid.");
 }
@@ -198,7 +190,7 @@ void tst_WebSocketsTest::testPeerAddress()
 void tst_WebSocketsTest::testProxy()
 {
     QNetworkProxy oldProxy = m_pWebSocket->proxy();
-    QNetworkProxy proxy(QNetworkProxy::HttpProxy, QString("proxy.network.com"), 80);
+    QNetworkProxy proxy(QNetworkProxy::HttpProxy, QStringLiteral("proxy.network.com"), 80);
     m_pWebSocket->setProxy(proxy);
     QCOMPARE(proxy, m_pWebSocket->proxy());
     m_pWebSocket->setProxy(oldProxy);

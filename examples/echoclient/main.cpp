@@ -44,7 +44,7 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    EchoClient client(QUrl("ws://localhost:1234"));
+    EchoClient client(QUrl(QStringLiteral("ws://localhost:1234")));
     QObject::connect(&client, &EchoClient::closed, &a, &QCoreApplication::quit);
 
     Q_UNUSED(client);
