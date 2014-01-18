@@ -42,6 +42,7 @@
 #include "qwebsockethandshakeresponse_p.h"
 #include "qwebsockethandshakerequest_p.h"
 #include "qwebsocketprotocol.h"
+#include "qwebsocketprotocol_p.h"
 
 #include <QtCore/QString>
 #include <QtCore/QTextStream>

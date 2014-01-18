@@ -84,8 +84,6 @@ enum CloseCode
     CloseCodeTlsHandshakeFailed     = 1015
 };
 
-inline Version currentVersion() { return VersionLatest; }
-
 }	//end namespace QWebSocketProtocol
 
 QT_END_NAMESPACE
