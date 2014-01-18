@@ -70,11 +70,11 @@ QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName,
     m_serverName(serverName),
     m_secureMode(secureMode),
     m_pendingConnections(),
-    m_error(QWebSocketProtocol::CC_NORMAL),
+    m_error(QWebSocketProtocol::CloseCodeNormal),
     m_errorString()
 {
     Q_ASSERT(pWebSocketServer);
-    if (m_secureMode == NON_SECURE_MODE) {
+    if (m_secureMode == SecureModeSecure) {
         m_pTcpServer = new QTcpServer(this);
         if (Q_LIKELY(m_pTcpServer))
             connect(m_pTcpServer, &QTcpServer::newConnection,
@@ -118,7 +118,7 @@ void QWebSocketServerPrivate::close()
     m_pTcpServer->close();
     while (!m_pendingConnections.isEmpty()) {
         QWebSocket *pWebSocket = m_pendingConnections.dequeue();
-        pWebSocket->close(QWebSocketProtocol::CC_GOING_AWAY, tr("Server closed."));
+        pWebSocket->close(QWebSocketProtocol::CloseCodeGoingAway, tr("Server closed."));
         pWebSocket->deleteLater();
     }
     //emit signal via the event queue, so the server gets time
@@ -326,7 +326,7 @@ QWebSocketServerPrivate::SecureMode QWebSocketServerPrivate::secureMode() const
 #ifndef QT_NO_SSL
 void QWebSocketServerPrivate::setSslConfiguration(const QSslConfiguration &sslConfiguration)
 {
-    if (m_secureMode == SECURE_MODE)
+    if (m_secureMode == SecureModeSecure)
         qobject_cast<QSslServer *>(m_pTcpServer)->setSslConfiguration(sslConfiguration);
     else
         qWarning() << tr("Cannot set SSL configuration for non-secure server.");
@@ -334,7 +334,7 @@ void QWebSocketServerPrivate::setSslConfiguration(const QSslConfiguration &sslCo
 
 QSslConfiguration QWebSocketServerPrivate::sslConfiguration() const
 {
-    if (m_secureMode == SECURE_MODE)
+    if (m_secureMode == SecureModeSecure)
         return qobject_cast<QSslServer *>(m_pTcpServer)->sslConfiguration();
     else
         return QSslConfiguration::defaultConfiguration();
@@ -388,7 +388,7 @@ void QWebSocketServerPrivate::handshakeReceived()
             pTcpSocket->close();
             qWarning() <<
                 tr("Too many pending connections: new websocket connection not accepted.");
-            setError(QWebSocketProtocol::CC_ABNORMAL_DISCONNECTION,
+            setError(QWebSocketProtocol::CloseCodeAbnormalDisconnection,
                      tr("Too many pending connections."));
             return;
         }
@@ -423,7 +423,7 @@ void QWebSocketServerPrivate::handshakeReceived()
                         Q_EMIT q->newConnection();
                         success = true;
                     } else {
-                        setError(QWebSocketProtocol::CC_ABNORMAL_DISCONNECTION,
+                        setError(QWebSocketProtocol::CloseCodeAbnormalDisconnection,
                                  tr("Upgrading to websocket failed."));
                     }
                 }
@@ -431,7 +431,7 @@ void QWebSocketServerPrivate::handshakeReceived()
                     setError(response.error(), response.errorString());
                 }
             } else {
-                setError(QWebSocketProtocol::CC_PROTOCOL_ERROR, tr("Invalid response received."));
+                setError(QWebSocketProtocol::CloseCodeProtocolError, tr("Invalid response received."));
             }
         }
         if (!success) {

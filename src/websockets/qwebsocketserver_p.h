@@ -77,8 +77,8 @@ class QWebSocketServerPrivate : public QObject
 public:
     enum SecureMode
     {
-        SECURE_MODE = true,
-        NON_SECURE_MODE
+        SecureModeSecure = true,
+        SecureModeNonSecure
     };
 
     explicit QWebSocketServerPrivate(const QString &serverName, SecureMode secureMode,
