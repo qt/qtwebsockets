@@ -128,22 +128,22 @@ void tst_WebSocketProtocol::tst_opCodes_data()
     QTest::addColumn<QWebSocketProtocol::OpCode>("opCode");
     QTest::addColumn<bool>("isReserved");
 
-    QTest::newRow("OC_BINARY") << QWebSocketProtocol::OC_BINARY << false;
-    QTest::newRow("OC_CLOSE") << QWebSocketProtocol::OC_CLOSE << false;
-    QTest::newRow("OC_CONTINUE") << QWebSocketProtocol::OC_CONTINUE << false;
-    QTest::newRow("OC_PING") << QWebSocketProtocol::OC_PING << false;
-    QTest::newRow("OC_PONG") << QWebSocketProtocol::OC_PONG << false;
-    QTest::newRow("OC_RESERVED3") << QWebSocketProtocol::OC_RESERVED_3 << true;
-    QTest::newRow("OC_RESERVED4") << QWebSocketProtocol::OC_RESERVED_4 << true;
-    QTest::newRow("OC_RESERVED5") << QWebSocketProtocol::OC_RESERVED_5 << true;
-    QTest::newRow("OC_RESERVED6") << QWebSocketProtocol::OC_RESERVED_6 << true;
-    QTest::newRow("OC_RESERVED7") << QWebSocketProtocol::OC_RESERVED_7 << true;
-    QTest::newRow("OC_RESERVEDB") << QWebSocketProtocol::OC_RESERVED_B << true;
-    QTest::newRow("OC_RESERVEDC") << QWebSocketProtocol::OC_RESERVED_C << true;
-    QTest::newRow("OC_RESERVEDD") << QWebSocketProtocol::OC_RESERVED_D << true;
-    QTest::newRow("OC_RESERVEDE") << QWebSocketProtocol::OC_RESERVED_E << true;
-    QTest::newRow("OC_RESERVEDF") << QWebSocketProtocol::OC_RESERVED_F << true;
-    QTest::newRow("OC_TEXT") << QWebSocketProtocol::OC_TEXT << false;
+    QTest::newRow("OpCodeBinary")       << QWebSocketProtocol::OpCodeBinary << false;
+    QTest::newRow("OpCodeClose")        << QWebSocketProtocol::OpCodeClose << false;
+    QTest::newRow("OpCodeContinue")     << QWebSocketProtocol::OpCodeContinue << false;
+    QTest::newRow("OpCodePing")         << QWebSocketProtocol::OpCodePing << false;
+    QTest::newRow("OpCodePong")         << QWebSocketProtocol::OpCodePong << false;
+    QTest::newRow("OpCodeReserved3")    << QWebSocketProtocol::OpCodeReserved3 << true;
+    QTest::newRow("OpCodeReserved4")    << QWebSocketProtocol::OpCodeReserved4 << true;
+    QTest::newRow("OpCodeReserved5")    << QWebSocketProtocol::OpCodeReserved5 << true;
+    QTest::newRow("OpCodeReserved6")    << QWebSocketProtocol::OpCodeReserved6 << true;
+    QTest::newRow("OpCodeReserved7")    << QWebSocketProtocol::OpCodeReserved7 << true;
+    QTest::newRow("OpCodeReserved8")    << QWebSocketProtocol::OpCodeReservedB << true;
+    QTest::newRow("OpCodeReservedC")    << QWebSocketProtocol::OpCodeReservedC << true;
+    QTest::newRow("OpCodeReservedD")    << QWebSocketProtocol::OpCodeReservedD << true;
+    QTest::newRow("OpCodeReservedE")    << QWebSocketProtocol::OpCodeReservedE << true;
+    QTest::newRow("OpCodeReservedF")    << QWebSocketProtocol::OpCodeReservedF << true;
+    QTest::newRow("OpCodeText")         << QWebSocketProtocol::OpCodeText << false;
 }
 
 void tst_WebSocketProtocol::tst_opCodes()

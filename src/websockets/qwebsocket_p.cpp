@@ -103,7 +103,7 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
     m_mustMask(true),
     m_isClosingHandshakeSent(false),
     m_isClosingHandshakeReceived(false),
-    m_closeCode(QWebSocketProtocol::CC_NORMAL),
+    m_closeCode(QWebSocketProtocol::CloseCodeNormal),
     m_closeReason(),
     m_pingTimer(),
     m_dataProcessor(),
@@ -132,7 +132,7 @@ QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol:
     m_mustMask(true),
     m_isClosingHandshakeSent(false),
     m_isClosingHandshakeReceived(false),
-    m_closeCode(QWebSocketProtocol::CC_NORMAL),
+    m_closeCode(QWebSocketProtocol::CloseCodeNormal),
     m_closeReason(),
     m_pingTimer(),
     m_dataProcessor(),
@@ -159,7 +159,7 @@ QWebSocketPrivate::~QWebSocketPrivate()
     if (!m_pSocket)
         return;
     if (state() == QAbstractSocket::ConnectedState)
-        close(QWebSocketProtocol::CC_GOING_AWAY, tr("Connection closed"));
+        close(QWebSocketProtocol::CloseCodeGoingAway, tr("Connection closed"));
     releaseConnections(m_pSocket.data());
 }
 
@@ -328,7 +328,7 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
             maskingKey = generateMaskingKey();
             QWebSocketProtocol::mask(payload.data(), payload.size(), maskingKey);
         }
-        QByteArray frame = getFrameHeader(QWebSocketProtocol::OC_CLOSE,
+        QByteArray frame = getFrameHeader(QWebSocketProtocol::OpCodeClose,
                                           payload.size(), maskingKey, true);
         frame.append(payload);
         m_pSocket->write(frame);
@@ -444,7 +444,7 @@ void QWebSocketPrivate::ping(const QByteArray &payload)
 {
     QByteArray payloadTruncated = payload.left(125);
     m_pingTimer.restart();
-    QByteArray pingFrame = getFrameHeader(QWebSocketProtocol::OC_PING, payloadTruncated.size(),
+    QByteArray pingFrame = getFrameHeader(QWebSocketProtocol::OpCodePing, payloadTruncated.size(),
                                           0 /*do not mask*/, true);
     pingFrame.append(payloadTruncated);
     qint64 ret = writeFrame(pingFrame);
@@ -698,7 +698,7 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
 
     Q_Q(QWebSocket);
     const QWebSocketProtocol::OpCode firstOpCode = isBinary ?
-                QWebSocketProtocol::OC_BINARY : QWebSocketProtocol::OC_TEXT;
+                QWebSocketProtocol::OpCodeBinary : QWebSocketProtocol::OpCodeText;
 
     int numFrames = data.size() / FRAME_SIZE_IN_BYTES;
     QByteArray tmpData(data);
@@ -726,7 +726,7 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
 
         const quint64 size = qMin(bytesLeft, FRAME_SIZE_IN_BYTES);
         const QWebSocketProtocol::OpCode opcode = isFirstFrame ? firstOpCode
-                                                               : QWebSocketProtocol::OC_CONTINUE;
+                                                               : QWebSocketProtocol::OpCodeContinue;
 
         //write header
         bytesWritten += m_pSocket->write(getFrameHeader(opcode, size, maskingKey, isLastFrame));
@@ -1029,7 +1029,7 @@ void QWebSocketPrivate::processPing(const QByteArray &data)
     quint32 maskingKey = 0;
     if (m_mustMask)
         maskingKey = generateMaskingKey();
-    m_pSocket->write(getFrameHeader(QWebSocketProtocol::OC_PONG, data.size(), maskingKey, true));
+    m_pSocket->write(getFrameHeader(QWebSocketProtocol::OpCodePong, data.size(), maskingKey, true));
     if (data.size() > 0) {
         QByteArray maskedData = data;
         if (m_mustMask)
