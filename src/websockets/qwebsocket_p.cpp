@@ -210,29 +210,6 @@ bool QWebSocketPrivate::flush()
 /*!
     \internal
  */
-qint64 QWebSocketPrivate::write(const char *message)
-{
-    if (!message || !*message)
-        return qint64(0);
-    uint size = qstrlen(message);
-    qint64 maxSize = qMin(qint64(size), qint64(std::numeric_limits<QString::size_type>::max()));
-    return doWriteFrames(QString::fromUtf8(message, maxSize).toUtf8(), false);
-}
-
-/*!
-    \internal
- */
-qint64 QWebSocketPrivate::write(const char *message, qint64 maxSize)
-{
-    if (!message || (maxSize <= qint64(0)) || !*message)
-        return qint64(0);
-    maxSize = qMin(maxSize, qint64(std::numeric_limits<QString::size_type>::max()));
-    return doWriteFrames(QString::fromUtf8(message, maxSize).toUtf8(), false);
-}
-
-/*!
-    \internal
- */
 qint64 QWebSocketPrivate::write(const QString &message)
 {
     return doWriteFrames(message.toUtf8(), false);

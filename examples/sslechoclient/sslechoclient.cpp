@@ -58,7 +58,7 @@ void SslEchoClient::onConnected()
 {
     qDebug() << "Websocket connected";
     connect(&m_webSocket, SIGNAL(textMessageReceived(QString)), this, SLOT(onTextMessageReceived(QString)));
-    m_webSocket.write("Hello, world!");
+    m_webSocket.write(QStringLiteral("Hello, world!"));
 }
 //! [onConnected]
 
