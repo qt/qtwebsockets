@@ -72,8 +72,8 @@ QWebSocketHandshakeResponse::QWebSocketHandshakeResponse(
     m_response(),
     m_acceptedProtocol(),
     m_acceptedExtension(),
-    m_acceptedVersion(QWebSocketProtocol::V_Unknow),
-    m_error(QWebSocketProtocol::CC_NORMAL),
+    m_acceptedVersion(QWebSocketProtocol::VersionUnknown),
+    m_error(QWebSocketProtocol::CloseCodeNormal),
     m_errorString()
 {
     m_response = getHandshakeResponse(request, serverName,
@@ -140,7 +140,7 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(
 
     if (!isOriginAllowed) {
         if (!m_canUpgrade) {
-            m_error = QWebSocketProtocol::CC_POLICY_VIOLATED;
+            m_error = QWebSocketProtocol::CloseCodePolicyViolated;
             m_errorString = tr("Access forbidden.");
             response << QStringLiteral("HTTP/1.1 403 Access Forbidden");
         }
@@ -157,7 +157,7 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(
                       std::greater<QWebSocketProtocol::Version>());    //sort in descending order
 
             if (Q_UNLIKELY(matchingVersions.isEmpty())) {
-                m_error = QWebSocketProtocol::CC_PROTOCOL_ERROR;
+                m_error = QWebSocketProtocol::CloseCodeProtocolError;
                 m_errorString = tr("Unsupported version requested.");
                 m_canUpgrade = false;
             } else {
@@ -189,7 +189,7 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(
                 m_canUpgrade = true;
             }
         } else {
-            m_error = QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            m_error = QWebSocketProtocol::CloseCodeProtocolError;
             m_errorString = tr("Bad handshake request received.");
             m_canUpgrade = false;
         }

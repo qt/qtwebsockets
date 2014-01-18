@@ -85,7 +85,7 @@ private:
 
 FrameHelper::FrameHelper() :
     m_rsv1(0), m_rsv2(0), m_rsv3(0),
-    m_mask(0), m_opCode(QWebSocketProtocol::OC_RESERVED_3),
+    m_mask(0), m_opCode(QWebSocketProtocol::OpCodeReserved3),
     m_payload(), m_isFinalFrame(false)
 {}
 
@@ -201,7 +201,7 @@ void tst_WebSocketFrame::tst_copyConstructorAndAssignment()
     frameHelper.setRsv3(0);
     frameHelper.setFinalFrame(true);
     frameHelper.setMask(1234u);
-    frameHelper.setOpCode(QWebSocketProtocol::OC_BINARY);
+    frameHelper.setOpCode(QWebSocketProtocol::OpCodeBinary);
     frameHelper.setPayload(QByteArray("12345"));
 
     QByteArray payload = frameHelper.wireRepresentation();
@@ -263,54 +263,54 @@ void tst_WebSocketFrame::tst_goodFrames_data()
 
     QTest::newRow("Non masked final text frame with small payload")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_TEXT
+            << 0U << QWebSocketProtocol::OpCodeText
             << true << QStringLiteral("Hello world!").toUtf8()
             << false << true << false;
     QTest::newRow("Non masked final binary frame with small payload")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_BINARY
+            << 0U << QWebSocketProtocol::OpCodeBinary
             << true << QByteArrayLiteral("\x00\x01\x02\x03\x04")
             << false << true << false;
     QTest::newRow("Non masked final text frame with no payload")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_TEXT
+            << 0U << QWebSocketProtocol::OpCodeText
             << true << QByteArray()
             << false << true << false;
     QTest::newRow("Non masked final binary frame with no payload")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_BINARY
+            << 0U << QWebSocketProtocol::OpCodeBinary
             << true << QByteArray()
             << false << true << false;
 
     QTest::newRow("Non masked final close frame with small payload")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_CLOSE
+            << 0U << QWebSocketProtocol::OpCodeClose
             << true << QStringLiteral("Hello world!").toUtf8()
             << true << false << false;
     QTest::newRow("Non masked final close frame with no payload")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_CLOSE
+            << 0U << QWebSocketProtocol::OpCodeClose
             << true << QByteArray()
             << true << false << false;
     QTest::newRow("Non masked final ping frame with small payload")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_PING
+            << 0U << QWebSocketProtocol::OpCodePing
             << true << QStringLiteral("Hello world!").toUtf8()
             << true << false << false;
     QTest::newRow("Non masked final pong frame with no payload")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_PONG
+            << 0U << QWebSocketProtocol::OpCodePong
             << true << QByteArray()
             << true << false << false;
 
     QTest::newRow("Non masked final continuation frame with small payload")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_CONTINUE
+            << 0U << QWebSocketProtocol::OpCodeContinue
             << true << QStringLiteral("Hello world!").toUtf8()
             << false << true << true;
     QTest::newRow("Non masked non-final continuation frame with small payload")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_CONTINUE
+            << 0U << QWebSocketProtocol::OpCodeContinue
             << false << QStringLiteral("Hello world!").toUtf8()
             << false << true << true;
 }
@@ -370,116 +370,116 @@ void tst_WebSocketFrame::tst_invalidFrames_data()
 
     QTest::newRow("RSV1 != 0")
             << 1 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_TEXT
+            << 0U << QWebSocketProtocol::OpCodeText
             << true << QStringLiteral("Hello world!").toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("RSV2 != 0")
             << 0 << 1 << 0
-            << 0U << QWebSocketProtocol::OC_TEXT
+            << 0U << QWebSocketProtocol::OpCodeText
             << true << QStringLiteral("Hello world!").toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("RSV3 != 0")
             << 0 << 0 << 1
-            << 0U << QWebSocketProtocol::OC_TEXT
+            << 0U << QWebSocketProtocol::OpCodeText
             << true << QStringLiteral("Hello world!").toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("RSV1 != 0 and RSV2 != 0")
             << 1 << 1 << 0
-            << 0U << QWebSocketProtocol::OC_TEXT
+            << 0U << QWebSocketProtocol::OpCodeText
             << true << QStringLiteral("Hello world!").toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("RSV1 != 0 and RSV3 != 0")
             << 1 << 0 << 1
-            << 0U << QWebSocketProtocol::OC_TEXT
+            << 0U << QWebSocketProtocol::OpCodeText
             << true << QStringLiteral("Hello world!").toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("RSV2 != 0 and RSV3 != 0")
             << 0 << 1 << 1
-            << 0U << QWebSocketProtocol::OC_TEXT
+            << 0U << QWebSocketProtocol::OpCodeText
             << true << QStringLiteral("Hello world!").toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
 
     QTest::newRow("Reserved OpCode 3")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_RESERVED_3
+            << 0U << QWebSocketProtocol::OpCodeReserved3
             << true << QStringLiteral("Hello world!").toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("Reserved OpCode 4")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_RESERVED_4
+            << 0U << QWebSocketProtocol::OpCodeReserved4
             << true << QStringLiteral("Hello world!").toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("Reserved OpCode 5")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_RESERVED_5
+            << 0U << QWebSocketProtocol::OpCodeReserved5
             << true << QStringLiteral("Hello world!").toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("Reserved OpCode 6")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_RESERVED_6
+            << 0U << QWebSocketProtocol::OpCodeReserved6
             << true << QStringLiteral("Hello world!").toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("Reserved OpCode 7")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_RESERVED_7
+            << 0U << QWebSocketProtocol::OpCodeReserved7
             << true << QStringLiteral("Hello world!").toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("Reserved OpCode B")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_RESERVED_B
+            << 0U << QWebSocketProtocol::OpCodeReservedB
             << true << QStringLiteral("Hello world!").toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("Reserved OpCode C")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_RESERVED_C
+            << 0U << QWebSocketProtocol::OpCodeReservedC
             << true << QStringLiteral("Hello world!").toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("Reserved OpCode D")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_RESERVED_D
+            << 0U << QWebSocketProtocol::OpCodeReservedD
             << true << QStringLiteral("Hello world!").toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("Reserved OpCode E")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_RESERVED_E
+            << 0U << QWebSocketProtocol::OpCodeReservedE
             << true << QStringLiteral("Hello world!").toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("Reserved OpCode F")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_RESERVED_F
+            << 0U << QWebSocketProtocol::OpCodeReservedF
             << true << QStringLiteral("Hello world!").toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
 
     QTest::newRow("Close Frame with payload > 125 bytes")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_CLOSE
+            << 0U << QWebSocketProtocol::OpCodeClose
             << true << QString(126, 'a').toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("Non-final Close Frame")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_CLOSE
+            << 0U << QWebSocketProtocol::OpCodeClose
             << false << QString(126, 'a').toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("Ping Frame with payload > 125 bytes")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_PING
+            << 0U << QWebSocketProtocol::OpCodePing
             << true << QString(126, 'a').toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("Non-final Ping Frame")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_PING
+            << 0U << QWebSocketProtocol::OpCodePing
             << false << QString(126, 'a').toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("Pong Frame with payload > 125 bytes")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_PONG
+            << 0U << QWebSocketProtocol::OpCodePong
             << true << QString(126, 'a').toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("Non-final Pong Frame")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_PONG
+            << 0U << QWebSocketProtocol::OpCodePong
             << false << QString(126, 'a').toUtf8()
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
 }
 
 void tst_WebSocketFrame::tst_invalidFrames()
@@ -520,9 +520,9 @@ void tst_WebSocketFrame::tst_invalidFrames()
  *
     QTest::newRow("Frame Too Big")
             << 0 << 0 << 0
-            << 0U << QWebSocketProtocol::OC_TEXT
+            << 0U << QWebSocketProtocol::OpCodeText
             << true << QString(MAX_FRAME_SIZE_IN_BYTES + 1, 'a').toUtf8()
-            << QWebSocketProtocol::CC_TOO_MUCH_DATA;
+            << QWebSocketProtocol::CloseCodeTooMuchData;
 
  */
 void tst_WebSocketFrame::tst_malformedFrames_data()
@@ -531,13 +531,13 @@ void tst_WebSocketFrame::tst_malformedFrames_data()
     QTest::addColumn<QWebSocketProtocol::CloseCode>("expectedError");
 
     //too little data
-    QTest::newRow("No data") << QByteArray() << QWebSocketProtocol::CC_GOING_AWAY;
+    QTest::newRow("No data") << QByteArray() << QWebSocketProtocol::CloseCodeGoingAway;
     FrameHelper helper;
     helper.setRsv1(0);
     helper.setRsv2(0);
     helper.setRsv3(0);
     helper.setMask(0U);
-    helper.setOpCode(QWebSocketProtocol::OC_TEXT);
+    helper.setOpCode(QWebSocketProtocol::OpCodeText);
     helper.setFinalFrame(true);
     helper.setPayload(QString(10, 'a').toUtf8());
     QByteArray wireRep = helper.wireRepresentation();
@@ -548,7 +548,7 @@ void tst_WebSocketFrame::tst_malformedFrames_data()
     {
         QTest::newRow(QStringLiteral("Header too small - %1 byte(s)").arg(i).toLatin1().constData())
                 << wireRep.left(i)
-                << QWebSocketProtocol::CC_GOING_AWAY;
+                << QWebSocketProtocol::CloseCodeGoingAway;
     }
     //too much data
     {
@@ -558,7 +558,7 @@ void tst_WebSocketFrame::tst_malformedFrames_data()
         qToBigEndian<quint64>(payloadSize, swapped);
         QTest::newRow("Frame too big")
                 << wireRep.left(1).append(bigpayloadIndicator).append(reinterpret_cast<char *>(swapped), 8)
-                << QWebSocketProtocol::CC_TOO_MUCH_DATA;
+                << QWebSocketProtocol::CloseCodeTooMuchData;
     }
     //invalid size field
     {
@@ -568,13 +568,13 @@ void tst_WebSocketFrame::tst_malformedFrames_data()
         qToBigEndian<quint64>(payloadSize, swapped);
         QTest::newRow("Highest bit of payload length is set")
                 << wireRep.left(1).append(bigpayloadIndicator).append(reinterpret_cast<char *>(swapped), 8)
-                << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+                << QWebSocketProtocol::CloseCodeProtocolError;
 
         payloadSize = 256;
         qToBigEndian<quint64>(payloadSize, swapped);
         QTest::newRow("Overlong 64-bit size field; should be 16-bit")
                 << wireRep.left(1).append(bigpayloadIndicator).append(reinterpret_cast<char *>(swapped), 8)
-                << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+                << QWebSocketProtocol::CloseCodeProtocolError;
     }
     //overlong size field
     {
@@ -584,7 +584,7 @@ void tst_WebSocketFrame::tst_malformedFrames_data()
         qToBigEndian<quint16>(payloadSize, swapped);
         QTest::newRow("Overlong 16-bit size field")
                 << wireRep.left(1).append(largepayloadIndicator).append(reinterpret_cast<char *>(swapped), 2)
-                << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+                << QWebSocketProtocol::CloseCodeProtocolError;
     }
     {
         const char bigpayloadIndicator = char(127);
@@ -593,13 +593,13 @@ void tst_WebSocketFrame::tst_malformedFrames_data()
         qToBigEndian<quint64>(payloadSize, swapped);
         QTest::newRow("Overlong 64-bit size field; should be 7-bit")
                 << wireRep.left(1).append(bigpayloadIndicator).append(reinterpret_cast<char *>(swapped), 8)
-                << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+                << QWebSocketProtocol::CloseCodeProtocolError;
 
         payloadSize = 256;
         qToBigEndian<quint64>(payloadSize, swapped);
         QTest::newRow("Overlong 64-bit size field; should be 16-bit")
                 << wireRep.left(1).append(bigpayloadIndicator).append(reinterpret_cast<char *>(swapped), 8)
-                << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+                << QWebSocketProtocol::CloseCodeProtocolError;
     }
 }
 

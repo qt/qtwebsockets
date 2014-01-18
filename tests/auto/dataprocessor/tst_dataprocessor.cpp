@@ -249,7 +249,7 @@ void tst_DataProcessor::goodBinaryFrame()
     QWebSocketDataProcessor dataProcessor;
     QFETCH(QByteArray, payload);
 
-    data.append((char)(FIN | QWebSocketProtocol::OC_BINARY));
+    data.append((char)(FIN | QWebSocketProtocol::OpCodeBinary));
 
     if (payload.length() < 126)
     {
@@ -331,7 +331,7 @@ void tst_DataProcessor::goodTextFrame()
     QFETCH(QByteArray, payload);
     QFETCH(int, size);
 
-    data.append((char)(FIN | QWebSocketProtocol::OC_TEXT));
+    data.append((char)(FIN | QWebSocketProtocol::OpCodeText));
 
     if (payload.length() < 126)
     {
@@ -395,7 +395,7 @@ void tst_DataProcessor::goodControlFrame()
     QSignalSpy pingReceivedSpy(&dataProcessor, SIGNAL(pingReceived(QByteArray)));
     QSignalSpy pongReceivedSpy(&dataProcessor, SIGNAL(pongReceived(QByteArray)));
 
-    data.append((char)(FIN | QWebSocketProtocol::OC_PING));
+    data.append((char)(FIN | QWebSocketProtocol::OpCodePing));
     data.append(QChar::fromLatin1(0));
     buffer.setData(data);
     buffer.open(QIODevice::ReadOnly);
@@ -413,7 +413,7 @@ void tst_DataProcessor::goodControlFrame()
     data.clear();
     pingReceivedSpy.clear();
     pongReceivedSpy.clear();
-    data.append((char)(FIN | QWebSocketProtocol::OC_PONG));
+    data.append((char)(FIN | QWebSocketProtocol::OpCodePong));
     data.append(QChar::fromLatin1(0));
     buffer.setData(data);
     buffer.open(QIODevice::ReadOnly);
@@ -437,55 +437,82 @@ void tst_DataProcessor::goodCloseFrame_data()
     for (int i = 0; i < 124; ++i)
     {
         QTest::newRow(QStringLiteral("Close frame with %1 ASCII characters").arg(i).toLatin1().constData())
-                << QString(i, 'a') << QWebSocketProtocol::CC_NORMAL;
+                << QString(i, 'a') << QWebSocketProtocol::CloseCodeNormal;
     }
     for (int i = 0; i < 126; ++i)
     {
         QTest::newRow(QStringLiteral("Text frame with containing ASCII character '0x%1'")
                       .arg(QByteArray(1, char(i)).toHex().constData()).toLatin1().constData())
-                << QString(1, char(i)) << QWebSocketProtocol::CC_NORMAL;
+                << QString(1, char(i)) << QWebSocketProtocol::CloseCodeNormal;
     }
-    QTest::newRow("Close frame with close code NORMAL") << QString(1, 'a') << QWebSocketProtocol::CC_NORMAL;
-    QTest::newRow("Close frame with close code BAD OPERATION") << QString(1, 'a') << QWebSocketProtocol::CC_BAD_OPERATION;
-    QTest::newRow("Close frame with close code DATATYPE NOT SUPPORTED") << QString(1, 'a') << QWebSocketProtocol::CC_DATATYPE_NOT_SUPPORTED;
-    QTest::newRow("Close frame with close code GOING AWAY") << QString(1, 'a') << QWebSocketProtocol::CC_GOING_AWAY;
-    QTest::newRow("Close frame with close code MISSING EXTENSION") << QString(1, 'a') << QWebSocketProtocol::CC_MISSING_EXTENSION;
-    QTest::newRow("Close frame with close code POLICY VIOLATED") << QString(1, 'a') << QWebSocketProtocol::CC_POLICY_VIOLATED;
-    QTest::newRow("Close frame with close code PROTOCOL ERROR") << QString(1, 'a') << QWebSocketProtocol::CC_PROTOCOL_ERROR;
-    QTest::newRow("Close frame with close code TOO MUCH DATA") << QString(1, 'a') << QWebSocketProtocol::CC_TOO_MUCH_DATA;
-    QTest::newRow("Close frame with close code WRONG DATATYPE") << QString(1, 'a') << QWebSocketProtocol::CC_WRONG_DATATYPE;
-    QTest::newRow("Close frame with close code 3000") << QString(1, 'a') << QWebSocketProtocol::CloseCode(3000);
-    QTest::newRow("Close frame with close code 3999") << QString(1, 'a') << QWebSocketProtocol::CloseCode(3999);
-    QTest::newRow("Close frame with close code 4000") << QString(1, 'a') << QWebSocketProtocol::CloseCode(4000);
-    QTest::newRow("Close frame with close code 4999") << QString(1, 'a') << QWebSocketProtocol::CloseCode(4999);
+    QTest::newRow("Close frame with close code NORMAL")
+            << QString(1, 'a') << QWebSocketProtocol::CloseCodeNormal;
+    QTest::newRow("Close frame with close code BAD OPERATION")
+            << QString(1, 'a') << QWebSocketProtocol::CloseCodeBadOperation;
+    QTest::newRow("Close frame with close code DATATYPE NOT SUPPORTED")
+            << QString(1, 'a') << QWebSocketProtocol::CloseCodeDatatypeNotSupported;
+    QTest::newRow("Close frame with close code GOING AWAY")
+            << QString(1, 'a') << QWebSocketProtocol::CloseCodeGoingAway;
+    QTest::newRow("Close frame with close code MISSING EXTENSION")
+            << QString(1, 'a') << QWebSocketProtocol::CloseCodeMissingExtension;
+    QTest::newRow("Close frame with close code POLICY VIOLATED")
+            << QString(1, 'a') << QWebSocketProtocol::CloseCodePolicyViolated;
+    QTest::newRow("Close frame with close code PROTOCOL ERROR")
+            << QString(1, 'a') << QWebSocketProtocol::CloseCodeProtocolError;
+    QTest::newRow("Close frame with close code TOO MUCH DATA")
+            << QString(1, 'a') << QWebSocketProtocol::CloseCodeTooMuchData;
+    QTest::newRow("Close frame with close code WRONG DATATYPE")
+            << QString(1, 'a') << QWebSocketProtocol::CloseCodeWrongDatatype;
+    QTest::newRow("Close frame with close code 3000")
+            << QString(1, 'a') << QWebSocketProtocol::CloseCode(3000);
+    QTest::newRow("Close frame with close code 3999")
+            << QString(1, 'a') << QWebSocketProtocol::CloseCode(3999);
+    QTest::newRow("Close frame with close code 4000")
+            << QString(1, 'a') << QWebSocketProtocol::CloseCode(4000);
+    QTest::newRow("Close frame with close code 4999")
+            << QString(1, 'a') << QWebSocketProtocol::CloseCode(4999);
 
     //close frames with no close reason
-    QTest::newRow("Close frame with close code NORMAL and no reason") << QString() << QWebSocketProtocol::CC_NORMAL;
-    QTest::newRow("Close frame with close code BAD OPERATION and no reason") << QString() << QWebSocketProtocol::CC_BAD_OPERATION;
-    QTest::newRow("Close frame with close code DATATYPE NOT SUPPORTED and no reason") << QString() << QWebSocketProtocol::CC_DATATYPE_NOT_SUPPORTED;
-    QTest::newRow("Close frame with close code GOING AWAY and no reason") << QString() << QWebSocketProtocol::CC_GOING_AWAY;
-    QTest::newRow("Close frame with close code MISSING EXTENSION and no reason") << QString() << QWebSocketProtocol::CC_MISSING_EXTENSION;
-    QTest::newRow("Close frame with close code POLICY VIOLATED and no reason") << QString() << QWebSocketProtocol::CC_POLICY_VIOLATED;
-    QTest::newRow("Close frame with close code PROTOCOL ERROR and no reason") << QString() << QWebSocketProtocol::CC_PROTOCOL_ERROR;
-    QTest::newRow("Close frame with close code TOO MUCH DATA and no reason") << QString() << QWebSocketProtocol::CC_TOO_MUCH_DATA;
-    QTest::newRow("Close frame with close code WRONG DATATYPE and no reason") << QString() << QWebSocketProtocol::CC_WRONG_DATATYPE;
-    QTest::newRow("Close frame with close code 3000 and no reason") << QString() << QWebSocketProtocol::CloseCode(3000);
-    QTest::newRow("Close frame with close code 3999 and no reason") << QString() << QWebSocketProtocol::CloseCode(3999);
-    QTest::newRow("Close frame with close code 4000 and no reason") << QString() << QWebSocketProtocol::CloseCode(4000);
-    QTest::newRow("Close frame with close code 4999 and no reason") << QString() << QWebSocketProtocol::CloseCode(4999);
+    QTest::newRow("Close frame with close code NORMAL and no reason")
+            << QString() << QWebSocketProtocol::CloseCodeNormal;
+    QTest::newRow("Close frame with close code BAD OPERATION and no reason")
+            << QString() << QWebSocketProtocol::CloseCodeBadOperation;
+    QTest::newRow("Close frame with close code DATATYPE NOT SUPPORTED and no reason")
+            << QString() << QWebSocketProtocol::CloseCodeDatatypeNotSupported;
+    QTest::newRow("Close frame with close code GOING AWAY and no reason")
+            << QString() << QWebSocketProtocol::CloseCodeGoingAway;
+    QTest::newRow("Close frame with close code MISSING EXTENSION and no reason")
+            << QString() << QWebSocketProtocol::CloseCodeMissingExtension;
+    QTest::newRow("Close frame with close code POLICY VIOLATED and no reason")
+            << QString() << QWebSocketProtocol::CloseCodePolicyViolated;
+    QTest::newRow("Close frame with close code PROTOCOL ERROR and no reason")
+            << QString() << QWebSocketProtocol::CloseCodeProtocolError;
+    QTest::newRow("Close frame with close code TOO MUCH DATA and no reason")
+            << QString() << QWebSocketProtocol::CloseCodeTooMuchData;
+    QTest::newRow("Close frame with close code WRONG DATATYPE and no reason")
+            << QString() << QWebSocketProtocol::CloseCodeWrongDatatype;
+    QTest::newRow("Close frame with close code 3000 and no reason")
+            << QString() << QWebSocketProtocol::CloseCode(3000);
+    QTest::newRow("Close frame with close code 3999 and no reason")
+            << QString() << QWebSocketProtocol::CloseCode(3999);
+    QTest::newRow("Close frame with close code 4000 and no reason")
+            << QString() << QWebSocketProtocol::CloseCode(4000);
+    QTest::newRow("Close frame with close code 4999 and no reason")
+            << QString() << QWebSocketProtocol::CloseCode(4999);
 
-    QTest::newRow("Close frame with no close code and no reason") << QString() << QWebSocketProtocol::CloseCode(0);
+    QTest::newRow("Close frame with no close code and no reason")
+            << QString() << QWebSocketProtocol::CloseCode(0);
 }
 
 void tst_DataProcessor::goodOpcodes_data()
 {
     QTest::addColumn<QWebSocketProtocol::OpCode>("opCode");
 
-    QTest::newRow("Frame with PING opcode") << QWebSocketProtocol::OC_PING;
-    QTest::newRow("Frame with PONG opcode") << QWebSocketProtocol::OC_PONG;
-    QTest::newRow("Frame with TEXT opcode") << QWebSocketProtocol::OC_TEXT;
-    QTest::newRow("Frame with BINARY opcode") << QWebSocketProtocol::OC_BINARY;
-    QTest::newRow("Frame with CLOSE opcode") << QWebSocketProtocol::OC_CLOSE;
+    QTest::newRow("Frame with PING opcode") << QWebSocketProtocol::OpCodePing;
+    QTest::newRow("Frame with PONG opcode") << QWebSocketProtocol::OpCodePong;
+    QTest::newRow("Frame with TEXT opcode") << QWebSocketProtocol::OpCodeText;
+    QTest::newRow("Frame with BINARY opcode") << QWebSocketProtocol::OpCodeBinary;
+    QTest::newRow("Frame with CLOSE opcode") << QWebSocketProtocol::OpCodeClose;
 }
 
 void tst_DataProcessor::goodOpcodes()
@@ -501,25 +528,33 @@ void tst_DataProcessor::goodOpcodes()
     buffer.setData(data);
     buffer.open(QIODevice::ReadOnly);
 
-    QSignalSpy errorReceivedSpy(&dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
-    QSignalSpy closeReceivedSpy(&dataProcessor, SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
-    QSignalSpy pingReceivedSpy(&dataProcessor, SIGNAL(pingReceived(QByteArray)));
-    QSignalSpy pongReceivedSpy(&dataProcessor, SIGNAL(pongReceived(QByteArray)));
-    QSignalSpy textFrameReceivedSpy(&dataProcessor, SIGNAL(textFrameReceived(QString,bool)));
-    QSignalSpy textMessageReceivedSpy(&dataProcessor, SIGNAL(textMessageReceived(QString)));
-    QSignalSpy binaryFrameReceivedSpy(&dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)));
-    QSignalSpy binaryMessageReceivedSpy(&dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)));
+    QSignalSpy errorReceivedSpy(&dataProcessor,
+                                SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
+    QSignalSpy closeReceivedSpy(&dataProcessor,
+                                SIGNAL(closeReceived(QWebSocketProtocol::CloseCode,QString)));
+    QSignalSpy pingReceivedSpy(&dataProcessor,
+                               SIGNAL(pingReceived(QByteArray)));
+    QSignalSpy pongReceivedSpy(&dataProcessor,
+                               SIGNAL(pongReceived(QByteArray)));
+    QSignalSpy textFrameReceivedSpy(&dataProcessor,
+                                    SIGNAL(textFrameReceived(QString,bool)));
+    QSignalSpy textMessageReceivedSpy(&dataProcessor,
+                                      SIGNAL(textMessageReceived(QString)));
+    QSignalSpy binaryFrameReceivedSpy(&dataProcessor,
+                                      SIGNAL(binaryFrameReceived(QByteArray,bool)));
+    QSignalSpy binaryMessageReceivedSpy(&dataProcessor,
+                                        SIGNAL(binaryMessageReceived(QByteArray)));
 
     dataProcessor.process(&buffer);
 
     QCOMPARE(errorReceivedSpy.count(), 0);
-    QCOMPARE(pingReceivedSpy.count(), opCode == QWebSocketProtocol::OC_PING ? 1 : 0);
-    QCOMPARE(pongReceivedSpy.count(), opCode == QWebSocketProtocol::OC_PONG ? 1 : 0);
-    QCOMPARE(closeReceivedSpy.count(), opCode == QWebSocketProtocol::OC_CLOSE ? 1 : 0);
-    QCOMPARE(textFrameReceivedSpy.count(), opCode == QWebSocketProtocol::OC_TEXT ? 1 : 0);
-    QCOMPARE(textMessageReceivedSpy.count(), opCode == QWebSocketProtocol::OC_TEXT ? 1 : 0);
-    QCOMPARE(binaryFrameReceivedSpy.count(), opCode == QWebSocketProtocol::OC_BINARY ? 1 : 0);
-    QCOMPARE(binaryMessageReceivedSpy.count(), opCode == QWebSocketProtocol::OC_BINARY ? 1 : 0);
+    QCOMPARE(pingReceivedSpy.count(), opCode == QWebSocketProtocol::OpCodePing ? 1 : 0);
+    QCOMPARE(pongReceivedSpy.count(), opCode == QWebSocketProtocol::OpCodePong ? 1 : 0);
+    QCOMPARE(closeReceivedSpy.count(), opCode == QWebSocketProtocol::OpCodeClose ? 1 : 0);
+    QCOMPARE(textFrameReceivedSpy.count(), opCode == QWebSocketProtocol::OpCodeText ? 1 : 0);
+    QCOMPARE(textMessageReceivedSpy.count(), opCode == QWebSocketProtocol::OpCodeText ? 1 : 0);
+    QCOMPARE(binaryFrameReceivedSpy.count(), opCode == QWebSocketProtocol::OpCodeBinary ? 1 : 0);
+    QCOMPARE(binaryMessageReceivedSpy.count(), opCode == QWebSocketProtocol::OpCodeBinary ? 1 : 0);
 
     buffer.close();
 }
@@ -534,7 +569,7 @@ void tst_DataProcessor::goodCloseFrame()
     quint16 swapped = qToBigEndian<quint16>(closeCode);
     const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
 
-    data.append((char)(FIN | QWebSocketProtocol::OC_CLOSE));
+    data.append((char)(FIN | QWebSocketProtocol::OpCodeClose));
     if (swapped != 0)
     {
         data.append(char(payload.length() + 2)).append(wireRepresentation, 2).append(payload);
@@ -542,8 +577,8 @@ void tst_DataProcessor::goodCloseFrame()
     else
     {
         data.append(QChar::fromLatin1(0));  //payload length 0;
-        //dataprocessor emits a CC_NORMAL close code when none is present
-        closeCode = QWebSocketProtocol::CC_NORMAL;
+        //dataprocessor emits a CloseCodeNormal close code when none is present
+        closeCode = QWebSocketProtocol::CloseCodeNormal;
     }
     buffer.setData(data);
     buffer.open(QIODevice::ReadOnly);
@@ -668,9 +703,10 @@ void tst_DataProcessor::frameTooSmall()
     QWebSocketDataProcessor dataProcessor;
     QByteArray firstFrame;
 
-    firstFrame.append(quint8(QWebSocketProtocol::OC_TEXT)).append(char(1)).append(QByteArray(1, 'a'));
+    firstFrame.append(quint8(QWebSocketProtocol::OpCodeText)).append(char(1))
+            .append(QByteArray(1, 'a'));
 
-    //with nothing in the buffer, the dataProcessor should time out and the error should be CC_GOING_AWAY
+    //with nothing in the buffer, the dataProcessor should time out and the error should be CloseCodeGoingAway
     //meaning the socket will be closed
     buffer.setData(data);
     buffer.open(QIODevice::ReadOnly);
@@ -695,7 +731,8 @@ void tst_DataProcessor::frameTooSmall()
     QCOMPARE(binaryFrameSpy.count(), 0);
 
     QList<QVariant> arguments = errorSpy.takeFirst();
-    QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(), QWebSocketProtocol::CC_GOING_AWAY);
+    QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(),
+             QWebSocketProtocol::CloseCodeGoingAway);
     errorSpy.clear();
     closeSpy.clear();
     pingMessageSpy.clear();
@@ -707,7 +744,8 @@ void tst_DataProcessor::frameTooSmall()
     buffer.close();
     data.clear();
 
-    //only one byte; this is far too little; should get a time out as well and the error should be CC_GOING_AWAY
+    //only one byte; this is far too little;
+    //should get a time out as well and the error should be CloseCodeGoingAway
     //meaning the socket will be closed
     data.append(quint8('1'));   //put 1 byte in the buffer; this is too little
     buffer.setData(data);
@@ -725,7 +763,8 @@ void tst_DataProcessor::frameTooSmall()
     QCOMPARE(binaryFrameSpy.count(), 0);
 
     arguments = errorSpy.takeFirst();
-    QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(), QWebSocketProtocol::CC_GOING_AWAY);
+    QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(),
+             QWebSocketProtocol::CloseCodeGoingAway);
     buffer.close();
     errorSpy.clear();
     closeSpy.clear();
@@ -740,7 +779,7 @@ void tst_DataProcessor::frameTooSmall()
 
     {
         //text frame with final bit not set
-        data.append((char)(QWebSocketProtocol::OC_TEXT)).append(char(0x0));
+        data.append((char)(QWebSocketProtocol::OpCodeText)).append(char(0x0));
         buffer.setData(data);
         buffer.open(QIODevice::ReadOnly);
 
@@ -749,11 +788,13 @@ void tst_DataProcessor::frameTooSmall()
         buffer.close();
         data.clear();
 
-        //with nothing in the buffer, the dataProcessor should time out and the error should be CC_GOING_AWAY
+        //with nothing in the buffer,
+        //the dataProcessor should time out and the error should be CloseCodeGoingAway
         //meaning the socket will be closed
         buffer.setData(data);
         buffer.open(QIODevice::ReadOnly);
-        QSignalSpy errorSpy(&dataProcessor, SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
+        QSignalSpy errorSpy(&dataProcessor,
+                            SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
         dataProcessor.process(&buffer);
 
         QCOMPARE(errorSpy.count(), 1);
@@ -766,7 +807,8 @@ void tst_DataProcessor::frameTooSmall()
         QCOMPARE(binaryFrameSpy.count(), 0);
 
         QList<QVariant> arguments = errorSpy.takeFirst();
-        QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(), QWebSocketProtocol::CC_GOING_AWAY);
+        QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(),
+                 QWebSocketProtocol::CloseCodeGoingAway);
         errorSpy.clear();
         closeSpy.clear();
         pingMessageSpy.clear();
@@ -779,7 +821,7 @@ void tst_DataProcessor::frameTooSmall()
         data.clear();
 
         //text frame with final bit not set
-        data.append((char)(QWebSocketProtocol::OC_TEXT)).append(char(0x0));
+        data.append((char)(QWebSocketProtocol::OpCodeText)).append(char(0x0));
         buffer.setData(data);
         buffer.open(QIODevice::ReadOnly);
         dataProcessor.process(&buffer);
@@ -805,7 +847,8 @@ void tst_DataProcessor::frameTooSmall()
         textFrameSpy.clear();
         binaryFrameSpy.clear();
 
-        //only 1 byte follows in continuation frame; should time out with close code CC_GOING_AWAY
+        //only 1 byte follows in continuation frame;
+        //should time out with close code CloseCodeGoingAway
         data.append('a');
         buffer.setData(data);
         buffer.open(QIODevice::ReadOnly);
@@ -820,7 +863,8 @@ void tst_DataProcessor::frameTooSmall()
         QCOMPARE(textFrameSpy.count(), 0);
         QCOMPARE(binaryFrameSpy.count(), 0);
         arguments = errorSpy.takeFirst();
-        QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(), QWebSocketProtocol::CC_GOING_AWAY);
+        QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(),
+                 QWebSocketProtocol::CloseCodeGoingAway);
         buffer.close();
     }
 }
@@ -842,29 +886,29 @@ void tst_DataProcessor::frameTooBig_data()
     swapped64 = qToBigEndian<quint64>(QWebSocketDataProcessor::maxFrameSize() + 1);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped64));
     QTest::newRow("Text frame with payload size > INT_MAX")
-            << quint8(FIN | QWebSocketProtocol::OC_TEXT)
+            << quint8(FIN | QWebSocketProtocol::OpCodeText)
             << quint8(127)
             << QByteArray(wireRepresentation, 8).append(QByteArray(32, 'a'))
             << false
-            << QWebSocketProtocol::CC_TOO_MUCH_DATA;
+            << QWebSocketProtocol::CloseCodeTooMuchData;
 
     swapped64 = qToBigEndian<quint64>(QWebSocketDataProcessor::maxFrameSize() + 1);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped64));
     QTest::newRow("Binary frame with payload size > INT_MAX")
-            << quint8(FIN | QWebSocketProtocol::OC_BINARY)
+            << quint8(FIN | QWebSocketProtocol::OpCodeBinary)
             << quint8(127)
             << QByteArray(wireRepresentation, 8).append(QByteArray(32, 'a'))
             << false
-            << QWebSocketProtocol::CC_TOO_MUCH_DATA;
+            << QWebSocketProtocol::CloseCodeTooMuchData;
 
     swapped64 = qToBigEndian<quint64>(QWebSocketDataProcessor::maxFrameSize() + 1);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped64));
     QTest::newRow("Continuation frame with payload size > INT_MAX")
-            << quint8(FIN | QWebSocketProtocol::OC_CONTINUE)
+            << quint8(FIN | QWebSocketProtocol::OpCodeContinue)
             << quint8(127)
             << QByteArray(wireRepresentation, 8).append(QByteArray(32, 'a'))
             << true
-            << QWebSocketProtocol::CC_TOO_MUCH_DATA;
+            << QWebSocketProtocol::CloseCodeTooMuchData;
 }
 
 void tst_DataProcessor::frameTooBig()
@@ -892,16 +936,16 @@ void tst_DataProcessor::invalidHeader_data()
     invalidField("RSV1, RSV2 and RSV3 set", RSV1 | RSV2 | RSV3);
 
     //invalid opcodes
-    invalidField("Invalid OpCode 3", QWebSocketProtocol::OC_RESERVED_3);
-    invalidField("Invalid OpCode 4", QWebSocketProtocol::OC_RESERVED_4);
-    invalidField("Invalid OpCode 5", QWebSocketProtocol::OC_RESERVED_5);
-    invalidField("Invalid OpCode 6", QWebSocketProtocol::OC_RESERVED_6);
-    invalidField("Invalid OpCode 7", QWebSocketProtocol::OC_RESERVED_7);
-    invalidField("Invalid OpCode B", QWebSocketProtocol::OC_RESERVED_B);
-    invalidField("Invalid OpCode C", QWebSocketProtocol::OC_RESERVED_C);
-    invalidField("Invalid OpCode D", QWebSocketProtocol::OC_RESERVED_D);
-    invalidField("Invalid OpCode E", QWebSocketProtocol::OC_RESERVED_E);
-    invalidField("Invalid OpCode F", QWebSocketProtocol::OC_RESERVED_F);
+    invalidField("Invalid OpCode 3", QWebSocketProtocol::OpCodeReserved3);
+    invalidField("Invalid OpCode 4", QWebSocketProtocol::OpCodeReserved4);
+    invalidField("Invalid OpCode 5", QWebSocketProtocol::OpCodeReserved5);
+    invalidField("Invalid OpCode 6", QWebSocketProtocol::OpCodeReserved6);
+    invalidField("Invalid OpCode 7", QWebSocketProtocol::OpCodeReserved7);
+    invalidField("Invalid OpCode B", QWebSocketProtocol::OpCodeReservedB);
+    invalidField("Invalid OpCode C", QWebSocketProtocol::OpCodeReservedC);
+    invalidField("Invalid OpCode D", QWebSocketProtocol::OpCodeReservedD);
+    invalidField("Invalid OpCode E", QWebSocketProtocol::OpCodeReservedE);
+    invalidField("Invalid OpCode F", QWebSocketProtocol::OpCodeReservedF);
 }
 
 void tst_DataProcessor::invalidHeader()
@@ -919,41 +963,41 @@ void tst_DataProcessor::invalidControlFrame_data()
 
 
     QTest::newRow("Close control frame with payload size 126")
-            << quint8(FIN | QWebSocketProtocol::OC_CLOSE)
+            << quint8(FIN | QWebSocketProtocol::OpCodeClose)
             << quint8(126)
             << QByteArray()
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("Ping control frame with payload size 126")
-            << quint8(FIN | QWebSocketProtocol::OC_PING)
+            << quint8(FIN | QWebSocketProtocol::OpCodePing)
             << quint8(126)
             << QByteArray()
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("Close control frame with payload size 126")
-            << quint8(FIN | QWebSocketProtocol::OC_PONG)
+            << quint8(FIN | QWebSocketProtocol::OpCodePong)
             << quint8(126)
             << QByteArray()
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
 
     QTest::newRow("Non-final close control frame (fragmented)")
-            << quint8(QWebSocketProtocol::OC_CLOSE)
+            << quint8(QWebSocketProtocol::OpCodeClose)
             << quint8(32)
             << QByteArray()
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("Non-final ping control frame (fragmented)")
-            << quint8(QWebSocketProtocol::OC_PING)
+            << quint8(QWebSocketProtocol::OpCodePing)
             << quint8(32) << QByteArray()
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow("Non-final pong control frame (fragmented)")
-            << quint8(QWebSocketProtocol::OC_PONG)
+            << quint8(QWebSocketProtocol::OpCodePong)
             << quint8(32)
             << QByteArray()
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
 }
 
 void tst_DataProcessor::invalidControlFrame()
@@ -970,127 +1014,127 @@ void tst_DataProcessor::invalidCloseFrame_data()
     QTest::addColumn<QWebSocketProtocol::CloseCode>("expectedCloseCode");
 
     QTest::newRow("Close control frame with payload size 1")
-            << quint8(FIN | QWebSocketProtocol::OC_CLOSE)
+            << quint8(FIN | QWebSocketProtocol::OpCodeClose)
             << quint8(1)
             << QByteArray(1, 'a')
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
-    quint16 swapped = qToBigEndian<quint16>(QWebSocketProtocol::CC_ABNORMAL_DISCONNECTION);
+            << QWebSocketProtocol::CloseCodeProtocolError;
+    quint16 swapped = qToBigEndian<quint16>(QWebSocketProtocol::CloseCodeAbnormalDisconnection);
     const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
 
     //Not allowed per RFC 6455 (see para 7.4.1)
     QTest::newRow("Close control frame close code ABNORMAL DISCONNECTION")
-            << quint8(FIN | QWebSocketProtocol::OC_CLOSE)
+            << quint8(FIN | QWebSocketProtocol::OpCodeClose)
             << quint8(2)
             << QByteArray(wireRepresentation, 2)
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
-    swapped = qToBigEndian<quint16>(QWebSocketProtocol::CC_MISSING_STATUS_CODE);
+            << QWebSocketProtocol::CloseCodeProtocolError;
+    swapped = qToBigEndian<quint16>(QWebSocketProtocol::CloseCodeMissingStatusCode);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     //Not allowed per RFC 6455 (see para 7.4.1)
     QTest::newRow("Close control frame close code MISSING STATUS CODE")
-            << quint8(FIN | QWebSocketProtocol::OC_CLOSE)
+            << quint8(FIN | QWebSocketProtocol::OpCodeClose)
             << quint8(2)
             << QByteArray(wireRepresentation, 2)
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     swapped = qToBigEndian<quint16>(1004);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code 1004")
-            << quint8(FIN | QWebSocketProtocol::OC_CLOSE)
+            << quint8(FIN | QWebSocketProtocol::OpCodeClose)
             << quint8(2)
             << QByteArray(wireRepresentation, 2)
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
-    swapped = qToBigEndian<quint16>(QWebSocketProtocol::CC_TLS_HANDSHAKE_FAILED);
+            << QWebSocketProtocol::CloseCodeProtocolError;
+    swapped = qToBigEndian<quint16>(QWebSocketProtocol::CloseCodeTlsHandshakeFailed);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     //Not allowed per RFC 6455 (see para 7.4.1)
     QTest::newRow("Close control frame close code TLS HANDSHAKE FAILED")
-            << quint8(FIN | QWebSocketProtocol::OC_CLOSE)
+            << quint8(FIN | QWebSocketProtocol::OpCodeClose)
             << quint8(2)
             << QByteArray(wireRepresentation, 2)
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     swapped = qToBigEndian<quint16>(0);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code 0")
-            << quint8(FIN | QWebSocketProtocol::OC_CLOSE)
+            << quint8(FIN | QWebSocketProtocol::OpCodeClose)
             << quint8(2)
             << QByteArray(wireRepresentation, 2)
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     swapped = qToBigEndian<quint16>(999);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code 999")
-            << quint8(FIN | QWebSocketProtocol::OC_CLOSE)
+            << quint8(FIN | QWebSocketProtocol::OpCodeClose)
             << quint8(2)
             << QByteArray(wireRepresentation, 2)
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     swapped = qToBigEndian<quint16>(1012);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code 1012")
-            << quint8(FIN | QWebSocketProtocol::OC_CLOSE)
+            << quint8(FIN | QWebSocketProtocol::OpCodeClose)
             << quint8(2)
             << QByteArray(wireRepresentation, 2)
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     swapped = qToBigEndian<quint16>(1013);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code 1013")
-            << quint8(FIN | QWebSocketProtocol::OC_CLOSE)
+            << quint8(FIN | QWebSocketProtocol::OpCodeClose)
             << quint8(2)
             << QByteArray(wireRepresentation, 2)
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     swapped = qToBigEndian<quint16>(1014);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code 1014")
-            << quint8(FIN | QWebSocketProtocol::OC_CLOSE)
+            << quint8(FIN | QWebSocketProtocol::OpCodeClose)
             << quint8(2)
             << QByteArray(wireRepresentation, 2)
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     swapped = qToBigEndian<quint16>(1100);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code 1100")
-            << quint8(FIN | QWebSocketProtocol::OC_CLOSE)
+            << quint8(FIN | QWebSocketProtocol::OpCodeClose)
             << quint8(2)
             << QByteArray(wireRepresentation, 2)
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     swapped = qToBigEndian<quint16>(2000);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code 2000")
-            << quint8(FIN | QWebSocketProtocol::OC_CLOSE)
+            << quint8(FIN | QWebSocketProtocol::OpCodeClose)
             << quint8(2)
             << QByteArray(wireRepresentation, 2)
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     swapped = qToBigEndian<quint16>(2999);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code 2999")
-            << quint8(FIN | QWebSocketProtocol::OC_CLOSE)
+            << quint8(FIN | QWebSocketProtocol::OpCodeClose)
             << quint8(2)
             << QByteArray(wireRepresentation, 2)
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     swapped = qToBigEndian<quint16>(5000);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code 5000")
-            << quint8(FIN | QWebSocketProtocol::OC_CLOSE)
+            << quint8(FIN | QWebSocketProtocol::OpCodeClose)
             << quint8(2)
             << QByteArray(wireRepresentation, 2)
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     swapped = qToBigEndian<quint16>(65535u);
     wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
     QTest::newRow("Close control frame close code 65535")
-            << quint8(FIN | QWebSocketProtocol::OC_CLOSE)
+            << quint8(FIN | QWebSocketProtocol::OpCodeClose)
             << quint8(2)
             << QByteArray(wireRepresentation, 2)
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
 }
 
 void tst_DataProcessor::invalidCloseFrame()
@@ -1301,22 +1345,22 @@ void tst_DataProcessor::incompletePayload_data()
     QTest::addColumn<bool>("isContinuationFrame");
     QTest::addColumn<QWebSocketProtocol::CloseCode>("expectedCloseCode");
 
-    incompleteFrame(QWebSocketProtocol::OC_TEXT, 125, 0);
-    incompleteFrame(QWebSocketProtocol::OC_TEXT, 64, 32);
-    incompleteFrame(QWebSocketProtocol::OC_TEXT, 256, 32);
-    incompleteFrame(QWebSocketProtocol::OC_TEXT, 128000, 32);
-    incompleteFrame(QWebSocketProtocol::OC_BINARY, 125, 0);
-    incompleteFrame(QWebSocketProtocol::OC_BINARY, 64, 32);
-    incompleteFrame(QWebSocketProtocol::OC_BINARY, 256, 32);
-    incompleteFrame(QWebSocketProtocol::OC_BINARY, 128000, 32);
-    incompleteFrame(QWebSocketProtocol::OC_CONTINUE, 125, 0);
-    incompleteFrame(QWebSocketProtocol::OC_CONTINUE, 64, 32);
-    incompleteFrame(QWebSocketProtocol::OC_CONTINUE, 256, 32);
-    incompleteFrame(QWebSocketProtocol::OC_CONTINUE, 128000, 32);
+    incompleteFrame(QWebSocketProtocol::OpCodeText, 125, 0);
+    incompleteFrame(QWebSocketProtocol::OpCodeText, 64, 32);
+    incompleteFrame(QWebSocketProtocol::OpCodeText, 256, 32);
+    incompleteFrame(QWebSocketProtocol::OpCodeText, 128000, 32);
+    incompleteFrame(QWebSocketProtocol::OpCodeBinary, 125, 0);
+    incompleteFrame(QWebSocketProtocol::OpCodeBinary, 64, 32);
+    incompleteFrame(QWebSocketProtocol::OpCodeBinary, 256, 32);
+    incompleteFrame(QWebSocketProtocol::OpCodeBinary, 128000, 32);
+    incompleteFrame(QWebSocketProtocol::OpCodeContinue, 125, 0);
+    incompleteFrame(QWebSocketProtocol::OpCodeContinue, 64, 32);
+    incompleteFrame(QWebSocketProtocol::OpCodeContinue, 256, 32);
+    incompleteFrame(QWebSocketProtocol::OpCodeContinue, 128000, 32);
 
-    incompleteFrame(QWebSocketProtocol::OC_CLOSE, 64, 32);
-    incompleteFrame(QWebSocketProtocol::OC_PING, 64, 32);
-    incompleteFrame(QWebSocketProtocol::OC_PONG, 64, 32);
+    incompleteFrame(QWebSocketProtocol::OpCodeClose, 64, 32);
+    incompleteFrame(QWebSocketProtocol::OpCodePing, 64, 32);
+    incompleteFrame(QWebSocketProtocol::OpCodePong, 64, 32);
 }
 
 void tst_DataProcessor::incompletePayload()
@@ -1374,7 +1418,7 @@ void tst_DataProcessor::doTest()
 
     if (isContinuationFrame)
     {
-        data.append(quint8(QWebSocketProtocol::OC_TEXT)).append(char(1)).append(QByteArray(1, 'a'));
+        data.append(quint8(QWebSocketProtocol::OpCodeText)).append(char(1)).append(QByteArray(1, 'a'));
     }
     data.append(firstByte).append(secondByte);
     data.append(payload);
@@ -1434,82 +1478,82 @@ QString tst_DataProcessor::opCodeToString(quint8 opCode)
     QString frameType;
     switch (opCode)
     {
-        case QWebSocketProtocol::OC_BINARY:
+        case QWebSocketProtocol::OpCodeBinary:
         {
             frameType = QStringLiteral("Binary");
             break;
         }
-        case QWebSocketProtocol::OC_TEXT:
+        case QWebSocketProtocol::OpCodeText:
         {
             frameType = QStringLiteral("Text");
             break;
         }
-        case QWebSocketProtocol::OC_PING:
+        case QWebSocketProtocol::OpCodePing:
         {
             frameType = QStringLiteral("Ping");
             break;
         }
-        case QWebSocketProtocol::OC_PONG:
+        case QWebSocketProtocol::OpCodePong:
         {
             frameType = QStringLiteral("Pong");
             break;
         }
-        case QWebSocketProtocol::OC_CLOSE:
+        case QWebSocketProtocol::OpCodeClose:
         {
             frameType = QStringLiteral("Close");
             break;
         }
-        case QWebSocketProtocol::OC_CONTINUE:
+        case QWebSocketProtocol::OpCodeContinue:
         {
             frameType = QStringLiteral("Continuation");
             break;
         }
-        case QWebSocketProtocol::OC_RESERVED_3:
+        case QWebSocketProtocol::OpCodeReserved3:
         {
             frameType = QStringLiteral("Reserved3");
             break;
         }
-        case QWebSocketProtocol::OC_RESERVED_4:
+        case QWebSocketProtocol::OpCodeReserved4:
         {
             frameType = QStringLiteral("Reserved5");
             break;
         }
-        case QWebSocketProtocol::OC_RESERVED_5:
+        case QWebSocketProtocol::OpCodeReserved5:
         {
             frameType = QStringLiteral("Reserved5");
             break;
         }
-        case QWebSocketProtocol::OC_RESERVED_6:
+        case QWebSocketProtocol::OpCodeReserved6:
         {
             frameType = QStringLiteral("Reserved6");
             break;
         }
-        case QWebSocketProtocol::OC_RESERVED_7:
+        case QWebSocketProtocol::OpCodeReserved7:
         {
             frameType = QStringLiteral("Reserved7");
             break;
         }
-        case QWebSocketProtocol::OC_RESERVED_B:
+        case QWebSocketProtocol::OpCodeReservedB:
         {
             frameType = QStringLiteral("ReservedB");
             break;
         }
-        case QWebSocketProtocol::OC_RESERVED_C:
+        case QWebSocketProtocol::OpCodeReservedC:
         {
             frameType = QStringLiteral("ReservedC");
             break;
         }
-        case QWebSocketProtocol::OC_RESERVED_D:
+        case QWebSocketProtocol::OpCodeReservedD:
         {
             frameType = QStringLiteral("ReservedD");
             break;
         }
-        case QWebSocketProtocol::OC_RESERVED_E:
+        case QWebSocketProtocol::OpCodeReservedE:
         {
             frameType = QStringLiteral("ReservedE");
             break;
         }
-        case QWebSocketProtocol::OC_RESERVED_F:
+        case QWebSocketProtocol::OpCodeReservedF:
         {
             frameType = QStringLiteral("ReservedF");
             break;
@@ -1529,25 +1573,25 @@ void tst_DataProcessor::minimumSize16Bit(quint16 sizeInBytes)
     const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped16));
     QTest::newRow(QStringLiteral("Text frame with payload size %1, represented in 2 bytes")
                   .arg(sizeInBytes).toLatin1().constData())
-            << quint8(FIN | QWebSocketProtocol::OC_TEXT)
+            << quint8(FIN | QWebSocketProtocol::OpCodeText)
             << quint8(126)
             << QByteArray(wireRepresentation, 2)
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow(QStringLiteral("Binary frame with payload size %1, represented in 2 bytes")
                   .arg(sizeInBytes).toLatin1().constBegin())
-            << quint8(FIN | QWebSocketProtocol::OC_BINARY)
+            << quint8(FIN | QWebSocketProtocol::OpCodeBinary)
             << quint8(126)
             << QByteArray(wireRepresentation, 2)
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow(QStringLiteral("Continuation frame with payload size %1, represented in 2 bytes")
                   .arg(sizeInBytes).toLatin1().constData())
-            << quint8(FIN | QWebSocketProtocol::OC_CONTINUE)
+            << quint8(FIN | QWebSocketProtocol::OpCodeContinue)
             << quint8(126)
             << QByteArray(wireRepresentation, 2)
             << true
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
 }
 
 void tst_DataProcessor::minimumSize64Bit(quint64 sizeInBytes)
@@ -1557,27 +1601,27 @@ void tst_DataProcessor::minimumSize64Bit(quint64 sizeInBytes)
 
     QTest::newRow(QStringLiteral("Text frame with payload size %1, represented in 8 bytes")
                   .arg(sizeInBytes).toLatin1().constData())
-            << quint8(FIN | QWebSocketProtocol::OC_TEXT)
+            << quint8(FIN | QWebSocketProtocol::OpCodeText)
             << quint8(127)
             << QByteArray(wireRepresentation, 8)
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
 
     QTest::newRow(QStringLiteral("Binary frame with payload size %1, represented in 8 bytes")
                   .arg(sizeInBytes).toLatin1().constData())
-            << quint8(FIN | QWebSocketProtocol::OC_BINARY)
+            << quint8(FIN | QWebSocketProtocol::OpCodeBinary)
             << quint8(127)
             << QByteArray(wireRepresentation, 8)
             << false
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
 
     QTest::newRow(QStringLiteral("Continuation frame with payload size %1, represented in 8 bytes")
                   .arg(sizeInBytes).toLatin1().constData())
-            << quint8(FIN | QWebSocketProtocol::OC_CONTINUE)
+            << quint8(FIN | QWebSocketProtocol::OpCodeContinue)
             << quint8(127)
             << QByteArray(wireRepresentation, 8)
             << true
-            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+            << QWebSocketProtocol::CloseCodeProtocolError;
 }
 
 void tst_DataProcessor::invalidUTF8(const char *dataTag, const char *utf8Sequence, bool isCloseFrame)
@@ -1586,33 +1630,33 @@ void tst_DataProcessor::invalidUTF8(const char *dataTag, const char *utf8Sequenc
 
     if (isCloseFrame)
     {
-        quint16 closeCode = qToBigEndian<quint16>(QWebSocketProtocol::CC_NORMAL);
+        quint16 closeCode = qToBigEndian<quint16>(QWebSocketProtocol::CloseCodeNormal);
         const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&closeCode));
         QTest::newRow(QStringLiteral("Close frame with invalid UTF8-sequence: %1")
                       .arg(dataTag).toLatin1().constData())
-                << quint8(FIN | QWebSocketProtocol::OC_CLOSE)
+                << quint8(FIN | QWebSocketProtocol::OpCodeClose)
                 << quint8(payload.length() + 2)
                 << QByteArray(wireRepresentation, 2).append(payload)
                 << false
-                << QWebSocketProtocol::CC_WRONG_DATATYPE;
+                << QWebSocketProtocol::CloseCodeWrongDatatype;
     }
     else
     {
         QTest::newRow(QStringLiteral("Text frame with invalid UTF8-sequence: %1")
                       .arg(dataTag).toLatin1().constData())
-                << quint8(FIN | QWebSocketProtocol::OC_TEXT)
+                << quint8(FIN | QWebSocketProtocol::OpCodeText)
                 << quint8(payload.length())
                 << payload
                 << false
-                << QWebSocketProtocol::CC_WRONG_DATATYPE;
+                << QWebSocketProtocol::CloseCodeWrongDatatype;
 
         QTest::newRow(QStringLiteral("Continuation text frame with invalid UTF8-sequence: %1")
                       .arg(dataTag).toLatin1().constData())
-                << quint8(FIN | QWebSocketProtocol::OC_CONTINUE)
+                << quint8(FIN | QWebSocketProtocol::OpCodeContinue)
                 << quint8(payload.length())
                 << payload
                 << true
-                << QWebSocketProtocol::CC_WRONG_DATATYPE;
+                << QWebSocketProtocol::CloseCodeWrongDatatype;
     }
 }
 
@@ -1622,13 +1666,13 @@ void tst_DataProcessor::invalidField(const char *dataTag, quint8 invalidFieldVal
                            << quint8(0x00)
                            << QByteArray()
                            << false
-                           << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+                           << QWebSocketProtocol::CloseCodeProtocolError;
     QTest::newRow(QString::fromLatin1(dataTag).append(" with continuation frame").toLatin1().constData())
                             << quint8(FIN | invalidFieldValue)
                             << quint8(0x00)
                             << QByteArray()
                             << true
-                            << QWebSocketProtocol::CC_PROTOCOL_ERROR;
+                            << QWebSocketProtocol::CloseCodeProtocolError;
 }
 
 void tst_DataProcessor::incompleteFrame(quint8 controlCode, quint64 indicatedSize, quint64 actualPayloadSize)
@@ -1646,8 +1690,8 @@ void tst_DataProcessor::incompleteFrame(quint8 controlCode, quint64 indicatedSiz
                 << quint8(FIN | controlCode)
                 << quint8(indicatedSize)
                 << firstFrame.append(QByteArray(actualPayloadSize, 'a'))
-                << (controlCode == QWebSocketProtocol::OC_CONTINUE)
-                << QWebSocketProtocol::CC_GOING_AWAY;
+                << (controlCode == QWebSocketProtocol::OpCodeContinue)
+                << QWebSocketProtocol::CloseCodeGoingAway;
     }
     else if (indicatedSize <= 0xFFFFu)
     {
@@ -1658,8 +1702,8 @@ void tst_DataProcessor::incompleteFrame(quint8 controlCode, quint64 indicatedSiz
                 << quint8(FIN | controlCode)
                 << quint8(126)
                 << firstFrame.append(QByteArray(wireRepresentation, 2).append(QByteArray(actualPayloadSize, 'a')))
-                << (controlCode == QWebSocketProtocol::OC_CONTINUE)
-                << QWebSocketProtocol::CC_GOING_AWAY;
+                << (controlCode == QWebSocketProtocol::OpCodeContinue)
+                << QWebSocketProtocol::CloseCodeGoingAway;
     }
     else
     {
@@ -1670,8 +1714,8 @@ void tst_DataProcessor::incompleteFrame(quint8 controlCode, quint64 indicatedSiz
                 << quint8(FIN | controlCode)
                 << quint8(127)
                 << firstFrame.append(QByteArray(wireRepresentation, 8).append(QByteArray(actualPayloadSize, 'a')))
-                << (controlCode == QWebSocketProtocol::OC_CONTINUE)
-                << QWebSocketProtocol::CC_GOING_AWAY;
+                << (controlCode == QWebSocketProtocol::OpCodeContinue)
+                << QWebSocketProtocol::CloseCodeGoingAway;
     }
 }
 
@@ -1681,14 +1725,14 @@ void tst_DataProcessor::nonCharacterSequence(const char *sequence)
 
     QTest::newRow(QStringLiteral("Text frame with payload containing the non-control character sequence 0x%1")
                   .arg(QString::fromLocal8Bit(sequence)).toLatin1().constData())
-            << quint8(FIN | QWebSocketProtocol::OC_TEXT)
+            << quint8(FIN | QWebSocketProtocol::OpCodeText)
             << quint8(utf8Sequence.size())
             << utf8Sequence
             << false;
 
     QTest::newRow(QStringLiteral("Continuation frame with payload containing the non-control character sequence 0x%1")
                   .arg(QString::fromLocal8Bit(sequence)).toLatin1().constData())
-            << quint8(FIN | QWebSocketProtocol::OC_CONTINUE)
+            << quint8(FIN | QWebSocketProtocol::OpCodeContinue)
             << quint8(utf8Sequence.size())
             << utf8Sequence
             << true;
@@ -1698,25 +1742,25 @@ void tst_DataProcessor::insertIncompleteSizeFieldTest(quint8 payloadCode, quint8
 {
     QTest::newRow(QStringLiteral("Text frame with payload size %1, with %2 bytes following.")
                   .arg(payloadCode).arg(numBytesFollowing).toLatin1().constData())
-            << quint8(FIN | QWebSocketProtocol::OC_TEXT)
+            << quint8(FIN | QWebSocketProtocol::OpCodeText)
             << quint8(payloadCode)
             << QByteArray(numBytesFollowing, quint8(1))
             << false
-            << QWebSocketProtocol::CC_GOING_AWAY;
+            << QWebSocketProtocol::CloseCodeGoingAway;
     QTest::newRow(QStringLiteral("Binary frame with payload size %1, with %2 bytes following.")
                   .arg(payloadCode).arg(numBytesFollowing).toLatin1().constData())
-            << quint8(FIN | QWebSocketProtocol::OC_BINARY)
+            << quint8(FIN | QWebSocketProtocol::OpCodeBinary)
             << quint8(payloadCode)
             << QByteArray(numBytesFollowing, quint8(1))
             << false
-            << QWebSocketProtocol::CC_GOING_AWAY;
+            << QWebSocketProtocol::CloseCodeGoingAway;
     QTest::newRow(QStringLiteral("Continuation frame with payload size %1, with %2 bytes following.")
                   .arg(payloadCode).arg(numBytesFollowing).toLatin1().constData())
-            << quint8(FIN | QWebSocketProtocol::OC_CONTINUE)
+            << quint8(FIN | QWebSocketProtocol::OpCodeContinue)
             << quint8(payloadCode)
             << QByteArray(numBytesFollowing, quint8(1))
             << true
-            << QWebSocketProtocol::CC_GOING_AWAY;
+            << QWebSocketProtocol::CloseCodeGoingAway;
 }
 
 QTEST_MAIN(tst_DataProcessor)

@@ -66,7 +66,7 @@ class Q_WEBSOCKETS_EXPORT QWebSocket : public QObject
 
 public:
     explicit QWebSocket(const QString &origin = QString(),
-                        QWebSocketProtocol::Version version = QWebSocketProtocol::V_LATEST,
+                        QWebSocketProtocol::Version version = QWebSocketProtocol::VersionLatest,
                         QObject *parent = Q_NULLPTR);
     virtual ~QWebSocket();
 
@@ -116,7 +116,7 @@ public:
 #endif
 
 public Q_SLOTS:
-    void close(QWebSocketProtocol::CloseCode closeCode = QWebSocketProtocol::CC_NORMAL,
+    void close(QWebSocketProtocol::CloseCode closeCode = QWebSocketProtocol::CloseCodeNormal,
                const QString &reason = QString());
     void open(const QUrl &url, bool mask = true);
     void ping(const QByteArray &payload = QByteArray());
