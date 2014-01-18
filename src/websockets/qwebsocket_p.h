@@ -140,8 +140,6 @@ public:
     QWebSocketProtocol::CloseCode closeCode() const;
     QString closeReason() const;
 
-    qint64 write(const char *message) Q_REQUIRED_RESULT;
-    qint64 write(const char *message, qint64 maxSize) Q_REQUIRED_RESULT;
     qint64 write(const QString &message) Q_REQUIRED_RESULT;
     qint64 write(const QByteArray &data) Q_REQUIRED_RESULT;    //send data as binary
 
