@@ -86,7 +86,7 @@ void SslEchoServer::onNewConnection()
 
     qDebug() << "Client connected:" << pSocket->peerName() << pSocket->origin();
 
-    connect(pSocket, SIGNAL(textMessageReceived(QString)), this, SLOT(processMessage(QString)));
+    connect(pSocket, SIGNAL(textMessageReceived(QString)), this, SLOT(processTextMessage(QString)));
     connect(pSocket, SIGNAL(binaryMessageReceived(QByteArray)), this, SLOT(processBinaryMessage(QByteArray)));
     connect(pSocket, SIGNAL(disconnected()), this, SLOT(socketDisconnected()));
     //connect(pSocket, SIGNAL(pong(quint64)), this, SLOT(processPong(quint64)));
@@ -95,8 +95,8 @@ void SslEchoServer::onNewConnection()
 }
 //! [onNewConnection]
 
-//! [processMessage]
-void SslEchoServer::processMessage(QString message)
+//! [processTextMessage]
+void SslEchoServer::processTextMessage(QString message)
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     if (pClient)
@@ -104,7 +104,7 @@ void SslEchoServer::processMessage(QString message)
         pClient->sendTextMessage(message);
     }
 }
-//! [processMessage]
+//! [processTextMessage]
 
 //! [processBinaryMessage]
 void SslEchoServer::processBinaryMessage(QByteArray message)
