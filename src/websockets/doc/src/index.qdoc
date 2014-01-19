@@ -31,7 +31,8 @@
     \title Qt WebSockets
     \brief Provides an implementation of the WebSocket protocol.
 
-    The QtWebSockets module implements the WebSocket protocol as specified in \l {http://tools.ietf.org/html/rfc6455} {RFC 6455}.
+    The QtWebSockets module implements the WebSocket protocol as specified in
+    \l {http://tools.ietf.org/html/rfc6455} {RFC 6455}.
     It solely depends on Qt (no external dependencies).
 
 
