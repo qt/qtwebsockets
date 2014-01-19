@@ -83,7 +83,7 @@ void ChatServer::processMessage(QString message)
     {
         if (pClient != pSender) //don't echo message back to sender
         {
-            qint64 bytesWritten = pClient->write(message);
+            qint64 bytesWritten = pClient->sendTextMessage(message);
             Q_UNUSED(bytesWritten);
         }
     }

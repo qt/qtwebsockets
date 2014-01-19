@@ -210,7 +210,7 @@ bool QWebSocketPrivate::flush()
 /*!
     \internal
  */
-qint64 QWebSocketPrivate::write(const QString &message)
+qint64 QWebSocketPrivate::sendTextMessage(const QString &message)
 {
     return doWriteFrames(message.toUtf8(), false);
 }
@@ -218,7 +218,7 @@ qint64 QWebSocketPrivate::write(const QString &message)
 /*!
     \internal
  */
-qint64 QWebSocketPrivate::write(const QByteArray &data)
+qint64 QWebSocketPrivate::sendBinaryMessage(const QByteArray &data)
 {
     return doWriteFrames(data, true);
 }

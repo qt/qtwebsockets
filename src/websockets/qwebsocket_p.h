@@ -140,8 +140,8 @@ public:
     QWebSocketProtocol::CloseCode closeCode() const;
     QString closeReason() const;
 
-    qint64 write(const QString &message) Q_REQUIRED_RESULT;
-    qint64 write(const QByteArray &data) Q_REQUIRED_RESULT;    //send data as binary
+    qint64 sendTextMessage(const QString &message) Q_REQUIRED_RESULT;
+    qint64 sendBinaryMessage(const QByteArray &data) Q_REQUIRED_RESULT;
 
 #ifndef QT_NO_SSL
     void ignoreSslErrors(const QList<QSslError> &errors);
