@@ -52,7 +52,7 @@ ChatServer::ChatServer(quint16 port, QObject *parent) :
     m_clients()
 {
     m_pWebSocketServer = new QWebSocketServer(QStringLiteral("Chat Server"),
-                                              QWebSocketServer::SecureModeNonSecure,
+                                              QWebSocketServer::NonSecureMode,
                                               this);
     if (m_pWebSocketServer->listen(QHostAddress::Any, port))
     {
