@@ -181,11 +181,11 @@
 */
 
 /*!
-  \enum QWebSocketServer::SecureMode
-  Indicates whether the server operates over wss (SecureModeSecure) or ws (SecureModeNonSecure)
+  \enum QWebSocketServer::SslMode
+  Indicates whether the server operates over wss (SecureMode) or ws (NonSecureMode)
 
-  \value SecureModeSecure The server operates in secure mode (over wss)
-  \value SecureModeNonSecure The server operates in non-secure mode (over ws)
+  \value SecureMode The server operates in secure mode (over wss)
+  \value NonSecureMode The server operates in non-secure mode (over ws)
   */
 
 #include "qwebsocketprotocol.h"
@@ -206,21 +206,21 @@ QT_BEGIN_NAMESPACE
 /*!
     Constructs a new WebSocketServer with the given \a serverName.
     The \a serverName will be used in the http handshake phase to identify the server.
-    The \a secureMode parameter indicates whether the server operates over wss (\l{SECURE_MODE})
-    or over ws (\l{NON_SECURE_MODE}).
+    The \a secureMode parameter indicates whether the server operates over wss (\l{SecureMode})
+    or over ws (\l{NonSecureMode}).
 
     \a parent is passed to the QObject constructor.
  */
-QWebSocketServer::QWebSocketServer(const QString &serverName, SecureMode secureMode,
+QWebSocketServer::QWebSocketServer(const QString &serverName, SslMode secureMode,
                                    QObject *parent) :
     QObject(parent),
     d_ptr(new QWebSocketServerPrivate(serverName,
                                       #ifndef QT_NO_SSL
-                                      (secureMode == SecureModeSecure) ?
-                                          QWebSocketServerPrivate::SecureModeSecure :
-                                          QWebSocketServerPrivate::SecureModeNonSecure,
+                                      (secureMode == SecureMode) ?
+                                          QWebSocketServerPrivate::SecureMode :
+                                          QWebSocketServerPrivate::NonSecureMode,
                                       #else
-                                      QWebSocketServerPrivate::SecureModeNonSecure,
+                                      QWebSocketServerPrivate::NonSecureMode,
                                       #endif
                                       this,
                                       this))
@@ -373,9 +373,9 @@ void QWebSocketServer::setProxy(const QNetworkProxy &networkProxy)
 /*!
     Sets the SSL configuration for the websocket server to \a sslConfiguration.
     This method has no effect if QWebSocketServer runs in non-secure mode
-    (QWebSocketServer::SecureModeNonSecure).
+    (QWebSocketServer::NonSecureMode).
 
-    \sa sslConfiguration(), SecureMode
+    \sa sslConfiguration(), SslMode
  */
 void QWebSocketServer::setSslConfiguration(const QSslConfiguration &sslConfiguration)
 {
@@ -385,10 +385,10 @@ void QWebSocketServer::setSslConfiguration(const QSslConfiguration &sslConfigura
 
 /*!
     Returns the SSL configuration used by the websocket server.
-    If the server is not running in secure mode (QWebSocketServer::SECURE_MODE),
+    If the server is not running in secure mode (QWebSocketServer::SecureMode),
     this method returns QSslConfiguration::defaultConfiguration().
 
-    \sa setSslConfiguration(), SecureMode, QSslConfiguration::defaultConfiguration()
+    \sa setSslConfiguration(), SslMode, QSslConfiguration::defaultConfiguration()
  */
 QSslConfiguration QWebSocketServer::sslConfiguration() const
 {
@@ -441,16 +441,16 @@ QHostAddress QWebSocketServer::serverAddress() const
 }
 
 /*!
-    Returns the mode the server is running in.
+    Returns the secure mode the server is running in.
 
-    \sa QWebSocketServer(), SecureMode
+    \sa QWebSocketServer(), SslMode
  */
-QWebSocketServer::SecureMode QWebSocketServer::secureMode() const
+QWebSocketServer::SslMode QWebSocketServer::secureMode() const
 {
 #ifndef QT_NO_SSL
     Q_D(const QWebSocketServer);
-    return (d->secureMode() == QWebSocketServerPrivate::SecureModeSecure) ?
-                QWebSocketServer::SecureModeSecure : QWebSocketServer::SecureModeNonSecure;
+    return (d->secureMode() == QWebSocketServerPrivate::SecureMode) ?
+                QWebSocketServer::SecureMode : QWebSocketServer::NonSecureMode;
 #else
     return QWebSocketServer::SecureModeNonSecure;
 #endif
