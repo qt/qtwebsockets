@@ -75,13 +75,13 @@ class QWebSocketServerPrivate : public QObject
     Q_DECLARE_PUBLIC(QWebSocketServer)
 
 public:
-    enum SecureMode
+    enum SslMode
     {
-        SecureModeSecure = true,
-        SecureModeNonSecure
+        SecureMode = true,
+        NonSecureMode
     };
 
-    explicit QWebSocketServerPrivate(const QString &serverName, SecureMode secureMode,
+    explicit QWebSocketServerPrivate(const QString &serverName, SslMode secureMode,
                                      QWebSocketServer * const pWebSocketServer,
                                      QObject *parent = Q_NULLPTR);
     virtual ~QWebSocketServerPrivate();
@@ -113,7 +113,7 @@ public:
     void setServerName(const QString &serverName);
     QString serverName() const;
 
-    SecureMode secureMode() const;
+    SslMode secureMode() const;
 
 #ifndef QT_NO_SSL
     void setSslConfiguration(const QSslConfiguration &sslConfiguration);
@@ -132,7 +132,7 @@ private:
 
     QTcpServer *m_pTcpServer;
     QString m_serverName;
-    SecureMode m_secureMode;
+    SslMode m_secureMode;
     QQueue<QWebSocket *> m_pendingConnections;
     QWebSocketProtocol::CloseCode m_error;
     QString m_errorString;

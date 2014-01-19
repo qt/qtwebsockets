@@ -61,7 +61,7 @@ QT_BEGIN_NAMESPACE
     \internal
  */
 QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName,
-                                                 QWebSocketServerPrivate::SecureMode secureMode,
+                                                 QWebSocketServerPrivate::SslMode secureMode,
                                                  QWebSocketServer * const pWebSocketServer,
                                                  QObject *parent) :
     QObject(parent),
@@ -74,7 +74,7 @@ QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName,
     m_errorString()
 {
     Q_ASSERT(pWebSocketServer);
-    if (m_secureMode == SecureModeSecure) {
+    if (m_secureMode == SecureMode) {
         m_pTcpServer = new QTcpServer(this);
         if (Q_LIKELY(m_pTcpServer))
             connect(m_pTcpServer, &QTcpServer::newConnection,
@@ -318,7 +318,7 @@ QString QWebSocketServerPrivate::serverName() const
 /*!
   \internal
  */
-QWebSocketServerPrivate::SecureMode QWebSocketServerPrivate::secureMode() const
+QWebSocketServerPrivate::SslMode QWebSocketServerPrivate::secureMode() const
 {
     return m_secureMode;
 }
@@ -326,7 +326,7 @@ QWebSocketServerPrivate::SecureMode QWebSocketServerPrivate::secureMode() const
 #ifndef QT_NO_SSL
 void QWebSocketServerPrivate::setSslConfiguration(const QSslConfiguration &sslConfiguration)
 {
-    if (m_secureMode == SecureModeSecure)
+    if (m_secureMode == SecureMode)
         qobject_cast<QSslServer *>(m_pTcpServer)->setSslConfiguration(sslConfiguration);
     else
         qWarning() << tr("Cannot set SSL configuration for non-secure server.");
@@ -334,7 +334,7 @@ void QWebSocketServerPrivate::setSslConfiguration(const QSslConfiguration &sslCo
 
 QSslConfiguration QWebSocketServerPrivate::sslConfiguration() const
 {
-    if (m_secureMode == SecureModeSecure)
+    if (m_secureMode == SecureMode)
         return qobject_cast<QSslServer *>(m_pTcpServer)->sslConfiguration();
     else
         return QSslConfiguration::defaultConfiguration();
