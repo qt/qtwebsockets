@@ -27,7 +27,7 @@
 
 /*!
     \page qtwebsockets-index.html
-    \since 5.2
+    \since 5.3
     \title Qt WebSockets
     \brief Provides an implementation of the WebSocket protocol.
 
