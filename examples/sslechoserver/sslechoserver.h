@@ -58,7 +58,7 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void onNewConnection();
-    void processMessage(QString message);
+    void processTextMessage(QString message);
     void processBinaryMessage(QByteArray message);
     void socketDisconnected();
 

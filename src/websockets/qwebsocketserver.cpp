@@ -92,8 +92,8 @@
   The client socket is remembered in a list, in case we would like to use it later
   (in this example, nothing is done with it).
 
-  \snippet echoserver/echoserver.cpp processMessage
-  Whenever `processMessage()` is triggered, we retrieve the sender, and if valid, send back the
+  \snippet echoserver/echoserver.cpp processTextMessage
+  Whenever `processTextMessage()` is triggered, we retrieve the sender, and if valid, send back the
   original message (`send()`).
   The same is done with binary messages.
   \snippet echoserver/echoserver.cpp processBinaryMessage
