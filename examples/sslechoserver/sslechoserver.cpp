@@ -105,7 +105,7 @@ void SslEchoServer::processMessage(QString message)
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     if (pClient)
     {
-        qint64 bytesWritten = pClient->write(message);
+        qint64 bytesWritten = pClient->sendTextMessage(message);
         Q_UNUSED(bytesWritten);
     }
 }
@@ -117,7 +117,7 @@ void SslEchoServer::processBinaryMessage(QByteArray message)
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     if (pClient)
     {
-        qint64 bytesWritten = pClient->write(message);
+        qint64 bytesWritten = pClient->sendBinaryMessage(message);
         Q_UNUSED(bytesWritten);
     }
 }

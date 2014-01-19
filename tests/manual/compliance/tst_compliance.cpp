@@ -105,10 +105,10 @@ void tst_ComplianceTest::runTestCase(int nbr, int total)
     //ws://ipaddress:port/runCase?case=<number>&agent=<agentname>
     //where agent name will be QWebSocket
     QObject::connect(pWebSocket, &QWebSocket::textMessageReceived, [=](QString message) {
-        pWebSocket->write(message);
+        pWebSocket->sendTextMessage(message);
     });
     QObject::connect(pWebSocket, &QWebSocket::binaryMessageReceived, [=](QByteArray message) {
-        pWebSocket->write(message);
+        pWebSocket->sendBinaryMessage(message);
     });
 
     qDebug() << "Executing test" << (nbr + 1) << "/" << total;
