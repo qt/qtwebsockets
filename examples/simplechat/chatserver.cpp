@@ -80,7 +80,7 @@ void ChatServer::processMessage(QString message)
     {
         if (pClient != pSender) //don't echo message back to sender
         {
-            pClient->write(message);
+            pClient->sendTextMessage(message);
         }
     }
 }

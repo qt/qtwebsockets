@@ -87,7 +87,7 @@ void EchoServer::processMessage(QString message)
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     if (pClient) {
-        pClient->write(message);
+        pClient->sendTextMessage(message);
     }
     m_pWebSocketServer->close();
 }
@@ -98,7 +98,7 @@ void EchoServer::processBinaryMessage(QByteArray message)
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     if (pClient) {
-        pClient->write(message);
+        pClient->sendTextMessage(message);
     }
 }
 //! [processBinaryMessage]

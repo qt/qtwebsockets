@@ -126,7 +126,7 @@ qint64 QQmlWebSocket::sendTextMessage(const QString &message)
         setStatus(Error);
         return 0;
     }
-    return m_webSocket->write(message);
+    return m_webSocket->sendTextMessage(message);
 }
 
 QUrl QQmlWebSocket::url() const

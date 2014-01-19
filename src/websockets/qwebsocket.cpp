@@ -330,21 +330,25 @@ bool QWebSocket::flush()
 /*!
     \brief Sends the given \a message over the socket as a text message and
     returns the number of bytes actually sent.
+
+    \sa sendBinaryMessage()
  */
-qint64 QWebSocket::write(const QString &message)
+qint64 QWebSocket::sendTextMessage(const QString &message)
 {
     Q_D(QWebSocket);
-    return d->write(message);
+    return d->sendTextMessage(message);
 }
 
 /*!
     \brief Sends the given \a data over the socket as a binary message and
     returns the number of bytes actually sent.
+
+    \sa sendTextMessage()
  */
-qint64 QWebSocket::write(const QByteArray &data)
+qint64 QWebSocket::sendBinaryMessage(const QByteArray &data)
 {
     Q_D(QWebSocket);
-    return d->write(data);
+    return d->sendBinaryMessage(data);
 }
 
 /*!
