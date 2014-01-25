@@ -57,11 +57,20 @@
     Call nextPendingConnection() to accept the pending connection as a connected QWebSocket.
     The function returns a pointer to a QWebSocket in QAbstractSocket::ConnectedState that you can
     use for communicating with the client.
+
     If an error occurs, serverError() returns the type of error, and errorString() can be called
     to get a human readable description of what happened.
+
     When listening for connections, the address and port on which the server is listening are
     available as serverAddress() and serverPort().
+
     Calling close() makes QWebSocketServer stop listening for incoming connections.
+
+    QWebSocketServer currently does not support
+    \l {http://tools.ietf.org/html/rfc6455#page-39} {extensions} and
+    \l {http://tools.ietf.org/html/rfc6455#page-12} {subprotocols}.
+
+    QWebSocketServer only supports version 13 of the WebSocket protocol, as outlined in RFC 6455.
 
     \sa echoserver.html
 
@@ -94,7 +103,7 @@
 
   \snippet echoserver/echoserver.cpp processTextMessage
   Whenever `processTextMessage()` is triggered, we retrieve the sender, and if valid, send back the
-  original message (`send()`).
+  original message (`sendTextMessage()`).
   The same is done with binary messages.
   \snippet echoserver/echoserver.cpp processBinaryMessage
   The only difference is that the message now is a QByteArray instead of a QString.
@@ -204,7 +213,7 @@
 QT_BEGIN_NAMESPACE
 
 /*!
-    Constructs a new WebSocketServer with the given \a serverName.
+    Constructs a new QWebSocketServer with the given \a serverName.
     The \a serverName will be used in the http handshake phase to identify the server.
     The \a secureMode parameter indicates whether the server operates over wss (\l{SecureMode})
     or over ws (\l{NonSecureMode}).

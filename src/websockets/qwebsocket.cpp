@@ -53,6 +53,12 @@
 
     This class was modeled after QAbstractSocket.
 
+    QWebSocket currently does not support
+    \l {http://tools.ietf.org/html/rfc6455#page-39} {extensions} and
+    \l {http://tools.ietf.org/html/rfc6455#page-12} {subprotocols}.
+
+    QWebSocket only supports version 13 of the WebSocket protocol, as outlined in RFC 6455.
+
     \sa QAbstractSocket, QTcpSocket
 
     \sa {QWebSocket client example}

@@ -51,7 +51,7 @@
     It processes frames one at a time.
     \note It is the QWebSocketDataProcessor that takes the sequence into account.
 
-    \sa DataProcessor()
+    \sa QWebSocketDataProcessor
     \internal
  */
 
