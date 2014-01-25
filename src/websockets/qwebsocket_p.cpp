@@ -148,6 +148,7 @@ QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol:
 void QWebSocketPrivate::init()
 {
     Q_ASSERT(q_ptr);
+    //TODO: need a better randomizer
     qsrand(static_cast<uint>(QDateTime::currentMSecsSinceEpoch()));
 }
 
@@ -739,6 +740,7 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
  */
 quint32 QWebSocketPrivate::generateRandomNumber() const
 {
+    //TODO: need a better randomizer
     return quint32((double(qrand()) / RAND_MAX) * std::numeric_limits<quint32>::max());
 }
 

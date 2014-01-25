@@ -150,6 +150,8 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(
             const QString acceptKey = calculateAcceptKey(request.key());
             const QList<QString> matchingProtocols =
                     supportedProtocols.toSet().intersect(request.protocols().toSet()).toList();
+            //TODO: extensions must be kept in the order in which they arrive
+            //cannot use set.intersect() to get the supported extensions
             const QList<QString> matchingExtensions =
                     supportedExtensions.toSet().intersect(request.extensions().toSet()).toList();
             QList<QWebSocketProtocol::Version> matchingVersions =
