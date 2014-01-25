@@ -75,7 +75,7 @@ void EchoServer::onNewConnection()
 {
     QWebSocket *pSocket = m_pWebSocketServer->nextPendingConnection();
 
-    connect(pSocket, &QWebSocket::textMessageReceived, this, &EchoServer::processMessage);
+    connect(pSocket, &QWebSocket::textMessageReceived, this, &EchoServer::processTextMessage);
     connect(pSocket, &QWebSocket::binaryMessageReceived, this, &EchoServer::processBinaryMessage);
     connect(pSocket, &QWebSocket::disconnected, this, &EchoServer::socketDisconnected);
 
@@ -83,8 +83,8 @@ void EchoServer::onNewConnection()
 }
 //! [onNewConnection]
 
-//! [processMessage]
-void EchoServer::processMessage(QString message)
+//! [processTextMessage]
+void EchoServer::processTextMessage(QString message)
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
     if (pClient) {
@@ -93,7 +93,7 @@ void EchoServer::processMessage(QString message)
     }
     m_pWebSocketServer->close();
 }
-//! [processMessage]
+//! [processTextMessage]
 
 //! [processBinaryMessage]
 void EchoServer::processBinaryMessage(QByteArray message)
