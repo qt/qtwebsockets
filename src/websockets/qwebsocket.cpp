@@ -509,24 +509,6 @@ QString QWebSocket::origin() const
 }
 
 /*!
-    \brief Returns the currently used protocol.
- */
-QString QWebSocket::protocol() const
-{
-    Q_D(const QWebSocket);
-    return d->protocol();
-}
-
-/*!
-    \brief Returns the currently used extension.
- */
-QString QWebSocket::extension() const
-{
-    Q_D(const QWebSocket);
-    return d->extension();
-}
-
-/*!
     \brief Returns the code indicating why the socket was closed.
     \sa QWebSocketProtocol::CloseCode, closeReason()
  */

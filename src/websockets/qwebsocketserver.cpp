@@ -535,22 +535,4 @@ QList<QWebSocketProtocol::Version> QWebSocketServer::supportedVersions() const
     return d->supportedVersions();
 }
 
-/*!
-  Returns a list of websocket subprotocols that this server supports.
- */
-QStringList QWebSocketServer::supportedProtocols() const
-{
-    Q_D(const QWebSocketServer);
-    return d->supportedProtocols();
-}
-
-/*!
-  Returns a list of websocket extensions that this server supports.
- */
-QStringList QWebSocketServer::supportedExtensions() const
-{
-    Q_D(const QWebSocketServer);
-    return d->supportedExtensions();
-}
-
 QT_END_NAMESPACE

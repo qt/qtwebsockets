@@ -118,8 +118,6 @@ public:
 #endif
 
     QList<QWebSocketProtocol::Version> supportedVersions() const;
-    QStringList supportedProtocols() const;
-    QStringList supportedExtensions() const;
 
 Q_SIGNALS:
     void acceptError(QAbstractSocket::SocketError socketError);

@@ -99,8 +99,6 @@ public:
     QString resourceName() const;
     QUrl requestUrl() const;
     QString origin() const;
-    QString protocol() const;
-    QString extension() const;
     QWebSocketProtocol::CloseCode closeCode() const;
     QString closeReason() const;
 
