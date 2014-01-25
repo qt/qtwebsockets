@@ -74,7 +74,7 @@ QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName,
     m_errorString()
 {
     Q_ASSERT(pWebSocketServer);
-    if (m_secureMode == SecureMode) {
+    if (m_secureMode == NonSecureMode) {
         m_pTcpServer = new QTcpServer(this);
         if (Q_LIKELY(m_pTcpServer))
             connect(m_pTcpServer, &QTcpServer::newConnection,
@@ -356,6 +356,7 @@ void QWebSocketServerPrivate::setError(QWebSocketProtocol::CloseCode code, const
  */
 void QWebSocketServerPrivate::onNewConnection()
 {
+    qDebug() << "New connection arrived.";
     QTcpSocket *pTcpSocket = m_pTcpServer->nextPendingConnection();
     connect(pTcpSocket, &QTcpSocket::readyRead, this, &QWebSocketServerPrivate::handshakeReceived);
 }
