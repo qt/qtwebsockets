@@ -91,8 +91,6 @@ public:
     void resume();
     void setPauseMode(QAbstractSocket::PauseModes pauseMode);
 
-    void setSocketOption(QAbstractSocket::SocketOption option, const QVariant &value);
-    QVariant socketOption(QAbstractSocket::SocketOption option);
     QAbstractSocket::SocketState state() const;
 
     QWebSocketProtocol::Version version() const;

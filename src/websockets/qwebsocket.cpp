@@ -678,26 +678,6 @@ void QWebSocket::setReadBufferSize(qint64 size)
 }
 
 /*!
-    Sets the given \a option to the value described by \a value.
-    \sa socketOption()
-*/
-void QWebSocket::setSocketOption(QAbstractSocket::SocketOption option, const QVariant &value)
-{
-    Q_D(QWebSocket);
-    d->setSocketOption(option, value);
-}
-
-/*!
-    Returns the value of the option \a option.
-    \sa setSocketOption()
-*/
-QVariant QWebSocket::socketOption(QAbstractSocket::SocketOption option)
-{
-    Q_D(QWebSocket);
-    return d->socketOption(option);
-}
-
-/*!
     Returns true if the QWebSocket is valid.
  */
 bool QWebSocket::isValid() const

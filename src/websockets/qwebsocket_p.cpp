@@ -1218,26 +1218,6 @@ void QWebSocketPrivate::setReadBufferSize(qint64 size)
 /*!
     \internal
  */
-void QWebSocketPrivate::setSocketOption(QAbstractSocket::SocketOption option, const QVariant &value)
-{
-    if (Q_LIKELY(m_pSocket))
-        m_pSocket->setSocketOption(option, value);
-}
-
-/*!
-    \internal
- */
-QVariant QWebSocketPrivate::socketOption(QAbstractSocket::SocketOption option)
-{
-    QVariant val;
-    if (Q_LIKELY(m_pSocket))
-        val = m_pSocket->socketOption(option);
-    return val;
-}
-
-/*!
-    \internal
- */
 bool QWebSocketPrivate::isValid() const
 {
     return (m_pSocket && m_pSocket->isValid());
