@@ -678,7 +678,8 @@ void QWebSocket::setReadBufferSize(qint64 size)
 }
 
 /*!
-    Returns true if the QWebSocket is valid.
+    Returns \c true if the socket is ready for reading and writing; otherwise
+    returns \c false.
  */
 bool QWebSocket::isValid() const
 {

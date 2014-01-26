@@ -1225,7 +1225,8 @@ void QWebSocketPrivate::setReadBufferSize(qint64 size)
  */
 bool QWebSocketPrivate::isValid() const
 {
-    return (m_pSocket && m_pSocket->isValid());
+    return (m_pSocket && m_pSocket->isValid() &&
+            (m_socketState == QAbstractSocket::ConnectedState));
 }
 
 QT_END_NAMESPACE
