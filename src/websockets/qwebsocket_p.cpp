@@ -678,7 +678,7 @@ QByteArray QWebSocketPrivate::getFrameHeader(QWebSocketProtocol::OpCode opCode,
 qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
 {
     qint64 payloadWritten = 0;
-    if (Q_UNLIKELY(!m_pSocket))
+    if (Q_UNLIKELY(!m_pSocket) || (state() != QAbstractSocket::ConnectedState))
         return payloadWritten;
 
     Q_Q(QWebSocket);
