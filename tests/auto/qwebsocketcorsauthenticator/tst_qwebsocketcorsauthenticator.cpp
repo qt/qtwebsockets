@@ -45,20 +45,15 @@
 #include <QtCore/QtEndian>
 
 #include "QtWebSockets/qwebsocketcorsauthenticator.h"
-#include "QtWebSockets/qwebsocketprotocol.h"
-#include "private/qwebsocketprotocol_p.h"
 
 QT_USE_NAMESPACE
 
-Q_DECLARE_METATYPE(QWebSocketProtocol::CloseCode)
-Q_DECLARE_METATYPE(QWebSocketProtocol::OpCode)
-
-class tst_WebSocketCorsAuthenticator : public QObject
+class tst_QWebSocketCorsAuthenticator : public QObject
 {
     Q_OBJECT
 
 public:
-    tst_WebSocketCorsAuthenticator();
+    tst_QWebSocketCorsAuthenticator();
 
 private Q_SLOTS:
     void initTestCase();
@@ -69,27 +64,25 @@ private Q_SLOTS:
     void tst_initialization();
 };
 
-tst_WebSocketCorsAuthenticator::tst_WebSocketCorsAuthenticator()
+tst_QWebSocketCorsAuthenticator::tst_QWebSocketCorsAuthenticator()
 {}
 
-void tst_WebSocketCorsAuthenticator::initTestCase()
+void tst_QWebSocketCorsAuthenticator::initTestCase()
 {
 }
 
-void tst_WebSocketCorsAuthenticator::cleanupTestCase()
+void tst_QWebSocketCorsAuthenticator::cleanupTestCase()
 {}
 
-void tst_WebSocketCorsAuthenticator::init()
-{
-    qRegisterMetaType<QWebSocketProtocol::OpCode>("QWebSocketProtocol::OpCode");
-    qRegisterMetaType<QWebSocketProtocol::CloseCode>("QWebSocketProtocol::CloseCode");
-}
-
-void tst_WebSocketCorsAuthenticator::cleanup()
+void tst_QWebSocketCorsAuthenticator::init()
 {
 }
 
-void tst_WebSocketCorsAuthenticator::tst_initialization()
+void tst_QWebSocketCorsAuthenticator::cleanup()
+{
+}
+
+void tst_QWebSocketCorsAuthenticator::tst_initialization()
 {
     {
         QWebSocketCorsAuthenticator authenticator((QString()));
@@ -121,7 +114,7 @@ void tst_WebSocketCorsAuthenticator::tst_initialization()
     }
 }
 
-QTEST_MAIN(tst_WebSocketCorsAuthenticator)
+QTEST_MAIN(tst_QWebSocketCorsAuthenticator)
 
-#include "tst_websocketcorsauthenticator.moc"
+#include "tst_qwebsocketcorsauthenticator.moc"
 

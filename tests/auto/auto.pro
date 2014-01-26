@@ -1,10 +1,10 @@
 TEMPLATE = subdirs
 
-#SUBDIRS +=
+SUBDIRS = \
+    qwebsocketcorsauthenticator
 
 contains(QT_CONFIG, private_tests): SUBDIRS += \
    websocketprotocol \
    dataprocessor \
    websocketframe \
-   handshakerequest \
-   websocketcorsauthenticator
+   handshakerequest
