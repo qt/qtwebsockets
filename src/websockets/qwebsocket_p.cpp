@@ -99,6 +99,8 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
     m_protocol(),
     m_extension(),
     m_socketState(QAbstractSocket::UnconnectedState),
+    m_pauseMode(QAbstractSocket::PauseNever),
+    m_readBufferSize(0),
     m_key(),
     m_mustMask(true),
     m_isClosingHandshakeSent(false),
@@ -128,6 +130,8 @@ QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol:
     m_protocol(),
     m_extension(),
     m_socketState(pTcpSocket->state()),
+    m_pauseMode(pTcpSocket->pauseMode()),
+    m_readBufferSize(pTcpSocket->readBufferSize()),
     m_key(),
     m_mustMask(true),
     m_isClosingHandshakeSent(false),
@@ -365,6 +369,8 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
                 if (Q_LIKELY(m_pSocket)) {
                     m_pSocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
                     m_pSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
+                    m_pSocket->setReadBufferSize(m_readBufferSize);
+                    m_pSocket->setPauseMode(m_pauseMode);
 
                     makeConnections(m_pSocket.data());
                     connect(sslSocket, &QSslSocket::encryptedBytesWritten, q,
@@ -393,6 +399,8 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
             if (Q_LIKELY(m_pSocket)) {
                 m_pSocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
                 m_pSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
+                m_pSocket->setReadBufferSize(m_readBufferSize);
+                m_pSocket->setPauseMode(m_pauseMode);
 
                 makeConnections(m_pSocket.data());
                 connect(m_pSocket.data(), &QAbstractSocket::bytesWritten, q,
@@ -1120,10 +1128,7 @@ quint16 QWebSocketPrivate::localPort() const
  */
 QAbstractSocket::PauseModes QWebSocketPrivate::pauseMode() const
 {
-    QAbstractSocket::PauseModes mode = QAbstractSocket::PauseNever;
-    if (Q_LIKELY(m_pSocket))
-        mode = m_pSocket->pauseMode();
-    return mode;
+    return m_pauseMode;
 }
 
 /*!
@@ -1183,10 +1188,7 @@ void QWebSocketPrivate::setProxy(const QNetworkProxy &networkProxy)
  */
 qint64 QWebSocketPrivate::readBufferSize() const
 {
-    qint64 size = 0;
-    if (Q_LIKELY(m_pSocket))
-        size = m_pSocket->readBufferSize();
-    return size;
+    return m_readBufferSize;
 }
 
 /*!
@@ -1203,8 +1205,9 @@ void QWebSocketPrivate::resume()
  */
 void QWebSocketPrivate::setPauseMode(QAbstractSocket::PauseModes pauseMode)
 {
+    m_pauseMode = pauseMode;
     if (Q_LIKELY(m_pSocket))
-        m_pSocket->setPauseMode(pauseMode);
+        m_pSocket->setPauseMode(m_pauseMode);
 }
 
 /*!
@@ -1212,8 +1215,9 @@ void QWebSocketPrivate::setPauseMode(QAbstractSocket::PauseModes pauseMode)
  */
 void QWebSocketPrivate::setReadBufferSize(qint64 size)
 {
+    m_readBufferSize = size;
     if (Q_LIKELY(m_pSocket))
-        m_pSocket->setReadBufferSize(size);
+        m_pSocket->setReadBufferSize(m_readBufferSize);
 }
 
 /*!

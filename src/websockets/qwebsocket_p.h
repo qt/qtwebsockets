@@ -215,6 +215,8 @@ private:
     QString m_protocol;
     QString m_extension;
     QAbstractSocket::SocketState m_socketState;
+    QAbstractSocket::PauseModes m_pauseMode;
+    qint64 m_readBufferSize;
 
     QByteArray m_key;	//identification key used in handshake requests
 
