@@ -91,7 +91,7 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
     QObject(parent),
     q_ptr(pWebSocket),
     m_pSocket(),
-    m_errorString(),
+    m_errorString(QWebSocket::tr("Unknown error")),
     m_version(version),
     m_resourceName(),
     m_requestUrl(),
@@ -182,7 +182,7 @@ void QWebSocketPrivate::abort()
  */
 QAbstractSocket::SocketError QWebSocketPrivate::error() const
 {
-    QAbstractSocket::SocketError err = QAbstractSocket::OperationError;
+    QAbstractSocket::SocketError err = QAbstractSocket::UnknownSocketError;
     if (Q_LIKELY(m_pSocket))
         err = m_pSocket->error();
     return err;
