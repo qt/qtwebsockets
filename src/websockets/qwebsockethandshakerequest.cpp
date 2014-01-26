@@ -41,6 +41,7 @@
 
 #include "qwebsockethandshakerequest_p.h"
 #include "qwebsocketprotocol.h"
+#include "qwebsocketprotocol_p.h"
 
 #include <QtCore/QString>
 #include <QtCore/QMap>

@@ -87,6 +87,7 @@ inline bool isCloseCodeValid(int closeCode)
 }
 
 inline Version currentVersion() { return VersionLatest; }
+Version versionFromString(const QString &versionString);
 
 void Q_AUTOTEST_EXPORT mask(QByteArray *payload, quint32 maskingKey);
 void Q_AUTOTEST_EXPORT mask(char *payload, quint64 size, quint32 maskingKey);

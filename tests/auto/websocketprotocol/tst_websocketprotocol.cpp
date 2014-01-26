@@ -44,7 +44,7 @@
 
 #include <QDebug>
 
-#include "qwebsocketprotocol.h"
+#include "QtWebSockets/qwebsocketprotocol.h"
 #include "private/qwebsocketprotocol_p.h"
 
 QT_USE_NAMESPACE
@@ -73,6 +73,9 @@ private Q_SLOTS:
 
     void tst_closeCodes_data();
     void tst_closeCodes();
+
+    void tst_versionFromString_data();
+    void tst_versionFromString();
 };
 
 tst_WebSocketProtocol::tst_WebSocketProtocol()
@@ -213,6 +216,78 @@ void tst_WebSocketProtocol::tst_closeCodes()
     bool result = QWebSocketProtocol::isCloseCodeValid(closeCode);
 
     QCOMPARE(result, isValid);
+}
+
+void tst_WebSocketProtocol::tst_versionFromString_data()
+{
+    QTest::addColumn<QWebSocketProtocol::Version>("version");
+    QTest::addColumn<QString>("versionString");
+
+    //happy flow; good data
+    QTest::newRow("Version 0")
+            << QWebSocketProtocol::Version0
+            << QStringLiteral("0");
+    QTest::newRow("Version 4")
+            << QWebSocketProtocol::Version4
+            << QStringLiteral("4");
+    QTest::newRow("Version 5")
+            << QWebSocketProtocol::Version5
+            << QStringLiteral("5");
+    QTest::newRow("Version 6")
+            << QWebSocketProtocol::Version6
+            << QStringLiteral("6");
+    QTest::newRow("Version 7")
+            << QWebSocketProtocol::Version7
+            << QStringLiteral("7");
+    QTest::newRow("Version 8")
+            << QWebSocketProtocol::Version8
+            << QStringLiteral("8");
+    QTest::newRow("Version 13")
+            << QWebSocketProtocol::Version13
+            << QStringLiteral("13");
+
+    //rainy flow; invalid data
+    QTest::newRow("Version -1")
+            << QWebSocketProtocol::VersionUnknown
+            << QStringLiteral("-1");
+    QTest::newRow("Version 1")
+            << QWebSocketProtocol::VersionUnknown
+            << QStringLiteral("1");
+    QTest::newRow("Version 2")
+            << QWebSocketProtocol::VersionUnknown
+            << QStringLiteral("2");
+    QTest::newRow("Version 3")
+            << QWebSocketProtocol::VersionUnknown
+            << QStringLiteral("3");
+    QTest::newRow("Version 9")
+            << QWebSocketProtocol::VersionUnknown
+            << QStringLiteral("9");
+    QTest::newRow("Version 10")
+            << QWebSocketProtocol::VersionUnknown
+            << QStringLiteral("10");
+    QTest::newRow("Version 11")
+            << QWebSocketProtocol::VersionUnknown
+            << QStringLiteral("11");
+    QTest::newRow("Version 12")
+            << QWebSocketProtocol::VersionUnknown
+            << QStringLiteral("12");
+    QTest::newRow("Version abcd")
+            << QWebSocketProtocol::VersionUnknown
+            << QStringLiteral("abcd");
+    QTest::newRow("Version 1.6")
+            << QWebSocketProtocol::VersionUnknown
+            << QStringLiteral("1.6");
+    QTest::newRow("Version empty")
+            << QWebSocketProtocol::VersionUnknown
+            << QString();
+}
+
+void tst_WebSocketProtocol::tst_versionFromString()
+{
+    QFETCH(QWebSocketProtocol::Version, version);
+    QFETCH(QString, versionString);
+
+    QCOMPARE(QWebSocketProtocol::versionFromString(versionString), version);
 }
 
 QTEST_MAIN(tst_WebSocketProtocol)

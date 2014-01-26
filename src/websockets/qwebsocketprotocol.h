@@ -65,8 +65,6 @@ enum Version
     VersionLatest = Version13
 };
 
-Version versionFromString(const QString &versionString);
-
 enum CloseCode
 {
     CloseCodeNormal                 = 1000,
