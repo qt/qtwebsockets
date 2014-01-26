@@ -8,3 +8,6 @@ contains(QT_CONFIG, private_tests): SUBDIRS += \
    dataprocessor \
    websocketframe \
    handshakerequest
+
+SUBDIRS += \
+    qwebsocket
