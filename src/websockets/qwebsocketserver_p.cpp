@@ -356,7 +356,6 @@ void QWebSocketServerPrivate::setError(QWebSocketProtocol::CloseCode code, const
  */
 void QWebSocketServerPrivate::onNewConnection()
 {
-    qDebug() << "New connection arrived.";
     QTcpSocket *pTcpSocket = m_pTcpServer->nextPendingConnection();
     connect(pTcpSocket, &QTcpSocket::readyRead, this, &QWebSocketServerPrivate::handshakeReceived);
 }
