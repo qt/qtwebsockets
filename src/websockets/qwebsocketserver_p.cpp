@@ -158,7 +158,10 @@ bool QWebSocketServerPrivate::isListening() const
  */
 bool QWebSocketServerPrivate::listen(const QHostAddress &address, quint16 port)
 {
-    return m_pTcpServer->listen(address, port);
+    bool success = m_pTcpServer->listen(address, port);
+    if (!success)
+        setErrorFromSocketError(m_pTcpServer->serverError(), m_pTcpServer->errorString());
+    return success;
 }
 
 /*!
