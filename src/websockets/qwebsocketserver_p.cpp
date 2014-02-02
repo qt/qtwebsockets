@@ -427,7 +427,6 @@ void QWebSocketServerPrivate::handshakeReceived()
                                                                             request,
                                                                             response);
                     if (pWebSocket) {
-                        pWebSocket->setParent(this);
                         addPendingConnection(pWebSocket);
                         Q_EMIT q->newConnection();
                         success = true;
