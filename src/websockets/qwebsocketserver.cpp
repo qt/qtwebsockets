@@ -215,6 +215,7 @@ QT_BEGIN_NAMESPACE
 /*!
     Constructs a new QWebSocketServer with the given \a serverName.
     The \a serverName will be used in the http handshake phase to identify the server.
+    It can be empty, in which case an empty server name will be sent to the client.
     The \a secureMode parameter indicates whether the server operates over wss (\l{SecureMode})
     or over ws (\l{NonSecureMode}).
 
@@ -262,6 +263,7 @@ void QWebSocketServer::close()
 
 /*!
     Returns a human readable description of the last error that occurred.
+    If no error occurred, an empty string is returned.
 
     \sa serverError()
 */
@@ -284,9 +286,9 @@ bool QWebSocketServer::hasPendingConnections() const
 
 /*!
     Returns true if the server is currently listening for incoming connections;
-    otherwise returns false.
+    otherwise returns false. If listening fails, error() will return the reason.
 
-    \sa listen()
+    \sa listen(), error()
  */
 bool QWebSocketServer::isListening() const
 {
@@ -467,6 +469,7 @@ QWebSocketServer::SslMode QWebSocketServer::secureMode() const
 
 /*!
     Returns an error code for the last error that occurred.
+    If no error occurred, QWebSocketProtocol::CloseCodeNormal is returned.
 
     \sa errorString()
  */
