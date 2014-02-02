@@ -47,6 +47,7 @@
 */
 
 /*!
+    \internal
     \page qtwebsockets-qml-types.html
     \title Qt WebSockets QML Types
     \brief List of QML types that provide WebSockets communication.
