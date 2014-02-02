@@ -181,6 +181,16 @@ void QWebSocketServerPrivate::addPendingConnection(QWebSocket *pWebSocket)
 /*!
     \internal
  */
+void QWebSocketServerPrivate::setErrorFromSocketError(QAbstractSocket::SocketError error,
+                                                      const QString &errorDescription)
+{
+    Q_UNUSED(error);
+    setError(QWebSocketProtocol::CloseCodeAbnormalDisconnection, errorDescription);
+}
+
+/*!
+    \internal
+ */
 QWebSocket *QWebSocketServerPrivate::nextPendingConnection()
 {
     QWebSocket *pWebSocket = Q_NULLPTR;

@@ -138,6 +138,8 @@ private:
     QString m_errorString;
 
     void addPendingConnection(QWebSocket *pWebSocket);
+    void setErrorFromSocketError(QAbstractSocket::SocketError error,
+                                 const QString &errorDescription);
 };
 
 QT_END_NAMESPACE
