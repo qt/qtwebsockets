@@ -82,6 +82,15 @@ SslEchoServer::SslEchoServer(quint16 port, QObject *parent) :
 }
 //! [constructor]
 
+SslEchoServer::~SslEchoServer()
+{
+    m_pWebSocketServer->close();
+    while (!m_clients.isEmpty()) {
+        QWebSocket *pWebSocket = m_clients.takeFirst();
+        delete pWebSocket;
+    }
+}
+
 //! [onNewConnection]
 void SslEchoServer::onNewConnection()
 {

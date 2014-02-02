@@ -61,6 +61,15 @@ ChatServer::ChatServer(quint16 port, QObject *parent) :
                 this, &ChatServer::onNewConnection);
     }
 }
+
+ChatServer::~ChatServer()
+{
+    m_pWebSocketServer->close();
+    while (!m_clients.isEmpty()) {
+        QWebSocket *pWebSocket = m_clients.takeFirst();
+        delete pWebSocket;
+    }
+}
 //! [constructor]
 
 //! [onNewConnection]
