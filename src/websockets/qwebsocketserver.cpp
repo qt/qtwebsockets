@@ -241,9 +241,9 @@ QWebSocketServer::QWebSocketServer(const QString &serverName, SslMode secureMode
 }
 
 /*!
-    Destroys the WebSocketServer object. If the server is listening for connections,
+    Destroys the QWebSocketServer object. If the server is listening for connections,
     the socket is automatically closed.
-    Any client WebSockets that are still connected are closed and deleted.
+    Any client \l{QWebSocket}s that are still queued are closed and deleted.
 
     \sa close()
  */
@@ -323,14 +323,13 @@ int QWebSocketServer::maxPendingConnections() const
 }
 
 /*!
-    Returns the next pending connection as a connected WebSocket object.
-    The socket is created as a child of the server, which means that it is automatically
-    deleted when the WebSocketServer object is destroyed.
-    It is still a good idea to delete the object explicitly when you are done with it,
-    to avoid wasting memory.
+    Returns the next pending connection as a connected QWebSocket object.
+    QWebSocketServer does not take ownership of the returned QWebSocket object.
+    It is up to the caller to delete the object explicitly when it is done using it,
+    otherwise a memory leak will occur.
     Q_NULLPTR is returned if this function is called when there are no pending connections.
 
-    Note: The returned WebSocket object cannot be used from another thread..
+    Note: The returned QWebSocket object cannot be used from another thread.
 
     \sa hasPendingConnections()
 */
@@ -352,7 +351,7 @@ void QWebSocketServer::pauseAccepting()
 
 #ifndef QT_NO_NETWORKPROXY
 /*!
-    Returns the network proxy for this socket. By default QNetworkProxy::DefaultProxy is used.
+    Returns the network proxy for this server. By default QNetworkProxy::DefaultProxy is used.
 
     \sa setProxy()
 */
@@ -363,9 +362,9 @@ QNetworkProxy QWebSocketServer::proxy() const
 }
 
 /*!
-    \brief Sets the explicit network proxy for this socket to \a networkProxy.
+    Sets the explicit network proxy for this server to \a networkProxy.
 
-    To disable the use of a proxy for this socket, use the QNetworkProxy::NoProxy proxy type:
+    To disable the use of a proxy, use the QNetworkProxy::NoProxy proxy type:
 
     \code
         server->setProxy(QNetworkProxy::NoProxy);
@@ -382,7 +381,7 @@ void QWebSocketServer::setProxy(const QNetworkProxy &networkProxy)
 
 #ifndef QT_NO_SSL
 /*!
-    Sets the SSL configuration for the websocket server to \a sslConfiguration.
+    Sets the SSL configuration for the QWebSocketServer to \a sslConfiguration.
     This method has no effect if QWebSocketServer runs in non-secure mode
     (QWebSocketServer::NonSecureMode).
 
@@ -395,7 +394,7 @@ void QWebSocketServer::setSslConfiguration(const QSslConfiguration &sslConfigura
 }
 
 /*!
-    Returns the SSL configuration used by the websocket server.
+    Returns the SSL configuration used by the QWebSocketServer.
     If the server is not running in secure mode (QWebSocketServer::SecureMode),
     this method returns QSslConfiguration::defaultConfiguration().
 
@@ -421,6 +420,7 @@ void QWebSocketServer::resumeAccepting()
 /*!
     Sets the server name that will be used during the http handshake phase to the given
     \a serverName.
+    The \a serverName can be empty, in which case an empty server name will be sent to the client.
     Existing connected clients will not be notified of this change, only newly connecting clients
     will see this new name.
  */
@@ -497,8 +497,8 @@ quint16 QWebSocketServer::serverPort() const
     By default, the limit is 30 pending connections.
 
     Clients may still able to connect after the server has reached its maximum number of
-    pending connections (i.e., WebSocket can still emit the connected() signal).
-    WebSocketServer will stop accepting the new connections, but the operating system may still
+    pending connections (i.e., QWebSocketServer can still emit the connected() signal).
+    QWebSocketServer will stop accepting the new connections, but the operating system may still
     keep them in queue.
 
     \sa maxPendingConnections(), hasPendingConnections()
