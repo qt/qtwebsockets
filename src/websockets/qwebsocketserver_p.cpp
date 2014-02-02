@@ -397,6 +397,7 @@ void QWebSocketServerPrivate::handshakeReceived()
 
         if (m_pendingConnections.length() >= maxPendingConnections()) {
             pTcpSocket->close();
+            pTcpSocket->deleteLater();
             setError(QWebSocketProtocol::CloseCodeAbnormalDisconnection,
                      tr("Too many pending connections."));
             return;
@@ -445,6 +446,7 @@ void QWebSocketServerPrivate::handshakeReceived()
         if (!success) {
             qWarning() << tr("Closing socket because of invalid or unsupported request.");
             pTcpSocket->close();
+            pTcpSocket->deleteLater();
         }
     } else {
         qWarning() <<

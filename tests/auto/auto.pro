@@ -10,4 +10,5 @@ contains(QT_CONFIG, private_tests): SUBDIRS += \
    handshakerequest
 
 SUBDIRS += \
-    qwebsocket
+    qwebsocket \
+    qwebsocketserver
