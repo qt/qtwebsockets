@@ -328,8 +328,6 @@ void QWebSocketServerPrivate::setSslConfiguration(const QSslConfiguration &sslCo
 {
     if (m_secureMode == SecureMode)
         qobject_cast<QSslServer *>(m_pTcpServer)->setSslConfiguration(sslConfiguration);
-    else
-        qWarning() << tr("Cannot set SSL configuration for non-secure server.");
 }
 
 QSslConfiguration QWebSocketServerPrivate::sslConfiguration() const
@@ -386,8 +384,6 @@ void QWebSocketServerPrivate::handshakeReceived()
 
         if (m_pendingConnections.length() >= maxPendingConnections()) {
             pTcpSocket->close();
-            qWarning() <<
-                tr("Too many pending connections: new websocket connection not accepted.");
             setError(QWebSocketProtocol::CloseCodeAbnormalDisconnection,
                      tr("Too many pending connections."));
             return;
