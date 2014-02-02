@@ -46,7 +46,7 @@
 #include <QQmlParserStatus>
 #include <QtQml>
 #include <QScopedPointer>
-#include <QWebSocket>
+#include <QtWebSockets/QWebSocket>
 
 QT_BEGIN_NAMESPACE
 
