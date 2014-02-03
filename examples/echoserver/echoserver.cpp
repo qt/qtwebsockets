@@ -64,10 +64,7 @@ EchoServer::EchoServer(quint16 port, QObject *parent) :
 EchoServer::~EchoServer()
 {
     m_pWebSocketServer->close();
-    while (!m_clients.isEmpty()) {
-        QWebSocket *pWebSocket = m_clients.takeFirst();
-        delete pWebSocket;
-    }
+    qDeleteAll(m_clients.begin(), m_clients.end());
 }
 
 //! [onNewConnection]
