@@ -223,8 +223,7 @@ QT_BEGIN_NAMESPACE
  */
 QWebSocketServer::QWebSocketServer(const QString &serverName, SslMode secureMode,
                                    QObject *parent) :
-    QObject(parent),
-    d_ptr(new QWebSocketServerPrivate(serverName,
+    QObject(*(new QWebSocketServerPrivate(serverName,
                                       #ifndef QT_NO_SSL
                                       (secureMode == SecureMode) ?
                                           QWebSocketServerPrivate::SecureMode :
@@ -232,8 +231,7 @@ QWebSocketServer::QWebSocketServer(const QString &serverName, SslMode secureMode
                                       #else
                                       QWebSocketServerPrivate::NonSecureMode,
                                       #endif
-                                      this,
-                                      this))
+                                      this)), parent)
 {
 #ifdef QT_NO_SSL
     Q_UNUSED(secureMode)
@@ -249,7 +247,6 @@ QWebSocketServer::QWebSocketServer(const QString &serverName, SslMode secureMode
  */
 QWebSocketServer::~QWebSocketServer()
 {
-    delete d_ptr;
 }
 
 /*!

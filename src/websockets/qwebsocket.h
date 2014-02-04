@@ -142,7 +142,6 @@ Q_SIGNALS:
 private:
     QWebSocket(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version,
                QObject *parent = Q_NULLPTR);
-    QWebSocketPrivate * const d_ptr;
 };
 
 QT_END_NAMESPACE

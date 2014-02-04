@@ -64,6 +64,7 @@
 #include <QtNetwork/QSslSocket>
 #endif
 #include <QtCore/QTime>
+#include <private/qobject_p.h>
 
 #include "qwebsocketprotocol.h"
 #include "qwebsocketdataprocessor_p.h"
@@ -94,17 +95,15 @@ public:
     QTcpSocket *m_pSocket;
 };
 
-class QWebSocketPrivate : public QObject
+class QWebSocketPrivate : public QObjectPrivate
 {
-    Q_OBJECT
     Q_DISABLE_COPY(QWebSocketPrivate)
-    Q_DECLARE_PUBLIC(QWebSocket)
 
 public:
+    Q_DECLARE_PUBLIC(QWebSocket)
     explicit QWebSocketPrivate(const QString &origin,
                                QWebSocketProtocol::Version version,
-                               QWebSocket * const pWebSocket,
-                               QObject *parent = Q_NULLPTR);
+                               QWebSocket * const pWebSocket);
     virtual ~QWebSocketPrivate();
 
     void init();
@@ -143,32 +142,20 @@ public:
 
 #ifndef QT_NO_SSL
     void ignoreSslErrors(const QList<QSslError> &errors);
+    void ignoreSslErrors();
     void setSslConfiguration(const QSslConfiguration &sslConfiguration);
     QSslConfiguration sslConfiguration() const;
 #endif
 
-public Q_SLOTS:
     void close(QWebSocketProtocol::CloseCode closeCode, QString reason);
     void open(const QUrl &url, bool mask);
     void ping(const QByteArray &payload);
 
-#ifndef QT_NO_SSL
-    void ignoreSslErrors();
-#endif
-
-private Q_SLOTS:
-    void processData();
-    void processPing(const QByteArray &data);
-    void processPong(const QByteArray &data);
-    void processClose(QWebSocketProtocol::CloseCode closeCode, QString closeReason);
-    void processHandshake(QTcpSocket *pSocket);
-    void processStateChanged(QAbstractSocket::SocketState socketState);
-
-private:
     QWebSocket * const q_ptr;
 
+private:
     QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version,
-                      QWebSocket *pWebSocket, QObject *parent = Q_NULLPTR);
+                      QWebSocket *pWebSocket);
     void setVersion(QWebSocketProtocol::Version version);
     void setResourceName(const QString &resourceName);
     void setRequestUrl(const QUrl &requestUrl);
@@ -178,6 +165,13 @@ private:
     void enableMasking(bool enable);
     void setSocketState(QAbstractSocket::SocketState state);
     void setErrorString(const QString &errorString);
+
+    void processData();
+    void processPing(const QByteArray &data);
+    void processPong(const QByteArray &data);
+    void processClose(QWebSocketProtocol::CloseCode closeCode, QString closeReason);
+    void processHandshake(QTcpSocket *pSocket);
+    void processStateChanged(QAbstractSocket::SocketState socketState);
 
     qint64 doWriteFrames(const QByteArray &data, bool isBinary) Q_REQUIRED_RESULT;
 

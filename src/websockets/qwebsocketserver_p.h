@@ -56,6 +56,7 @@
 #include <QtCore/QQueue>
 #include <QtCore/QString>
 #include <QtNetwork/QHostAddress>
+#include <private/qobject_p.h>
 #include "qwebsocket.h"
 
 #ifndef QT_NO_SSL
@@ -68,13 +69,12 @@ QT_BEGIN_NAMESPACE
 class QTcpServer;
 class QWebSocketServer;
 
-class QWebSocketServerPrivate : public QObject
+class QWebSocketServerPrivate : public QObjectPrivate
 {
-    Q_OBJECT
     Q_DISABLE_COPY(QWebSocketServerPrivate)
-    Q_DECLARE_PUBLIC(QWebSocketServer)
 
 public:
+    Q_DECLARE_PUBLIC(QWebSocketServer)
     enum SslMode
     {
         SecureMode = true,
@@ -82,8 +82,7 @@ public:
     };
 
     explicit QWebSocketServerPrivate(const QString &serverName, SslMode secureMode,
-                                     QWebSocketServer * const pWebSocketServer,
-                                     QObject *parent = Q_NULLPTR);
+                                     QWebSocketServer * const pWebSocketServer);
     virtual ~QWebSocketServerPrivate();
 
     void close();
@@ -122,14 +121,9 @@ public:
 
     void setError(QWebSocketProtocol::CloseCode code, const QString &errorString);
 
-private Q_SLOTS:
-    void onNewConnection();
-    void onCloseConnection();
-    void handshakeReceived();
-
-private:
     QWebSocketServer * const q_ptr;
 
+private:
     QTcpServer *m_pTcpServer;
     QString m_serverName;
     SslMode m_secureMode;
@@ -140,6 +134,10 @@ private:
     void addPendingConnection(QWebSocket *pWebSocket);
     void setErrorFromSocketError(QAbstractSocket::SocketError error,
                                  const QString &errorDescription);
+
+    void onNewConnection();
+    void onCloseConnection();
+    void handshakeReceived();
 };
 
 QT_END_NAMESPACE

@@ -1,7 +1,7 @@
 load(qt_build_config)
 TARGET = QtWebSockets
 
-QT = core network
+QT = core network core-private
 
 TEMPLATE = lib
 

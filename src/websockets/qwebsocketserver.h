@@ -131,9 +131,6 @@ Q_SIGNALS:
     void sslErrors(const QList<QSslError> &errors);
 #endif
     void closed();
-
-private:
-    QWebSocketServerPrivate * const d_ptr;
 };
 
 QT_END_NAMESPACE
