@@ -111,7 +111,6 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
     m_dataProcessor(),
     m_configuration()
 {
-    init();
 }
 
 /*!
@@ -142,8 +141,6 @@ QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol:
     m_dataProcessor(),
     m_configuration()
 {
-    init();
-    makeConnections(m_pSocket.data());
 }
 
 /*!
@@ -154,6 +151,10 @@ void QWebSocketPrivate::init()
     Q_ASSERT(q_ptr);
     //TODO: need a better randomizer
     qsrand(static_cast<uint>(QDateTime::currentMSecsSinceEpoch()));
+
+    if (m_pSocket) {
+        makeConnections(m_pSocket.data());
+    }
 }
 
 /*!

@@ -262,6 +262,8 @@ QWebSocket::QWebSocket(const QString &origin,
                        QObject *parent) :
     QObject(*(new QWebSocketPrivate(origin, version, this)), parent)
 {
+    Q_D(QWebSocket);
+    d->init();
 }
 
 /*!
@@ -301,6 +303,8 @@ QWebSocket::QWebSocket(QTcpSocket *pTcpSocket,
                        QWebSocketProtocol::Version version, QObject *parent) :
     QObject(*(new QWebSocketPrivate(pTcpSocket, version, this)), parent)
 {
+    Q_D(QWebSocket);
+    d->init();
 }
 
 /*!

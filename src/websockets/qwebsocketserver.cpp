@@ -236,6 +236,8 @@ QWebSocketServer::QWebSocketServer(const QString &serverName, SslMode secureMode
 #ifdef QT_NO_SSL
     Q_UNUSED(secureMode)
 #endif
+    Q_D(QWebSocketServer);
+    d->init();
 }
 
 /*!

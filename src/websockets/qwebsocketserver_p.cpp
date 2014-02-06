@@ -73,6 +73,13 @@ QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName,
     m_errorString()
 {
     Q_ASSERT(pWebSocketServer);
+}
+
+/*!
+    \internal
+ */
+void QWebSocketServerPrivate::init()
+{
     if (m_secureMode == NonSecureMode) {
         m_pTcpServer = new QTcpServer();
         if (Q_LIKELY(m_pTcpServer))

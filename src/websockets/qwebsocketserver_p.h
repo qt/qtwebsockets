@@ -85,6 +85,7 @@ public:
                                      QWebSocketServer * const pWebSocketServer);
     virtual ~QWebSocketServerPrivate();
 
+    void init();
     void close();
     QString errorString() const;
     bool hasPendingConnections() const;
