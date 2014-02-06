@@ -86,7 +86,7 @@ public:
     virtual ~QWebSocketServerPrivate();
 
     void init();
-    void close();
+    void close(bool aboutToDestroy = false);
     QString errorString() const;
     bool hasPendingConnections() const;
     bool isListening() const;

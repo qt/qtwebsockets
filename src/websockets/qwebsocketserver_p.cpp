@@ -111,14 +111,14 @@ void QWebSocketServerPrivate::init()
  */
 QWebSocketServerPrivate::~QWebSocketServerPrivate()
 {
-    close();
+    close(true);
     m_pTcpServer->deleteLater();
 }
 
 /*!
     \internal
  */
-void QWebSocketServerPrivate::close()
+void QWebSocketServerPrivate::close(bool aboutToDestroy)
 {
     Q_Q(QWebSocketServer);
     m_pTcpServer->close();
@@ -128,9 +128,11 @@ void QWebSocketServerPrivate::close()
                           QWebSocketServer::tr("Server closed."));
         pWebSocket->deleteLater();
     }
-    //emit signal via the event queue, so the server gets time
-    //to process any hanging events, like flushing buffers aso
-    QMetaObject::invokeMethod(q, "closed", Qt::QueuedConnection);
+    if (!aboutToDestroy) {
+        //emit signal via the event queue, so the server gets time
+        //to process any hanging events, like flushing buffers aso
+        QMetaObject::invokeMethod(q, "closed", Qt::QueuedConnection);
+    }
 }
 
 /*!
