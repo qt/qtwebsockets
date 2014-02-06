@@ -377,6 +377,10 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
                     makeConnections(m_pSocket.data());
                     QObject::connect(sslSocket, &QSslSocket::encryptedBytesWritten, q,
                                      &QWebSocket::bytesWritten);
+                    typedef void (QSslSocket:: *sslErrorSignalType)(const QList<QSslError> &);
+                    QObject::connect(sslSocket,
+                                     static_cast<sslErrorSignalType>(&QSslSocket::sslErrors),
+                                     q, &QWebSocket::sslErrors);
                     setSocketState(QAbstractSocket::ConnectingState);
 
                     sslSocket->setSslConfiguration(m_configuration.m_sslConfiguration);
