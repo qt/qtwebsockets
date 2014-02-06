@@ -171,7 +171,7 @@ void tst_QWebSocket::tst_invalidOpen()
     QSignalSpy pongSpy(&socket, SIGNAL(pong(quint64,QByteArray)));
     QSignalSpy bytesWrittenSpy(&socket, SIGNAL(bytesWritten(qint64)));
 
-    socket.open(QUrl(QStringLiteral("ws://SomeNonExistingWebSocketServer/")), true);
+    socket.open(QUrl(QStringLiteral("ws://127.0.0.1:1/")), true);
 
     QVERIFY(socket.origin().isEmpty());
     QCOMPARE(socket.version(), QWebSocketProtocol::VersionLatest);
@@ -185,23 +185,23 @@ void tst_QWebSocket::tst_invalidOpen()
     QCOMPARE(socket.pauseMode(), QAbstractSocket::PauseNever);
     QVERIFY(socket.peerAddress().isNull());
     QCOMPARE(socket.peerPort(), quint16(0));
-    QCOMPARE(socket.peerName(), QStringLiteral("somenonexistingwebsocketserver"));
+    QCOMPARE(socket.peerName(), QStringLiteral("127.0.0.1"));
     QCOMPARE(socket.state(), QAbstractSocket::ConnectingState);
     QCOMPARE(socket.readBufferSize(), 0);
     QCOMPARE(socket.resourceName(), QStringLiteral("/"));
-    QCOMPARE(socket.requestUrl(), QUrl(QStringLiteral("ws://SomeNonExistingWebSocketServer/")));
+    QCOMPARE(socket.requestUrl(), QUrl(QStringLiteral("ws://127.0.0.1:1/")));
     QCOMPARE(socket.closeCode(), QWebSocketProtocol::CloseCodeNormal);
     QVERIFY(socket.closeReason().isEmpty());
     QVERIFY(!socket.flush());   //flush should fail if socket is in connecting state
     QCOMPARE(socket.sendTextMessage(QStringLiteral("A text message")), 0);
     QCOMPARE(socket.sendBinaryMessage(QByteArrayLiteral("A text message")), 0);
 
-    errorSpy.wait();
+    QVERIFY(errorSpy.wait());
     QCOMPARE(errorSpy.count(), 1);
     QList<QVariant> arguments = errorSpy.takeFirst();
     QAbstractSocket::SocketError socketError =
             qvariant_cast<QAbstractSocket::SocketError>(arguments.at(0));
-    QCOMPARE(socketError, QAbstractSocket::HostNotFoundError);
+    QCOMPARE(socketError, QAbstractSocket::ConnectionRefusedError);
     QCOMPARE(aboutToCloseSpy.count(), 0);
     QCOMPARE(connectedSpy.count(), 0);
     QCOMPARE(disconnectedSpy.count(), 1);
