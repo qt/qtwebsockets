@@ -872,7 +872,9 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
         while (!headerLine.isEmpty()) {
             const QStringList headerField = headerLine.split(QStringLiteral(": "),
                                                              QString::SkipEmptyParts);
-            headers.insertMulti(headerField[0], headerField[1]);
+            if (headerField.size() == 2) {
+                headers.insertMulti(headerField[0], headerField[1]);
+            }
             headerLine = readLine(pSocket);
         }
 
