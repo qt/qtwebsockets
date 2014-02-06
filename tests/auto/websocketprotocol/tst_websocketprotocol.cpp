@@ -51,6 +51,7 @@ QT_USE_NAMESPACE
 
 Q_DECLARE_METATYPE(QWebSocketProtocol::CloseCode)
 Q_DECLARE_METATYPE(QWebSocketProtocol::OpCode)
+Q_DECLARE_METATYPE(QWebSocketProtocol::Version)
 
 class tst_WebSocketProtocol : public QObject
 {
