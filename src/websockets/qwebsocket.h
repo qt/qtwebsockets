@@ -112,7 +112,7 @@ public:
 public Q_SLOTS:
     void close(QWebSocketProtocol::CloseCode closeCode = QWebSocketProtocol::CloseCodeNormal,
                const QString &reason = QString());
-    void open(const QUrl &url, bool mask = true);
+    void open(const QUrl &url);
     void ping(const QByteArray &payload = QByteArray());
 #ifndef QT_NO_SSL
     void ignoreSslErrors();

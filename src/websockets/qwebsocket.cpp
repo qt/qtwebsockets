@@ -373,14 +373,11 @@ void QWebSocket::close(QWebSocketProtocol::CloseCode closeCode, const QString &r
 
 /*!
     \brief Opens a websocket connection using the given \a url.
-    If \a mask is true, all frames will be masked; this is only necessary for client side sockets;
-    servers should never mask.
-    \note A client socket must *always* mask its frames; servers may *never* mask its frames.
  */
-void QWebSocket::open(const QUrl &url, bool mask)
+void QWebSocket::open(const QUrl &url)
 {
     Q_D(QWebSocket);
-    d->open(url, mask);
+    d->open(url, true);
 }
 
 /*!
