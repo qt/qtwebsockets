@@ -19,17 +19,16 @@ qhp.QtWebSockets.filterAttributes                   = qtwebsockets $QT_VERSION q
 qhp.QtWebSockets.customFilters.Qt.name              = QtWebSockets $QT_VERSION
 qhp.QtWebSockets.customFilters.Qt.filterAttributes  = qtwebsockets $QT_VERSION
 
-#qhp.QtWebSockets.subprojects                        = classes qml examples
-qhp.QtWebSockets.subprojects                        = classes examples
+qhp.QtWebSockets.subprojects                        = classes qml examples
 qhp.QtWebSockets.subprojects.classes.title          = C++ Classes
 qhp.QtWebSockets.subprojects.classes.indexTitle     = Qt WebSockets C++ Classes
 qhp.QtWebSockets.subprojects.classes.selectors      = class fake:headerfile
 qhp.QtWebSockets.subprojects.classes.sortPages      = true
 
-#qhp.QtWebSockets.subprojects.qml.title              = QML Types
-#qhp.QtWebSockets.subprojects.qml.indexTitle         = Qt WebSockets QML Types
-#qhp.QtWebSockets.subprojects.qml.selectors          = fake:qmlclass
-#qhp.QtWebSockets.subprojects.qml.sortPages          = true
+qhp.QtWebSockets.subprojects.qml.title              = QML Types
+qhp.QtWebSockets.subprojects.qml.indexTitle         = Qt WebSockets QML Types
+qhp.QtWebSockets.subprojects.qml.selectors          = fake:qmlclass
+qhp.QtWebSockets.subprojects.qml.sortPages          = true
 
 qhp.QtWebSockets.subprojects.examples.title         = Examples
 qhp.QtWebSockets.subprojects.examples.indexTitle    = Qt WebSockets Examples
@@ -42,11 +41,11 @@ tagfile                                             = ../../../doc/qtwebsockets/
 depends                                             += qtcore qtnetwork qtdoc
 
 headerdirs                                          += ..
-#                                                       ../../imports
+                                                       ../../imports
 
 sourcedirs                                          += .. \
                                                        src
-#                                                       ../../imports
+                                                       ../../imports
 
 
 exampledirs                                         += ../../../examples/ \
@@ -54,4 +53,4 @@ exampledirs                                         += ../../../examples/ \
 
 navigation.landingpage                              = "Qt WebSockets"
 navigation.cppclassespage                           = "Qt WebSockets C++ Classes"
-#navigation.qmltypespage                             = "Qt WebSockets QML Types"
+navigation.qmltypespage                             = "Qt WebSockets QML Types"
