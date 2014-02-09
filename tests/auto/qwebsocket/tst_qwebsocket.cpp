@@ -171,7 +171,7 @@ void tst_QWebSocket::tst_invalidOpen()
     QSignalSpy pongSpy(&socket, SIGNAL(pong(quint64,QByteArray)));
     QSignalSpy bytesWrittenSpy(&socket, SIGNAL(bytesWritten(qint64)));
 
-    socket.open(QUrl(QStringLiteral("ws://127.0.0.1:1/")), true);
+    socket.open(QUrl(QStringLiteral("ws://127.0.0.1:1/")));
 
     QVERIFY(socket.origin().isEmpty());
     QCOMPARE(socket.version(), QWebSocketProtocol::VersionLatest);
