@@ -61,7 +61,9 @@ private Q_SLOTS:
     void tst_initialisation_data();
     void tst_initialisation();
     void tst_settersAndGetters();
+    void tst_invalidOpen_data();
     void tst_invalidOpen();
+    void tst_invalidOrigin();
 };
 
 tst_QWebSocket::tst_QWebSocket()
@@ -155,9 +157,114 @@ void tst_QWebSocket::tst_settersAndGetters()
     QCOMPARE(socket.readBufferSize(), -1);
 }
 
+void tst_QWebSocket::tst_invalidOpen_data()
+{
+    QTest::addColumn<QString>("url");
+    QTest::addColumn<QString>("expectedUrl");
+    QTest::addColumn<QString>("expectedPeerName");
+    QTest::addColumn<QString>("expectedResourceName");
+    QTest::addColumn<QAbstractSocket::SocketState>("stateAfterOpenCall");
+    QTest::addColumn<int>("disconnectedCount");
+    QTest::addColumn<int>("stateChangedCount");
+
+    QTest::newRow("Illegal local address")
+            << QStringLiteral("ws://127.0.0.1:1/") << QStringLiteral("ws://127.0.0.1:1/")
+            << QStringLiteral("127.0.0.1")
+            << QStringLiteral("/") << QAbstractSocket::ConnectingState
+            << 1
+            << 2;  //going from connecting to disconnected
+    QTest::newRow("URL containing new line in the hostname")
+            << QStringLiteral("ws://myhacky\r\nserver/") << QString()
+            << QString()
+            << QString() << QAbstractSocket::UnconnectedState
+            << 0 << 0;
+    QTest::newRow("URL containing new line in the resource name")
+            << QStringLiteral("ws://127.0.0.1:1/tricky\r\npath") << QString()
+            << QString()
+            << QString()
+            << QAbstractSocket::UnconnectedState
+            << 0 << 0;
+}
+
 void tst_QWebSocket::tst_invalidOpen()
 {
+    QFETCH(QString, url);
+    QFETCH(QString, expectedUrl);
+    QFETCH(QString, expectedPeerName);
+    QFETCH(QString, expectedResourceName);
+    QFETCH(QAbstractSocket::SocketState, stateAfterOpenCall);
+    QFETCH(int, disconnectedCount);
+    QFETCH(int, stateChangedCount);
     QWebSocket socket;
+    QSignalSpy errorSpy(&socket, SIGNAL(error(QAbstractSocket::SocketError)));
+    QSignalSpy aboutToCloseSpy(&socket, SIGNAL(aboutToClose()));
+    QSignalSpy connectedSpy(&socket, SIGNAL(connected()));
+    QSignalSpy disconnectedSpy(&socket, SIGNAL(disconnected()));
+    QSignalSpy stateChangedSpy(&socket, SIGNAL(stateChanged(QAbstractSocket::SocketState)));
+    QSignalSpy readChannelFinishedSpy(&socket, SIGNAL(readChannelFinished()));
+    QSignalSpy textFrameReceivedSpy(&socket, SIGNAL(textFrameReceived(QString,bool)));
+    QSignalSpy binaryFrameReceivedSpy(&socket, SIGNAL(binaryFrameReceived(QByteArray,bool)));
+    QSignalSpy textMessageReceivedSpy(&socket, SIGNAL(textMessageReceived(QString)));
+    QSignalSpy binaryMessageReceivedSpy(&socket, SIGNAL(binaryMessageReceived(QByteArray)));
+    QSignalSpy pongSpy(&socket, SIGNAL(pong(quint64,QByteArray)));
+    QSignalSpy bytesWrittenSpy(&socket, SIGNAL(bytesWritten(qint64)));
+
+    socket.open(QUrl(url));
+
+    QVERIFY(socket.origin().isEmpty());
+    QCOMPARE(socket.version(), QWebSocketProtocol::VersionLatest);
+    //at this point the socket is in a connecting state
+    //so, there should no error at this point
+    QCOMPARE(socket.error(), QAbstractSocket::UnknownSocketError);
+    QVERIFY(!socket.errorString().isEmpty());
+    QVERIFY(!socket.isValid());
+    QVERIFY(socket.localAddress().isNull());
+    QCOMPARE(socket.localPort(), quint16(0));
+    QCOMPARE(socket.pauseMode(), QAbstractSocket::PauseNever);
+    QVERIFY(socket.peerAddress().isNull());
+    QCOMPARE(socket.peerPort(), quint16(0));
+    QCOMPARE(socket.peerName(), expectedPeerName);
+    QCOMPARE(socket.state(), stateAfterOpenCall);
+    QCOMPARE(socket.readBufferSize(), 0);
+    QCOMPARE(socket.resourceName(), expectedResourceName);
+    QCOMPARE(socket.requestUrl().toString(), expectedUrl);
+    QCOMPARE(socket.closeCode(), QWebSocketProtocol::CloseCodeNormal);
+    QVERIFY(socket.closeReason().isEmpty());
+    QCOMPARE(socket.sendTextMessage(QStringLiteral("A text message")), 0);
+    QCOMPARE(socket.sendBinaryMessage(QByteArrayLiteral("A text message")), 0);
+
+    if (errorSpy.count() == 0)
+        QVERIFY(errorSpy.wait());
+    QCOMPARE(errorSpy.count(), 1);
+    QList<QVariant> arguments = errorSpy.takeFirst();
+    QAbstractSocket::SocketError socketError =
+            qvariant_cast<QAbstractSocket::SocketError>(arguments.at(0));
+    QCOMPARE(socketError, QAbstractSocket::ConnectionRefusedError);
+    QCOMPARE(aboutToCloseSpy.count(), 0);
+    QCOMPARE(connectedSpy.count(), 0);
+    QCOMPARE(disconnectedSpy.count(), disconnectedCount);
+    QCOMPARE(stateChangedSpy.count(), stateChangedCount);
+    if (stateChangedCount == 2) {
+        arguments = stateChangedSpy.takeFirst();
+        QAbstractSocket::SocketState socketState =
+                qvariant_cast<QAbstractSocket::SocketState>(arguments.at(0));
+        arguments = stateChangedSpy.takeFirst();
+        socketState = qvariant_cast<QAbstractSocket::SocketState>(arguments.at(0));
+        QCOMPARE(socketState, QAbstractSocket::UnconnectedState);
+    }
+    QCOMPARE(readChannelFinishedSpy.count(), 0);
+    QCOMPARE(textFrameReceivedSpy.count(), 0);
+    QCOMPARE(binaryFrameReceivedSpy.count(), 0);
+    QCOMPARE(textMessageReceivedSpy.count(), 0);
+    QCOMPARE(binaryMessageReceivedSpy.count(), 0);
+    QCOMPARE(pongSpy.count(), 0);
+    QCOMPARE(bytesWrittenSpy.count(), 0);
+}
+
+void tst_QWebSocket::tst_invalidOrigin()
+{
+    QWebSocket socket(QStringLiteral("My server\r\nin the wild."));
+
     QSignalSpy errorSpy(&socket, SIGNAL(error(QAbstractSocket::SocketError)));
     QSignalSpy aboutToCloseSpy(&socket, SIGNAL(aboutToClose()));
     QSignalSpy connectedSpy(&socket, SIGNAL(connected()));
@@ -173,8 +280,6 @@ void tst_QWebSocket::tst_invalidOpen()
 
     socket.open(QUrl(QStringLiteral("ws://127.0.0.1:1/")));
 
-    QVERIFY(socket.origin().isEmpty());
-    QCOMPARE(socket.version(), QWebSocketProtocol::VersionLatest);
     //at this point the socket is in a connecting state
     //so, there should no error at this point
     QCOMPARE(socket.error(), QAbstractSocket::UnknownSocketError);
@@ -191,12 +296,9 @@ void tst_QWebSocket::tst_invalidOpen()
     QCOMPARE(socket.resourceName(), QStringLiteral("/"));
     QCOMPARE(socket.requestUrl(), QUrl(QStringLiteral("ws://127.0.0.1:1/")));
     QCOMPARE(socket.closeCode(), QWebSocketProtocol::CloseCodeNormal);
-    QVERIFY(socket.closeReason().isEmpty());
-    QVERIFY(!socket.flush());   //flush should fail if socket is in connecting state
-    QCOMPARE(socket.sendTextMessage(QStringLiteral("A text message")), 0);
-    QCOMPARE(socket.sendBinaryMessage(QByteArrayLiteral("A text message")), 0);
 
     QVERIFY(errorSpy.wait());
+
     QCOMPARE(errorSpy.count(), 1);
     QList<QVariant> arguments = errorSpy.takeFirst();
     QAbstractSocket::SocketError socketError =

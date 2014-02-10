@@ -330,8 +330,14 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
 void QWebSocketPrivate::open(const QUrl &url, bool mask)
 {
     //just delete the old socket for the moment;
-    //later, we can add more 'intelligent' handling by looking at the url
+    //later, we can add more 'intelligent' handling by looking at the URL
     //m_pSocket.reset();
+    Q_Q(QWebSocket);
+    if (!url.isValid() || url.toString().contains(QStringLiteral("\r\n"))) {
+        setErrorString(QWebSocket::tr("Invalid URL."));
+        Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
+        return;
+    }
     QTcpSocket *pTcpSocket = m_pSocket.take();
     if (pTcpSocket) {
         releaseConnections(pTcpSocket);
@@ -339,14 +345,18 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
     }
     //if (m_url != url)
     if (Q_LIKELY(!m_pSocket)) {
-        Q_Q(QWebSocket);
-
         m_dataProcessor.clear();
         m_isClosingHandshakeReceived = false;
         m_isClosingHandshakeSent = false;
 
         setRequestUrl(url);
         QString resourceName = url.path();
+        if (resourceName.contains(QStringLiteral("\r\n"))) {
+            setRequestUrl(QUrl());  //clear requestUrl
+            setErrorString(QWebSocket::tr("Invalid resource name."));
+            Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
+            return;
+        }
         if (!url.query().isEmpty()) {
             if (!resourceName.endsWith(QChar::fromLatin1('?'))) {
                 resourceName.append(QChar::fromLatin1('?'));
@@ -973,6 +983,11 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
                                            QString(),
                                            QString(),
                                            m_key);
+            if (handshake.isEmpty()) {
+                m_pSocket->abort();
+                Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
+                return;
+            }
             m_pSocket->write(handshake.toLatin1());
         }
         break;
@@ -1062,6 +1077,31 @@ QString QWebSocketPrivate::createHandShakeRequest(QString resourceName,
                                                   QByteArray key)
 {
     QStringList handshakeRequest;
+    if (resourceName.contains(QStringLiteral("\r\n"))) {
+        setErrorString(QWebSocket::tr("The resource name contains newlines. " \
+                                      "Possible attack detected."));
+        return QString();
+    }
+    if (host.contains(QStringLiteral("\r\n"))) {
+        setErrorString(QWebSocket::tr("The hostname contains newlines. " \
+                                      "Possible attack detected."));
+        return QString();
+    }
+    if (origin.contains(QStringLiteral("\r\n"))) {
+        setErrorString(QWebSocket::tr("The origin contains newlines. " \
+                                      "Possible attack detected."));
+        return QString();
+    }
+    if (extensions.contains(QStringLiteral("\r\n"))) {
+        setErrorString(QWebSocket::tr("The extensions attribute contains newlines. " \
+                                      "Possible attack detected."));
+        return QString();
+    }
+    if (protocols.contains(QStringLiteral("\r\n"))) {
+        setErrorString(QWebSocket::tr("The protocols attribute contains newlines. " \
+                                      "Possible attack detected."));
+        return QString();
+    }
 
     handshakeRequest << QStringLiteral("GET ") % resourceName % QStringLiteral(" HTTP/1.1") <<
                         QStringLiteral("Host: ") % host <<

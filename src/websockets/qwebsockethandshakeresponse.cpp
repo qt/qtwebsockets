@@ -177,19 +177,27 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(
                     response << QStringLiteral("Sec-WebSocket-Extensions: ") % m_acceptedExtension;
                 }
                 QString origin = request.origin().trimmed();
-                if (origin.isEmpty())
-                    origin = QStringLiteral("*");
-                response << QStringLiteral("Server: ") % serverName                      <<
-                            QStringLiteral("Access-Control-Allow-Credentials: false")    <<
-                            QStringLiteral("Access-Control-Allow-Methods: GET")          <<
-                            QStringLiteral("Access-Control-Allow-Headers: content-type") <<
-                            QStringLiteral("Access-Control-Allow-Origin: ") % origin     <<
-                            QStringLiteral("Date: ") %
-                                QDateTime::currentDateTimeUtc()
-                                    .toString(QStringLiteral("ddd, dd MMM yyyy hh:mm:ss 'GMT'"));
+                if (origin.contains(QStringLiteral("\r\n")) ||
+                        serverName.contains(QStringLiteral("\r\n"))) {
+                    m_error = QWebSocketProtocol::CloseCodeAbnormalDisconnection;
+                    m_errorString = tr("One of the headers contains a newline. " \
+                                       "Possible attack detected.");
+                    m_canUpgrade = false;
+                } else {
+                    if (origin.isEmpty())
+                        origin = QStringLiteral("*");
+                    response << QStringLiteral("Server: ") % serverName                      <<
+                                QStringLiteral("Access-Control-Allow-Credentials: false")    <<
+                                QStringLiteral("Access-Control-Allow-Methods: GET")          <<
+                                QStringLiteral("Access-Control-Allow-Headers: content-type") <<
+                                QStringLiteral("Access-Control-Allow-Origin: ") % origin     <<
+                                QStringLiteral("Date: ") %
+                                    QDateTime::currentDateTimeUtc()
+                                        .toString(QStringLiteral("ddd, dd MMM yyyy hh:mm:ss 'GMT'"));
 
-                m_acceptedVersion = QWebSocketProtocol::currentVersion();
-                m_canUpgrade = true;
+                    m_acceptedVersion = QWebSocketProtocol::currentVersion();
+                    m_canUpgrade = true;
+                }
             }
         } else {
             m_error = QWebSocketProtocol::CloseCodeProtocolError;

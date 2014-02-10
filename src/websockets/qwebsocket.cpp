@@ -255,6 +255,8 @@ QT_BEGIN_NAMESPACE
  * The \a origin of the client is as specified \l {http://tools.ietf.org/html/rfc6454}{RFC 6454}.
  * (The \a origin is not required for non-web browser clients
  * (see \l {http://tools.ietf.org/html/rfc6455}{RFC 6455})).
+ * The \a origin may not contain new line characters, otherwise the connection will be
+ * aborted immediately during the handshake phase.
  * \note Currently only V13 (\l {http://tools.ietf.org/html/rfc6455} {RFC 6455}) is supported
  */
 QWebSocket::QWebSocket(const QString &origin,
@@ -373,6 +375,9 @@ void QWebSocket::close(QWebSocketProtocol::CloseCode closeCode, const QString &r
 
 /*!
     \brief Opens a websocket connection using the given \a url.
+
+    If the url contains newline characters (\\r\\n), then the error signal will be emitted
+    with QAbstractSocket::ConnectionRefusedError as error type.
  */
 void QWebSocket::open(const QUrl &url)
 {
