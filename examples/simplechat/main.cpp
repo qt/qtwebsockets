@@ -46,7 +46,5 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
     ChatServer server(1234);
 
-    Q_UNUSED(server);
-
     return a.exec();
 }

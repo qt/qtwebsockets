@@ -55,8 +55,6 @@ public:
     explicit ChatServer(quint16 port, QObject *parent = Q_NULLPTR);
     virtual ~ChatServer();
 
-Q_SIGNALS:
-
 private Q_SLOTS:
     void onNewConnection();
     void processMessage(QString message);
