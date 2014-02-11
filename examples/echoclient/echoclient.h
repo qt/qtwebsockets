@@ -44,8 +44,6 @@
 #include <QtCore/QObject>
 #include <QtWebSockets/QWebSocket>
 
-QT_FORWARD_DECLARE_CLASS(QWebSocket)
-
 class EchoClient : public QObject
 {
     Q_OBJECT
@@ -54,8 +52,6 @@ public:
 
 Q_SIGNALS:
     void closed();
-
-public Q_SLOTS:
 
 private Q_SLOTS:
     void onConnected();

@@ -46,7 +46,6 @@ QT_USE_NAMESPACE
 //! [constructor]
 EchoClient::EchoClient(const QUrl &url, QObject *parent) :
     QObject(parent),
-    m_webSocket(),
     m_url(url)
 {
     connect(&m_webSocket, &QWebSocket::connected, this, &EchoClient::onConnected);
