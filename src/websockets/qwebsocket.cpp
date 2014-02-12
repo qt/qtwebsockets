@@ -57,7 +57,17 @@
     \l {http://tools.ietf.org/html/rfc6455#page-39} {extensions} and
     \l {http://tools.ietf.org/html/rfc6455#page-12} {subprotocols}.
 
-    QWebSocket only supports version 13 of the WebSocket protocol, as outlined in RFC 6455.
+    QWebSocket only supports version 13 of the WebSocket protocol, as outlined in
+    \l {http://tools.ietf.org/html/rfc6455}{RFC 6455}.
+
+    \warning To generate masks, this implementation of WebSockets uses the cryptographically
+    insecure qrand() function.
+    For more information about the importance of good masking,
+    see \l {http://w2spconf.com/2011/papers/websocket.pdf}.
+    The best measure against attacks mentioned in the document above,
+    is to use QWebSocket over a secure connection (\e wss://).
+    In general, always be careful to not have 3rd party script access to
+    a QWebSocket in your application.
 
     \sa QAbstractSocket, QTcpSocket
 
@@ -619,6 +629,26 @@ void QWebSocket::setProxy(const QNetworkProxy &networkProxy)
     d->setProxy(networkProxy);
 }
 #endif
+
+/*!
+    Sets the generator to use for creating masks to \a maskGenerator.
+    The default QWebSocket generator can be reset by supplying a \e Q_NULLPTR.
+    The mask generator can be changed at any time, even while the connection is open.
+ */
+void QWebSocket::setMaskGenerator(const QMaskGenerator *maskGenerator)
+{
+    Q_D(QWebSocket);
+    d->setMaskGenerator(maskGenerator);
+}
+
+/*!
+    Returns the mask generator that is currently used by this QWebSocket.
+ */
+const QMaskGenerator *QWebSocket::maskGenerator() const
+{
+    Q_D(const QWebSocket);
+    return d->maskGenerator();
+}
 
 /*!
     Returns the size in bytes of the readbuffer that is used by the socket.

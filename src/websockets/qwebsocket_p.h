@@ -68,6 +68,7 @@
 
 #include "qwebsocketprotocol.h"
 #include "qwebsocketdataprocessor_p.h"
+#include "qdefaultmaskgenerator_p.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -75,6 +76,7 @@ class QWebSocketHandshakeRequest;
 class QWebSocketHandshakeResponse;
 class QTcpSocket;
 class QWebSocket;
+class QMaskGenerator;
 
 struct QWebSocketConfiguration
 {
@@ -122,6 +124,8 @@ public:
     QNetworkProxy proxy() const;
     void setProxy(const QNetworkProxy &networkProxy);
 #endif
+    void setMaskGenerator(const QMaskGenerator *maskGenerator);
+    const QMaskGenerator *maskGenerator() const;
     qint64 readBufferSize() const;
     void resume();
     void setPauseMode(QAbstractSocket::PauseModes pauseMode);
@@ -195,7 +199,6 @@ private:
 
     quint32 generateMaskingKey() const;
     QByteArray generateKey() const;
-    quint32 generateRandomNumber() const;
     qint64 writeFrames(const QList<QByteArray> &frames) Q_REQUIRED_RESULT;
     qint64 writeFrame(const QByteArray &frame) Q_REQUIRED_RESULT;
 
@@ -225,6 +228,9 @@ private:
 
     QWebSocketDataProcessor m_dataProcessor;
     QWebSocketConfiguration m_configuration;
+
+    QMaskGenerator *m_pMaskGenerator;
+    QDefaultMaskGenerator m_defaultMaskGenerator;
 
     friend class QWebSocketServerPrivate;
 };

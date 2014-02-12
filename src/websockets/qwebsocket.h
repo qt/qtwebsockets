@@ -57,6 +57,7 @@ QT_BEGIN_NAMESPACE
 
 class QTcpSocket;
 class QWebSocketPrivate;
+class QMaskGenerator;
 
 class Q_WEBSOCKETS_EXPORT QWebSocket : public QObject
 {
@@ -85,6 +86,8 @@ public:
     QNetworkProxy proxy() const;
     void setProxy(const QNetworkProxy &networkProxy);
 #endif
+    void setMaskGenerator(const QMaskGenerator *maskGenerator);
+    const QMaskGenerator *maskGenerator() const;
     qint64 readBufferSize() const;
     void setReadBufferSize(qint64 size);
 

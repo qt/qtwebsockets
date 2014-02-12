@@ -1,7 +1,7 @@
 load(qt_build_config)
 TARGET = QtWebSockets
 
-QT = core network core-private
+QT = core network core-private sql
 
 TEMPLATE = lib
 
@@ -17,7 +17,8 @@ PUBLIC_HEADERS += \
     $$PWD/qwebsocket.h \
     $$PWD/qwebsocketserver.h \
     $$PWD/qwebsocketprotocol.h \
-    $$PWD/qwebsocketcorsauthenticator.h
+    $$PWD/qwebsocketcorsauthenticator.h \
+    $$PWD/qmaskgenerator.h
 
 PRIVATE_HEADERS += \
     $$PWD/qwebsocket_p.h \
@@ -27,7 +28,8 @@ PRIVATE_HEADERS += \
     $$PWD/qwebsockethandshakeresponse_p.h \
     $$PWD/qwebsocketdataprocessor_p.h \
     $$PWD/qwebsocketcorsauthenticator_p.h \
-    $$PWD/qwebsocketframe_p.h
+    $$PWD/qwebsocketframe_p.h \
+    $$PWD/qdefaultmaskgenerator_p.h
 
 SOURCES += \
     $$PWD/qwebsocket.cpp \
@@ -39,7 +41,9 @@ SOURCES += \
     $$PWD/qwebsockethandshakeresponse.cpp \
     $$PWD/qwebsocketdataprocessor.cpp \
     $$PWD/qwebsocketcorsauthenticator.cpp \
-    $$PWD/qwebsocketframe.cpp
+    $$PWD/qwebsocketframe.cpp \
+    $$PWD/qmaskgenerator.cpp \
+    $$PWD/qdefaultmaskgenerator_p.cpp
 
 contains(QT_CONFIG, openssl) | contains(QT_CONFIG, openssl-linked) {
     SOURCES += $$PWD/qsslserver.cpp

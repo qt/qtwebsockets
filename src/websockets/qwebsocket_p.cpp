@@ -44,6 +44,7 @@
 #include "qwebsocketprotocol_p.h"
 #include "qwebsockethandshakerequest_p.h"
 #include "qwebsockethandshakeresponse_p.h"
+#include "qdefaultmaskgenerator_p.h"
 
 #include <QtCore/QUrl>
 #include <QtNetwork/QAuthenticator>
@@ -109,7 +110,9 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
     m_closeReason(),
     m_pingTimer(),
     m_dataProcessor(),
-    m_configuration()
+    m_configuration(),
+    m_pMaskGenerator(&m_defaultMaskGenerator),
+    m_defaultMaskGenerator()
 {
 }
 
@@ -139,7 +142,9 @@ QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol:
     m_closeReason(),
     m_pingTimer(),
     m_dataProcessor(),
-    m_configuration()
+    m_configuration(),
+    m_pMaskGenerator(&m_defaultMaskGenerator),
+    m_defaultMaskGenerator()
 {
 }
 
@@ -149,8 +154,9 @@ QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol:
 void QWebSocketPrivate::init()
 {
     Q_ASSERT(q_ptr);
-    //TODO: need a better randomizer
-    qsrand(static_cast<uint>(QDateTime::currentMSecsSinceEpoch()));
+    Q_ASSERT(m_pMaskGenerator);
+
+    m_pMaskGenerator->seed();
 
     if (m_pSocket) {
         makeConnections(m_pSocket.data());
@@ -762,20 +768,11 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
 }
 
 /*!
- * \internal
- */
-quint32 QWebSocketPrivate::generateRandomNumber() const
-{
-    //TODO: need a better randomizer
-    return quint32((double(qrand()) / RAND_MAX) * std::numeric_limits<quint32>::max());
-}
-
-/*!
     \internal
  */
 quint32 QWebSocketPrivate::generateMaskingKey() const
 {
-    return generateRandomNumber();
+    return m_pMaskGenerator->nextMask();
 }
 
 /*!
@@ -786,7 +783,7 @@ QByteArray QWebSocketPrivate::generateKey() const
     QByteArray key;
 
     for (int i = 0; i < 4; ++i) {
-        const quint32 tmp = generateRandomNumber();
+        const quint32 tmp = m_pMaskGenerator->nextMask();
         key.append(static_cast<const char *>(static_cast<const void *>(&tmp)), sizeof(quint32));
     }
 
@@ -1231,6 +1228,26 @@ void QWebSocketPrivate::setProxy(const QNetworkProxy &networkProxy)
         m_configuration.m_proxy = networkProxy;
 }
 #endif  //QT_NO_NETWORKPROXY
+
+/*!
+    \internal
+ */
+void QWebSocketPrivate::setMaskGenerator(const QMaskGenerator *maskGenerator)
+{
+    if (!maskGenerator)
+        m_pMaskGenerator = &m_defaultMaskGenerator;
+    else if (maskGenerator != m_pMaskGenerator)
+        m_pMaskGenerator = const_cast<QMaskGenerator *>(maskGenerator);
+}
+
+/*!
+    \internal
+ */
+const QMaskGenerator *QWebSocketPrivate::maskGenerator() const
+{
+    Q_ASSERT(m_pMaskGenerator);
+    return m_pMaskGenerator;
+}
 
 /*!
     \internal
