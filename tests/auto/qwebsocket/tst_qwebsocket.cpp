@@ -41,11 +41,91 @@
 #include <QString>
 #include <QtTest>
 #include <QtWebSockets/QWebSocket>
+#include <QtWebSockets/QWebSocketServer>
 #include <QtWebSockets/qwebsocketprotocol.h>
 
 QT_USE_NAMESPACE
 
 Q_DECLARE_METATYPE(QWebSocketProtocol::Version)
+
+class EchoServer : public QObject
+{
+    Q_OBJECT
+public:
+    explicit EchoServer(QObject *parent = Q_NULLPTR);
+    ~EchoServer();
+
+    QHostAddress hostAddress() const { return m_pWebSocketServer->serverAddress(); }
+    quint16 port() const { return m_pWebSocketServer->serverPort(); }
+
+Q_SIGNALS:
+    void closed();
+
+private Q_SLOTS:
+    void onNewConnection();
+    void processTextMessage(QString message);
+    void processBinaryMessage(QByteArray message);
+    void socketDisconnected();
+
+private:
+    QWebSocketServer *m_pWebSocketServer;
+    QList<QWebSocket *> m_clients;
+};
+
+EchoServer::EchoServer(QObject *parent) :
+    QObject(parent),
+    m_pWebSocketServer(new QWebSocketServer(QStringLiteral("Echo Server"),
+                                            QWebSocketServer::NonSecureMode, this)),
+    m_clients()
+{
+    if (m_pWebSocketServer->listen()) {
+        connect(m_pWebSocketServer, &QWebSocketServer::newConnection,
+                this, &EchoServer::onNewConnection);
+        connect(m_pWebSocketServer, &QWebSocketServer::closed, this, &EchoServer::closed);
+    }
+}
+
+EchoServer::~EchoServer()
+{
+    m_pWebSocketServer->close();
+    qDeleteAll(m_clients.begin(), m_clients.end());
+}
+
+void EchoServer::onNewConnection()
+{
+    QWebSocket *pSocket = m_pWebSocketServer->nextPendingConnection();
+
+    connect(pSocket, &QWebSocket::textMessageReceived, this, &EchoServer::processTextMessage);
+    connect(pSocket, &QWebSocket::binaryMessageReceived, this, &EchoServer::processBinaryMessage);
+    connect(pSocket, &QWebSocket::disconnected, this, &EchoServer::socketDisconnected);
+
+    m_clients << pSocket;
+}
+
+void EchoServer::processTextMessage(QString message)
+{
+    QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
+    if (pClient) {
+        pClient->sendTextMessage(message);
+    }
+}
+
+void EchoServer::processBinaryMessage(QByteArray message)
+{
+    QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
+    if (pClient) {
+        pClient->sendBinaryMessage(message);
+    }
+}
+
+void EchoServer::socketDisconnected()
+{
+    QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
+    if (pClient) {
+        m_clients.removeAll(pClient);
+        pClient->deleteLater();
+    }
+}
 
 class tst_QWebSocket : public QObject
 {
@@ -64,6 +144,8 @@ private Q_SLOTS:
     void tst_invalidOpen_data();
     void tst_invalidOpen();
     void tst_invalidOrigin();
+    void tst_sendTextMessage();
+    void tst_sendBinaryMessage();
 };
 
 tst_QWebSocket::tst_QWebSocket()
@@ -321,6 +403,140 @@ void tst_QWebSocket::tst_invalidOrigin()
     QCOMPARE(binaryMessageReceivedSpy.count(), 0);
     QCOMPARE(pongSpy.count(), 0);
     QCOMPARE(bytesWrittenSpy.count(), 0);
+}
+
+void tst_QWebSocket::tst_sendTextMessage()
+{
+    EchoServer echoServer;
+
+    QWebSocket socket;
+    QSignalSpy socketConnectedSpy(&socket, SIGNAL(connected()));
+    QSignalSpy textMessageReceived(&socket, SIGNAL(textMessageReceived(QString)));
+    QSignalSpy textFrameReceived(&socket, SIGNAL(textFrameReceived(QString,bool)));
+    QSignalSpy binaryMessageReceived(&socket, SIGNAL(binaryMessageReceived(QByteArray)));
+    QSignalSpy binaryFrameReceived(&socket, SIGNAL(binaryFrameReceived(QByteArray,bool)));
+
+    socket.open(QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
+                     QStringLiteral(":") + QString::number(echoServer.port())));
+
+    if (socketConnectedSpy.count() == 0)
+        QVERIFY(socketConnectedSpy.wait(500));
+    QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
+
+    socket.sendTextMessage(QStringLiteral("Hello world!"));
+
+    QVERIFY(textMessageReceived.wait(500));
+    QCOMPARE(textMessageReceived.count(), 1);
+    QCOMPARE(binaryMessageReceived.count(), 0);
+    QCOMPARE(binaryFrameReceived.count(), 0);
+    QList<QVariant> arguments = textMessageReceived.takeFirst();
+    QString messageReceived = arguments.at(0).toString();
+    QCOMPARE(messageReceived, QStringLiteral("Hello world!"));
+
+    QCOMPARE(textFrameReceived.count(), 1);
+    arguments = textFrameReceived.takeFirst();
+    QString frameReceived = arguments.at(0).toString();
+    bool isLastFrame = arguments.at(1).toBool();
+    QCOMPARE(frameReceived, QStringLiteral("Hello world!"));
+    QVERIFY(isLastFrame);
+
+    socket.close();
+
+    //QTBUG-36762: QWebSocket emits multiplied signals when socket was reopened
+    socketConnectedSpy.clear();
+    textMessageReceived.clear();
+    textFrameReceived.clear();
+
+    socket.open(QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
+                     QStringLiteral(":") + QString::number(echoServer.port())));
+
+    if (socketConnectedSpy.count() == 0)
+        QVERIFY(socketConnectedSpy.wait(500));
+    QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
+
+    socket.sendTextMessage(QStringLiteral("Hello world!"));
+
+    QVERIFY(textMessageReceived.wait(500));
+    QCOMPARE(textMessageReceived.count(), 1);
+    QCOMPARE(binaryMessageReceived.count(), 0);
+    QCOMPARE(binaryFrameReceived.count(), 0);
+    arguments = textMessageReceived.takeFirst();
+    messageReceived = arguments.at(0).toString();
+    QCOMPARE(messageReceived, QStringLiteral("Hello world!"));
+
+    QCOMPARE(textFrameReceived.count(), 1);
+    arguments = textFrameReceived.takeFirst();
+    frameReceived = arguments.at(0).toString();
+    isLastFrame = arguments.at(1).toBool();
+    QCOMPARE(frameReceived, QStringLiteral("Hello world!"));
+    QVERIFY(isLastFrame);
+}
+
+void tst_QWebSocket::tst_sendBinaryMessage()
+{
+    EchoServer echoServer;
+
+    QWebSocket socket;
+    QSignalSpy socketConnectedSpy(&socket, SIGNAL(connected()));
+    QSignalSpy textMessageReceived(&socket, SIGNAL(textMessageReceived(QString)));
+    QSignalSpy textFrameReceived(&socket, SIGNAL(textFrameReceived(QString,bool)));
+    QSignalSpy binaryMessageReceived(&socket, SIGNAL(binaryMessageReceived(QByteArray)));
+    QSignalSpy binaryFrameReceived(&socket, SIGNAL(binaryFrameReceived(QByteArray,bool)));
+
+    socket.open(QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
+                     QStringLiteral(":") + QString::number(echoServer.port())));
+
+    if (socketConnectedSpy.count() == 0)
+        QVERIFY(socketConnectedSpy.wait(500));
+    QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
+
+    socket.sendBinaryMessage(QByteArrayLiteral("Hello world!"));
+
+    QVERIFY(binaryMessageReceived.wait(500));
+    QCOMPARE(textMessageReceived.count(), 0);
+    QCOMPARE(textFrameReceived.count(), 0);
+    QCOMPARE(binaryMessageReceived.count(), 1);
+    QList<QVariant> arguments = binaryMessageReceived.takeFirst();
+    QByteArray messageReceived = arguments.at(0).toByteArray();
+    QCOMPARE(messageReceived, QByteArrayLiteral("Hello world!"));
+
+    QCOMPARE(binaryFrameReceived.count(), 1);
+    arguments = binaryFrameReceived.takeFirst();
+    QByteArray frameReceived = arguments.at(0).toByteArray();
+    bool isLastFrame = arguments.at(1).toBool();
+    QCOMPARE(frameReceived, QByteArrayLiteral("Hello world!"));
+    QVERIFY(isLastFrame);
+
+    socket.close();
+
+    //QTBUG-36762: QWebSocket emits multiplied signals when socket was reopened
+    socketConnectedSpy.clear();
+    binaryMessageReceived.clear();
+    binaryFrameReceived.clear();
+
+    socket.open(QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
+                     QStringLiteral(":") + QString::number(echoServer.port())));
+
+    if (socketConnectedSpy.count() == 0)
+        QVERIFY(socketConnectedSpy.wait(500));
+    QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
+
+    socket.sendBinaryMessage(QByteArrayLiteral("Hello world!"));
+
+    QVERIFY(binaryMessageReceived.wait(500));
+    QCOMPARE(textMessageReceived.count(), 0);
+    QCOMPARE(textFrameReceived.count(), 0);
+    QCOMPARE(binaryMessageReceived.count(), 1);
+    arguments = binaryMessageReceived.takeFirst();
+    messageReceived = arguments.at(0).toByteArray();
+    QCOMPARE(messageReceived, QByteArrayLiteral("Hello world!"));
+
+    QCOMPARE(binaryFrameReceived.count(), 1);
+    arguments = binaryFrameReceived.takeFirst();
+    frameReceived = arguments.at(0).toByteArray();
+    isLastFrame = arguments.at(1).toBool();
+    QCOMPARE(frameReceived, QByteArrayLiteral("Hello world!"));
+    QVERIFY(isLastFrame);
 }
 
 QTEST_MAIN(tst_QWebSocket)

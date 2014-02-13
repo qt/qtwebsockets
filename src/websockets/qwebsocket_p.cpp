@@ -575,7 +575,7 @@ void QWebSocketPrivate::releaseConnections(const QTcpSocket *pTcpSocket)
 {
     if (Q_LIKELY(pTcpSocket))
         pTcpSocket->disconnect(pTcpSocket);
-    m_dataProcessor.disconnect(&m_dataProcessor);
+    m_dataProcessor.disconnect();
 }
 
 /*!
