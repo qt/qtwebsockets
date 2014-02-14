@@ -70,7 +70,8 @@ QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName,
     m_secureMode(secureMode),
     m_pendingConnections(),
     m_error(QWebSocketProtocol::CloseCodeNormal),
-    m_errorString()
+    m_errorString(),
+    m_maxPendingConnections(30)
 {
     Q_ASSERT(pWebSocketServer);
 }
@@ -178,7 +179,7 @@ bool QWebSocketServerPrivate::listen(const QHostAddress &address, quint16 port)
  */
 int QWebSocketServerPrivate::maxPendingConnections() const
 {
-    return m_pTcpServer->maxPendingConnections();
+    return m_maxPendingConnections;
 }
 
 /*!
@@ -273,7 +274,9 @@ quint16 QWebSocketServerPrivate::serverPort() const
  */
 void QWebSocketServerPrivate::setMaxPendingConnections(int numConnections)
 {
-    m_pTcpServer->setMaxPendingConnections(numConnections);
+    if (m_pTcpServer->maxPendingConnections() <= numConnections)
+        m_pTcpServer->setMaxPendingConnections(numConnections + 1);
+    m_maxPendingConnections = numConnections;
 }
 
 /*!

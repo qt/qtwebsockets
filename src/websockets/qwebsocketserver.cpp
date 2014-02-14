@@ -495,10 +495,10 @@ quint16 QWebSocketServer::serverPort() const
     nextPendingConnection() is called.
     By default, the limit is 30 pending connections.
 
-    Clients may still able to connect after the server has reached its maximum number of
-    pending connections (i.e., QWebSocketServer can still emit the connected() signal).
-    QWebSocketServer will stop accepting the new connections, but the operating system may still
-    keep them in queue.
+    QWebSocketServer will emit the error() signal with
+    the QWebSocketProtocol::CloseCodeAbnormalDisconnection close code
+    when the maximum of connections has been reached.
+    The websocket handshake will fail and the socket will be closed.
 
     \sa maxPendingConnections(), hasPendingConnections()
  */

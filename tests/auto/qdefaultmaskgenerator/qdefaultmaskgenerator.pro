@@ -1,5 +1,5 @@
 CONFIG += console
-CONFIG += testcase c++11
+CONFIG += testcase
 CONFIG -= app_bundle
 
 TEMPLATE = app

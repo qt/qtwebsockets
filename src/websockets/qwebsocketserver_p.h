@@ -131,6 +131,7 @@ private:
     QQueue<QWebSocket *> m_pendingConnections;
     QWebSocketProtocol::CloseCode m_error;
     QString m_errorString;
+    int m_maxPendingConnections;
 
     void addPendingConnection(QWebSocket *pWebSocket);
     void setErrorFromSocketError(QAbstractSocket::SocketError error,
