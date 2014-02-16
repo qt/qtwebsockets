@@ -94,7 +94,8 @@ void QWebSocketServerPrivate::init()
         m_pTcpServer = pSslServer;
         if (Q_LIKELY(m_pTcpServer)) {
             QObjectPrivate::connect(pSslServer, &QSslServer::newEncryptedConnection,
-                                    this, &QWebSocketServerPrivate::onNewConnection);
+                                    this, &QWebSocketServerPrivate::onNewConnection,
+                                    Qt::QueuedConnection);
             QObject::connect(pSslServer, &QSslServer::peerVerifyError,
                              q_ptr, &QWebSocketServer::peerVerifyError);
             QObject::connect(pSslServer, &QSslServer::sslErrors,
@@ -414,12 +415,21 @@ void QWebSocketServerPrivate::handshakeReceived()
         qWarning() << QWebSocketServer::tr("Sender is not a QTcpSocket. This is a Qt bug!!!");
         return;
     }
+    //When using Google Chrome the handshake in received in two parts.
+    //Therefore, the readyRead signal is emitted twice.
+    //This is a guard against the BEAST attack.
+    //See: https://www.imperialviolet.org/2012/01/15/beastfollowup.html
+    //For Safari, the handshake is delivered at once
+    //FIXME: For FireFox, the readyRead signal is never emitted
+    //This is a bug in FireFox (see https://bugzilla.mozilla.org/show_bug.cgi?id=594502)
+    if (!pTcpSocket->canReadLine()) {
+        return;
+    }
+    disconnect(pTcpSocket, &QTcpSocket::readyRead,
+               this, &QWebSocketServerPrivate::handshakeReceived);
     Q_Q(QWebSocketServer);
     bool success = false;
     bool isSecure = false;
-
-    disconnect(pTcpSocket, &QTcpSocket::readyRead,
-               this, &QWebSocketServerPrivate::handshakeReceived);
 
     if (m_pendingConnections.length() >= maxPendingConnections()) {
         pTcpSocket->close();
