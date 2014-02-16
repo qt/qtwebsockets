@@ -78,6 +78,8 @@ SslEchoServer::SslEchoServer(quint16 port, QObject *parent) :
         qDebug() << "SSL Echo Server listening on port" << port;
         connect(m_pWebSocketServer, &QWebSocketServer::newConnection,
                 this, &SslEchoServer::onNewConnection);
+        connect(m_pWebSocketServer, &QWebSocketServer::sslErrors,
+                this, &SslEchoServer::onSslErrors);
     }
 }
 //! [constructor]
@@ -137,5 +139,10 @@ void SslEchoServer::socketDisconnected()
         m_clients.removeAll(pClient);
         pClient->deleteLater();
     }
+}
+
+void SslEchoServer::onSslErrors(const QList<QSslError> &)
+{
+    qDebug() << "Ssl errors occurred";
 }
 //! [socketDisconnected]
