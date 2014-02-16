@@ -66,7 +66,6 @@ SslEchoServer::SslEchoServer(quint16 port, QObject *parent) :
     QSslKey sslKey(&keyFile, QSsl::Rsa, QSsl::Pem);
     certFile.close();
     keyFile.close();
-    sslConfiguration.setProtocol(QSsl::AnyProtocol);
     sslConfiguration.setPeerVerifyMode(QSslSocket::VerifyNone);
     sslConfiguration.setLocalCertificate(certificate);
     sslConfiguration.setPrivateKey(sslKey);
