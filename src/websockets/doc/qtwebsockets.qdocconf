@@ -40,11 +40,11 @@ tagfile                                             = ../../../doc/qtwebsockets/
 
 depends                                             += qtcore qtnetwork qtdoc
 
-headerdirs                                          += ..
+headerdirs                                          += .. \
                                                        ../../imports
 
 sourcedirs                                          += .. \
-                                                       src
+                                                       src \
                                                        ../../imports
 
 
