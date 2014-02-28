@@ -50,10 +50,15 @@
     QT += websockets
     \endcode
 
-    \section1 Related information
+    \section1 Reference documentation
     \list
     \li \l{Qt WebSockets C++ Classes}{C++ Classes}
-    \li \l{Qt WebSockets Examples}{Examples}
     \li \l{Qt WebSockets QML Types}{QML Types}
     \endlist
+
+    \section1 Examples
+
+    The module provides the following examples as a guide to using
+    the API.
+    \l{Qt WebSockets Examples}{Examples}
 */

@@ -43,6 +43,8 @@
     \example sslechoclient
     \title SSL Echo Client Example
     \ingroup qtwebsockets-examples
+    \brief Shows how to use the QWebSocket class to implement an echo
+    client over a secure connection (wss).
 
     The SSL Echo Client example shows how to use the QWebSocket class to implement
     an echo client over a secure connection (wss).
