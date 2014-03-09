@@ -86,10 +86,6 @@ public:
     QWebSocketProtocol::CloseCode error() const;
     QString errorString() const;
 
-public Q_SLOTS:
-
-Q_SIGNALS:
-
 private:
     bool m_isValid;
     bool m_canUpgrade;
