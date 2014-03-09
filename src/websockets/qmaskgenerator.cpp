@@ -41,7 +41,9 @@
 
 /*!
     \class QMaskGenerator
-    The QMaskGenerator class provides an abstract base for custom 32-bit mask generators.
+    \inmodule QtWebSockets
+
+    \brief The QMaskGenerator class provides an abstract base for custom 32-bit mask generators.
 
     The WebSockets specification as outlined in {http://tools.ietf.org/html/rfc6455}{RFC 6455}
     requires that all communication from client to server must be masked. This is to prevent
@@ -61,6 +63,7 @@
     Initializes the QMaskGenerator by seeding the randomizer.
     When seed() is not called, it depends on the specific implementation of a subclass if
     a default seed is used or no seed is used at all.
+    Returns \e true if seeding succeeds, otherwise false.
 */
 
 /*!
@@ -75,7 +78,7 @@
 QT_BEGIN_NAMESPACE
 
 /*!
-    Creates a new QMaskGenerator object.
+    Creates a new QMaskGenerator object with the given optional QObject \a parent.
  */
 QMaskGenerator::QMaskGenerator(QObject *parent) :
     QObject(parent)
