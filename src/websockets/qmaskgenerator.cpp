@@ -41,6 +41,7 @@
 
 /*!
     \class QMaskGenerator
+
     \inmodule QtWebSockets
 
     \brief The QMaskGenerator class provides an abstract base for custom 32-bit mask generators.

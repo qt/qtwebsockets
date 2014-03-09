@@ -60,6 +60,10 @@
     QWebSocket only supports version 13 of the WebSocket protocol, as outlined in
     \l {http://tools.ietf.org/html/rfc6455}{RFC 6455}.
 
+    \note Some proxies do not understand certain HTTP headers used during a web socket handshake.
+    In that case, non-secure web socket connections fail. The best way to mitigate against
+    this problem is to use web sockets over a secure connection.
+
     \warning To generate masks, this implementation of WebSockets uses the cryptographically
     insecure qrand() function.
     For more information about the importance of good masking,
