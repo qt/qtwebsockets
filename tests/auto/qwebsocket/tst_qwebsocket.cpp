@@ -298,7 +298,7 @@ void tst_QWebSocket::tst_invalidOpen()
     //at this point the socket is in a connecting state
     //so, there should no error at this point
     QCOMPARE(socket.error(), QAbstractSocket::UnknownSocketError);
-    //QVERIFY(socket.errorString().isEmpty());
+    QVERIFY(!socket.errorString().isEmpty());
     QVERIFY(!socket.isValid());
     QVERIFY(socket.localAddress().isNull());
     QCOMPARE(socket.localPort(), quint16(0));
