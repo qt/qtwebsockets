@@ -40,6 +40,8 @@
 ****************************************************************************/
 #include "sslechoclient.h"
 #include <QtCore/QDebug>
+#include <QtWebSockets/QWebSocket>
+#include <QCoreApplication>
 
 QT_USE_NAMESPACE
 
@@ -49,6 +51,9 @@ SslEchoClient::SslEchoClient(const QUrl &url, QObject *parent) :
     m_webSocket()
 {
     connect(&m_webSocket, &QWebSocket::connected, this, &SslEchoClient::onConnected);
+    typedef void (QWebSocket:: *sslErrorsSignal)(const QList<QSslError> &);
+    connect(&m_webSocket, static_cast<sslErrorsSignal>(&QWebSocket::sslErrors),
+            this, &SslEchoClient::onSslErrors);
     m_webSocket.open(QUrl(url));
 }
 //! [constructor]
@@ -67,5 +72,12 @@ void SslEchoClient::onConnected()
 void SslEchoClient::onTextMessageReceived(QString message)
 {
     qDebug() << "Message received:" << message;
+    qApp->quit();
+}
+
+void SslEchoClient::onSslErrors(const QList<QSslError> &errors)
+{
+    Q_UNUSED(errors);
+    m_webSocket.ignoreSslErrors();
 }
 //! [onTextMessageReceived]
