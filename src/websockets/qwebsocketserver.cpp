@@ -79,9 +79,7 @@
 
     QWebSocketServer only supports version 13 of the WebSocket protocol, as outlined in RFC 6455.
 
-    \sa echoserver.html
-
-    \sa QWebSocket
+    \sa {WebSocket Server Example}, QWebSocket
 */
 
 /*!
@@ -122,8 +120,8 @@
 
 /*!
     \fn void QWebSocketServer::acceptError(QAbstractSocket::SocketError socketError)
-    This signal is emitted when accepting a new connection results in an error.
-    The \a socketError parameter describes the type of error that occurred
+    This signal is emitted when the acceptance of a new connection results in an error.
+    The \a socketError parameter describes the type of error that occurred.
 
     \sa pauseAccepting(), resumeAccepting()
 */
@@ -145,7 +143,7 @@
 
 /*!
     \fn void QWebSocketServer::closed()
-    This signal is emitted when the server closed it's connection.
+    This signal is emitted when the server closed its connection.
 
     \sa close()
 */
@@ -155,7 +153,7 @@
     This signal is emitted when a new connection is requested.
     The slot connected to this signal should indicate whether the origin
     (which can be determined by the origin() call) is allowed in the \a authenticator object
-    (by issuing \l{QWebSocketCorsAuthenticator::}{setAllowed()})
+    (by issuing \l{QWebSocketCorsAuthenticator::}{setAllowed()}).
 
     If no slot is connected to this signal, all origins will be accepted by default.
 
@@ -172,7 +170,7 @@
     usually an indication that QWebSocketServer is unable to securely identify the
     peer.
 
-    This signal provides you with an early indication when something's wrong.
+    This signal provides you with an early indication when something is wrong.
     By connecting to this signal, you can manually choose to tear down the
     connection from inside the connected slot before the handshake has
     completed. If no action is taken, QWebSocketServer will proceed to emitting
@@ -221,7 +219,7 @@ QT_BEGIN_NAMESPACE
 
 /*!
     Constructs a new QWebSocketServer with the given \a serverName.
-    The \a serverName will be used in the http handshake phase to identify the server.
+    The \a serverName will be used in the HTTP handshake phase to identify the server.
     It can be empty, in which case an empty server name will be sent to the client.
     The \a secureMode parameter indicates whether the server operates over wss (\l{SecureMode})
     or over ws (\l{NonSecureMode}).
@@ -331,7 +329,7 @@ int QWebSocketServer::maxPendingConnections() const
 /*!
     Returns the next pending connection as a connected QWebSocket object.
     QWebSocketServer does not take ownership of the returned QWebSocket object.
-    It is up to the caller to delete the object explicitly when it is done using it,
+    It is up to the caller to delete the object explicitly when it will no longer be used,
     otherwise a memory leak will occur.
     Q_NULLPTR is returned if this function is called when there are no pending connections.
 
@@ -424,7 +422,7 @@ void QWebSocketServer::resumeAccepting()
 }
 
 /*!
-    Sets the server name that will be used during the http handshake phase to the given
+    Sets the server name that will be used during the HTTP handshake phase to the given
     \a serverName.
     The \a serverName can be empty, in which case an empty server name will be sent to the client.
     Existing connected clients will not be notified of this change, only newly connecting clients

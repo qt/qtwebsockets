@@ -52,7 +52,7 @@
     It provides applications with fine-grained control over which origin URLs are allowed
     and which aren't.
     By default, every origin is accepted.
-    To get fine grained control, an application connects the
+    To get fine-grained control, an application connects the
     \l{QWebSocketServer::}{originAuthenticationRequired()} signal to a slot.
     When the origin (QWebSocketCorsAuthenticator::origin()) is accepted,
     it calls QWebSocketCorsAuthenticator::setAllowed(true)
@@ -95,14 +95,14 @@ QWebSocketCorsAuthenticator::QWebSocketCorsAuthenticator(const QString &origin) 
 }
 
 /*!
-  Destroys the object
+  Destroys the object.
  */
 QWebSocketCorsAuthenticator::~QWebSocketCorsAuthenticator()
 {
 }
 
 /*!
-  Constructs a copy of \a other
+  Constructs a copy of \a other.
  */
 QWebSocketCorsAuthenticator::QWebSocketCorsAuthenticator(const QWebSocketCorsAuthenticator &other) :
     d_ptr(new QWebSocketCorsAuthenticatorPrivate(other.d_ptr->m_origin, other.d_ptr->m_isAllowed))
@@ -110,7 +110,7 @@ QWebSocketCorsAuthenticator::QWebSocketCorsAuthenticator(const QWebSocketCorsAut
 }
 
 /*!
-  Assigns \a other to this authenticator object
+  Assigns \a other to this authenticator object.
  */
 QWebSocketCorsAuthenticator &
 QWebSocketCorsAuthenticator::operator =(const QWebSocketCorsAuthenticator &other)

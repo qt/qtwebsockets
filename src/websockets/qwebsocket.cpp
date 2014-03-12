@@ -143,7 +143,7 @@ not been filled in with new information when the signal returns.
     This signal is emitted whenever QWebSocket's state changes.
     The \a state parameter is the new state.
 
-    \note QAbstractSocket::ConnectedState is emitted after the handshake has
+    \note QAbstractSocket::ConnectedState is emitted after the handshake
     with the server has succeeded.
 
     QAbstractSocket::SocketState is not a registered metatype, so for queued
@@ -168,7 +168,7 @@ not been filled in with new information when the signal returns.
 
     \note This signal has the same meaning both for secure and non-secure websockets.
     As opposed to QSslSocket, bytesWritten() is only emitted when encrypted data is effectively
-    written (see QSslSocket:encryptedBytesWritten()).
+    written (see QSslSocket::encryptedBytesWritten()).
     \sa close()
 */
 
@@ -266,7 +266,7 @@ QT_BEGIN_NAMESPACE
  * \brief Creates a new QWebSocket with the given \a origin,
  * the \a version of the protocol to use and \a parent.
  *
- * The \a origin of the client is as specified \l {http://tools.ietf.org/html/rfc6454}{RFC 6454}.
+ * The \a origin of the client is as specified in \l {http://tools.ietf.org/html/rfc6454}{RFC 6454}.
  * (The \a origin is not required for non-web browser clients
  * (see \l {http://tools.ietf.org/html/rfc6455}{RFC 6455})).
  * The \a origin may not contain new line characters, otherwise the connection will be
@@ -496,7 +496,7 @@ QSslConfiguration QWebSocket::sslConfiguration() const
 #endif  //not QT_NO_SSL
 
 /*!
-    \brief Returns the version the socket is currently using
+    \brief Returns the version the socket is currently using.
  */
 QWebSocketProtocol::Version QWebSocket::version() const
 {
@@ -523,7 +523,7 @@ QUrl QWebSocket::requestUrl() const
 }
 
 /*!
-    \brief Returns the current origin
+    \brief Returns the current origin.
  */
 QString QWebSocket::origin() const
 {
@@ -552,7 +552,7 @@ QString QWebSocket::closeReason() const
 }
 
 /*!
-    \brief Returns the current state of the socket
+    \brief Returns the current state of the socket.
  */
 QAbstractSocket::SocketState QWebSocket::state() const
 {
@@ -703,7 +703,7 @@ void QWebSocket::setPauseMode(QAbstractSocket::PauseModes pauseMode)
     Exceptionally, a buffer size of 0 means that the read buffer is unlimited and
     all incoming data is buffered. This is the default.
     This option is useful if you only read the data at certain points in time
-    (e.g., in a real-time streaming application) or if you want to protect your socket against
+    (for example, in a real-time streaming application) or if you want to protect your socket against
     receiving too much data, which may eventually cause your application to run out of memory.
 
     \sa readBufferSize()
