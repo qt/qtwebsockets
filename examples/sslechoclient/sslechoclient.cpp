@@ -78,6 +78,11 @@ void SslEchoClient::onTextMessageReceived(QString message)
 void SslEchoClient::onSslErrors(const QList<QSslError> &errors)
 {
     Q_UNUSED(errors);
+
+    // WARNING: Never ignore SSL errors in production code.
+    // The proper way to handle self-signed certificates is to add a custom root
+    // to the CA store.
+
     m_webSocket.ignoreSslErrors();
 }
 //! [onTextMessageReceived]
