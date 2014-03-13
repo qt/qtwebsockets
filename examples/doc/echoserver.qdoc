@@ -43,9 +43,11 @@
     \example echoserver
     \title Echo Server Example
     \ingroup qtwebsockets-examples
+    \brief Shows how to create a simple server application that
+    sends back the messages it receives.
 
-    The Echo Server example shows how to create a simple server application that
-    sends back the messages that it receives, using the websockets API.
+    The Echo Server Example shows how to create a simple server application that
+    sends back the messages it receives, using the websockets API.
 
     \sa {Echo Client Example}
 */

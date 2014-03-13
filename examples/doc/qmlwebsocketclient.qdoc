@@ -43,4 +43,5 @@
     \example qmlwebsocketclient
     \title QML WebSocket Client Example
     \ingroup qtwebsockets-examples
+    \brief Explains how to program a QML WebSocket client example.
 */

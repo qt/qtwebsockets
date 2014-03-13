@@ -92,7 +92,7 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
     QObjectPrivate(),
     q_ptr(pWebSocket),
     m_pSocket(),
-    m_errorString(QWebSocket::tr("Unknown error")),
+    m_errorString(),
     m_version(version),
     m_resourceName(),
     m_requestUrl(),

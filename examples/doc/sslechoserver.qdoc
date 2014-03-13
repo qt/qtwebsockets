@@ -43,6 +43,8 @@
     \example sslechoserver
     \title SSL Echo Server Example
     \ingroup qtwebsockets-examples
+    \brief Shows how to use the QWebSocketServer class for implementing a simple
+    echo server over secure sockets (wss).
 
     The SSL Echo Server example shows how to use the QWebSocketServer class
     to implement a simple echo server over secure sockets (wss).

@@ -45,8 +45,7 @@
     \page examples.html
     \brief List of Qt WebSocket examples
 
-    The module provides the following examples for reference to
-    help understand the API usage:
+    The examples below can be used as a guide to using the API.
 
     \list
     \li \l echoclient

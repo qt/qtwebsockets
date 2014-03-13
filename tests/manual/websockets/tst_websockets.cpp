@@ -169,7 +169,7 @@ void tst_WebSocketsTest::testPeerAddress()
     QVERIFY(addresses.length() > 0);
     QHostAddress peer = m_pWebSocket->peerAddress();
     bool found = false;
-    Q_FOREACH(QHostAddress a, addresses)
+    Q_FOREACH (const QHostAddress &a, addresses)
     {
         if (a == peer)
         {

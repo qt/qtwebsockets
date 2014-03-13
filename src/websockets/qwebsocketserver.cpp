@@ -70,6 +70,13 @@
     \l {http://tools.ietf.org/html/rfc6455#page-39} {extensions} and
     \l {http://tools.ietf.org/html/rfc6455#page-12} {subprotocols}.
 
+    \note When working with self-signed certificates, FireFox currently has a
+    \l {https://bugzilla.mozilla.org/show_bug.cgi?id=594502} {bug} that prevents it to
+    connect to a secure websocket server. To work around this problem, first browse to the
+    secure websocket server using https. FireFox will indicate that the certificate is invalid.
+    From here on, the certificate can be added to the exceptions. After this, the secure websockets
+    connection should work.
+
     QWebSocketServer only supports version 13 of the WebSocket protocol, as outlined in RFC 6455.
 
     \sa echoserver.html

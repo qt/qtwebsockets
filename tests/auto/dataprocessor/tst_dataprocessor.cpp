@@ -751,7 +751,7 @@ void tst_DataProcessor::frameTooSmall()
     QSignalSpy pongMessageSpy(&dataProcessor, SIGNAL(pongReceived(QByteArray)));
     QSignalSpy textMessageSpy(&dataProcessor, SIGNAL(textMessageReceived(QString)));
     QSignalSpy binaryMessageSpy(&dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)));
-    QSignalSpy textFrameSpy(&dataProcessor, SIGNAL(textFrameReceived(QString, bool)));
+    QSignalSpy textFrameSpy(&dataProcessor, SIGNAL(textFrameReceived(QString,bool)));
     QSignalSpy binaryFrameSpy(&dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)));
 
     dataProcessor.process(&buffer);
@@ -1363,7 +1363,7 @@ void tst_DataProcessor::invalidPayloadInCloseFrame()
     QSignalSpy pongMessageSpy(&dataProcessor, SIGNAL(pongReceived(QByteArray)));
     QSignalSpy textMessageSpy(&dataProcessor, SIGNAL(textMessageReceived(QString)));
     QSignalSpy binaryMessageSpy(&dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)));
-    QSignalSpy textFrameSpy(&dataProcessor, SIGNAL(textFrameReceived(QString, bool)));
+    QSignalSpy textFrameSpy(&dataProcessor, SIGNAL(textFrameReceived(QString,bool)));
     QSignalSpy binaryFrameSpy(&dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)));
 
     data.append(firstByte).append(secondByte);
@@ -1463,7 +1463,7 @@ void tst_DataProcessor::doTest()
                         SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
     QSignalSpy textMessageSpy(&dataProcessor, SIGNAL(textMessageReceived(QString)));
     QSignalSpy binaryMessageSpy(&dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)));
-    QSignalSpy textFrameSpy(&dataProcessor, SIGNAL(textFrameReceived(QString, bool)));
+    QSignalSpy textFrameSpy(&dataProcessor, SIGNAL(textFrameReceived(QString,bool)));
     QSignalSpy binaryFrameSpy(&dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)));
 
     if (isContinuationFrame)
@@ -1508,7 +1508,7 @@ void tst_DataProcessor::doCloseFrameTest()
                         SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
     QSignalSpy textMessageSpy(&dataProcessor, SIGNAL(textMessageReceived(QString)));
     QSignalSpy binaryMessageSpy(&dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)));
-    QSignalSpy textFrameSpy(&dataProcessor, SIGNAL(textFrameReceived(QString, bool)));
+    QSignalSpy textFrameSpy(&dataProcessor, SIGNAL(textFrameReceived(QString,bool)));
     QSignalSpy binaryFrameSpy(&dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)));
 
     data.append(firstByte).append(secondByte);

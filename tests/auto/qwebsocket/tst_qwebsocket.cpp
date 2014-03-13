@@ -146,6 +146,7 @@ private Q_SLOTS:
     void tst_invalidOrigin();
     void tst_sendTextMessage();
     void tst_sendBinaryMessage();
+    void tst_errorString();
 };
 
 tst_QWebSocket::tst_QWebSocket()
@@ -202,8 +203,7 @@ void tst_QWebSocket::tst_initialisation()
     QCOMPARE(socket->origin(), expectedOrigin);
     QCOMPARE(socket->version(), expectedVersion);
     QCOMPARE(socket->error(), QAbstractSocket::UnknownSocketError);
-    //error string defaults to "Unknown error" (localised)
-    QVERIFY(!socket->errorString().isEmpty());
+    QVERIFY(socket->errorString().isEmpty());
     QVERIFY(!socket->isValid());
     QVERIFY(socket->localAddress().isNull());
     QCOMPARE(socket->localPort(), quint16(0));
@@ -407,11 +407,15 @@ void tst_QWebSocket::tst_invalidOrigin()
 
 void tst_QWebSocket::tst_sendTextMessage()
 {
-    //will resolve in another commit
+    //TODO: will resolve in another commit
 #ifndef Q_OS_WIN
     EchoServer echoServer;
 
     QWebSocket socket;
+
+    //should return 0 because socket is not open yet
+    QCOMPARE(socket.sendTextMessage(QStringLiteral("1234")), 0);
+
     QSignalSpy socketConnectedSpy(&socket, SIGNAL(connected()));
     QSignalSpy textMessageReceived(&socket, SIGNAL(textMessageReceived(QString)));
     QSignalSpy textFrameReceived(&socket, SIGNAL(textFrameReceived(QString,bool)));
@@ -477,11 +481,15 @@ void tst_QWebSocket::tst_sendTextMessage()
 
 void tst_QWebSocket::tst_sendBinaryMessage()
 {
-    //will resolve in another commit
+    //TODO: will resolve in another commit
 #ifndef Q_OS_WIN
     EchoServer echoServer;
 
     QWebSocket socket;
+
+    //should return 0 because socket is not open yet
+    QCOMPARE(socket.sendBinaryMessage(QByteArrayLiteral("1234")), 0);
+
     QSignalSpy socketConnectedSpy(&socket, SIGNAL(connected()));
     QSignalSpy textMessageReceived(&socket, SIGNAL(textMessageReceived(QString)));
     QSignalSpy textFrameReceived(&socket, SIGNAL(textFrameReceived(QString,bool)));
@@ -514,7 +522,7 @@ void tst_QWebSocket::tst_sendBinaryMessage()
 
     socket.close();
 
-    //QTBUG-36762: QWebSocket emits multiplied signals when socket was reopened
+    //QTBUG-36762: QWebSocket emits multiple signals when socket is reopened
     socketConnectedSpy.clear();
     binaryMessageReceived.clear();
     binaryFrameReceived.clear();
@@ -543,6 +551,28 @@ void tst_QWebSocket::tst_sendBinaryMessage()
     QCOMPARE(frameReceived, QByteArrayLiteral("Hello world!"));
     QVERIFY(isLastFrame);
 #endif
+}
+
+void tst_QWebSocket::tst_errorString()
+{
+    //Check for QTBUG-37228: QWebSocket returns "Unknown Error" for known errors
+    QWebSocket socket;
+
+    //check that the default error string is empty
+    QVERIFY(socket.errorString().isEmpty());
+
+    QSignalSpy errorSpy(&socket, SIGNAL(error(QAbstractSocket::SocketError)));
+
+    socket.open(QUrl(QStringLiteral("ws://someserver.on.mars:9999")));
+
+    if (errorSpy.count() == 0)
+        errorSpy.wait();
+    QCOMPARE(errorSpy.count(), 1);
+    QList<QVariant> arguments = errorSpy.takeFirst();
+    QAbstractSocket::SocketError socketError =
+            qvariant_cast<QAbstractSocket::SocketError>(arguments.at(0));
+    QCOMPARE(socketError, QAbstractSocket::HostNotFoundError);
+    QCOMPARE(socket.errorString(), QStringLiteral("Host not found"));
 }
 
 QTEST_MAIN(tst_QWebSocket)

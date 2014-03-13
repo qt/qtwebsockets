@@ -38,6 +38,26 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+/*!
+    \class QDefaultMaskGenerator
+
+    \inmodule QtWebSockets
+
+    \brief The QDefaultMaskGenerator class provides the default mask generator for QtWebSockets.
+
+    The WebSockets specification as outlined in {http://tools.ietf.org/html/rfc6455}{RFC 6455}
+    requires that all communication from client to server must be masked. This is to prevent
+    malicious scripts to attack bad behaving proxies.
+    For more information about the importance of good masking,
+    see \l {http://w2spconf.com/2011/papers/websocket.pdf}.
+    The default mask generator uses the cryptographically insecure qrand() function.
+    The best measure against attacks mentioned in the document above,
+    is to use QWebSocket over a secure connection (\e wss://).
+    In general, always be careful to not have 3rd party script access to
+    a QWebSocket in your application.
+
+    \internal
+*/
 
 #include "qdefaultmaskgenerator_p.h"
 #include <QDateTime>
@@ -45,21 +65,42 @@
 
 QT_BEGIN_NAMESPACE
 
+/*!
+    Constructs a new QDefaultMaskGenerator with the given \a parent.
+
+    \internal
+*/
 QDefaultMaskGenerator::QDefaultMaskGenerator(QObject *parent) :
     QMaskGenerator(parent)
 {
 }
 
+/*!
+    Destroys the QDefaultMaskGenerator object.
+
+    \internal
+*/
 QDefaultMaskGenerator::~QDefaultMaskGenerator()
 {
 }
 
+/*!
+    Seeds the QDefaultMaskGenerator using qsrand().
+    When seed() is not called, no seed is used at all.
+
+    \internal
+*/
 bool QDefaultMaskGenerator::seed()
 {
     qsrand(static_cast<uint>(QDateTime::currentMSecsSinceEpoch()));
     return true;
 }
 
+/*!
+    Generates a new random mask using the insecure qrand() method.
+
+    \internal
+*/
 quint32 QDefaultMaskGenerator::nextMask()
 {
     return quint32((double(qrand()) / RAND_MAX) * std::numeric_limits<quint32>::max());
