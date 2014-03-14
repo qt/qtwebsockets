@@ -51,6 +51,8 @@ sourcedirs                                          += .. \
 exampledirs                                         += ../../../examples/ \
                                                        snippets
 
+manifestmeta.thumbnail.names                        += "QtWebSockets/*"
+
 navigation.landingpage                              = "Qt WebSockets"
 navigation.cppclassespage                           = "Qt WebSockets C++ Classes"
 navigation.qmltypespage                             = "Qt WebSockets QML Types"
