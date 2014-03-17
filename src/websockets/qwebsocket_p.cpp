@@ -78,7 +78,7 @@ QWebSocketConfiguration::QWebSocketConfiguration() :
     m_ignoredSslErrors(),
     m_ignoreSslErrors(false),
 #endif
-#ifndef QT_NONETWORKPROXY
+#ifndef QT_NO_NETWORKPROXY
     m_proxy(QNetworkProxy::DefaultProxy)
 #endif
 {
