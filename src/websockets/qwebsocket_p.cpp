@@ -79,8 +79,9 @@ QWebSocketConfiguration::QWebSocketConfiguration() :
     m_ignoreSslErrors(false),
 #endif
 #ifndef QT_NO_NETWORKPROXY
-    m_proxy(QNetworkProxy::DefaultProxy)
+    m_proxy(QNetworkProxy::DefaultProxy),
 #endif
+    m_pSocket(Q_NULLPTR)
 {
 }
 
@@ -541,8 +542,10 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
         QObject::connect(pTcpSocket,
                          static_cast<ASErrorSignal>(&QAbstractSocket::error),
                          q, static_cast<WSErrorSignal>(&QWebSocket::error));
+#ifndef QT_NO_NETWORKPROXY
         QObject::connect(pTcpSocket, &QAbstractSocket::proxyAuthenticationRequired, q,
                          &QWebSocket::proxyAuthenticationRequired);
+#endif
         QObject::connect(pTcpSocket, &QAbstractSocket::readChannelFinished, q,
                          &QWebSocket::readChannelFinished);
         QObject::connect(pTcpSocket, &QAbstractSocket::aboutToClose, q, &QWebSocket::aboutToClose);
