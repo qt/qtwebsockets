@@ -53,7 +53,6 @@ const quint8 FIN = 0x80;
 const quint8 RSV1 = 0x40;
 const quint8 RSV2 = 0x30;
 const quint8 RSV3 = 0x10;
-const quint8 MASK = 0x80;
 
 QT_USE_NAMESPACE
 
