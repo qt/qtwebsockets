@@ -1,9 +1,9 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Kurt Pattyn <pattyn.kurt@gmail.com>.
+** Copyright (C) 2014 Klarälvdalens Datakonsult AB, a KDAB Group company, info@kdab.com, author Milian Wolff <milian.wolff@kdab.com>
 ** Contact: http://www.qt-project.org/legal
 **
-** This file is part of the QtWebSockets module of the Qt Toolkit.
+** This file is part of the QtWebSocket module of the Qt Toolkit.
 **
 ** $QT_BEGIN_LICENSE:LGPL$
 ** Commercial License Usage
@@ -39,85 +39,84 @@
 **
 ****************************************************************************/
 
-#ifndef QQMLWEBSOCKET_H
-#define QQMLWEBSOCKET_H
+#ifndef QQMLWEBSOCKETSERVER_H
+#define QQMLWEBSOCKETSERVER_H
 
-#include <QObject>
+#include <QUrl>
 #include <QQmlParserStatus>
-#include <QtQml>
-#include <QScopedPointer>
-#include <QtWebSockets/QWebSocket>
+#include <QtWebSockets/QWebSocketServer>
 
 QT_BEGIN_NAMESPACE
 
-class QQmlWebSocket : public QObject, public QQmlParserStatus
+class QQmlWebSocket;
+class QQmlWebSocketServer : public QObject, public QQmlParserStatus
 {
     Q_OBJECT
-    Q_DISABLE_COPY(QQmlWebSocket)
+    Q_DISABLE_COPY(QQmlWebSocketServer)
     Q_INTERFACES(QQmlParserStatus)
 
-    Q_ENUMS(Status)
-    Q_PROPERTY(QUrl url READ url WRITE setUrl NOTIFY urlChanged)
-    Q_PROPERTY(Status status READ status NOTIFY statusChanged)
+    Q_PROPERTY(QUrl url READ url NOTIFY urlChanged)
+    Q_PROPERTY(QString host READ host WRITE setHost NOTIFY hostChanged)
+    Q_PROPERTY(quint16 port READ port WRITE setPort NOTIFY portChanged)
+    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     Q_PROPERTY(QString errorString READ errorString NOTIFY errorStringChanged)
-    Q_PROPERTY(bool active READ isActive WRITE setActive NOTIFY activeChanged)
+    Q_PROPERTY(bool listen READ listen WRITE setListen NOTIFY listenChanged)
+    Q_PROPERTY(bool accept READ accept WRITE setAccept NOTIFY acceptChanged)
 
 public:
-    explicit QQmlWebSocket(QObject *parent = Q_NULLPTR);
-    explicit QQmlWebSocket(QWebSocket *socket, QObject *parent = Q_NULLPTR);
-    virtual ~QQmlWebSocket();
+    explicit QQmlWebSocketServer(QObject *parent = Q_NULLPTR);
+    virtual ~QQmlWebSocketServer();
 
-    enum Status
-    {
-        Connecting  = 0,
-        Open        = 1,
-        Closing     = 2,
-        Closed      = 3,
-        Error       = 4
-    };
-
-    QUrl url() const;
-    void setUrl(const QUrl &url);
-    Status status() const;
-    QString errorString() const;
-
-    void setActive(bool active);
-    bool isActive() const;
-
-    Q_INVOKABLE qint64 sendTextMessage(const QString &message);
-
-
-Q_SIGNALS:
-    void textMessageReceived(QString message);
-    void statusChanged(Status status);
-    void activeChanged(bool isActive);
-    void errorStringChanged(QString errorString);
-    void urlChanged();
-
-public:
     void classBegin() Q_DECL_OVERRIDE;
     void componentComplete() Q_DECL_OVERRIDE;
 
-private Q_SLOTS:
-    void onError(QAbstractSocket::SocketError error);
-    void onStateChanged(QAbstractSocket::SocketState state);
+    QUrl url() const;
+
+    QString host() const;
+    void setHost(const QString &host);
+
+    quint16 port() const;
+    void setPort(quint16 port);
+
+    QString name() const;
+    void setName(const QString &name);
+
+    QString errorString() const;
+
+    bool listen() const;
+    void setListen(bool listen);
+
+    bool accept() const;
+    void setAccept(bool accept);
+
+Q_SIGNALS:
+    void clientConnected(QQmlWebSocket *webSocket);
+
+    void errorStringChanged(const QString &errorString);
+    void urlChanged(const QUrl &url);
+    void portChanged(quint16 port);
+    void nameChanged(const QString &name);
+    void hostChanged(const QString &host);
+    void listenChanged(bool listen);
+    void acceptChanged(bool accept);
 
 private:
-    QScopedPointer<QWebSocket> m_webSocket;
-    Status m_status;
-    QUrl m_url;
-    bool m_isActive;
-    bool m_componentCompleted;
-    QString m_errorString;
+    void init();
+    void updateListening();
+    void newConnection();
+    void serverError();
+    void closed();
 
-    // takes ownership of the socket
-    void setSocket(QWebSocket *socket);
-    void setStatus(Status status);
-    void open();
-    void close();
-    void setErrorString(QString errorString = QString());
+    QScopedPointer<QWebSocketServer> m_server;
+    QString m_host;
+    QString m_name;
+    quint16 m_port;
+    bool m_listen;
+    bool m_accept;
+    bool m_componentCompleted;
+
 };
 
 QT_END_NAMESPACE
 
-#endif // QQMLWEBSOCKET_H
+#endif // QQMLWEBSOCKETSERVER_H

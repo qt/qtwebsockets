@@ -120,6 +120,18 @@ QQmlWebSocket::QQmlWebSocket(QObject *parent) :
 {
 }
 
+QQmlWebSocket::QQmlWebSocket(QWebSocket *socket, QObject *parent) :
+    QObject(parent),
+    m_status(Closed),
+    m_url(socket->requestUrl()),
+    m_isActive(true),
+    m_componentCompleted(true),
+    m_errorString(socket->errorString())
+{
+    setSocket(socket);
+    onStateChanged(socket->state());
+}
+
 QQmlWebSocket::~QQmlWebSocket()
 {
 }
@@ -173,8 +185,19 @@ void QQmlWebSocket::classBegin()
 
 void QQmlWebSocket::componentComplete()
 {
-    m_webSocket.reset(new (std::nothrow) QWebSocket());
-    if (Q_LIKELY(m_webSocket)) {
+    setSocket(new QWebSocket);
+
+    m_componentCompleted = true;
+
+    open();
+}
+
+void QQmlWebSocket::setSocket(QWebSocket *socket)
+{
+    m_webSocket.reset(socket);
+    if (m_webSocket) {
+        // explicit ownership via QScopedPointer
+        m_webSocket->setParent(Q_NULLPTR);
         connect(m_webSocket.data(), &QWebSocket::textMessageReceived,
                 this, &QQmlWebSocket::textMessageReceived);
         typedef void (QWebSocket::* ErrorSignal)(QAbstractSocket::SocketError);
@@ -182,10 +205,6 @@ void QQmlWebSocket::componentComplete()
                 this, &QQmlWebSocket::onError);
         connect(m_webSocket.data(), &QWebSocket::stateChanged,
                 this, &QQmlWebSocket::onStateChanged);
-
-        m_componentCompleted = true;
-
-        open();
     }
 }
 

@@ -1,9 +1,9 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Kurt Pattyn <pattyn.kurt@gmail.com>.
+** Copyright (C) 2014 Klarälvdalens Datakonsult AB, a KDAB Group company, info@kdab.com, author Milian Wolff <milian.wolff@kdab.com>
 ** Contact: http://www.qt-project.org/legal
 **
-** This file is part of the QtWebSockets module of the Qt Toolkit.
+** This file is part of the QtWebSocket module of the Qt Toolkit.
 **
 ** $QT_BEGIN_LICENSE:LGPL$
 ** Commercial License Usage
@@ -39,22 +39,16 @@
 **
 ****************************************************************************/
 
-#include "qmlwebsockets_plugin.h"
+#include <QtGui/QGuiApplication>
+#include <QQuickView>
 
-#include <QtQml>
-
-#include "qqmlwebsocket.h"
-#include "qqmlwebsocketserver.h"
-
-QT_BEGIN_NAMESPACE
-
-void QtWebSocketsDeclarativeModule::registerTypes(const char *uri)
+int main(int argc, char *argv[])
 {
-    Q_ASSERT(uri == QLatin1String("Qt.WebSockets"));
+    QGuiApplication app(argc, argv);
 
-    // @uri Qt.WebSockets
-    qmlRegisterType<QQmlWebSocket>(uri, 1 /*major*/, 0 /*minor*/, "WebSocket");
-    qmlRegisterType<QQmlWebSocketServer>(uri, 1 /*major*/, 0 /*minor*/, "WebSocketServer");
+    QQuickView view;
+    view.setSource(QUrl(QStringLiteral("qrc:/qml/qmlwebsocketserver/main.qml")));
+    view.show();
+
+    return app.exec();
 }
-
-QT_END_NAMESPACE

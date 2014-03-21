@@ -1,9 +1,9 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Kurt Pattyn <pattyn.kurt@gmail.com>.
+** Copyright (C) 2014 Klarälvdalens Datakonsult AB, a KDAB Group company, info@kdab.com, author Milian Wolff <milian.wolff@kdab.com>
 ** Contact: http://www.qt-project.org/legal
 **
-** This file is part of the QtWebSockets module of the Qt Toolkit.
+** This file is part of the QtWebSocket module of the Qt Toolkit.
 **
 ** $QT_BEGIN_LICENSE:LGPL$
 ** Commercial License Usage
@@ -39,22 +39,54 @@
 **
 ****************************************************************************/
 
-#include "qmlwebsockets_plugin.h"
+import QtQuick 2.0
+import Qt.WebSockets 1.0
 
-#include <QtQml>
+Rectangle {
+    width: 360
+    height: 360
 
-#include "qqmlwebsocket.h"
-#include "qqmlwebsocketserver.h"
+    function appendMessage(message) {
+        messageBox.text += "\n" + message
+    }
 
-QT_BEGIN_NAMESPACE
+    WebSocketServer {
+        id: server
+        listen: true
+        onClientConnected: {
+            webSocket.onTextMessageReceived.connect(function(message) {
+                appendMessage(qsTr("Server received message: %1").arg(message));
+                webSocket.sendTextMessage(qsTr("Hello Client!"));
+            });
+        }
+        onErrorStringChanged: {
+            appendMessage(qsTr("Server error: %1").arg(errorString));
+        }
+    }
 
-void QtWebSocketsDeclarativeModule::registerTypes(const char *uri)
-{
-    Q_ASSERT(uri == QLatin1String("Qt.WebSockets"));
+    WebSocket {
+        id: socket
+        url: server.url
+        onTextMessageReceived: appendMessage(qsTr("Client received message: %1").arg(message))
+        onStatusChanged: {
+            if (socket.status == WebSocket.Error) {
+                appendMessage(qsTr("Client error: %1").arg(socket.errorString));
+            } else if (socket.status == WebSocket.Closed) {
+                appendMessage(qsTr("Client socket closed."));
+            }
+        }
+    }
 
-    // @uri Qt.WebSockets
-    qmlRegisterType<QQmlWebSocket>(uri, 1 /*major*/, 0 /*minor*/, "WebSocket");
-    qmlRegisterType<QQmlWebSocketServer>(uri, 1 /*major*/, 0 /*minor*/, "WebSocketServer");
+    Text {
+        id: messageBox
+        text: qsTr("Click to send a message!")
+        anchors.fill: parent
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                socket.sendTextMessage(qsTr("Hello Server!"));
+            }
+        }
+    }
 }
-
-QT_END_NAMESPACE

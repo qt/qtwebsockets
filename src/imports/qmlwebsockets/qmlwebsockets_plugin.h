@@ -44,8 +44,6 @@
 
 #include <QQmlExtensionPlugin>
 
-#include "qqmlwebsocket.h"
-
 QT_BEGIN_NAMESPACE
 
 class QtWebSocketsDeclarativeModule : public QQmlExtensionPlugin

@@ -3,10 +3,12 @@ QT = core websockets qml
 TARGETPATH = Qt/WebSockets
 
 HEADERS +=  qmlwebsockets_plugin.h \
-            qqmlwebsocket.h
+            qqmlwebsocket.h \
+            qqmlwebsocketserver.h
 
 SOURCES +=  qmlwebsockets_plugin.cpp \
-            qqmlwebsocket.cpp
+            qqmlwebsocket.cpp \
+            qqmlwebsocketserver.cpp
 
 OTHER_FILES += qmldir
 
