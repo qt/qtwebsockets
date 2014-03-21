@@ -48,7 +48,7 @@ sourcedirs                                          += .. \
                                                        ../../imports
 
 
-exampledirs                                         += ../../../examples/ \
+exampledirs                                         += ../../../examples/websockets \
                                                        snippets
 
 manifestmeta.thumbnail.names                        += "QtWebSockets/*"
