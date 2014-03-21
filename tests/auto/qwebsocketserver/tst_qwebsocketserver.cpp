@@ -147,6 +147,7 @@ void tst_QWebSocketServer::tst_initialisation()
         QCOMPARE(server.supportedVersions().count(), 1);
         QCOMPARE(server.supportedVersions().at(0), QWebSocketProtocol::VersionLatest);
         QCOMPARE(server.supportedVersions().at(0), QWebSocketProtocol::Version13);
+        QCOMPARE(server.serverUrl(), QUrl());
     }
 
     {
@@ -254,9 +255,11 @@ void tst_QWebSocketServer::tst_connectivity()
     QSignalSpy socketConnectedSpy(&socket, SIGNAL(connected()));
 
     QVERIFY(server.listen());
+    QCOMPARE(server.serverAddress(), QHostAddress(QHostAddress::Any));
+    QCOMPARE(server.serverUrl(), QUrl(QStringLiteral("ws://") + QHostAddress(QHostAddress::LocalHost).toString() +
+                                 QStringLiteral(":").append(QString::number(server.serverPort()))));
 
-    socket.open(QStringLiteral("ws://") + QHostAddress(QHostAddress::LocalHost).toString() +
-                QStringLiteral(":").append(QString::number(server.serverPort())));
+    socket.open(server.serverUrl().toString());
 
     if (socketConnectedSpy.count() == 0)
         QVERIFY(socketConnectedSpy.wait());
@@ -305,23 +308,20 @@ void tst_QWebSocketServer::tst_maxPendingConnections()
 
     QVERIFY(server.listen());
 
-    socket1.open(QStringLiteral("ws://") + QHostAddress(QHostAddress::LocalHost).toString() +
-                 QStringLiteral(":").append(QString::number(server.serverPort())));
+    socket1.open(server.serverUrl().toString());
 
     if (socket1ConnectedSpy.count() == 0)
         QVERIFY(socket1ConnectedSpy.wait());
     QCOMPARE(socket1.state(), QAbstractSocket::ConnectedState);
     QCOMPARE(serverConnectionSpy.count(), 1);
     QCOMPARE(corsAuthenticationSpy.count(), 1);
-    socket2.open(QStringLiteral("ws://") + QHostAddress(QHostAddress::LocalHost).toString() +
-                 QStringLiteral(":").append(QString::number(server.serverPort())));
+    socket2.open(server.serverUrl().toString());
     if (socket2ConnectedSpy.count() == 0)
         QVERIFY(socket2ConnectedSpy.wait());
     QCOMPARE(socket2.state(), QAbstractSocket::ConnectedState);
     QCOMPARE(serverConnectionSpy.count(), 2);
     QCOMPARE(corsAuthenticationSpy.count(), 2);
-    socket3.open(QStringLiteral("ws://") + server.serverAddress().toString() +
-                 QStringLiteral(":").append(QString::number(server.serverPort())));
+    socket3.open(server.serverUrl().toString());
     if (socket3ConnectedSpy.count() == 0)
         QVERIFY(!socket3ConnectedSpy.wait(250));
     QCOMPARE(socket3.state(), QAbstractSocket::UnconnectedState);

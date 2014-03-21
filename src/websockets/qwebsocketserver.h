@@ -90,6 +90,7 @@ public:
 
     quint16 serverPort() const;
     QHostAddress serverAddress() const;
+    QUrl serverUrl() const;
 
     SslMode secureMode() const;
 

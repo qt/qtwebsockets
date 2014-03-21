@@ -495,6 +495,44 @@ quint16 QWebSocketServer::serverPort() const
 }
 
 /*!
+    Returns a URL clients can use to connect to this server if the server is listening for connections.
+    Otherwise an invalid URL is returned.
+
+    \sa serverPort(), serverAddress(), listen()
+ */
+QUrl QWebSocketServer::serverUrl() const
+{
+    QUrl url;
+
+    if (!isListening()) {
+        return url;
+    }
+
+    switch (secureMode()) {
+    case NonSecureMode:
+        url.setScheme(QStringLiteral("ws"));
+        break;
+    #ifndef QT_NO_SSL
+    case SecureMode:
+        url.setScheme(QStringLiteral("wss"));
+        break;
+    #endif
+    }
+
+    url.setPort(serverPort());
+
+    if (serverAddress() == QHostAddress(QHostAddress::Any)) {
+        // NOTE: On Windows at least, clients cannot connect to QHostAddress::Any
+        // so in that case we always return LocalHost instead.
+        url.setHost(QHostAddress(QHostAddress::LocalHost).toString());
+    } else {
+        url.setHost(serverAddress().toString());
+    }
+
+    return url;
+}
+
+/*!
     Sets the maximum number of pending accepted connections to \a numConnections.
     WebSocketServer will accept no more than \a numConnections incoming connections before
     nextPendingConnection() is called.
