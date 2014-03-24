@@ -48,8 +48,10 @@ sourcedirs                                          += .. \
                                                        ../../imports
 
 
-exampledirs                                         += ../../../examples/ \
+exampledirs                                         += ../../../examples/websockets \
                                                        snippets
+
+manifestmeta.thumbnail.names                        += "QtWebSockets/*"
 
 navigation.landingpage                              = "Qt WebSockets"
 navigation.cppclassespage                           = "Qt WebSockets C++ Classes"

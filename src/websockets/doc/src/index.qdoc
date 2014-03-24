@@ -58,7 +58,6 @@
 
     \section1 Examples
 
-    The module provides the following examples as a guide to using
+    The module provides the following \l{Qt WebSockets Examples}{Examples} as a guide to using
     the API.
-    \l{Qt WebSockets Examples}{Examples}
 */

@@ -43,6 +43,7 @@
 #define QWEBSOCKET_H
 
 #include <QtCore/QUrl>
+#include <QtNetwork/QAbstractSocket>
 #ifndef QT_NO_NETWORKPROXY
 #include <QtNetwork/QNetworkProxy>
 #endif

@@ -91,7 +91,7 @@ public:
     QList<QSslError> m_ignoredSslErrors;
     bool m_ignoreSslErrors;
 #endif
-#ifndef QT_NONETWORKPROXY
+#ifndef QT_NO_NETWORKPROXY
     QNetworkProxy m_proxy;
 #endif
     QTcpSocket *m_pSocket;

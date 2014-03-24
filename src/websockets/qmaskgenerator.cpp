@@ -46,9 +46,9 @@
 
     \brief The QMaskGenerator class provides an abstract base for custom 32-bit mask generators.
 
-    The WebSockets specification as outlined in {http://tools.ietf.org/html/rfc6455}{RFC 6455}
-    requires that all communication from client to server must be masked. This is to prevent
-    malicious scripts to attack bad behaving proxies.
+    The WebSockets specification as outlined in \l {http://tools.ietf.org/html/rfc6455}{RFC 6455}
+    requires that all communication from client to server be masked. This is to prevent
+    malicious scripts from attacking badly behaving proxies.
     For more information about the importance of good masking,
     see \l {http://w2spconf.com/2011/papers/websocket.pdf}.
     By default QWebSocket uses the cryptographically insecure qrand() function.

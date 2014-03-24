@@ -41,18 +41,9 @@
 
 
 /*!
+    \group qtwebsockets-examples
     \title Qt WebSockets Examples
-    \page examples.html
     \brief List of Qt WebSocket examples
 
-    The examples below can be used as a guide to using the API.
-
-    \list
-    \li \l echoclient
-    \li \l echoserver
-    \li \l qmlwebsocketclient
-    \li \l simplechat
-    \li \l sslechoclient
-    \li \l sslechoserver
-    \endlist
+    The examples below can be used as a guide to using the \l{Qt WebSockets} API.
 */
