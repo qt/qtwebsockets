@@ -90,7 +90,7 @@ QDefaultMaskGenerator::~QDefaultMaskGenerator()
 
     \internal
 */
-bool QDefaultMaskGenerator::seed()
+bool QDefaultMaskGenerator::seed() Q_DECL_NOEXCEPT
 {
     qsrand(static_cast<uint>(QDateTime::currentMSecsSinceEpoch()));
     return true;
@@ -101,7 +101,7 @@ bool QDefaultMaskGenerator::seed()
 
     \internal
 */
-quint32 QDefaultMaskGenerator::nextMask()
+quint32 QDefaultMaskGenerator::nextMask() Q_DECL_NOEXCEPT
 {
     return quint32((double(qrand()) / RAND_MAX) * std::numeric_limits<quint32>::max());
 }
