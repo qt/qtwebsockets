@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Websocket Echo Client</title>
+        <title>WebSocket Echo Client</title>
         <meta charset="utf-8">
     </head>
     <body>
-        <h1>Websocket Echo Client</h1>
+        <h1>WebSocket Echo Client</h1>
         <p>
-            <button onClick="initWebsocket();">Connect</button>
-            <button onClick="stopWebsocket();">Disconnect</button>
+            <button onClick="initWebSocket();">Connect</button>
+            <button onClick="stopWebSocket();">Disconnect</button>
             <button onClick="checkSocket();">State</button>
         </p>
         <p>
@@ -39,7 +39,7 @@
                 }
             }
 
-            function initWebsocket() {
+            function initWebSocket() {
                 try {
                     if (typeof MozWebSocket == 'function')
                         WebSocket = MozWebSocket;
@@ -64,7 +64,7 @@
                 }
             }
 
-            function stopWebsocket() {
+            function stopWebSocket() {
                 if (websocket)
                     websocket.close();
             }
@@ -94,9 +94,9 @@
                             break;
                         }
                     }
-                    debug("Websocket state = " + websocket.readyState + " ( " + stateStr + " )");
+                    debug("WebSocket state = " + websocket.readyState + " ( " + stateStr + " )");
                 } else {
-                    debug("Websocket is null");
+                    debug("WebSocket is null");
                 }
             }
         </script>

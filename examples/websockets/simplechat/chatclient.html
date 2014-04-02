@@ -1,12 +1,12 @@
 <html>
     <head>
-        <title>Websocket Chat Client</title>
+        <title>WebSocket Chat Client</title>
     </head>
     <body>
-        <h1>Websocket Chat Client</h1>
+        <h1>WebSocket Chat Client</h1>
         <p>
-            <button onClick="initWebsocket();">Connect</button>
-            <button onClick="stopWebsocket();">Disconnect</button>
+            <button onClick="initWebSocket();">Connect</button>
+            <button onClick="stopWebSocket();">Disconnect</button>
             <button onClick="checkSocket();">State</button>
         </p>
         <p>
@@ -41,7 +41,7 @@
             var wsUri = "ws://localhost:1234";
             var websocket = null;
 
-            function initWebsocket() {
+            function initWebSocket() {
                 try {
                     if (typeof MozWebSocket == 'function')
                         WebSocket = MozWebSocket;
@@ -66,7 +66,7 @@
                 }
             }
 
-            function stopWebsocket() {
+            function stopWebSocket() {
                 if (websocket)
                     websocket.close();
             }
@@ -96,9 +96,9 @@
                             break;
                         }
                     }
-                    debug("Websocket state = " + websocket.readyState + " ( " + stateStr + " )");
+                    debug("WebSocket state = " + websocket.readyState + " ( " + stateStr + " )");
                 } else {
-                    debug("Websocket is null");
+                    debug("WebSocket is null");
                 }
             }
         </script>

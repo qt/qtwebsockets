@@ -440,7 +440,7 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
             }
         } else {
             const QString message =
-                    QWebSocket::tr("Unsupported websockets scheme: %1").arg(url.scheme());
+                    QWebSocket::tr("Unsupported WebSocket scheme: %1").arg(url.scheme());
             setErrorString(message);
             Q_EMIT q->error(QAbstractSocket::UnsupportedSocketOperationError);
         }
@@ -463,7 +463,7 @@ void QWebSocketPrivate::ping(const QByteArray &payload)
 
 /*!
   \internal
-    Sets the version to use for the websocket protocol;
+    Sets the version to use for the WebSocket protocol;
     this must be set before the socket is opened.
 */
 void QWebSocketPrivate::setVersion(QWebSocketProtocol::Version version)

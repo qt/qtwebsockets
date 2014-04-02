@@ -44,11 +44,11 @@
 
     \inmodule QtWebSockets
 
-    \brief Implements a websocket-based server.
+    \brief Implements a WebSocket-based server.
 
     It is modeled after QTcpServer, and behaves the same. So, if you know how to use QTcpServer,
     you know how to use QWebSocketServer.
-    This class makes it possible to accept incoming websocket connections.
+    This class makes it possible to accept incoming WebSocket connections.
     You can specify the port or have QWebSocketServer pick one automatically.
     You can listen on a specific address or on all the machine's addresses.
     Call listen() to have the server listen for incoming connections.
@@ -72,9 +72,9 @@
 
     \note When working with self-signed certificates, FireFox currently has a
     \l {https://bugzilla.mozilla.org/show_bug.cgi?id=594502} {bug} that prevents it to
-    connect to a secure websocket server. To work around this problem, first browse to the
-    secure websocket server using https. FireFox will indicate that the certificate is invalid.
-    From here on, the certificate can be added to the exceptions. After this, the secure websockets
+    connect to a secure WebSocket server. To work around this problem, first browse to the
+    secure WebSocket server using HTTPS. FireFox will indicate that the certificate is invalid.
+    From here on, the certificate can be added to the exceptions. After this, the secure WebSockets
     connection should work.
 
     QWebSocketServer only supports version 13 of the WebSocket protocol, as outlined in RFC 6455.
@@ -85,10 +85,10 @@
 /*!
   \page echoserver.html example
   \title WebSocket server example
-  \brief A sample websocket server echoing back messages sent to it.
+  \brief A sample WebSocket server echoing back messages sent to it.
 
   \section1 Description
-  The echoserver example implements a web socket server that echoes back everything that is sent
+  The echoserver example implements a WebSocket server that echoes back everything that is sent
   to it.
   \section1 Code
   We start by creating a QWebSocketServer (`new QWebSocketServer()`). After the creation, we listen
@@ -96,7 +96,7 @@
   \snippet echoserver/echoserver.cpp constructor
   If listening is successful, we connect the `newConnection()` signal to the slot
   `onNewConnection()`.
-  The `newConnection()` signal will be thrown whenever a new web socket client is connected to our
+  The `newConnection()` signal will be thrown whenever a new WebSocket client is connected to our
   server.
 
   \snippet echoserver/echoserver.cpp onNewConnection
@@ -128,7 +128,7 @@
 
 /*!
     \fn void QWebSocketServer::serverError(QWebSocketProtocol::CloseCode closeCode)
-    This signal is emitted when an error occurs during the setup of a web socket connection.
+    This signal is emitted when an error occurs during the setup of a WebSocket connection.
     The \a closeCode parameter describes the type of error that occurred
 
     \sa errorString()
@@ -503,7 +503,7 @@ quint16 QWebSocketServer::serverPort() const
     QWebSocketServer will emit the error() signal with
     the QWebSocketProtocol::CloseCodeAbnormalDisconnection close code
     when the maximum of connections has been reached.
-    The websocket handshake will fail and the socket will be closed.
+    The WebSocket handshake will fail and the socket will be closed.
 
     \sa maxPendingConnections(), hasPendingConnections()
  */
@@ -543,7 +543,7 @@ int QWebSocketServer::socketDescriptor() const
 }
 
 /*!
-  Returns a list of websocket versions that this server is supporting.
+  Returns a list of WebSocket versions that this server is supporting.
  */
 QList<QWebSocketProtocol::Version> QWebSocketServer::supportedVersions() const
 {

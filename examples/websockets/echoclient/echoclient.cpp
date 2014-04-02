@@ -57,7 +57,7 @@ EchoClient::EchoClient(const QUrl &url, QObject *parent) :
 //! [onConnected]
 void EchoClient::onConnected()
 {
-    qDebug() << "Websocket connected";
+    qDebug() << "WebSocket connected";
     connect(&m_webSocket, &QWebSocket::textMessageReceived,
             this, &EchoClient::onTextMessageReceived);
     m_webSocket.sendTextMessage(QStringLiteral("Hello, world!"));

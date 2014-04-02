@@ -44,9 +44,9 @@
     \title Simple Chat Example
     \ingroup qtwebsockets-examples
     \brief Shows how to use the QWebSocket and QWebSocketServer classes
-    for creating a minimalistic chat application over websockets.
+    for creating a minimalistic chat application over the WebSocket protocol.
 
     The Simple Chat Example shows how to use the QWebSocket and QWebSocketServer
-    classes to create a minimalistic chat application over websockets.
+    classes to create a minimalistic chat application over the WebSocket protocol.
 
 */

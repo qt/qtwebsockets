@@ -43,9 +43,9 @@
     \example echoclient
     \title Echo Client Example
     \ingroup qtwebsockets-examples
-    \brief Describes how to use the websocket API for creating a simple echo client.
+    \brief Describes how to use the WebSocket API for creating a simple echo client.
 
-    The Echo Client Example shows how to use the websocket API to create a simple
+    The Echo Client Example shows how to use the WebSocket API to create a simple
     echo client.
 
     \sa {Echo Server Example}
