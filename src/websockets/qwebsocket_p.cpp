@@ -887,21 +887,21 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
             const QStringList headerField = headerLine.split(QStringLiteral(": "),
                                                              QString::SkipEmptyParts);
             if (headerField.size() == 2) {
-                headers.insertMulti(headerField[0], headerField[1]);
+                headers.insertMulti(headerField[0].toLower(), headerField[1]);
             }
             headerLine = readLine(pSocket);
         }
 
-        const QString acceptKey = headers.value(QStringLiteral("Sec-WebSocket-Accept"),
+        const QString acceptKey = headers.value(QStringLiteral("sec-websocket-accept"),
                                                 QString());
-        const QString upgrade = headers.value(QStringLiteral("Upgrade"), QString());
-        const QString connection = headers.value(QStringLiteral("Connection"), QString());
+        const QString upgrade = headers.value(QStringLiteral("upgrade"), QString());
+        const QString connection = headers.value(QStringLiteral("connection"), QString());
 //        unused for the moment
-//        const QString extensions = headers.value(QStringLiteral("Sec-WebSocket-Extensions"),
+//        const QString extensions = headers.value(QStringLiteral("sec-websocket-extensions"),
 //                                                 QString());
-//        const QString protocol = headers.value(QStringLiteral("Sec-WebSocket-Protocol"),
+//        const QString protocol = headers.value(QStringLiteral("sec-websocket-protocol"),
 //                                               QString());
-        const QString version = headers.value(QStringLiteral("Sec-WebSocket-Version"),
+        const QString version = headers.value(QStringLiteral("sec-websocket-version"),
                                               QString());
 
         if (Q_LIKELY(httpStatusCode == 101)) {
