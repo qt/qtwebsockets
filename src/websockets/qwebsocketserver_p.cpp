@@ -407,12 +407,10 @@ void QWebSocketServerPrivate::onCloseConnection()
 void QWebSocketServerPrivate::handshakeReceived()
 {
     if (Q_UNLIKELY(!currentSender)) {
-        qWarning() << QWebSocketServer::tr("Sender is NULL. This is a Qt bug.");
         return;
     }
     QTcpSocket *pTcpSocket = qobject_cast<QTcpSocket*>(currentSender->sender);
     if (Q_UNLIKELY(!pTcpSocket)) {
-        qWarning() << QWebSocketServer::tr("Sender is not a QTcpSocket. This is a Qt bug!!!");
         return;
     }
     //When using Google Chrome the handshake in received in two parts.
@@ -434,8 +432,6 @@ void QWebSocketServerPrivate::handshakeReceived()
     if (m_pendingConnections.length() >= maxPendingConnections()) {
         pTcpSocket->close();
         pTcpSocket->deleteLater();
-        qWarning() << QWebSocketServer::tr("Too many pending connections: " \
-                                           "New WebSocket connection not accepted.");
         setError(QWebSocketProtocol::CloseCodeAbnormalDisconnection,
                  QWebSocketServer::tr("Too many pending connections."));
         return;
@@ -483,7 +479,6 @@ void QWebSocketServerPrivate::handshakeReceived()
         }
     }
     if (!success) {
-        qWarning() << QWebSocketServer::tr("Closing socket because of invalid or unsupported request.");
         pTcpSocket->close();
     }
 }
