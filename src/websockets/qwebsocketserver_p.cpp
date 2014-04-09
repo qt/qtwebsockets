@@ -471,7 +471,7 @@ void QWebSocketServerPrivate::handshakeReceived()
                     success = true;
                 } else {
                     setError(QWebSocketProtocol::CloseCodeAbnormalDisconnection,
-                             QWebSocketServer::tr("Upgrading to websocket failed."));
+                             QWebSocketServer::tr("Upgrade to WebSocket failed."));
                 }
             }
             else {
