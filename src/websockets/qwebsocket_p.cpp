@@ -440,7 +440,7 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
             }
         } else {
             const QString message =
-                    QWebSocket::tr("Unsupported websockets scheme: %1").arg(url.scheme());
+                    QWebSocket::tr("Unsupported WebSocket scheme: %1").arg(url.scheme());
             setErrorString(message);
             Q_EMIT q->error(QAbstractSocket::UnsupportedSocketOperationError);
         }
@@ -463,7 +463,7 @@ void QWebSocketPrivate::ping(const QByteArray &payload)
 
 /*!
   \internal
-    Sets the version to use for the websocket protocol;
+    Sets the version to use for the WebSocket protocol;
     this must be set before the socket is opened.
 */
 void QWebSocketPrivate::setVersion(QWebSocketProtocol::Version version)
@@ -887,21 +887,21 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
             const QStringList headerField = headerLine.split(QStringLiteral(": "),
                                                              QString::SkipEmptyParts);
             if (headerField.size() == 2) {
-                headers.insertMulti(headerField[0], headerField[1]);
+                headers.insertMulti(headerField[0].toLower(), headerField[1]);
             }
             headerLine = readLine(pSocket);
         }
 
-        const QString acceptKey = headers.value(QStringLiteral("Sec-WebSocket-Accept"),
+        const QString acceptKey = headers.value(QStringLiteral("sec-websocket-accept"),
                                                 QString());
-        const QString upgrade = headers.value(QStringLiteral("Upgrade"), QString());
-        const QString connection = headers.value(QStringLiteral("Connection"), QString());
+        const QString upgrade = headers.value(QStringLiteral("upgrade"), QString());
+        const QString connection = headers.value(QStringLiteral("connection"), QString());
 //        unused for the moment
-//        const QString extensions = headers.value(QStringLiteral("Sec-WebSocket-Extensions"),
+//        const QString extensions = headers.value(QStringLiteral("sec-websocket-extensions"),
 //                                                 QString());
-//        const QString protocol = headers.value(QStringLiteral("Sec-WebSocket-Protocol"),
+//        const QString protocol = headers.value(QStringLiteral("sec-websocket-protocol"),
 //                                               QString());
-        const QString version = headers.value(QStringLiteral("Sec-WebSocket-Version"),
+        const QString version = headers.value(QStringLiteral("sec-websocket-version"),
                                               QString());
 
         if (Q_LIKELY(httpStatusCode == 101)) {

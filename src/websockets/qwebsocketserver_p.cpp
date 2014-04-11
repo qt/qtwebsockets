@@ -435,7 +435,7 @@ void QWebSocketServerPrivate::handshakeReceived()
         pTcpSocket->close();
         pTcpSocket->deleteLater();
         qWarning() << QWebSocketServer::tr("Too many pending connections: " \
-                                           "New websocket connection not accepted.");
+                                           "New WebSocket connection not accepted.");
         setError(QWebSocketProtocol::CloseCodeAbnormalDisconnection,
                  QWebSocketServer::tr("Too many pending connections."));
         return;
@@ -471,7 +471,7 @@ void QWebSocketServerPrivate::handshakeReceived()
                     success = true;
                 } else {
                     setError(QWebSocketProtocol::CloseCodeAbnormalDisconnection,
-                             QWebSocketServer::tr("Upgrading to websocket failed."));
+                             QWebSocketServer::tr("Upgrade to WebSocket failed."));
                 }
             }
             else {

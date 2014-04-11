@@ -43,7 +43,7 @@
     \class QWebSocket
 
     \inmodule QtWebSockets
-    \brief Implements a TCP socket that talks the websocket protocol.
+    \brief Implements a TCP socket that talks the WebSocket protocol.
 
     WebSockets is a web technology providing full-duplex communications channels over
     a single TCP connection.
@@ -60,9 +60,9 @@
     QWebSocket only supports version 13 of the WebSocket protocol, as outlined in
     \l {http://tools.ietf.org/html/rfc6455}{RFC 6455}.
 
-    \note Some proxies do not understand certain HTTP headers used during a web socket handshake.
-    In that case, non-secure web socket connections fail. The best way to mitigate against
-    this problem is to use web sockets over a secure connection.
+    \note Some proxies do not understand certain HTTP headers used during a WebSocket handshake.
+    In that case, non-secure WebSocket connections fail. The best way to mitigate against
+    this problem is to use WebSocket over a secure connection.
 
     \warning To generate masks, this implementation of WebSockets uses the cryptographically
     insecure qrand() function.
@@ -81,11 +81,11 @@
 /*!
     \page echoclient.html example
     \title QWebSocket client example
-    \brief A sample websocket client that sends a message and displays the message that
+    \brief A sample WebSocket client that sends a message and displays the message that
     it receives back.
 
     \section1 Description
-    The EchoClient example implements a web socket client that sends a message to a websocket server
+    The EchoClient example implements a WebSocket client that sends a message to a WebSocket server
     and dumps the answer that it gets back.
     This example should ideally be used with the EchoServer example.
     \section1 Code
@@ -166,7 +166,7 @@ not been filled in with new information when the signal returns.
     This signal is emitted every time a payload of data has been written to the socket.
     The \a bytes argument is set to the number of bytes that were written in this payload.
 
-    \note This signal has the same meaning both for secure and non-secure websockets.
+    \note This signal has the same meaning both for secure and non-secure WebSockets.
     As opposed to QSslSocket, bytesWritten() is only emitted when encrypted data is effectively
     written (see QSslSocket::encryptedBytesWritten()).
     \sa close()
@@ -388,7 +388,7 @@ void QWebSocket::close(QWebSocketProtocol::CloseCode closeCode, const QString &r
 }
 
 /*!
-    \brief Opens a websocket connection using the given \a url.
+    \brief Opens a WebSocket connection using the given \a url.
 
     If the url contains newline characters (\\r\\n), then the error signal will be emitted
     with QAbstractSocket::ConnectionRefusedError as error type.

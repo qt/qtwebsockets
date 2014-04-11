@@ -159,14 +159,14 @@ void tst_HandshakeRequest::tst_invalidStream_data()
     //this test checks if there doesn't occur an out-of-bounds exception
     QTest::newRow("Correctly formatted but invalid short fields") << QStringLiteral("V R P");
     QTest::newRow("Invalid \\0 character in header") << QStringLiteral("V R\0 P");
-    QTest::newRow("Invalid http version in header") << QStringLiteral("V R HTTP/invalid");
+    QTest::newRow("Invalid HTTP version in header") << QStringLiteral("V R HTTP/invalid");
     QTest::newRow("Empty header field") << QStringLiteral("GET . HTTP/1.1\r\nHEADER: ");
     QTest::newRow("All zeros") << QString::fromUtf8(QByteArray(10, char(0)));
     QTest::newRow("Invalid hostname") << QStringLiteral("GET . HTTP/1.1\r\nHost: \xFF\xFF");
     //doing extensive QStringLiteral concatenations here, because
     //MSVC 2010 complains when using concatenation literal strings about
     //concatenation of wide and narrow strings (error C2308)
-    QTest::newRow("Complete header - Invalid websocket version")
+    QTest::newRow("Complete header - Invalid WebSocket version")
             << QStringLiteral("GET . HTTP/1.1\r\nHost: foo\r\nSec-WebSocket-Version: ") +
                QStringLiteral("\xFF\xFF\r\n") +
                QStringLiteral("Sec-WebSocket-Key: AVDFBDDFF\r\n") +
@@ -177,7 +177,7 @@ void tst_HandshakeRequest::tst_invalidStream_data()
                QStringLiteral("Sec-WebSocket-Key: AVDFBDDFF\r\n") +
                QStringLiteral("Upgrade: websocket\r\n") +
                QStringLiteral("Connection: Upgrade\r\n\r\n");
-    QTest::newRow("Complete header - Invalid http version")
+    QTest::newRow("Complete header - Invalid HTTP version")
             << QStringLiteral("GET . HTTP/a.1\r\nHost: foo\r\nSec-WebSocket-Version: 13\r\n") +
                QStringLiteral("Sec-WebSocket-Key: AVDFBDDFF\r\n") +
                QStringLiteral("Upgrade: websocket\r\n") +

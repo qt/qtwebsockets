@@ -61,7 +61,7 @@ SslEchoClient::SslEchoClient(const QUrl &url, QObject *parent) :
 //! [onConnected]
 void SslEchoClient::onConnected()
 {
-    qDebug() << "Websocket connected";
+    qDebug() << "WebSocket connected";
     connect(&m_webSocket, &QWebSocket::textMessageReceived,
             this, &SslEchoClient::onTextMessageReceived);
     m_webSocket.sendTextMessage(QStringLiteral("Hello, world!"));

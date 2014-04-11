@@ -80,7 +80,7 @@ QT_BEGIN_NAMESPACE
 
     \inmodule QtWebSockets
 
-    \brief The different defined versions of the Websocket protocol.
+    \brief The different defined versions of the WebSocket protocol.
 
     For an overview of the differences between the different protocols, see
     <http://code.google.com/p/pywebsocket/wiki/WebSocketProtocolSpec>
@@ -162,7 +162,7 @@ QT_BEGIN_NAMESPACE
 
 /*!
   \fn QWebSocketProtocol::isCloseCodeValid(int closeCode)
-  Checks if \a closeCode is a valid web socket close code
+  Checks if \a closeCode is a valid WebSocket close code
 
   \internal
 */
