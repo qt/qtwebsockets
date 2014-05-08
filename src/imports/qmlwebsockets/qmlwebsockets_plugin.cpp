@@ -45,7 +45,7 @@
 
 QT_BEGIN_NAMESPACE
 
-void QmlWebSocket_plugin::registerTypes(const char *uri)
+void QtWebSocketsDeclarativeModule::registerTypes(const char *uri)
 {
     Q_ASSERT(uri == QLatin1String("Qt.WebSockets"));
 
