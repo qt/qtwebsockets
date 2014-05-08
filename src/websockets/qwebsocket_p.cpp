@@ -848,6 +848,45 @@ QString readLine(QTcpSocket *pSocket)
     return line;
 }
 
+// this function is a copy of QHttpNetworkReplyPrivate::parseStatus
+static bool parseStatusLine(const QByteArray &status, int *majorVersion, int *minorVersion,
+                            int *statusCode, QString *reasonPhrase)
+{
+    // from RFC 2616:
+    //        Status-Line = HTTP-Version SP Status-Code SP Reason-Phrase CRLF
+    //        HTTP-Version   = "HTTP" "/" 1*DIGIT "." 1*DIGIT
+    // that makes: 'HTTP/n.n xxx Message'
+    // byte count:  0123456789012
+
+    static const int minLength = 11;
+    static const int dotPos = 6;
+    static const int spacePos = 8;
+    static const char httpMagic[] = "HTTP/";
+
+    if (status.length() < minLength
+        || !status.startsWith(httpMagic)
+        || status.at(dotPos) != '.'
+        || status.at(spacePos) != ' ') {
+        // I don't know how to parse this status line
+        return false;
+    }
+
+    // optimize for the valid case: defer checking until the end
+    *majorVersion = status.at(dotPos - 1) - '0';
+    *minorVersion = status.at(dotPos + 1) - '0';
+
+    int i = spacePos;
+    int j = status.indexOf(' ', i + 1); // j == -1 || at(j) == ' ' so j+1 == 0 && j+1 <= length()
+    const QByteArray code = status.mid(i + 1, j - i - 1);
+
+    bool ok;
+    *statusCode = code.toInt(&ok);
+    *reasonPhrase = QString::fromLatin1(status.constData() + j + 1);
+
+    return ok && uint(*majorVersion) <= 9 && uint(* minorVersion) <= 9;
+}
+
+
 //called on the client for a server handshake response
 /*!
     \internal
@@ -861,25 +900,13 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
     bool ok = false;
     QString errorDescription;
 
-    const QString regExpStatusLine(QStringLiteral("^(HTTP/[0-9]+\\.[0-9]+)\\s([0-9]+)\\s(.*)"));
-    const QRegularExpression regExp(regExpStatusLine);
-    const QString statusLine = readLine(pSocket);
-    QString httpProtocol;
+    const QByteArray statusLine = pSocket->readLine();
+    int httpMajorVersion, httpMinorVersion;
     int httpStatusCode;
     QString httpStatusMessage;
-    const QRegularExpressionMatch match = regExp.match(statusLine);
-    if (Q_LIKELY(match.hasMatch())) {
-        QStringList tokens = match.capturedTexts();
-        tokens.removeFirst();	//remove the search string
-        if (tokens.length() == 3) {
-            httpProtocol = tokens[0];
-            httpStatusCode = tokens[1].toInt();
-            httpStatusMessage = tokens[2].trimmed();
-            ok = true;
-        }
-    }
-    if (Q_UNLIKELY(!ok)) {
-        errorDescription = QWebSocket::tr("Invalid statusline in response: %1.").arg(statusLine);
+    if (Q_UNLIKELY(!parseStatusLine(statusLine, &httpMajorVersion, &httpMinorVersion,
+                                    &httpStatusCode, &httpStatusMessage))) {
+        errorDescription = QWebSocket::tr("Invalid statusline in response: %1.").arg(QString::fromLatin1(statusLine));
     } else {
         QString headerLine = readLine(pSocket);
         QMap<QString, QString> headers;
@@ -906,11 +933,9 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
 
         if (Q_LIKELY(httpStatusCode == 101)) {
             //HTTP/x.y 101 Switching Protocols
-            bool conversionOk = false;
-            const float version = httpProtocol.midRef(5).toFloat(&conversionOk);
             //TODO: do not check the httpStatusText right now
             ok = !(acceptKey.isEmpty() ||
-                   (!conversionOk || (version < 1.1f)) ||
+                   (httpMajorVersion < 1 || httpMinorVersion < 1) ||
                    (upgrade.toLower() != QStringLiteral("websocket")) ||
                    (connection.toLower() != QStringLiteral("upgrade")));
             if (ok) {
@@ -923,7 +948,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
             } else {
                 errorDescription =
                     QWebSocket::tr("QWebSocketPrivate::processHandshake: Invalid statusline in response: %1.")
-                        .arg(statusLine);
+                        .arg(QString::fromLatin1(statusLine));
             }
         } else if (httpStatusCode == 400) {
             //HTTP/1.1 400 Bad Request
