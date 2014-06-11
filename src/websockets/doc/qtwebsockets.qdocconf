@@ -27,7 +27,7 @@ qhp.QtWebSockets.subprojects.classes.sortPages      = true
 
 qhp.QtWebSockets.subprojects.qml.title              = QML Types
 qhp.QtWebSockets.subprojects.qml.indexTitle         = Qt WebSockets QML Types
-qhp.QtWebSockets.subprojects.qml.selectors          = fake:qmlclass
+qhp.QtWebSockets.subprojects.qml.selectors          = qmlclass
 qhp.QtWebSockets.subprojects.qml.sortPages          = true
 
 qhp.QtWebSockets.subprojects.examples.title         = Examples
