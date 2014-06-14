@@ -99,6 +99,11 @@
   \sa WebSocket::status
   */
 
+/*!
+  \qmlmethod void WebSocket::sendTextMessage(string message)
+  Sends \c message to the server.
+  */
+
 #include "qqmlwebsocket.h"
 #include <QtWebSockets/QWebSocket>
 

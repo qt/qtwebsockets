@@ -48,7 +48,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class QmlWebSocket_plugin : public QQmlExtensionPlugin
+class QtWebSocketsDeclarativeModule : public QQmlExtensionPlugin
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
