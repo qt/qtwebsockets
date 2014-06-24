@@ -1227,7 +1227,7 @@ QNetworkProxy QWebSocketPrivate::proxy() const
  */
 void QWebSocketPrivate::setProxy(const QNetworkProxy &networkProxy)
 {
-    if (networkProxy != networkProxy)
+    if (m_configuration.m_proxy != networkProxy)
         m_configuration.m_proxy = networkProxy;
 }
 #endif  //QT_NO_NETWORKPROXY
