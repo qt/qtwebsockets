@@ -147,6 +147,7 @@ private Q_SLOTS:
     void tst_sendTextMessage();
     void tst_sendBinaryMessage();
     void tst_errorString();
+    void tst_setProxy();
 };
 
 tst_QWebSocket::tst_QWebSocket()
@@ -573,6 +574,23 @@ void tst_QWebSocket::tst_errorString()
             qvariant_cast<QAbstractSocket::SocketError>(arguments.at(0));
     QCOMPARE(socketError, QAbstractSocket::HostNotFoundError);
     QCOMPARE(socket.errorString(), QStringLiteral("Host not found"));
+}
+
+void tst_QWebSocket::tst_setProxy()
+{
+    // check if property assignment works as expected.
+    QWebSocket socket;
+    QCOMPARE(socket.proxy(), QNetworkProxy(QNetworkProxy::DefaultProxy));
+
+    QNetworkProxy proxy;
+    proxy.setPort(123);
+    socket.setProxy(proxy);
+    QCOMPARE(socket.proxy(), proxy);
+
+    proxy.setPort(321);
+    QCOMPARE(socket.proxy().port(), quint16(123));
+    socket.setProxy(proxy);
+    QCOMPARE(socket.proxy(), proxy);
 }
 
 QTEST_MAIN(tst_QWebSocket)
