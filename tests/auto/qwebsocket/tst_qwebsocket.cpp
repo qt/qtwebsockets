@@ -147,7 +147,9 @@ private Q_SLOTS:
     void tst_sendTextMessage();
     void tst_sendBinaryMessage();
     void tst_errorString();
+#ifndef QT_NO_NETWORKPROXY
     void tst_setProxy();
+#endif
 };
 
 tst_QWebSocket::tst_QWebSocket()
@@ -576,6 +578,7 @@ void tst_QWebSocket::tst_errorString()
     QCOMPARE(socket.errorString(), QStringLiteral("Host not found"));
 }
 
+#ifndef QT_NO_NETWORKPROXY
 void tst_QWebSocket::tst_setProxy()
 {
     // check if property assignment works as expected.
@@ -592,6 +595,7 @@ void tst_QWebSocket::tst_setProxy()
     socket.setProxy(proxy);
     QCOMPARE(socket.proxy(), proxy);
 }
+#endif // QT_NO_NETWORKPROXY
 
 QTEST_MAIN(tst_QWebSocket)
 
