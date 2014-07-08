@@ -63,7 +63,7 @@ class QQmlWebSocket : public QObject, public QQmlParserStatus
     Q_PROPERTY(bool active READ isActive WRITE setActive NOTIFY activeChanged)
 
 public:
-    explicit QQmlWebSocket(QObject *parent = Q_NULLPTR);
+    explicit QQmlWebSocket(QObject *parent = 0);
     virtual ~QQmlWebSocket();
 
     enum Status
