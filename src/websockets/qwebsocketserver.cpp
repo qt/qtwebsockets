@@ -247,6 +247,8 @@ QWebSocketServer::QWebSocketServer(const QString &serverName, SslMode secureMode
  */
 QWebSocketServer::~QWebSocketServer()
 {
+    Q_D(QWebSocketServer);
+    d->close(true);
 }
 
 /*!
