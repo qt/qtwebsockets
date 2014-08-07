@@ -1,11 +1,6 @@
-load(qt_build_config)
 TARGET = QtWebSockets
 
-QT = core network core-private
-
-TEMPLATE = lib
-
-DEFINES += QTWEBSOCKETS_LIBRARY
+QT = core-private network
 
 QMAKE_DOCS = $$PWD/doc/qtwebsockets.qdocconf
 OTHER_FILES += doc/src/*.qdoc   # show .qdoc files in Qt Creator

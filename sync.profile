@@ -5,10 +5,6 @@
 %moduleheaders = (
 );
 
-%classnames = (
-    "qtwebsockets.h" => "QtWebSockets",
-);
-
 %dependencies = (
     "qtbase" => "",
     "qtdeclarative" => "",
