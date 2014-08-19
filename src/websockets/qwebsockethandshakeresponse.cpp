@@ -49,6 +49,7 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QStringList>
 #include <QtCore/QDateTime>
+#include <QtCore/QLocale>
 #include <QtCore/QCryptographicHash>
 #include <QtCore/QSet>
 #include <QtCore/QList>
@@ -186,14 +187,15 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(
                 } else {
                     if (origin.isEmpty())
                         origin = QStringLiteral("*");
+                    QDateTime datetime = QDateTime::currentDateTimeUtc();
                     response << QStringLiteral("Server: ") % serverName                      <<
                                 QStringLiteral("Access-Control-Allow-Credentials: false")    <<
                                 QStringLiteral("Access-Control-Allow-Methods: GET")          <<
                                 QStringLiteral("Access-Control-Allow-Headers: content-type") <<
                                 QStringLiteral("Access-Control-Allow-Origin: ") % origin     <<
-                                QStringLiteral("Date: ") %
-                                    QDateTime::currentDateTimeUtc()
-                                        .toString(QStringLiteral("ddd, dd MMM yyyy hh:mm:ss 'GMT'"));
+                                QStringLiteral("Date: ") % QLocale::c()
+                                    .toString(datetime, QStringLiteral("ddd, dd MMM yyyy hh:mm:ss 'GMT'"));
+
 
                     m_acceptedVersion = QWebSocketProtocol::currentVersion();
                     m_canUpgrade = true;
