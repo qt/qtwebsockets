@@ -275,11 +275,11 @@ void tst_HandshakeRequest::tst_multipleVersions()
     QCOMPARE(request.extensions().length(), 0);
     QCOMPARE(request.protocols().length(), 0);
     QCOMPARE(request.headers().size(), 5);
-    QVERIFY(request.headers().contains(QStringLiteral("Host")));
-    QVERIFY(request.headers().contains(QStringLiteral("Sec-WebSocket-Version")));
-    QVERIFY(request.headers().contains(QStringLiteral("Sec-WebSocket-Key")));
-    QVERIFY(request.headers().contains(QStringLiteral("Upgrade")));
-    QVERIFY(request.headers().contains(QStringLiteral("Connection")));
+    QVERIFY(request.headers().contains(QStringLiteral("host")));
+    QVERIFY(request.headers().contains(QStringLiteral("sec-websocket-version")));
+    QVERIFY(request.headers().contains(QStringLiteral("sec-websocket-key")));
+    QVERIFY(request.headers().contains(QStringLiteral("upgrade")));
+    QVERIFY(request.headers().contains(QStringLiteral("connection")));
     QCOMPARE(request.key(), QStringLiteral("AVDFBDDFF"));
     QCOMPARE(request.origin().length(), 0);
     QCOMPARE(request.requestUrl(), QUrl("ws://foo.com/test"));
