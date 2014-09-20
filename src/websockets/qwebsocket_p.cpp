@@ -541,6 +541,7 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
         QObject::connect(pTcpSocket, &QAbstractSocket::readChannelFinished, q,
                          &QWebSocket::readChannelFinished);
         QObject::connect(pTcpSocket, &QAbstractSocket::aboutToClose, q, &QWebSocket::aboutToClose);
+        QObject::connect(pTcpSocket, &QAbstractSocket::bytesWritten, q, &QWebSocket::bytesWritten);
 
         //catch signals
         QObjectPrivate::connect(pTcpSocket, &QAbstractSocket::stateChanged, this,
