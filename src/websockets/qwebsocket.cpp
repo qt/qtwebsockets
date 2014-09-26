@@ -35,6 +35,7 @@
     \class QWebSocket
 
     \inmodule QtWebSockets
+    \since 5.3
     \brief Implements a TCP socket that talks the WebSocket protocol.
 
     WebSockets is a web technology providing full-duplex communications channels over
