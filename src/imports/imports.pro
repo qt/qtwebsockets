@@ -1,3 +1,4 @@
 TEMPLATE = subdirs
 
-SUBDIRS += qmlwebsockets
+SUBDIRS += qmlwebsockets \
+           qmlwebsockets_compat

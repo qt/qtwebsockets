@@ -1,6 +1,6 @@
 QT = core websockets qml
 
-TARGETPATH = Qt/WebSockets
+TARGETPATH = QtWebSockets
 
 HEADERS +=  qmlwebsockets_plugin.h \
             qqmlwebsocket.h \

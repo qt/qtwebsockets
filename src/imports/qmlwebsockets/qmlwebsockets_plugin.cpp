@@ -42,9 +42,10 @@ QT_BEGIN_NAMESPACE
 
 void QtWebSocketsDeclarativeModule::registerTypes(const char *uri)
 {
-    Q_ASSERT(uri == QLatin1String("Qt.WebSockets"));
+    // ### Qt 6: Remove support for the "Qt.WebSockets" QML module.
+    Q_ASSERT(uri == QLatin1String("QtWebSockets") || uri == QLatin1String("Qt.WebSockets"));
 
-    // @uri Qt.WebSockets
+    // @uri QtWebSockets
     qmlRegisterType<QQmlWebSocket>(uri, 1 /*major*/, 0 /*minor*/, "WebSocket");
     qmlRegisterType<QQmlWebSocketServer>(uri, 1 /*major*/, 0 /*minor*/, "WebSocketServer");
 }

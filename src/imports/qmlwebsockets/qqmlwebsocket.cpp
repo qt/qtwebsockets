@@ -36,7 +36,7 @@
     \instantiates QQmlWebSocket
     \since 5.3
 
-    \inqmlmodule Qt.WebSockets
+    \inqmlmodule QtWebSockets
     \ingroup websockets-qml
     \brief QML interface to QWebSocket.
 
