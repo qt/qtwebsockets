@@ -360,7 +360,7 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
             if (!resourceName.endsWith(QChar::fromLatin1('?'))) {
                 resourceName.append(QChar::fromLatin1('?'));
             }
-            resourceName.append(url.query());
+            resourceName.append(url.query(QUrl::FullyEncoded));
         }
         if (resourceName.isEmpty())
             resourceName = QStringLiteral("/");

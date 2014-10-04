@@ -417,8 +417,11 @@ void tst_QWebSocket::tst_sendTextMessage()
     QSignalSpy binaryMessageReceived(&socket, SIGNAL(binaryMessageReceived(QByteArray)));
     QSignalSpy binaryFrameReceived(&socket, SIGNAL(binaryFrameReceived(QByteArray,bool)));
 
-    socket.open(QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
-                     QStringLiteral(":") + QString::number(echoServer.port())));
+    QUrl url = QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
+                    QStringLiteral(":") + QString::number(echoServer.port()));
+    url.addQueryItem("queryitem", "with encoded characters");
+
+    socket.open(url);
 
     if (socketConnectedSpy.count() == 0)
         QVERIFY(socketConnectedSpy.wait(500));
