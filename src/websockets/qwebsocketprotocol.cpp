@@ -42,6 +42,7 @@ QT_BEGIN_NAMESPACE
   \namespace QWebSocketProtocol
   \inmodule QtWebSockets
   \brief Contains constants related to the WebSocket standard.
+  \since 5.3
 */
 
 /*!

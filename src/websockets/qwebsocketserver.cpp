@@ -35,6 +35,7 @@
     \class QWebSocketServer
 
     \inmodule QtWebSockets
+    \since 5.3
 
     \brief Implements a WebSocket-based server.
 

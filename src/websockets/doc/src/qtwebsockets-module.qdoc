@@ -48,14 +48,15 @@
 */
 
 /*!
-    \page qtwebsockets-qml-types.html
+    \qmlmodule Qt.WebSockets 1.0
     \title Qt WebSockets QML Types
-    \brief List of QML types that provide WebSockets communication.
+    \ingroup qmlmodules
+    \brief Provides QML types for WebSockets communication.
 
     \annotatedlist websockets-qml
 
     The QML types are accessed by using:
     \code
-    import QtWebSockets 1.0
+    import Qt.WebSockets 1.0
     \endcode
 */

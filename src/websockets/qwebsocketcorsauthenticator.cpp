@@ -35,6 +35,7 @@
     \class QWebSocketCorsAuthenticator
 
     \inmodule QtWebSockets
+    \since 5.3
     \brief The QWebSocketCorsAuthenticator class provides an authenticator object for
     Cross Origin Requests (CORS).
 
