@@ -34,6 +34,7 @@
 /*!
     \qmltype WebSocket
     \instantiates QQmlWebSocket
+    \since 5.3
 
     \inqmlmodule Qt.WebSockets
     \ingroup websockets-qml

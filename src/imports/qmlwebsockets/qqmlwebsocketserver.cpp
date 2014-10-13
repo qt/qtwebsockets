@@ -39,6 +39,7 @@ QT_USE_NAMESPACE
 /*!
     \qmltype WebSocketServer
     \instantiates QQmlWebSocketServer
+    \since 5.3
 
     \inqmlmodule Qt.WebSockets
     \ingroup websockets-qml
