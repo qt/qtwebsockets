@@ -224,6 +224,19 @@ private:
     QMaskGenerator *m_pMaskGenerator;
     QDefaultMaskGenerator m_defaultMaskGenerator;
 
+    enum HandshakeState {
+        NothingDoneState,
+        ReadingStatusState,
+        ReadingHeaderState,
+        ParsingHeaderState,
+        AllDoneState
+    } m_handshakeState;
+    QByteArray m_statusLine;
+    int m_httpStatusCode;
+    int m_httpMajorVersion, m_httpMinorVersion;
+    QString m_httpStatusMessage;
+    QMap<QString, QString> m_headers;
+
     friend class QWebSocketServerPrivate;
 };
 

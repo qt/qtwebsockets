@@ -137,7 +137,8 @@ QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol:
     m_dataProcessor(),
     m_configuration(),
     m_pMaskGenerator(&m_defaultMaskGenerator),
-    m_defaultMaskGenerator()
+    m_defaultMaskGenerator(),
+    m_handshakeState(NothingDoneState)
 {
 }
 
@@ -889,46 +890,66 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
     Q_Q(QWebSocket);
     if (Q_UNLIKELY(!pSocket))
         return;
+    // Reset handshake on a new connection.
+    if (m_handshakeState == AllDoneState)
+        m_handshakeState = NothingDoneState;
 
-    bool ok = false;
     QString errorDescription;
 
-    const QByteArray statusLine = pSocket->readLine();
-    int httpMajorVersion, httpMinorVersion;
-    int httpStatusCode;
-    QString httpStatusMessage;
-    if (Q_UNLIKELY(!parseStatusLine(statusLine, &httpMajorVersion, &httpMinorVersion,
-                                    &httpStatusCode, &httpStatusMessage))) {
-        errorDescription = QWebSocket::tr("Invalid statusline in response: %1.").arg(QString::fromLatin1(statusLine));
-    } else {
-        QString headerLine = readLine(pSocket);
-        QMap<QString, QString> headers;
-        while (!headerLine.isEmpty()) {
+    switch (m_handshakeState) {
+    case NothingDoneState:
+        m_headers.clear();
+        m_handshakeState = ReadingStatusState;
+        // no break
+    case ReadingStatusState:
+        if (!pSocket->canReadLine())
+            return;
+        m_statusLine = pSocket->readLine();
+        if (Q_UNLIKELY(!parseStatusLine(m_statusLine, &m_httpMajorVersion, &m_httpMinorVersion, &m_httpStatusCode, &m_httpStatusMessage))) {
+            errorDescription = QWebSocket::tr("Invalid statusline in response: %1.").arg(QString::fromLatin1(m_statusLine));
+            break;
+        }
+        m_handshakeState = ReadingHeaderState;
+        // no break
+    case ReadingHeaderState:
+        while (pSocket->canReadLine()) {
+            QString headerLine = readLine(pSocket);
             const QStringList headerField = headerLine.split(QStringLiteral(": "),
                                                              QString::SkipEmptyParts);
             if (headerField.size() == 2) {
-                headers.insertMulti(headerField[0].toLower(), headerField[1]);
+                m_headers.insertMulti(headerField[0].toLower(), headerField[1]);
             }
-            headerLine = readLine(pSocket);
+            if (headerField.isEmpty()) {
+                m_handshakeState = ParsingHeaderState;
+                break;
+            }
         }
 
-        const QString acceptKey = headers.value(QStringLiteral("sec-websocket-accept"),
-                                                QString());
-        const QString upgrade = headers.value(QStringLiteral("upgrade"), QString());
-        const QString connection = headers.value(QStringLiteral("connection"), QString());
+        if (m_handshakeState != ParsingHeaderState) {
+            if (pSocket->atEnd()) {
+                errorDescription = QWebSocket::tr("QWebSocketPrivate::processHandshake: Connection closed while reading header.");
+                break;
+            }
+            return;
+        }
+        // no break
+    case ParsingHeaderState: {
+        const QString acceptKey = m_headers.value(QStringLiteral("sec-websocket-accept"), QString());
+        const QString upgrade = m_headers.value(QStringLiteral("upgrade"), QString());
+        const QString connection = m_headers.value(QStringLiteral("connection"), QString());
 //        unused for the moment
-//        const QString extensions = headers.value(QStringLiteral("sec-websocket-extensions"),
+//        const QString extensions = m_headers.value(QStringLiteral("sec-websocket-extensions"),
 //                                                 QString());
-//        const QString protocol = headers.value(QStringLiteral("sec-websocket-protocol"),
+//        const QString protocol = m_headers.value(QStringLiteral("sec-websocket-protocol"),
 //                                               QString());
-        const QString version = headers.value(QStringLiteral("sec-websocket-version"),
-                                              QString());
+        const QString version = m_headers.value(QStringLiteral("sec-websocket-version"), QString());
 
-        if (Q_LIKELY(httpStatusCode == 101)) {
+        bool ok = false;
+        if (Q_LIKELY(m_httpStatusCode == 101)) {
             //HTTP/x.y 101 Switching Protocols
             //TODO: do not check the httpStatusText right now
             ok = !(acceptKey.isEmpty() ||
-                   (httpMajorVersion < 1 || httpMinorVersion < 1) ||
+                   (m_httpMajorVersion < 1 || m_httpMinorVersion < 1) ||
                    (upgrade.toLower() != QStringLiteral("websocket")) ||
                    (connection.toLower() != QStringLiteral("upgrade")));
             if (ok) {
@@ -941,9 +962,9 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
             } else {
                 errorDescription =
                     QWebSocket::tr("QWebSocketPrivate::processHandshake: Invalid statusline in response: %1.")
-                        .arg(QString::fromLatin1(statusLine));
+                        .arg(QString::fromLatin1(m_statusLine));
             }
-        } else if (httpStatusCode == 400) {
+        } else if (m_httpStatusCode == 400) {
             //HTTP/1.1 400 Bad Request
             if (!version.isEmpty()) {
                 const QStringList versions = version.split(QStringLiteral(", "),
@@ -954,29 +975,38 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
                     errorDescription =
                             QWebSocket::tr("Handshake: Server requests a version that we don't support: %1.")
                             .arg(versions.join(QStringLiteral(", ")));
-                    ok = false;
                 } else {
                     //we tried v13, but something different went wrong
                     errorDescription =
                         QWebSocket::tr("QWebSocketPrivate::processHandshake: Unknown error condition encountered. Aborting connection.");
-                    ok = false;
                 }
+            } else {
+                    errorDescription =
+                        QWebSocket::tr("QWebSocketPrivate::processHandshake: Unknown error condition encountered. Aborting connection.");
             }
         } else {
             errorDescription =
                     QWebSocket::tr("QWebSocketPrivate::processHandshake: Unhandled http status code: %1 (%2).")
-                        .arg(httpStatusCode).arg(httpStatusMessage);
-            ok = false;
+                        .arg(m_httpStatusCode).arg(m_httpStatusMessage);
         }
+        if (ok)
+            m_handshakeState = AllDoneState;
+        break;
+    }
+    case AllDoneState:
+        Q_UNREACHABLE();
+        break;
+    }
 
-        if (!ok) {
-            setErrorString(errorDescription);
-            Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
-        } else {
-            //handshake succeeded
-            setSocketState(QAbstractSocket::ConnectedState);
-            Q_EMIT q->connected();
-        }
+    if (m_handshakeState == AllDoneState) {
+        // handshake succeeded
+        setSocketState(QAbstractSocket::ConnectedState);
+        Q_EMIT q->connected();
+    } else {
+        // handshake failed
+        m_handshakeState = AllDoneState;
+        setErrorString(errorDescription);
+        Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
     }
 }
 
