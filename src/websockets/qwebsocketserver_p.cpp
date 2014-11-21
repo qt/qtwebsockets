@@ -74,7 +74,7 @@ QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName,
 void QWebSocketServerPrivate::init()
 {
     if (m_secureMode == NonSecureMode) {
-        m_pTcpServer = new QTcpServer();
+        m_pTcpServer = new QTcpServer(q_ptr);
         if (Q_LIKELY(m_pTcpServer))
             QObjectPrivate::connect(m_pTcpServer, &QTcpServer::newConnection,
                                     this, &QWebSocketServerPrivate::onNewConnection);
@@ -82,7 +82,7 @@ void QWebSocketServerPrivate::init()
             qFatal("Could not allocate memory for tcp server.");
     } else {
 #ifndef QT_NO_SSL
-        QSslServer *pSslServer = new QSslServer();
+        QSslServer *pSslServer = new QSslServer(q_ptr);
         m_pTcpServer = pSslServer;
         if (Q_LIKELY(m_pTcpServer)) {
             QObjectPrivate::connect(pSslServer, &QSslServer::newEncryptedConnection,
@@ -105,8 +105,6 @@ void QWebSocketServerPrivate::init()
  */
 QWebSocketServerPrivate::~QWebSocketServerPrivate()
 {
-    close(true);
-    m_pTcpServer->deleteLater();
 }
 
 /*!

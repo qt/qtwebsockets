@@ -385,12 +385,6 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
                     m_pSocket->setPauseMode(m_pauseMode);
 
                     makeConnections(m_pSocket.data());
-                    QObject::connect(sslSocket, &QSslSocket::encryptedBytesWritten, q,
-                                     &QWebSocket::bytesWritten);
-                    typedef void (QSslSocket:: *sslErrorSignalType)(const QList<QSslError> &);
-                    QObject::connect(sslSocket,
-                                     static_cast<sslErrorSignalType>(&QSslSocket::sslErrors),
-                                     q, &QWebSocket::sslErrors);
                     setSocketState(QAbstractSocket::ConnectingState);
 
                     sslSocket->setSslConfiguration(m_configuration.m_sslConfiguration);
@@ -419,8 +413,6 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
                 m_pSocket->setPauseMode(m_pauseMode);
 
                 makeConnections(m_pSocket.data());
-                QObject::connect(m_pSocket.data(), &QAbstractSocket::bytesWritten, q,
-                                 &QWebSocket::bytesWritten);
                 setSocketState(QAbstractSocket::ConnectingState);
     #ifndef QT_NO_NETWORKPROXY
                 m_pSocket->setProxy(m_configuration.m_proxy);
@@ -538,7 +530,7 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
 #ifndef QT_NO_NETWORKPROXY
         QObject::connect(pTcpSocket, &QAbstractSocket::proxyAuthenticationRequired, q,
                          &QWebSocket::proxyAuthenticationRequired);
-#endif
+#endif // QT_NO_NETWORKPROXY
         QObject::connect(pTcpSocket, &QAbstractSocket::readChannelFinished, q,
                          &QWebSocket::readChannelFinished);
         QObject::connect(pTcpSocket, &QAbstractSocket::aboutToClose, q, &QWebSocket::aboutToClose);
@@ -551,6 +543,21 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
         //with QTcpSocket there is no problem, but with QSslSocket the processing hangs
         QObjectPrivate::connect(pTcpSocket, &QAbstractSocket::readyRead, this,
                                 &QWebSocketPrivate::processData, Qt::QueuedConnection);
+#ifndef QT_NO_SSL
+        const QSslSocket * const sslSocket = qobject_cast<const QSslSocket *>(pTcpSocket);
+        if (sslSocket) {
+            QObject::connect(sslSocket, &QSslSocket::encryptedBytesWritten, q,
+                             &QWebSocket::bytesWritten);
+            typedef void (QSslSocket:: *sslErrorSignalType)(const QList<QSslError> &);
+            QObject::connect(sslSocket,
+                             static_cast<sslErrorSignalType>(&QSslSocket::sslErrors),
+                             q, &QWebSocket::sslErrors);
+        } else
+#endif // QT_NO_SSL
+        {
+            QObject::connect(pTcpSocket, &QAbstractSocket::bytesWritten, q,
+                             &QWebSocket::bytesWritten);
+        }
     }
 
     QObject::connect(&m_dataProcessor, &QWebSocketDataProcessor::textFrameReceived, q,
