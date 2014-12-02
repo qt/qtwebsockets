@@ -471,6 +471,11 @@ void tst_QWebSocket::tst_sendTextMessage()
     isLastFrame = arguments.at(1).toBool();
     QCOMPARE(frameReceived, QStringLiteral("Hello world!"));
     QVERIFY(isLastFrame);
+
+    QString reason = QStringLiteral("going away");
+    socket.close(QWebSocketProtocol::CloseCodeGoingAway, reason);
+    QCOMPARE(socket.closeCode(), QWebSocketProtocol::CloseCodeGoingAway);
+    QCOMPARE(socket.closeReason(), reason);
 #endif
 }
 

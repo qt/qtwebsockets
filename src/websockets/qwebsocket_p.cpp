@@ -300,6 +300,8 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
         return;
     if (!m_isClosingHandshakeSent) {
         Q_Q(QWebSocket);
+        m_closeCode = closeCode;
+        m_closeReason = reason;
         const quint16 code = qToBigEndian<quint16>(closeCode);
         QByteArray payload;
         payload.append(static_cast<const char *>(static_cast<const void *>(&code)), 2);
