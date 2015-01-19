@@ -37,7 +37,7 @@ qhp.QtWebSockets.subprojects.examples.sortPages     = true
 
 tagfile                                             = ../../../doc/qtwebsockets/qtwebsockets.tags
 
-depends                                             += qtcore qtnetwork qtdoc
+depends                                             += qtcore qtnetwork qtdoc qmake
 
 headerdirs                                          += .. \
                                                        ../../imports
