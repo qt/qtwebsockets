@@ -50,9 +50,6 @@ public:
     QHostAddress hostAddress() const { return m_pWebSocketServer->serverAddress(); }
     quint16 port() const { return m_pWebSocketServer->serverPort(); }
 
-Q_SIGNALS:
-    void closed();
-
 private Q_SLOTS:
     void onNewConnection();
     void processTextMessage(QString message);
@@ -71,9 +68,8 @@ EchoServer::EchoServer(QObject *parent) :
     m_clients()
 {
     if (m_pWebSocketServer->listen()) {
-        connect(m_pWebSocketServer, &QWebSocketServer::newConnection,
-                this, &EchoServer::onNewConnection);
-        connect(m_pWebSocketServer, &QWebSocketServer::closed, this, &EchoServer::closed);
+        connect(m_pWebSocketServer, SIGNAL(newConnection()),
+                this, SLOT(onNewConnection()));
     }
 }
 
@@ -87,9 +83,9 @@ void EchoServer::onNewConnection()
 {
     QWebSocket *pSocket = m_pWebSocketServer->nextPendingConnection();
 
-    connect(pSocket, &QWebSocket::textMessageReceived, this, &EchoServer::processTextMessage);
-    connect(pSocket, &QWebSocket::binaryMessageReceived, this, &EchoServer::processBinaryMessage);
-    connect(pSocket, &QWebSocket::disconnected, this, &EchoServer::socketDisconnected);
+    connect(pSocket, SIGNAL(textMessageReceived(QString)), this, SLOT(processTextMessage(QString)));
+    connect(pSocket, SIGNAL(binaryMessageReceived(QByteArray)), this, SLOT(processBinaryMessage(QByteArray)));
+    connect(pSocket, SIGNAL(disconnected()), this, SLOT(socketDisconnected()));
 
     m_clients << pSocket;
 }
