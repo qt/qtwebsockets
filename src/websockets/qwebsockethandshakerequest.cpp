@@ -260,7 +260,7 @@ void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream)
         connectionValues << (*c).trimmed();
 
     //optional headers
-    m_origin = m_headers.value(QStringLiteral("sec-websocket-origin"), QString());
+    m_origin = m_headers.value(QStringLiteral("origin"), QString());
     const QStringList protocolLines = m_headers.values(QStringLiteral("sec-websocket-protocol"));
     for (QStringList::const_iterator pl = protocolLines.begin(); pl != protocolLines.end(); ++pl) {
         QStringList protocols = (*pl).split(QStringLiteral(","), QString::SkipEmptyParts);
