@@ -83,7 +83,6 @@ void EchoServer::processTextMessage(QString message)
     if (pClient) {
         pClient->sendTextMessage(message);
     }
-    m_pWebSocketServer->close();
 }
 //! [processTextMessage]
 
