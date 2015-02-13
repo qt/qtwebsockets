@@ -50,6 +50,10 @@ sourcedirs                                          += .. \
 exampledirs                                         += ../../../examples/websockets \
                                                        snippets
 
+examples.fileextensions                             += "*.html"
+
+imagedirs                                           += ../../../examples/websockets/doc/images
+
 manifestmeta.thumbnail.names                        += "QtWebSockets/*"
 
 navigation.landingpage                              = "Qt WebSockets"
