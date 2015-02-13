@@ -36,6 +36,7 @@
 
 #include <QtCore/QString>
 #include <QtCore/QByteArray>
+#include <QtCore/QCoreApplication>
 #include <limits.h>
 
 #include "qwebsockets_global.h"
@@ -51,6 +52,8 @@ const quint64 MAX_MESSAGE_SIZE_IN_BYTES = INT_MAX - 1;
 
 class Q_AUTOTEST_EXPORT QWebSocketFrame
 {
+    Q_DECLARE_TR_FUNCTIONS(QWebSocketFrame)
+
 public:
     QWebSocketFrame();
     QWebSocketFrame(const QWebSocketFrame &other);
