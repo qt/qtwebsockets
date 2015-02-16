@@ -440,8 +440,13 @@ void QWebSocketPrivate::ping(const QByteArray &payload)
 {
     QByteArray payloadTruncated = payload.left(125);
     m_pingTimer.restart();
+    quint32 maskingKey = 0;
+    if (m_mustMask)
+        maskingKey = generateMaskingKey();
     QByteArray pingFrame = getFrameHeader(QWebSocketProtocol::OpCodePing, payloadTruncated.size(),
-                                          0 /*do not mask*/, true);
+                                          maskingKey, true);
+    if (m_mustMask)
+        QWebSocketProtocol::mask(&payloadTruncated, maskingKey);
     pingFrame.append(payloadTruncated);
     qint64 ret = writeFrame(pingFrame);
     Q_UNUSED(ret);
