@@ -222,10 +222,22 @@ void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream)
         headerLine = textStream.readLine();
     }
 
-    const QString host = m_headers.value(QStringLiteral("host"), QString());
     m_requestUrl = QUrl::fromEncoded(resourceName.toLatin1());
-    if (m_requestUrl.isRelative())
+    QString host = m_headers.value(QStringLiteral("host"), QString());
+    if (m_requestUrl.isRelative()) {
+        // see http://tools.ietf.org/html/rfc6455#page-17
+        // No. 4 item in "The requirements for this handshake"
+        int idx = host.indexOf(":");
+        bool ok = false;
+        int port;
+        if (idx != -1) {
+            port = host.rightRef(host.length() - idx - 1).toInt(&ok);
+            host.truncate(idx);
+        }
         m_requestUrl.setHost(host);
+        if (ok)
+            m_requestUrl.setPort(port);
+    }
     if (m_requestUrl.scheme().isEmpty()) {
         const QString scheme =  isSecure() ? QStringLiteral("wss") : QStringLiteral("ws");
         m_requestUrl.setScheme(scheme);
