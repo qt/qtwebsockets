@@ -65,6 +65,8 @@ private Q_SLOTS:
 
     void tst_multipleValuesInConnectionHeader();
     void tst_multipleVersions();
+
+    void tst_qtbug_39355();
 };
 
 tst_HandshakeRequest::tst_HandshakeRequest()
@@ -288,6 +290,26 @@ void tst_HandshakeRequest::tst_multipleVersions()
     QCOMPARE(request.versions().length(), 6);
     //should be 13 since the list is ordered in decreasing order
     QCOMPARE(request.versions().at(0), QWebSocketProtocol::Version13);
+}
+
+void tst_HandshakeRequest::tst_qtbug_39355()
+{
+    QString header = QStringLiteral("GET /ABC/DEF/ HTTP/1.1\r\nHost: localhost:1234\r\n") +
+                     QStringLiteral("Sec-WebSocket-Version: 13\r\n") +
+                     QStringLiteral("Sec-WebSocket-Key: 2Wg20829/4ziWlmsUAD8Dg==\r\n") +
+                     QStringLiteral("Upgrade: websocket\r\n") +
+                     QStringLiteral("Connection: Upgrade\r\n\r\n");
+    QByteArray data;
+    QTextStream textStream(&data);
+    QWebSocketHandshakeRequest request(8080, false);
+
+    textStream << header;
+    textStream.seek(0);
+    request.readHandshake(textStream);
+
+    QVERIFY(request.isValid());
+    QCOMPARE(request.port(), 1234);
+    QCOMPARE(request.host(), QStringLiteral("localhost"));
 }
 
 QTEST_MAIN(tst_HandshakeRequest)
