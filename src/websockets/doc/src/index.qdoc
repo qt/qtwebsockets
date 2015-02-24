@@ -31,10 +31,17 @@
     \title Qt WebSockets
     \brief Provides an implementation of the WebSocket protocol.
 
-    The QtWebSockets module implements the WebSocket protocol as specified in
-    \l {http://tools.ietf.org/html/rfc6455} {RFC 6455}.
-    It solely depends on Qt (no external dependencies).
+    WebSocket is a web-based protocol designed to enable two-way communication
+    between a client application and a remote host. It enables the two entities
+    to send data back and forth if the initial handshake succeeds. WebSocket is
+    the solution for applications that struggle to get real-time data feeds
+    with less network latency and minimum data exchange.
 
+    The Qt WebSockets module implements the WebSocket protocol as specified in
+    \l {http://tools.ietf.org/html/rfc6455} {RFC 6455}. It provides C++ and QML
+    interfaces that enable Qt applications to act as a server that can process
+    WebSocket-based requests, or a client that can consume data received from
+    the server, or both.
 
     To use this module in your application, use the following include
     statement:
