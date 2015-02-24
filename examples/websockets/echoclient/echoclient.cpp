@@ -36,10 +36,13 @@
 QT_USE_NAMESPACE
 
 //! [constructor]
-EchoClient::EchoClient(const QUrl &url, QObject *parent) :
+EchoClient::EchoClient(const QUrl &url, bool debug, QObject *parent) :
     QObject(parent),
-    m_url(url)
+    m_url(url),
+    m_debug(debug)
 {
+    if (m_debug)
+        qDebug() << "WebSocket server:" << url;
     connect(&m_webSocket, &QWebSocket::connected, this, &EchoClient::onConnected);
     connect(&m_webSocket, &QWebSocket::disconnected, this, &EchoClient::closed);
     m_webSocket.open(QUrl(url));
@@ -49,7 +52,8 @@ EchoClient::EchoClient(const QUrl &url, QObject *parent) :
 //! [onConnected]
 void EchoClient::onConnected()
 {
-    qDebug() << "WebSocket connected";
+    if (m_debug)
+        qDebug() << "WebSocket connected";
     connect(&m_webSocket, &QWebSocket::textMessageReceived,
             this, &EchoClient::onTextMessageReceived);
     m_webSocket.sendTextMessage(QStringLiteral("Hello, world!"));
@@ -59,7 +63,8 @@ void EchoClient::onConnected()
 //! [onTextMessageReceived]
 void EchoClient::onTextMessageReceived(QString message)
 {
-    qDebug() << "Message received:" << message;
+    if (m_debug)
+        qDebug() << "Message received:" << message;
     m_webSocket.close();
 }
 //! [onTextMessageReceived]

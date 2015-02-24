@@ -40,7 +40,7 @@ class EchoClient : public QObject
 {
     Q_OBJECT
 public:
-    explicit EchoClient(const QUrl &url, QObject *parent = Q_NULLPTR);
+    explicit EchoClient(const QUrl &url, bool debug = false, QObject *parent = Q_NULLPTR);
 
 Q_SIGNALS:
     void closed();
@@ -52,6 +52,7 @@ private Q_SLOTS:
 private:
     QWebSocket m_webSocket;
     QUrl m_url;
+    bool m_debug;
 };
 
 #endif // ECHOCLIENT_H
