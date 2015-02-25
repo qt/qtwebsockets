@@ -38,14 +38,16 @@
 QT_USE_NAMESPACE
 
 //! [constructor]
-EchoServer::EchoServer(quint16 port, QObject *parent) :
+EchoServer::EchoServer(quint16 port, bool debug, QObject *parent) :
     QObject(parent),
     m_pWebSocketServer(new QWebSocketServer(QStringLiteral("Echo Server"),
                                             QWebSocketServer::NonSecureMode, this)),
-    m_clients()
+    m_clients(),
+    m_debug(debug)
 {
     if (m_pWebSocketServer->listen(QHostAddress::Any, port)) {
-        qDebug() << "Echoserver listening on port" << port;
+        if (m_debug)
+            qDebug() << "Echoserver listening on port" << port;
         connect(m_pWebSocketServer, &QWebSocketServer::newConnection,
                 this, &EchoServer::onNewConnection);
         connect(m_pWebSocketServer, &QWebSocketServer::closed, this, &EchoServer::closed);
@@ -76,10 +78,11 @@ void EchoServer::onNewConnection()
 void EchoServer::processTextMessage(QString message)
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
+    if (m_debug)
+        qDebug() << "Message received:" << message;
     if (pClient) {
         pClient->sendTextMessage(message);
     }
-    m_pWebSocketServer->close();
 }
 //! [processTextMessage]
 
@@ -87,6 +90,8 @@ void EchoServer::processTextMessage(QString message)
 void EchoServer::processBinaryMessage(QByteArray message)
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
+    if (m_debug)
+        qDebug() << "Binary Message received:" << message;
     if (pClient) {
         pClient->sendBinaryMessage(message);
     }
@@ -97,6 +102,8 @@ void EchoServer::processBinaryMessage(QByteArray message)
 void EchoServer::socketDisconnected()
 {
     QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
+    if (m_debug)
+        qDebug() << "socketDisconnected:" << pClient;
     if (pClient) {
         m_clients.removeAll(pClient);
         pClient->deleteLater();
