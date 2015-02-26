@@ -227,9 +227,9 @@ void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream)
     if (m_requestUrl.isRelative()) {
         // see http://tools.ietf.org/html/rfc6455#page-17
         // No. 4 item in "The requirements for this handshake"
-        int idx = host.indexOf(":");
+        int idx = host.indexOf(QStringLiteral(":"));
         bool ok = false;
-        int port;
+        int port = 0;
         if (idx != -1) {
             port = host.rightRef(host.length() - idx - 1).toInt(&ok);
             host.truncate(idx);
