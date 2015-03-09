@@ -410,6 +410,7 @@ void tst_QWebSocket::tst_sendTextMessage()
     QSignalSpy textFrameReceived(&socket, SIGNAL(textFrameReceived(QString,bool)));
     QSignalSpy binaryMessageReceived(&socket, SIGNAL(binaryMessageReceived(QByteArray)));
     QSignalSpy binaryFrameReceived(&socket, SIGNAL(binaryFrameReceived(QByteArray,bool)));
+    QSignalSpy socketError(&socket, SIGNAL(error(QAbstractSocket::SocketError)));
 
     QUrl url = QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
                     QStringLiteral(":") + QString::number(echoServer.port()));
@@ -419,6 +420,7 @@ void tst_QWebSocket::tst_sendTextMessage()
 
     if (socketConnectedSpy.count() == 0)
         QVERIFY(socketConnectedSpy.wait(500));
+    QCOMPARE(socketError.count(), 0);
     QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
 
     socket.sendTextMessage(QStringLiteral("Hello world!"));

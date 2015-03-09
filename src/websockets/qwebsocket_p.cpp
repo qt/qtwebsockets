@@ -105,7 +105,8 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
     m_dataProcessor(),
     m_configuration(),
     m_pMaskGenerator(&m_defaultMaskGenerator),
-    m_defaultMaskGenerator()
+    m_defaultMaskGenerator(),
+    m_handshakeState(NothingDoneState)
 {
 }
 
