@@ -353,8 +353,9 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
         m_isClosingHandshakeSent = false;
 
         setRequestUrl(url);
-        QString resourceName = url.path();
-        if (resourceName.contains(QStringLiteral("\r\n"))) {
+        QString resourceName = url.path(QUrl::FullyEncoded);
+        // Check for encoded \r\n
+        if (resourceName.contains(QStringLiteral("%0D%0A"))) {
             setRequestUrl(QUrl());  //clear requestUrl
             setErrorString(QWebSocket::tr("Invalid resource name."));
             Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);

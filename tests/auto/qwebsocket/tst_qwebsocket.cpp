@@ -50,6 +50,9 @@ public:
     QHostAddress hostAddress() const { return m_pWebSocketServer->serverAddress(); }
     quint16 port() const { return m_pWebSocketServer->serverPort(); }
 
+Q_SIGNALS:
+    void newConnection(QUrl requestUrl);
+
 private Q_SLOTS:
     void onNewConnection();
     void processTextMessage(QString message);
@@ -82,6 +85,8 @@ EchoServer::~EchoServer()
 void EchoServer::onNewConnection()
 {
     QWebSocket *pSocket = m_pWebSocketServer->nextPendingConnection();
+
+    Q_EMIT newConnection(pSocket->requestUrl());
 
     connect(pSocket, SIGNAL(textMessageReceived(QString)), this, SLOT(processTextMessage(QString)));
     connect(pSocket, SIGNAL(binaryMessageReceived(QByteArray)), this, SLOT(processBinaryMessage(QByteArray)));
@@ -406,6 +411,7 @@ void tst_QWebSocket::tst_sendTextMessage()
     QCOMPARE(socket.sendTextMessage(QStringLiteral("1234")), 0);
 
     QSignalSpy socketConnectedSpy(&socket, SIGNAL(connected()));
+    QSignalSpy serverConnectedSpy(&echoServer, SIGNAL(newConnection(QUrl)));
     QSignalSpy textMessageReceived(&socket, SIGNAL(textMessageReceived(QString)));
     QSignalSpy textFrameReceived(&socket, SIGNAL(textFrameReceived(QString,bool)));
     QSignalSpy binaryMessageReceived(&socket, SIGNAL(binaryMessageReceived(QByteArray)));
@@ -414,6 +420,7 @@ void tst_QWebSocket::tst_sendTextMessage()
 
     QUrl url = QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
                     QStringLiteral(":") + QString::number(echoServer.port()));
+    url.setPath("/segment/with spaces");
     url.addQueryItem("queryitem", "with encoded characters");
 
     socket.open(url);
@@ -422,6 +429,10 @@ void tst_QWebSocket::tst_sendTextMessage()
         QVERIFY(socketConnectedSpy.wait(500));
     QCOMPARE(socketError.count(), 0);
     QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
+    QCOMPARE(serverConnectedSpy.count(), 1);
+    QList<QVariant> arguments = serverConnectedSpy.takeFirst();
+    QUrl urlConnected = arguments.at(0).toUrl();
+    QCOMPARE(urlConnected, url);
 
     socket.sendTextMessage(QStringLiteral("Hello world!"));
 
@@ -429,7 +440,7 @@ void tst_QWebSocket::tst_sendTextMessage()
     QCOMPARE(textMessageReceived.count(), 1);
     QCOMPARE(binaryMessageReceived.count(), 0);
     QCOMPARE(binaryFrameReceived.count(), 0);
-    QList<QVariant> arguments = textMessageReceived.takeFirst();
+    arguments = textMessageReceived.takeFirst();
     QString messageReceived = arguments.at(0).toString();
     QCOMPARE(messageReceived, QStringLiteral("Hello world!"));
 
