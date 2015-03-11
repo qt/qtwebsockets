@@ -67,7 +67,7 @@ EchoServer::EchoServer(QObject *parent) :
                                             QWebSocketServer::NonSecureMode, this)),
     m_clients()
 {
-    if (m_pWebSocketServer->listen()) {
+    if (m_pWebSocketServer->listen(QHostAddress(QStringLiteral("127.0.0.1")))) {
         connect(m_pWebSocketServer, SIGNAL(newConnection()),
                 this, SLOT(onNewConnection()));
     }
@@ -398,8 +398,6 @@ void tst_QWebSocket::tst_invalidOrigin()
 
 void tst_QWebSocket::tst_sendTextMessage()
 {
-    //TODO: will resolve in another commit
-#ifndef Q_OS_WIN
     EchoServer echoServer;
 
     QWebSocket socket;
@@ -475,13 +473,10 @@ void tst_QWebSocket::tst_sendTextMessage()
     socket.close(QWebSocketProtocol::CloseCodeGoingAway, reason);
     QCOMPARE(socket.closeCode(), QWebSocketProtocol::CloseCodeGoingAway);
     QCOMPARE(socket.closeReason(), reason);
-#endif
 }
 
 void tst_QWebSocket::tst_sendBinaryMessage()
 {
-    //TODO: will resolve in another commit
-#ifndef Q_OS_WIN
     EchoServer echoServer;
 
     QWebSocket socket;
@@ -549,7 +544,6 @@ void tst_QWebSocket::tst_sendBinaryMessage()
     isLastFrame = arguments.at(1).toBool();
     QCOMPARE(frameReceived, QByteArrayLiteral("Hello world!"));
     QVERIFY(isLastFrame);
-#endif
 }
 
 void tst_QWebSocket::tst_errorString()
@@ -565,7 +559,7 @@ void tst_QWebSocket::tst_errorString()
     socket.open(QUrl(QStringLiteral("ws://someserver.on.mars:9999")));
 
     if (errorSpy.count() == 0)
-        errorSpy.wait();
+        errorSpy.wait(500);
     QCOMPARE(errorSpy.count(), 1);
     QList<QVariant> arguments = errorSpy.takeFirst();
     QAbstractSocket::SocketError socketError =
