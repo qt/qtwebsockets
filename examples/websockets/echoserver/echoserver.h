@@ -44,7 +44,7 @@ class EchoServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit EchoServer(quint16 port, QObject *parent = Q_NULLPTR);
+    explicit EchoServer(quint16 port, bool debug = false, QObject *parent = Q_NULLPTR);
     ~EchoServer();
 
 Q_SIGNALS:
@@ -59,6 +59,7 @@ private Q_SLOTS:
 private:
     QWebSocketServer *m_pWebSocketServer;
     QList<QWebSocket *> m_clients;
+    bool m_debug;
 };
 
 #endif //ECHOSERVER_H

@@ -30,7 +30,7 @@
     \ingroup modules
     \qtvariable websockets
     \since 5.3
-    \brief List of C++ classes that provide WebSockets communication.
+    \brief List of C++ classes that enable WebSocket-based communication.
 
     To use these classes in your application, use the following include
     statement:
@@ -51,9 +51,8 @@
     \qmlmodule QtWebSockets 1.0
     \title Qt WebSockets QML Types
     \ingroup qmlmodules
-    \brief Provides QML types for WebSockets communication.
+    \brief Provides QML types for WebSocket-based communication.
 
-    \annotatedlist websockets-qml
 
     The QML types are accessed by using:
     \code

@@ -15,3 +15,5 @@ HEADERS += \
     sslechoserver.h
 
 OTHER_FILES += sslechoclient.html
+
+RESOURCES += securesocketclient.qrc
