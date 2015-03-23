@@ -13,7 +13,7 @@ It is implemented as a Qt add-on module, that can easily be embedded into existi
 Qt 5.x
 
 ### Build And Usage
-Checkout the source code from gitorious
+Checkout the source code from code.qt.io
 Go into the source directory and execute:
 
     qmake
