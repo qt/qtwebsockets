@@ -64,6 +64,7 @@ private Q_SLOTS:
     void tst_listening();
     void tst_connectivity();
     void tst_maxPendingConnections();
+    void tst_serverDestroyedWhileSocketConnected();
 };
 
 tst_QWebSocketServer::tst_QWebSocketServer()
@@ -350,6 +351,39 @@ void tst_QWebSocketServer::tst_maxPendingConnections()
     QCOMPARE(serverAcceptErrorSpy.count(), 0);
 }
 
+void tst_QWebSocketServer::tst_serverDestroyedWhileSocketConnected()
+{
+    QWebSocketServer * server = new QWebSocketServer(QString(), QWebSocketServer::NonSecureMode);
+    QSignalSpy serverConnectionSpy(server, SIGNAL(newConnection()));
+    QSignalSpy corsAuthenticationSpy(server,
+                              SIGNAL(originAuthenticationRequired(QWebSocketCorsAuthenticator*)));
+    QSignalSpy serverClosedSpy(server, SIGNAL(closed()));
+
+    QWebSocket socket;
+    QSignalSpy socketConnectedSpy(&socket, SIGNAL(connected()));
+    QSignalSpy socketDisconnectedSpy(&socket, SIGNAL(disconnected()));
+
+    QVERIFY(server->listen());
+    QCOMPARE(server->serverAddress(), QHostAddress(QHostAddress::Any));
+    QCOMPARE(server->serverUrl(), QUrl(QStringLiteral("ws://") + QHostAddress(QHostAddress::LocalHost).toString() +
+                                  QStringLiteral(":").append(QString::number(server->serverPort()))));
+
+    socket.open(server->serverUrl().toString());
+
+    if (socketConnectedSpy.count() == 0)
+        QVERIFY(socketConnectedSpy.wait());
+    QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
+    QCOMPARE(serverConnectionSpy.count(), 1);
+    QCOMPARE(corsAuthenticationSpy.count(), 1);
+
+    QCOMPARE(serverClosedSpy.count(), 0);
+
+    delete server;
+
+    if (socketDisconnectedSpy.count() == 0)
+        QVERIFY(socketDisconnectedSpy.wait());
+    QCOMPARE(socketDisconnectedSpy.count(), 1);
+}
 
 QTEST_MAIN(tst_QWebSocketServer)
 

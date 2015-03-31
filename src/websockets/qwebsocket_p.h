@@ -162,6 +162,8 @@ private:
     void setSocketState(QAbstractSocket::SocketState state);
     void setErrorString(const QString &errorString);
 
+    void socketDestroyed(QObject *socket);
+
     void processData();
     void processPing(const QByteArray &data);
     void processPong(const QByteArray &data);
