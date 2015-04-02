@@ -135,6 +135,7 @@ private Q_SLOTS:
     void tst_sendTextMessage();
     void tst_sendBinaryMessage();
     void tst_errorString();
+    void tst_openRequest();
 #ifndef QT_NO_NETWORKPROXY
     void tst_setProxy();
 #endif
@@ -566,6 +567,27 @@ void tst_QWebSocket::tst_errorString()
             qvariant_cast<QAbstractSocket::SocketError>(arguments.at(0));
     QCOMPARE(socketError, QAbstractSocket::HostNotFoundError);
     QCOMPARE(socket.errorString(), QStringLiteral("Host not found"));
+}
+
+void tst_QWebSocket::tst_openRequest()
+{
+    EchoServer echoServer;
+
+    QWebSocket socket;
+
+    QSignalSpy socketConnectedSpy(&socket, SIGNAL(connected()));
+
+    QUrl url = QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
+                    QLatin1Char(':') + QString::number(echoServer.port()));
+    url.addQueryItem("queryitem", "with encoded characters");
+    QNetworkRequest req(url);
+    socket.open(req);
+
+    if (socketConnectedSpy.count() == 0)
+        QVERIFY(socketConnectedSpy.wait(500));
+    QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
+
+    socket.close();
 }
 
 #ifndef QT_NO_NETWORKPROXY

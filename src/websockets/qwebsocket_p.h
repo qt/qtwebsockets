@@ -126,7 +126,7 @@ public:
 
     QWebSocketProtocol::Version version() const;
     QString resourceName() const;
-    QUrl requestUrl() const;
+    QNetworkRequest request() const;
     QString origin() const;
     QString protocol() const;
     QString extension() const;
@@ -144,7 +144,7 @@ public:
 #endif
 
     void close(QWebSocketProtocol::CloseCode closeCode, QString reason);
-    void open(const QUrl &url, bool mask);
+    void open(const QNetworkRequest &request, bool mask);
     void ping(const QByteArray &payload);
 
     QWebSocket * const q_ptr;
@@ -154,7 +154,7 @@ private:
                       QWebSocket *pWebSocket);
     void setVersion(QWebSocketProtocol::Version version);
     void setResourceName(const QString &resourceName);
-    void setRequestUrl(const QUrl &requestUrl);
+    void setRequest(const QNetworkRequest &request);
     void setOrigin(const QString &origin);
     void setProtocol(const QString &protocol);
     void setExtension(const QString &extension);
@@ -199,7 +199,7 @@ private:
     QWebSocketProtocol::Version m_version;
     QUrl m_resource;
     QString m_resourceName;
-    QUrl m_requestUrl;
+    QNetworkRequest m_request;
     QString m_origin;
     QString m_protocol;
     QString m_extension;

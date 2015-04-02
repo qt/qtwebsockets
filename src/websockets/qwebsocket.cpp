@@ -389,7 +389,20 @@ void QWebSocket::close(QWebSocketProtocol::CloseCode closeCode, const QString &r
 void QWebSocket::open(const QUrl &url)
 {
     Q_D(QWebSocket);
-    d->open(url, true);
+    QNetworkRequest request(url);
+    d->open(request, true);
+}
+
+/*!
+    \brief Opens a WebSocket connection using the given \a request.
+    \since 5.6
+
+    The \a request url will be used to open the WebSocket connection.
+ */
+void QWebSocket::open(const QNetworkRequest &request)
+{
+    Q_D(QWebSocket);
+    d->open(request, true);
 }
 
 /*!
@@ -512,7 +525,17 @@ QString QWebSocket::resourceName() const
 QUrl QWebSocket::requestUrl() const
 {
     Q_D(const QWebSocket);
-    return d->requestUrl();
+    return d->request().url();
+}
+
+/*!
+    \brief Returns the request that was or will be used to open this socket.
+    \since 5.6
+ */
+QNetworkRequest QWebSocket::request() const
+{
+    Q_D(const QWebSocket);
+    return d->request();
 }
 
 /*!
