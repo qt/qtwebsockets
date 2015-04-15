@@ -545,6 +545,10 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
         QObject::connect(pTcpSocket, &QAbstractSocket::aboutToClose, q, &QWebSocket::aboutToClose);
         QObject::connect(pTcpSocket, &QAbstractSocket::bytesWritten, q, &QWebSocket::bytesWritten);
 
+
+        QObjectPrivate::connect(pTcpSocket, &QObject::destroyed,
+                                this, &QWebSocketPrivate::socketDestroyed);
+
         //catch signals
         QObjectPrivate::connect(pTcpSocket, &QAbstractSocket::stateChanged, this,
                                 &QWebSocketPrivate::processStateChanged);
@@ -1078,6 +1082,13 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
     default:
         break;
     }
+}
+
+void QWebSocketPrivate::socketDestroyed(QObject *socket)
+{
+    Q_ASSERT(m_pSocket);
+    if (m_pSocket.data() == socket)
+        m_pSocket.take();
 }
 
 /*!
