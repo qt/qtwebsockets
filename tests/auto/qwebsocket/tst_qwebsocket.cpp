@@ -52,6 +52,7 @@ public:
 
 Q_SIGNALS:
     void newConnection(QUrl requestUrl);
+    void newConnection(QNetworkRequest request);
 
 private Q_SLOTS:
     void onNewConnection();
@@ -87,6 +88,7 @@ void EchoServer::onNewConnection()
     QWebSocket *pSocket = m_pWebSocketServer->nextPendingConnection();
 
     Q_EMIT newConnection(pSocket->requestUrl());
+    Q_EMIT newConnection(pSocket->request());
 
     connect(pSocket, SIGNAL(textMessageReceived(QString)), this, SLOT(processTextMessage(QString)));
     connect(pSocket, SIGNAL(binaryMessageReceived(QByteArray)), this, SLOT(processBinaryMessage(QByteArray)));
@@ -589,17 +591,23 @@ void tst_QWebSocket::tst_openRequest()
     QWebSocket socket;
 
     QSignalSpy socketConnectedSpy(&socket, SIGNAL(connected()));
+    QSignalSpy serverRequestSpy(&echoServer, SIGNAL(newConnection(QNetworkRequest)));
 
     QUrl url = QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
                     QLatin1Char(':') + QString::number(echoServer.port()));
     url.addQueryItem("queryitem", "with encoded characters");
     QNetworkRequest req(url);
+    req.setRawHeader("X-Custom-Header", "A custom header");
     socket.open(req);
 
     if (socketConnectedSpy.count() == 0)
         QVERIFY(socketConnectedSpy.wait(500));
     QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
-
+    QCOMPARE(serverRequestSpy.count(), 1);
+    QList<QVariant> arguments = serverRequestSpy.takeFirst();
+    QNetworkRequest requestConnected = arguments.at(0).value<QNetworkRequest>();
+    QCOMPARE(requestConnected.url(), req.url());
+    QCOMPARE(requestConnected.rawHeader("X-Custom-Header"), req.rawHeader("X-Custom-Header"));
     socket.close();
 }
 

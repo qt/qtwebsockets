@@ -398,6 +398,8 @@ void QWebSocket::open(const QUrl &url)
     \since 5.6
 
     The \a request url will be used to open the WebSocket connection.
+    Headers present in the request will be sent to the server in the upgrade request,
+    together with the ones needed for the websocket handshake.
  */
 void QWebSocket::open(const QNetworkRequest &request)
 {

@@ -282,6 +282,11 @@ QWebSocket *QWebSocketPrivate::upgradeFrom(QTcpSocket *pTcpSocket,
     QWebSocket *pWebSocket = new QWebSocket(pTcpSocket, response.acceptedVersion(), parent);
     if (Q_LIKELY(pWebSocket)) {
         QNetworkRequest netRequest(request.requestUrl());
+        QMapIterator<QString, QString> headerIter(request.headers());
+        while (headerIter.hasNext()) {
+            headerIter.next();
+            netRequest.setRawHeader(headerIter.key().toLatin1(), headerIter.value().toLatin1());
+        }
         pWebSocket->d_func()->setExtension(response.acceptedExtension());
         pWebSocket->d_func()->setOrigin(request.origin());
         pWebSocket->d_func()->setRequest(netRequest);
@@ -1044,6 +1049,12 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
     case QAbstractSocket::ConnectedState:
         if (webSocketState == QAbstractSocket::ConnectingState) {
             m_key = generateKey();
+
+            QList<QPair<QString, QString> > headers;
+            foreach (const QByteArray &key, m_request.rawHeaderList())
+                headers << qMakePair(QString::fromLatin1(key),
+                                     QString::fromLatin1(m_request.rawHeader(key)));
+
             const QString handshake =
                     createHandShakeRequest(m_resourceName,
                                            m_request.url().host()
@@ -1052,7 +1063,8 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
                                            origin(),
                                            QString(),
                                            QString(),
-                                           m_key);
+                                           m_key,
+                                           headers);
             if (handshake.isEmpty()) {
                 m_pSocket->abort();
                 Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
@@ -1151,7 +1163,8 @@ QString QWebSocketPrivate::createHandShakeRequest(QString resourceName,
                                                   QString origin,
                                                   QString extensions,
                                                   QString protocols,
-                                                  QByteArray key)
+                                                  QByteArray key,
+                                                  QList<QPair<QString, QString> > headers)
 {
     QStringList handshakeRequest;
     if (resourceName.contains(QStringLiteral("\r\n"))) {
@@ -1193,6 +1206,12 @@ QString QWebSocketPrivate::createHandShakeRequest(QString resourceName,
         handshakeRequest << QStringLiteral("Sec-WebSocket-Extensions: ") % extensions;
     if (protocols.length() > 0)
         handshakeRequest << QStringLiteral("Sec-WebSocket-Protocol: ") % protocols;
+
+    QListIterator<QPair<QString, QString> > headerIter(headers);
+    while (headerIter.hasNext()) {
+        const QPair<QString,QString> &header = headerIter.next();
+        handshakeRequest << header.first % QStringLiteral(": ") % header.second;
+    }
     handshakeRequest << QStringLiteral("\r\n");
 
     return handshakeRequest.join(QStringLiteral("\r\n"));
