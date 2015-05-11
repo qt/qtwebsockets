@@ -105,7 +105,7 @@ void tst_ComplianceTest::runTestCase(int nbr, int total)
 
     qDebug() << "Executing test" << (nbr + 1) << "/" << total;
     QUrl url = m_url;
-    url.setPath(QStringLiteral("/runCase?"));
+    url.setPath(QStringLiteral("/runCase"));
     QUrlQuery query;
     query.addQueryItem(QStringLiteral("case"), QString::number(nbr + 1));
     query.addQueryItem(QStringLiteral("agent"), QStringLiteral("QtWebSockets/1.0"));
@@ -142,7 +142,7 @@ void tst_ComplianceTest::autobahnTest()
     QObject::disconnect(pWebSocket, &QWebSocket::textMessageReceived, 0, 0);
     runTestCases(0, numberOfTestCases);
 
-    url.setPath(QStringLiteral("/updateReports?"));
+    url.setPath(QStringLiteral("/updateReports"));
     QUrlQuery query;
     query.addQueryItem(QStringLiteral("agent"), QStringLiteral("QtWebSockets"));
     url.setQuery(query);

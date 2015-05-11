@@ -105,7 +105,8 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
     m_dataProcessor(),
     m_configuration(),
     m_pMaskGenerator(&m_defaultMaskGenerator),
-    m_defaultMaskGenerator()
+    m_defaultMaskGenerator(),
+    m_handshakeState(NothingDoneState)
 {
 }
 
@@ -354,8 +355,9 @@ void QWebSocketPrivate::open(const QNetworkRequest &request, bool mask)
         m_isClosingHandshakeSent = false;
 
         setRequest(request);
-        QString resourceName = url.path();
-        if (resourceName.contains(QStringLiteral("\r\n"))) {
+        QString resourceName = url.path(QUrl::FullyEncoded);
+        // Check for encoded \r\n
+        if (resourceName.contains(QStringLiteral("%0D%0A"))) {
             setRequest(QNetworkRequest());  //clear request
             setErrorString(QWebSocket::tr("Invalid resource name."));
             Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
@@ -544,6 +546,10 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
                          &QWebSocket::readChannelFinished);
         QObject::connect(pTcpSocket, &QAbstractSocket::aboutToClose, q, &QWebSocket::aboutToClose);
         QObject::connect(pTcpSocket, &QAbstractSocket::bytesWritten, q, &QWebSocket::bytesWritten);
+
+
+        QObjectPrivate::connect(pTcpSocket, &QObject::destroyed,
+                                this, &QWebSocketPrivate::socketDestroyed);
 
         //catch signals
         QObjectPrivate::connect(pTcpSocket, &QAbstractSocket::stateChanged, this,
@@ -1078,6 +1084,13 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
     default:
         break;
     }
+}
+
+void QWebSocketPrivate::socketDestroyed(QObject *socket)
+{
+    Q_ASSERT(m_pSocket);
+    if (m_pSocket.data() == socket)
+        m_pSocket.take();
 }
 
 /*!
