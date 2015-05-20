@@ -56,4 +56,3 @@ include
 tests/auto/cmake/build
 lib/
 mkspecs/
-qml/
