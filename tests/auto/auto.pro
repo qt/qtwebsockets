@@ -1,6 +1,6 @@
 TEMPLATE = subdirs
 
-SUBDIRS += websockets
+SUBDIRS += cmake websockets
 
 qtHaveModule(quick) {
     SUBDIRS += qml
