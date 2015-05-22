@@ -1038,6 +1038,10 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
     Q_ASSERT(m_pSocket);
     Q_Q(QWebSocket);
     QAbstractSocket::SocketState webSocketState = this->state();
+    int port = 80;
+    if (m_requestUrl.scheme() == QStringLiteral("wss"))
+        port = 443;
+
     switch (socketState) {
     case QAbstractSocket::ConnectedState:
         if (webSocketState == QAbstractSocket::ConnectingState) {
@@ -1046,7 +1050,7 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
                     createHandShakeRequest(m_resourceName,
                                            m_requestUrl.host()
                                                 % QStringLiteral(":")
-                                                % QString::number(m_requestUrl.port(80)),
+                                                % QString::number(m_requestUrl.port(port)),
                                            origin(),
                                            QString(),
                                            QString(),
