@@ -370,13 +370,15 @@ void QWebSocketServerPrivate::setError(QWebSocketProtocol::CloseCode code, const
  */
 void QWebSocketServerPrivate::onNewConnection()
 {
-    QTcpSocket *pTcpSocket = m_pTcpServer->nextPendingConnection();
-    //use a queued connection because a QSslSocket
-    //needs the event loop to process incoming data
-    //if not queued, data is incomplete when handshakeReceived is called
-    QObjectPrivate::connect(pTcpSocket, &QTcpSocket::readyRead,
-                            this, &QWebSocketServerPrivate::handshakeReceived,
-                            Qt::QueuedConnection);
+    while (m_pTcpServer->hasPendingConnections()) {
+        QTcpSocket *pTcpSocket = m_pTcpServer->nextPendingConnection();
+        //use a queued connection because a QSslSocket
+        //needs the event loop to process incoming data
+        //if not queued, data is incomplete when handshakeReceived is called
+        QObjectPrivate::connect(pTcpSocket, &QTcpSocket::readyRead,
+                                this, &QWebSocketServerPrivate::handshakeReceived,
+                                Qt::QueuedConnection);
+    }
 }
 
 /*!
