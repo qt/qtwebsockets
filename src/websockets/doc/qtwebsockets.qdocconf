@@ -54,7 +54,11 @@ examples.fileextensions                             += "*.html"
 
 imagedirs                                           += ../../../examples/websockets/doc/images
 
-manifestmeta.thumbnail.names                        += "QtWebSockets/*"
+#add generic thumbnail images for example documentation that does not have an image.
+manifestmeta.thumbnail.names                        += "QtWebSockets/Echo Client*" \
+                                                       "QtWebSockets/QML*" \
+                                                       "QtWebSockets/SSL*" \
+                                                       "QtWebSockets/Simple*"
 
 navigation.landingpage                              = "Qt WebSockets"
 navigation.cppclassespage                           = "Qt WebSockets C++ Classes"
