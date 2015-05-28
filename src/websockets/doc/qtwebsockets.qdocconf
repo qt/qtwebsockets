@@ -53,7 +53,8 @@ exampledirs                                         += ../../../examples/websock
 
 examples.fileextensions                             += "*.html"
 
-imagedirs                                           += ../../../examples/websockets/doc/images
+imagedirs                                           += ../../../examples/websockets/doc/images \
+                                                       images
 
 manifestmeta.thumbnail.names                        += "QtWebSockets/*"
 
