@@ -593,6 +593,7 @@ void tst_QWebSocket::tst_openRequest()
     req.setRawHeader("X-Custom-Header", "A custom header");
     socket.open(req);
 
+    QTRY_COMPARE(socketConnectedSpy.count(), 1);
     QTRY_COMPARE(serverRequestSpy.count(), 1);
     QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
     QList<QVariant> arguments = serverRequestSpy.takeFirst();
