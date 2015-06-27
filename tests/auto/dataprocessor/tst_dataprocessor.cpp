@@ -329,7 +329,7 @@ void tst_DataProcessor::goodTextFrame_data()
     //error C2308: concatenating mismatched strings
     QTest::newRow((QStringLiteral("Text frame containing Hello-") +
                   QStringLiteral("\xC2\xB5\x40\xC3\x9F\xC3\xB6\xC3\xA4\xC3\xBC\xC3\xA0") +
-                  QStringLiteral("\xC3\xA1-UTF-8!!")).toLatin1().constData())
+                  QStringLiteral("\xC3\xA1-UTF-8!!")).toUtf8().constData())
             << QByteArray::fromHex("48656c6c6f2dc2b540c39fc3b6c3a4c3bcc3a0c3a12d5554462d382121")
             << 22;
 }
