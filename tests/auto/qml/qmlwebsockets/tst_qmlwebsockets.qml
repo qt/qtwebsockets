@@ -1,9 +1,9 @@
 /****************************************************************************
 **
-** Copyright (C) 2014 Klarälvdalens Datakonsult AB, a KDAB Group company, info@kdab.com, author Milian Wolff <milian.wolff@kdab.com>
+** Copyright (C) 2015 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
 **
-** This file is part of the QtWebSocket module of the Qt Toolkit.
+** This file is part of the test suite of the Qt Toolkit.
 **
 ** $QT_BEGIN_LICENSE:LGPL21$
 ** Commercial License Usage
@@ -31,7 +31,7 @@
 **
 ****************************************************************************/
 
-import QtQuick 2.0
+import QtQuick 2.5
 import QtWebSockets 1.0
 
 Rectangle {
@@ -44,41 +44,9 @@ Rectangle {
 
     WebSocketServer {
         id: server
-        listen: true
-        onClientConnected: {
-            webSocket.onTextMessageReceived.connect(function(message) {
-                appendMessage(qsTr("Server received message: %1").arg(message));
-                webSocket.sendTextMessage(qsTr("Hello Client!"));
-            });
-        }
-        onErrorStringChanged: {
-            appendMessage(qsTr("Server error: %1").arg(errorString));
-        }
     }
 
     WebSocket {
         id: socket
-        url: server.url
-        onTextMessageReceived: appendMessage(qsTr("Client received message: %1").arg(message))
-        onStatusChanged: {
-            if (socket.status == WebSocket.Error) {
-                appendMessage(qsTr("Client error: %1").arg(socket.errorString));
-            } else if (socket.status == WebSocket.Closed) {
-                appendMessage(qsTr("Client socket closed."));
-            }
-        }
-    }
-
-    Text {
-        id: messageBox
-        text: qsTr("Click to send a message!")
-        anchors.fill: parent
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                socket.sendTextMessage(qsTr("Hello Server!"));
-            }
-        }
     }
 }

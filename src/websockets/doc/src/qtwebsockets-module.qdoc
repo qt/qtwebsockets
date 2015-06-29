@@ -58,4 +58,9 @@
     \code
     import QtWebSockets 1.0
     \endcode
+
+    \note Prior to Qt 5.5, the import statement was \c{import Qt.WebSockets 1.0}
+    (notice the dot between \c Qt and \c WebSockets). The old statement is still
+    supported for backwards compatibility, but it cannot be mixed with the new
+    statement within the same project.
 */

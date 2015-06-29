@@ -37,11 +37,9 @@
     the solution for applications that struggle to get real-time data feeds
     with less network latency and minimum data exchange.
 
-    The Qt WebSockets module implements the WebSocket protocol as specified in
-    \l {http://tools.ietf.org/html/rfc6455} {RFC 6455}. It provides C++ and QML
-    interfaces that enable Qt applications to act as a server that can process
-    WebSocket-based requests, or a client that can consume data received from
-    the server, or both.
+    The Qt WebSockets module provides C++ and QML interfaces that enable
+    Qt applications to act as a server that can process WebSocket requests,
+    or a client that can consume data received from the server, or both.
 
     To use this module in your application, use the following include
     statement:
@@ -57,8 +55,9 @@
     QT += websockets
     \endcode
 
-    \section1 Reference documentation
+    \section1 Reference Documentation
     \list
+    \li \l{Qt WebSockets Overview}{Overview}
     \li \l{Qt WebSockets C++ Classes}{C++ Classes}
     \li \l{Qt WebSockets QML Types}{QML Types}
     \endlist
@@ -67,4 +66,22 @@
 
     The module provides the following \l{Qt WebSockets Examples}{Examples} as a guide to using
     the API.
+
+    \section1 Conformance
+    \list
+    \li \l {Testing Qt WebSockets}
+    \endlist
+*/
+
+/*!
+    \page qtwebsockets-testing.html
+    \title Testing Qt WebSockets
+
+    \l {http://autobahn.ws/testsuite/}{Autobahn|Testsuite}, a standard test
+    suite for WebSocket Protocol (RFC 6455), can be used for testing the
+    conformance of Qt WebSockets. Refer to Autobahn|Testsuite
+    \l {http://autobahn.ws/testsuite/installation.html}{installation documentation}
+    to set up the test suite.
+
+    \include README testsuite
 */
