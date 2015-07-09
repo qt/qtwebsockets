@@ -201,7 +201,7 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(
         if (Q_UNLIKELY(!m_canUpgrade)) {
             response << QStringLiteral("HTTP/1.1 400 Bad Request");
             QStringList versions;
-            Q_FOREACH (const QWebSocketProtocol::Version &version, supportedVersions)
+            Q_FOREACH (QWebSocketProtocol::Version version, supportedVersions)
                 versions << QString::number(static_cast<int>(version));
             response << QStringLiteral("Sec-WebSocket-Version: ")
                                 % versions.join(QStringLiteral(", "));
