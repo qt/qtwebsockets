@@ -44,6 +44,7 @@ Rectangle {
 
     WebSocketServer {
         id: server
+        port: 1337
     }
 
     WebSocket {

@@ -59,7 +59,9 @@ QT_USE_NAMESPACE
 
 /*!
   \qmlproperty int WebSocketServer::port
-  The port this server is listening on. By default, a port is chosen automatically.
+  The port this server is listening on. The value must be in the range 0-65535.
+
+  By default, a port is chosen automatically.
   */
 
 /*!
@@ -144,17 +146,21 @@ void QQmlWebSocketServer::setHost(const QString &host)
     updateListening();
 }
 
-quint16 QQmlWebSocketServer::port() const
+int QQmlWebSocketServer::port() const
 {
     return m_port;
 }
 
-void QQmlWebSocketServer::setPort(quint16 port)
+void QQmlWebSocketServer::setPort(int port)
 {
     if (port == m_port) {
         return;
     }
 
+    if (port < 0 || port > 65535) {
+        qWarning() << "QQmlWebSocketServer::setPort: port " << port << " is invalid. It must be in the range 0-65535.";
+        return;
+    }
     m_port = port;
     emit portChanged(port);
     emit urlChanged(url());

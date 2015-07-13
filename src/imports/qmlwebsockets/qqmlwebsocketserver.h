@@ -49,7 +49,7 @@ class QQmlWebSocketServer : public QObject, public QQmlParserStatus
 
     Q_PROPERTY(QUrl url READ url NOTIFY urlChanged)
     Q_PROPERTY(QString host READ host WRITE setHost NOTIFY hostChanged)
-    Q_PROPERTY(quint16 port READ port WRITE setPort NOTIFY portChanged)
+    Q_PROPERTY(int port READ port WRITE setPort NOTIFY portChanged)
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     Q_PROPERTY(QString errorString READ errorString NOTIFY errorStringChanged)
     Q_PROPERTY(bool listen READ listen WRITE setListen NOTIFY listenChanged)
@@ -67,8 +67,8 @@ public:
     QString host() const;
     void setHost(const QString &host);
 
-    quint16 port() const;
-    void setPort(quint16 port);
+    int port() const;
+    void setPort(int port);
 
     QString name() const;
     void setName(const QString &name);
@@ -86,7 +86,7 @@ Q_SIGNALS:
 
     void errorStringChanged(const QString &errorString);
     void urlChanged(const QUrl &url);
-    void portChanged(quint16 port);
+    void portChanged(int port);
     void nameChanged(const QString &name);
     void hostChanged(const QString &host);
     void listenChanged(bool listen);
@@ -102,7 +102,7 @@ private:
     QScopedPointer<QWebSocketServer> m_server;
     QString m_host;
     QString m_name;
-    quint16 m_port;
+    int m_port;
     bool m_listen;
     bool m_accept;
     bool m_componentCompleted;
