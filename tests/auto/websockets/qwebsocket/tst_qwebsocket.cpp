@@ -140,6 +140,8 @@ private Q_SLOTS:
     void tst_sendTextMessage();
     void tst_sendBinaryMessage();
     void tst_errorString();
+    void tst_moveToThread();
+    void tst_moveToThreadNoWarning();
 #ifndef QT_NO_NETWORKPROXY
     void tst_setProxy();
 #endif
@@ -580,6 +582,107 @@ void tst_QWebSocket::tst_errorString()
     QCOMPARE(socketError, QAbstractSocket::HostNotFoundError);
     QCOMPARE(socket.errorString(), QStringLiteral("Host not found"));
 }
+
+class WebSocket : public QWebSocket
+{
+    Q_OBJECT
+
+public:
+    explicit WebSocket()
+    {
+        connect(this, SIGNAL(triggerClose()), SLOT(onClose()), Qt::QueuedConnection);
+        connect(this, SIGNAL(triggerOpen(QUrl)), SLOT(onOpen(QUrl)), Qt::QueuedConnection);
+        connect(this, SIGNAL(triggerSendTextMessage(QString)), SLOT(onSendTextMessage(QString)), Qt::QueuedConnection);
+        connect(this, SIGNAL(textMessageReceived(QString)), this, SLOT(onTextMessageReceived(QString)), Qt::QueuedConnection);
+    }
+
+    void asyncClose() { triggerClose(); }
+    void asyncOpen(const QUrl &url) { triggerOpen(url); }
+    void asyncSendTextMessage(const QString &msg) { triggerSendTextMessage(msg); }
+
+    QString receivedMessage;
+
+Q_SIGNALS:
+    void triggerClose();
+    void triggerOpen(const QUrl &);
+    void triggerSendTextMessage(const QString &);
+    void done();
+
+private Q_SLOTS:
+    void onClose() { close(); }
+    void onOpen(const QUrl &url) { open(url); }
+    void onSendTextMessage(const QString &msg) { sendTextMessage(msg); }
+    void onTextMessageReceived(const QString &msg) { receivedMessage = msg; done(); }
+};
+
+struct Warned
+{
+    static QtMessageHandler origHandler;
+    static bool warned;
+    static void messageHandler(QtMsgType type, const QMessageLogContext& context, const QString& str)
+    {
+        if (type == QtWarningMsg) {
+            warned = true;
+        }
+        if (origHandler)
+            origHandler(type, context, str);
+    }
+};
+QtMessageHandler Warned::origHandler = 0;
+bool Warned::warned = false;
+
+
+void tst_QWebSocket::tst_moveToThread()
+{
+    Warned::origHandler = qInstallMessageHandler(&Warned::messageHandler);
+
+    EchoServer echoServer;
+
+    QThread* thread = new QThread;
+    thread->start();
+
+    WebSocket* socket = new WebSocket;
+    socket->moveToThread(thread);
+
+    const QString textMessage = QStringLiteral("Hello world!");
+    QSignalSpy socketConnectedSpy(socket, SIGNAL(connected()));
+    QUrl url = QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
+                    QStringLiteral(":") + QString::number(echoServer.port()));
+    url.setPath("/segment/with spaces");
+    url.addQueryItem("queryitem", "with encoded characters");
+
+    socket->asyncOpen(url);
+    if (socketConnectedSpy.count() == 0)
+        QVERIFY(socketConnectedSpy.wait(500));
+
+    socket->asyncSendTextMessage(textMessage);
+
+    QTimer timer;
+    timer.setInterval(1000);
+    timer.start();
+    QEventLoop loop;
+    connect(socket, SIGNAL(done()), &loop, SLOT(quit()));
+    connect(socket, SIGNAL(done()), &timer, SLOT(stop()));
+    connect(&timer, SIGNAL(timeout()), &loop, SLOT(quit()));
+    loop.exec();
+
+    socket->asyncClose();
+
+    QCOMPARE(timer.isActive(), false);
+    QCOMPARE(socket->receivedMessage, textMessage);
+
+    socket->deleteLater();
+    thread->quit();
+    thread->deleteLater();
+}
+
+void tst_QWebSocket::tst_moveToThreadNoWarning()
+{
+    // check for warnings in tst_moveToThread()
+    // couldn't done there because warnings are processed after the test run
+    QCOMPARE(Warned::warned, false);
+}
+
 
 #ifndef QT_NO_NETWORKPROXY
 void tst_QWebSocket::tst_setProxy()

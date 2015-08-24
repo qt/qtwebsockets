@@ -84,7 +84,7 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
                                      QWebSocket *pWebSocket) :
     QObjectPrivate(),
     q_ptr(pWebSocket),
-    m_pSocket(),
+    m_pSocket(Q_NULLPTR),
     m_errorString(),
     m_version(version),
     m_resourceName(),
@@ -154,7 +154,7 @@ void QWebSocketPrivate::init()
     m_pMaskGenerator->seed();
 
     if (m_pSocket) {
-        makeConnections(m_pSocket.data());
+        makeConnections(m_pSocket);
     }
 }
 
@@ -163,11 +163,18 @@ void QWebSocketPrivate::init()
 */
 QWebSocketPrivate::~QWebSocketPrivate()
 {
+}
+
+/*!
+    \internal
+*/
+void QWebSocketPrivate::closeGoingAway()
+{
     if (!m_pSocket)
         return;
     if (state() == QAbstractSocket::ConnectedState)
         close(QWebSocketProtocol::CloseCodeGoingAway, QWebSocket::tr("Connection closed"));
-    releaseConnections(m_pSocket.data());
+    releaseConnections(m_pSocket);
 }
 
 /*!
@@ -262,7 +269,7 @@ void QWebSocketPrivate::ignoreSslErrors()
 {
     m_configuration.m_ignoreSslErrors = true;
     if (Q_LIKELY(m_pSocket)) {
-        QSslSocket *pSslSocket = qobject_cast<QSslSocket *>(m_pSocket.data());
+        QSslSocket *pSslSocket = qobject_cast<QSslSocket *>(m_pSocket);
         if (Q_LIKELY(pSslSocket))
             pSslSocket->ignoreSslErrors();
     }
@@ -334,17 +341,17 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
 {
     //just delete the old socket for the moment;
     //later, we can add more 'intelligent' handling by looking at the URL
-    //m_pSocket.reset();
+
     Q_Q(QWebSocket);
     if (!url.isValid() || url.toString().contains(QStringLiteral("\r\n"))) {
         setErrorString(QWebSocket::tr("Invalid URL."));
         Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
         return;
     }
-    QTcpSocket *pTcpSocket = m_pSocket.take();
-    if (pTcpSocket) {
-        releaseConnections(pTcpSocket);
-        pTcpSocket->deleteLater();
+    if (m_pSocket) {
+        releaseConnections(m_pSocket);
+        m_pSocket->deleteLater();
+        m_pSocket = Q_NULLPTR;
     }
     //if (m_url != url)
     if (Q_LIKELY(!m_pSocket)) {
@@ -380,15 +387,15 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
                 setErrorString(message);
                 Q_EMIT q->error(QAbstractSocket::UnsupportedSocketOperationError);
             } else {
-                QSslSocket *sslSocket = new QSslSocket;
-                m_pSocket.reset(sslSocket);
+                QSslSocket *sslSocket = new QSslSocket(q_ptr);
+                m_pSocket = sslSocket;
                 if (Q_LIKELY(m_pSocket)) {
                     m_pSocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
                     m_pSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
                     m_pSocket->setReadBufferSize(m_readBufferSize);
                     m_pSocket->setPauseMode(m_pauseMode);
 
-                    makeConnections(m_pSocket.data());
+                    makeConnections(m_pSocket);
                     setSocketState(QAbstractSocket::ConnectingState);
 
                     sslSocket->setSslConfiguration(m_configuration.m_sslConfiguration);
@@ -409,14 +416,14 @@ void QWebSocketPrivate::open(const QUrl &url, bool mask)
         } else
     #endif
         if (url.scheme() == QStringLiteral("ws")) {
-            m_pSocket.reset(new QTcpSocket);
+            m_pSocket = new QTcpSocket(q_ptr);
             if (Q_LIKELY(m_pSocket)) {
                 m_pSocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
                 m_pSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
                 m_pSocket->setReadBufferSize(m_readBufferSize);
                 m_pSocket->setPauseMode(m_pauseMode);
 
-                makeConnections(m_pSocket.data());
+                makeConnections(m_pSocket);
                 setSocketState(QAbstractSocket::ConnectingState);
     #ifndef QT_NO_NETWORKPROXY
                 m_pSocket->setProxy(m_configuration.m_proxy);
@@ -1091,8 +1098,8 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
 void QWebSocketPrivate::socketDestroyed(QObject *socket)
 {
     Q_ASSERT(m_pSocket);
-    if (m_pSocket.data() == socket)
-        m_pSocket.take();
+    if (m_pSocket == socket)
+        m_pSocket = Q_NULLPTR;
 }
 
 /*!
@@ -1103,9 +1110,9 @@ void QWebSocketPrivate::processData()
     Q_ASSERT(m_pSocket);
     while (m_pSocket->bytesAvailable()) {
         if (state() == QAbstractSocket::ConnectingState)
-            processHandshake(m_pSocket.data());
+            processHandshake(m_pSocket);
         else
-            m_dataProcessor.process(m_pSocket.data());
+            m_dataProcessor.process(m_pSocket);
     }
 }
 
