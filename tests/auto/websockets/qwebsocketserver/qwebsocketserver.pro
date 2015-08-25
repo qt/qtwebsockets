@@ -10,4 +10,3 @@ TEMPLATE = app
 
 SOURCES += tst_qwebsocketserver.cpp
 
-DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0
