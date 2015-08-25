@@ -424,7 +424,9 @@ void tst_QWebSocket::tst_sendTextMessage()
     QUrl url = QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
                     QStringLiteral(":") + QString::number(echoServer.port()));
     url.setPath("/segment/with spaces");
-    url.addQueryItem("queryitem", "with encoded characters");
+    QUrlQuery query;
+    query.addQueryItem("queryitem", "with encoded characters");
+    url.setQuery(query);
 
     socket.open(url);
 
@@ -588,7 +590,9 @@ void tst_QWebSocket::tst_openRequest()
 
     QUrl url = QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
                     QLatin1Char(':') + QString::number(echoServer.port()));
-    url.addQueryItem("queryitem", "with encoded characters");
+    QUrlQuery query;
+    query.addQueryItem("queryitem", "with encoded characters");
+    url.setQuery(query);
     QNetworkRequest req(url);
     req.setRawHeader("X-Custom-Header", "A custom header");
     socket.open(req);
