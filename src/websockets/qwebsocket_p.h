@@ -141,6 +141,7 @@ public:
     void ignoreSslErrors();
     void setSslConfiguration(const QSslConfiguration &sslConfiguration);
     QSslConfiguration sslConfiguration() const;
+    void _q_updateSslConfiguration();
 #endif
 
     void closeGoingAway();
