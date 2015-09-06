@@ -45,6 +45,9 @@ QT_USE_NAMESPACE
 Q_DECLARE_METATYPE(QWebSocketProtocol::CloseCode)
 Q_DECLARE_METATYPE(QWebSocketProtocol::OpCode)
 
+const int MAX_HEADERLINE_LENGTH = 8 * 1024;
+const int MAX_HEADERS = 100;
+
 class tst_HandshakeRequest : public QObject
 {
     Q_OBJECT
@@ -67,6 +70,8 @@ private Q_SLOTS:
     void tst_multipleVersions();
 
     void tst_qtbug_39355();
+    void tst_qtbug_48123_data();
+    void tst_qtbug_48123();
 };
 
 tst_HandshakeRequest::tst_HandshakeRequest()
@@ -203,7 +208,7 @@ void tst_HandshakeRequest::tst_invalidStream()
 
     textStream << dataStream;
     textStream.seek(0);
-    request.readHandshake(textStream);
+    request.readHandshake(textStream, MAX_HEADERLINE_LENGTH, MAX_HEADERS);
 
     QVERIFY(!request.isValid());
     QCOMPARE(request.port(), 80);
@@ -239,7 +244,7 @@ void tst_HandshakeRequest::tst_multipleValuesInConnectionHeader()
 
     textStream << header;
     textStream.seek(0);
-    request.readHandshake(textStream);
+    request.readHandshake(textStream, MAX_HEADERLINE_LENGTH, MAX_HEADERS);
 
     QVERIFY(request.isValid());
     QCOMPARE(request.port(), 80);
@@ -269,7 +274,7 @@ void tst_HandshakeRequest::tst_multipleVersions()
 
     textStream << header;
     textStream.seek(0);
-    request.readHandshake(textStream);
+    request.readHandshake(textStream, MAX_HEADERLINE_LENGTH, MAX_HEADERS);
 
     QVERIFY(request.isValid());
     QCOMPARE(request.port(), 80);
@@ -305,11 +310,74 @@ void tst_HandshakeRequest::tst_qtbug_39355()
 
     textStream << header;
     textStream.seek(0);
-    request.readHandshake(textStream);
+    request.readHandshake(textStream, MAX_HEADERLINE_LENGTH, MAX_HEADERS);
 
     QVERIFY(request.isValid());
     QCOMPARE(request.port(), 1234);
     QCOMPARE(request.host(), QStringLiteral("localhost"));
+}
+
+void tst_HandshakeRequest::tst_qtbug_48123_data()
+{
+    QTest::addColumn<QString>("header");
+    QTest::addColumn<bool>("shouldBeValid");
+    const QString header = QStringLiteral("GET /ABC/DEF/ HTTP/1.1\r\nHost: localhost:1234\r\n") +
+                           QStringLiteral("Sec-WebSocket-Version: 13\r\n") +
+                           QStringLiteral("Sec-WebSocket-Key: 2Wg20829/4ziWlmsUAD8Dg==\r\n") +
+                           QStringLiteral("Upgrade: websocket\r\n") +
+                           QStringLiteral("Connection: Upgrade\r\n");
+    const int numHeaderLines = header.count(QStringLiteral("\r\n")) - 1; //-1: exclude requestline
+
+    //a headerline should not be larger than MAX_HEADERLINE_LENGTH characters (excluding CRLF)
+    QString illegalHeader = header;
+    illegalHeader.append(QString(MAX_HEADERLINE_LENGTH + 1, QChar::fromAscii('c')));
+    illegalHeader.append(QStringLiteral("\r\n\r\n"));
+
+    QTest::newRow("headerline too long") << illegalHeader << false;
+
+    QString legalHeader = header;
+    const QString headerKey = QStringLiteral("X-CUSTOM-KEY: ");
+    legalHeader.append(headerKey);
+    legalHeader.append(QString(MAX_HEADERLINE_LENGTH - headerKey.length(), QChar::fromAscii('c')));
+    legalHeader.append(QStringLiteral("\r\n\r\n"));
+
+    QTest::newRow("headerline with maximum length") << legalHeader << true;
+
+    //a header should not contain more than MAX_HEADERS header lines (excluding the request line)
+    //test with MAX_HEADERS + 1
+    illegalHeader = header;
+    const QString headerLine(QStringLiteral("Host: localhost:1234\r\n"));
+    for (int i = 0; i < (MAX_HEADERS - numHeaderLines + 1); ++i) {
+        illegalHeader.append(headerLine);
+    }
+    illegalHeader.append(QStringLiteral("\r\n"));
+
+    QTest::newRow("too many headerlines") << illegalHeader << false;
+
+    //test with MAX_HEADERS header lines (excluding the request line)
+    legalHeader = header;
+    for (int i = 0; i < (MAX_HEADERS - numHeaderLines); ++i) {
+        legalHeader.append(headerLine);
+    }
+    legalHeader.append(QStringLiteral("\r\n"));
+
+    QTest::newRow("just enough headerlines") << legalHeader << true;
+}
+
+void tst_HandshakeRequest::tst_qtbug_48123()
+{
+    QFETCH(QString, header);
+    QFETCH(bool, shouldBeValid);
+
+    QByteArray data;
+    QTextStream textStream(&data);
+    QWebSocketHandshakeRequest request(8080, false);
+
+    textStream << header;
+    textStream.seek(0);
+    request.readHandshake(textStream, MAX_HEADERLINE_LENGTH, MAX_HEADERS);
+
+    QCOMPARE(request.isValid(), shouldBeValid);
 }
 
 QTEST_MAIN(tst_HandshakeRequest)

@@ -91,7 +91,7 @@ void tst_HandshakeResponse::tst_date_response()
              QStringLiteral("Sec-WebSocket-Key: AVDFBDDFF\r\n") +
              QStringLiteral("Upgrade: websocket\r\n") +
              QStringLiteral("Connection: Upgrade\r\n\r\n");
-    request.readHandshake(input);
+    request.readHandshake(input, 8 * 1024, 100);
 
     QWebSocketHandshakeResponse response(request, "example.com", true,
                                          QList<QWebSocketProtocol::Version>() << QWebSocketProtocol::Version13,

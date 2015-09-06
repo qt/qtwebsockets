@@ -183,18 +183,49 @@ QUrl QWebSocketHandshakeRequest::requestUrl() const
 }
 
 /*!
+    Reads a line of text from the given textstream (terminated by CR/LF).
+    If an empty line was detected, an empty string is returned.
+    When an error occurs, a null string is returned.
     \internal
  */
-void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream)
+static QString readLine(QTextStream &stream, int maxHeaderLineLength)
 {
-    m_isValid = false;
+    QString line;
+    char c;
+    while (!stream.atEnd()) {
+        stream >> c;
+        if (stream.status() != QTextStream::Ok)
+            return QString();
+        if (c == char('\r')) {
+            //eat the \n character
+            stream >> c;
+            line.append(QStringLiteral(""));
+            break;
+        } else {
+            line.append(QChar::fromLatin1(c));
+            if (line.length() > maxHeaderLineLength)
+                return QString();
+        }
+    }
+    return line;
+}
+
+/*!
+    \internal
+ */
+void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream, int maxHeaderLineLength,
+                                               int maxHeaders)
+{
     clear();
     if (Q_UNLIKELY(textStream.status() != QTextStream::Ok))
         return;
-    const QString requestLine = textStream.readLine();
+    const QString requestLine = readLine(textStream, maxHeaderLineLength);
+    if (requestLine.isNull()) {
+        clear();
+        return;
+    }
     const QStringList tokens = requestLine.split(' ', QString::SkipEmptyParts);
     if (Q_UNLIKELY(tokens.length() < 3)) {
-        m_isValid = false;
         clear();
         return;
     }
@@ -206,10 +237,13 @@ void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream)
 
     if (Q_UNLIKELY(!conversionOk)) {
         clear();
-        m_isValid = false;
         return;
     }
-    QString headerLine = textStream.readLine();
+    QString headerLine = readLine(textStream, maxHeaderLineLength);
+    if (headerLine.isNull()) {
+        clear();
+        return;
+    }
     m_headers.clear();
     while (!headerLine.isEmpty()) {
         const QStringList headerField = headerLine.split(QStringLiteral(": "),
@@ -219,7 +253,15 @@ void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream)
             return;
         }
         m_headers.insertMulti(headerField.at(0).toLower(), headerField.at(1));
-        headerLine = textStream.readLine();
+        if (m_headers.size() > maxHeaders) {
+            clear();
+            return;
+        }
+        headerLine = readLine(textStream, maxHeaderLineLength);
+        if (headerLine.isNull()) {
+            clear();
+            return;
+        }
     }
 
     m_requestUrl = QUrl::fromEncoded(resourceName.toLatin1());

@@ -49,6 +49,12 @@
 
 QT_BEGIN_NAMESPACE
 
+//both constants are taken from the default settings of Apache
+//see: http://httpd.apache.org/docs/2.2/mod/core.html#limitrequestfieldsize and
+//http://httpd.apache.org/docs/2.2/mod/core.html#limitrequestfields
+const int MAX_HEADERLINE_LENGTH = 8 * 1024; //maximum length of a http request header line
+const int MAX_HEADERLINES = 100;            //maximum number of http request header lines
+
 /*!
     \internal
  */
@@ -431,7 +437,7 @@ void QWebSocketServerPrivate::handshakeReceived()
 
     QWebSocketHandshakeRequest request(pTcpSocket->peerPort(), isSecure);
     QTextStream textStream(pTcpSocket);
-    request.readHandshake(textStream);
+    request.readHandshake(textStream, MAX_HEADERLINE_LENGTH, MAX_HEADERLINES);
 
     if (request.isValid()) {
         QWebSocketCorsAuthenticator corsAuthenticator(request.origin());
