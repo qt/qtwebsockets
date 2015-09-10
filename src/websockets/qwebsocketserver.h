@@ -112,6 +112,8 @@ public:
 
     QList<QWebSocketProtocol::Version> supportedVersions() const;
 
+    void handleConnection(QTcpSocket *socket) const;
+
 Q_SIGNALS:
     void acceptError(QAbstractSocket::SocketError socketError);
     void serverError(QWebSocketProtocol::CloseCode closeCode);

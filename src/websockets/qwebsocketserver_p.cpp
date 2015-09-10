@@ -475,4 +475,14 @@ void QWebSocketServerPrivate::handshakeReceived()
     }
 }
 
+void QWebSocketServerPrivate::handleConnection(QTcpSocket *pTcpSocket) const
+{
+    if (pTcpSocket == Q_NULLPTR)
+        return;
+
+    QObjectPrivate::connect(pTcpSocket, &QTcpSocket::readyRead,
+                            this, &QWebSocketServerPrivate::handshakeReceived,
+                            Qt::QueuedConnection);
+}
+
 QT_END_NAMESPACE

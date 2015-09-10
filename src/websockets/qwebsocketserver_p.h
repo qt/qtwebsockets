@@ -114,6 +114,8 @@ public:
 
     void setError(QWebSocketProtocol::CloseCode code, const QString &errorString);
 
+    void handleConnection(QTcpSocket *socket) const;
+
     QWebSocketServer * const q_ptr;
 
 private:

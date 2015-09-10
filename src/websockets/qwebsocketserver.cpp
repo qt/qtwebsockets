@@ -584,4 +584,16 @@ QList<QWebSocketProtocol::Version> QWebSocketServer::supportedVersions() const
     return d->supportedVersions();
 }
 
+/*!
+  Call this function will make upgrade the tcp socket to websocket
+
+  The QWebSocketServer object will take ownership of the socket
+  object and delete it when appropriate.
+  */
+void QWebSocketServer::handleConnection(QTcpSocket *socket) const
+{
+    Q_D(const QWebSocketServer);
+    return d->handleConnection(socket);
+}
+
 QT_END_NAMESPACE
