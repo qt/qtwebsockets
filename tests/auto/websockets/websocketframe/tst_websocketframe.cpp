@@ -244,9 +244,9 @@ void tst_WebSocketFrame::tst_copyConstructorAndAssignment()
 
 void tst_WebSocketFrame::tst_goodFrames_data()
 {
-    QTest::addColumn<int>("rsv1");
-    QTest::addColumn<int>("rsv2");
-    QTest::addColumn<int>("rsv3");
+    QTest::addColumn<bool>("rsv1");
+    QTest::addColumn<bool>("rsv2");
+    QTest::addColumn<bool>("rsv3");
     QTest::addColumn<quint32>("mask");
     QTest::addColumn<QWebSocketProtocol::OpCode>("opCode");
     QTest::addColumn<bool>("isFinal");
@@ -256,54 +256,54 @@ void tst_WebSocketFrame::tst_goodFrames_data()
     QTest::addColumn<bool>("isContinuationFrame");
 
     QTest::newRow("Non masked final text frame with small payload")
-            << 0 << 0 << 0
+            << false << false << false
             << 0U << QWebSocketProtocol::OpCodeText
             << true << QStringLiteral("Hello world!").toUtf8()
             << false << true << false;
     QTest::newRow("Non masked final binary frame with small payload")
-            << 0 << 0 << 0
+            << false << false << false
             << 0U << QWebSocketProtocol::OpCodeBinary
             << true << QByteArrayLiteral("\x00\x01\x02\x03\x04")
             << false << true << false;
     QTest::newRow("Non masked final text frame with no payload")
-            << 0 << 0 << 0
+            << false << false << false
             << 0U << QWebSocketProtocol::OpCodeText
             << true << QByteArray()
             << false << true << false;
     QTest::newRow("Non masked final binary frame with no payload")
-            << 0 << 0 << 0
+            << false << false << false
             << 0U << QWebSocketProtocol::OpCodeBinary
             << true << QByteArray()
             << false << true << false;
 
     QTest::newRow("Non masked final close frame with small payload")
-            << 0 << 0 << 0
+            << false << false << false
             << 0U << QWebSocketProtocol::OpCodeClose
             << true << QStringLiteral("Hello world!").toUtf8()
             << true << false << false;
     QTest::newRow("Non masked final close frame with no payload")
-            << 0 << 0 << 0
+            << false << false << false
             << 0U << QWebSocketProtocol::OpCodeClose
             << true << QByteArray()
             << true << false << false;
     QTest::newRow("Non masked final ping frame with small payload")
-            << 0 << 0 << 0
+            << false << false << false
             << 0U << QWebSocketProtocol::OpCodePing
             << true << QStringLiteral("Hello world!").toUtf8()
             << true << false << false;
     QTest::newRow("Non masked final pong frame with no payload")
-            << 0 << 0 << 0
+            << false << false << false
             << 0U << QWebSocketProtocol::OpCodePong
             << true << QByteArray()
             << true << false << false;
 
     QTest::newRow("Non masked final continuation frame with small payload")
-            << 0 << 0 << 0
+            << false << false << false
             << 0U << QWebSocketProtocol::OpCodeContinue
             << true << QStringLiteral("Hello world!").toUtf8()
             << false << true << true;
     QTest::newRow("Non masked non-final continuation frame with small payload")
-            << 0 << 0 << 0
+            << false << false << false
             << 0U << QWebSocketProtocol::OpCodeContinue
             << false << QStringLiteral("Hello world!").toUtf8()
             << false << true << true;
@@ -311,9 +311,9 @@ void tst_WebSocketFrame::tst_goodFrames_data()
 
 void tst_WebSocketFrame::tst_goodFrames()
 {
-    QFETCH(int, rsv1);
-    QFETCH(int, rsv2);
-    QFETCH(int, rsv3);
+    QFETCH(bool, rsv1);
+    QFETCH(bool, rsv2);
+    QFETCH(bool, rsv3);
     QFETCH(quint32, mask);
     QFETCH(QWebSocketProtocol::OpCode, opCode);
     QFETCH(bool, isFinal);
