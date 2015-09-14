@@ -83,10 +83,11 @@ public:
     bool isActive() const;
 
     Q_INVOKABLE qint64 sendTextMessage(const QString &message);
-
+    Q_REVISION(1) Q_INVOKABLE qint64 sendBinaryMessage(const QByteArray &message);
 
 Q_SIGNALS:
     void textMessageReceived(QString message);
+    Q_REVISION(1) void binaryMessageReceived(QByteArray message);
     void statusChanged(Status status);
     void activeChanged(bool isActive);
     void errorStringChanged(QString errorString);

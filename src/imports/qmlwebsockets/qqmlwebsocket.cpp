@@ -91,6 +91,12 @@
   */
 
 /*!
+  \qmlsignal WebSocket::binaryMessageReceived(QString message)
+  \since 5.8
+  This signal is emitted when a binary message is received.
+  */
+
+/*!
   \qmlsignal WebSocket::statusChanged(Status status)
   This signal is emitted when the status of the WebSocket changes.
   the \l {WebSocket::status}{status} argument provides the current status.
@@ -100,6 +106,12 @@
 
 /*!
   \qmlmethod void WebSocket::sendTextMessage(string message)
+  Sends \c message to the server.
+  */
+
+/*!
+  \qmlmethod void WebSocket::sendBinaryMessage(ArrayBuffer message)
+  \since 5.8
   Sends \c message to the server.
   */
 
@@ -143,6 +155,16 @@ qint64 QQmlWebSocket::sendTextMessage(const QString &message)
         return 0;
     }
     return m_webSocket->sendTextMessage(message);
+}
+
+qint64 QQmlWebSocket::sendBinaryMessage(const QByteArray &message)
+{
+    if (m_status != Open) {
+        setErrorString(tr("Messages can only be sent when the socket is open."));
+        setStatus(Error);
+        return 0;
+    }
+    return m_webSocket->sendBinaryMessage(message);
 }
 
 QUrl QQmlWebSocket::url() const
@@ -199,6 +221,8 @@ void QQmlWebSocket::setSocket(QWebSocket *socket)
         m_webSocket->setParent(Q_NULLPTR);
         connect(m_webSocket.data(), &QWebSocket::textMessageReceived,
                 this, &QQmlWebSocket::textMessageReceived);
+        connect(m_webSocket.data(), &QWebSocket::binaryMessageReceived,
+                this, &QQmlWebSocket::binaryMessageReceived);
         typedef void (QWebSocket::* ErrorSignal)(QAbstractSocket::SocketError);
         connect(m_webSocket.data(), static_cast<ErrorSignal>(&QWebSocket::error),
                 this, &QQmlWebSocket::onError);

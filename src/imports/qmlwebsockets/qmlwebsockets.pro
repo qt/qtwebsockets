@@ -1,4 +1,4 @@
-QT = core websockets qml
+QT = core websockets qml qml-private core-private
 
 TARGETPATH = QtWebSockets
 

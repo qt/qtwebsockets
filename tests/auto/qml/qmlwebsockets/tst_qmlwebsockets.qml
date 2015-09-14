@@ -27,7 +27,7 @@
 ****************************************************************************/
 
 import QtQuick 2.5
-import QtWebSockets 1.0
+import QtWebSockets 1.1
 import QtTest 1.1
 
 Rectangle {
@@ -82,6 +82,29 @@ Rectangle {
         function test_send_text_error_closed() {
             ensureDisconnected();
             socket.sendTextMessage('hello');
+            tryCompare(socket, 'status', WebSocket.Error);
+        }
+
+        function test_send_receive_binary() {
+            ensureConnected();
+
+            var o = {};
+            var sending = new Uint8Array([42, 43]);
+            server.currentSocket.binaryMessageReceived.connect(function(received) {
+                var view = new DataView(received);
+                compare(received.byteLength, sending.length);
+                compare(view.getUInt8(0), sending[0]);
+                compare(view.getUInt8(1), sending[1]);
+                o.called = true;
+            });
+
+            socket.sendBinaryMessage(sending.buffer);
+            tryCompare(o, 'called', true);
+        }
+
+        function test_send_binary_error_closed() {
+            ensureDisconnected();
+            socket.sendBinaryMessage('hello');
             tryCompare(socket, 'status', WebSocket.Error);
         }
     }

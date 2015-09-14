@@ -53,6 +53,7 @@ void QtWebSocketsDeclarativeModule::registerTypes(const char *uri)
 
     // @uri QtWebSockets
     qmlRegisterType<QQmlWebSocket>(uri, 1 /*major*/, 0 /*minor*/, "WebSocket");
+    qmlRegisterType<QQmlWebSocket, 1>(uri, 1 /*major*/, 1 /*minor*/, "WebSocket");
     qmlRegisterType<QQmlWebSocketServer>(uri, 1 /*major*/, 0 /*minor*/, "WebSocketServer");
 }
 
