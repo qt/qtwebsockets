@@ -33,21 +33,61 @@
 
 import QtQuick 2.5
 import QtWebSockets 1.0
+import QtTest 1.1
 
 Rectangle {
     width: 360
     height: 360
 
-    function appendMessage(message) {
-        messageBox.text += "\n" + message
-    }
-
     WebSocketServer {
         id: server
         port: 1337
+
+        onClientConnected: {
+            currentSocket = webSocket;
+        }
+
+        property var currentSocket
     }
 
     WebSocket {
         id: socket
+        url: server.url
+    }
+
+    TestCase {
+        function ensureConnected() {
+            socket.active = true;
+            server.listen = true;
+            tryCompare(socket, 'status', WebSocket.Open);
+            verify(server.currentSocket);
+        }
+
+        function ensureDisconnected() {
+            socket.active = false;
+            server.listen = false;
+            tryCompare(socket, 'status', WebSocket.Closed);
+            server.currentSocket = null;
+        }
+
+        function test_send_receive_text() {
+            ensureConnected();
+
+            var o = {};
+            var sending = 'hello.';
+            server.currentSocket.textMessageReceived.connect(function(received) {
+                compare(received, sending);
+                o.called = true;
+            });
+
+            socket.sendTextMessage(sending);
+            tryCompare(o, 'called', true);
+        }
+
+        function test_send_text_error_closed() {
+            ensureDisconnected();
+            socket.sendTextMessage('hello');
+            tryCompare(socket, 'status', WebSocket.Error);
+        }
     }
 }
