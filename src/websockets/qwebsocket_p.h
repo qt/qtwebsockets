@@ -143,6 +143,7 @@ public:
     QSslConfiguration sslConfiguration() const;
 #endif
 
+    void closeGoingAway();
     void close(QWebSocketProtocol::CloseCode closeCode, QString reason);
     void open(const QNetworkRequest &request, bool mask);
     void ping(const QByteArray &payload);
@@ -197,7 +198,7 @@ private:
     qint64 writeFrames(const QList<QByteArray> &frames) Q_REQUIRED_RESULT;
     qint64 writeFrame(const QByteArray &frame) Q_REQUIRED_RESULT;
 
-    QScopedPointer<QTcpSocket> m_pSocket;
+    QTcpSocket *m_pSocket;
     QString m_errorString;
     QWebSocketProtocol::Version m_version;
     QUrl m_resource;

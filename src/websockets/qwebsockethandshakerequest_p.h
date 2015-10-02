@@ -78,7 +78,7 @@ public:
     QString resourceName() const;
     QString host() const;
 
-    void readHandshake(QTextStream &textStream);
+    void readHandshake(QTextStream &textStream, int maxHeaderLineLength, int maxHeaders);
 
 private:
 
