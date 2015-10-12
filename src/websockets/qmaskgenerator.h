@@ -34,7 +34,7 @@
 #ifndef QMASKGENERATOR_H
 #define QMASKGENERATOR_H
 
-#include <QObject>
+#include <QtCore/QObject>
 #include "QtWebSockets/qwebsockets_global.h"
 
 QT_BEGIN_NAMESPACE
