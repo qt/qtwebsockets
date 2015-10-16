@@ -330,7 +330,7 @@ void tst_HandshakeRequest::tst_qtbug_48123_data()
 
     //a headerline should not be larger than MAX_HEADERLINE_LENGTH characters (excluding CRLF)
     QString illegalHeader = header;
-    illegalHeader.append(QString(MAX_HEADERLINE_LENGTH + 1, QChar::fromAscii('c')));
+    illegalHeader.append(QString(MAX_HEADERLINE_LENGTH + 1, QLatin1Char('c')));
     illegalHeader.append(QStringLiteral("\r\n\r\n"));
 
     QTest::newRow("headerline too long") << illegalHeader << false;
@@ -338,7 +338,7 @@ void tst_HandshakeRequest::tst_qtbug_48123_data()
     QString legalHeader = header;
     const QString headerKey = QStringLiteral("X-CUSTOM-KEY: ");
     legalHeader.append(headerKey);
-    legalHeader.append(QString(MAX_HEADERLINE_LENGTH - headerKey.length(), QChar::fromAscii('c')));
+    legalHeader.append(QString(MAX_HEADERLINE_LENGTH - headerKey.length(), QLatin1Char('c')));
     legalHeader.append(QStringLiteral("\r\n\r\n"));
 
     QTest::newRow("headerline with maximum length") << legalHeader << true;
