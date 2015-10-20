@@ -61,14 +61,14 @@ QT_BEGIN_NAMESPACE
 QWebSocketFrame::QWebSocketFrame() :
     m_closeCode(QWebSocketProtocol::CloseCodeNormal),
     m_closeReason(),
-    m_isFinalFrame(true),
     m_mask(0),
-    m_rsv1(0),
-    m_rsv2(0),
-    m_rsv3(0),
     m_opCode(QWebSocketProtocol::OpCodeReservedC),
     m_length(0),
     m_payload(),
+    m_isFinalFrame(true),
+    m_rsv1(false),
+    m_rsv2(false),
+    m_rsv3(false),
     m_isValid(false)
 {
 }
@@ -79,14 +79,14 @@ QWebSocketFrame::QWebSocketFrame() :
 QWebSocketFrame::QWebSocketFrame(const QWebSocketFrame &other) :
     m_closeCode(other.m_closeCode),
     m_closeReason(other.m_closeReason),
-    m_isFinalFrame(other.m_isFinalFrame),
     m_mask(other.m_mask),
-    m_rsv1(other.m_rsv1),
-    m_rsv2(other.m_rsv2),
-    m_rsv3(other.m_rsv3),
     m_opCode(other.m_opCode),
     m_length(other.m_length),
     m_payload(other.m_payload),
+    m_isFinalFrame(other.m_isFinalFrame),
+    m_rsv1(other.m_rsv1),
+    m_rsv2(other.m_rsv2),
+    m_rsv3(other.m_rsv3),
     m_isValid(other.m_isValid)
 {
 }
@@ -118,14 +118,14 @@ QWebSocketFrame &QWebSocketFrame::operator =(const QWebSocketFrame &other)
 QWebSocketFrame::QWebSocketFrame(QWebSocketFrame &&other) :
     m_closeCode(qMove(other.m_closeCode)),
     m_closeReason(qMove(other.m_closeReason)),
-    m_isFinalFrame(qMove(other.m_isFinalFrame)),
     m_mask(qMove(other.m_mask)),
-    m_rsv1(qMove(other.m_rsv1)),
-    m_rsv2(qMove(other.m_rsv2)),
-    m_rsv3(qMove(other.m_rsv3)),
     m_opCode(qMove(other.m_opCode)),
     m_length(qMove(other.m_length)),
     m_payload(qMove(other.m_payload)),
+    m_isFinalFrame(qMove(other.m_isFinalFrame)),
+    m_rsv1(qMove(other.m_rsv1)),
+    m_rsv2(qMove(other.m_rsv2)),
+    m_rsv3(qMove(other.m_rsv3)),
     m_isValid(qMove(other.m_isValid))
 {}
 
@@ -239,30 +239,6 @@ quint32 QWebSocketFrame::mask() const
 /*!
     \internal
  */
-int QWebSocketFrame::rsv1() const
-{
-    return m_rsv1;
-}
-
-/*!
-    \internal
- */
-int QWebSocketFrame::rsv2() const
-{
-    return m_rsv2;
-}
-
-/*!
-    \internal
- */
-int QWebSocketFrame::rsv3() const
-{
-    return m_rsv3;
-}
-
-/*!
-    \internal
- */
 QWebSocketProtocol::OpCode QWebSocketFrame::opCode() const
 {
     return m_opCode;
@@ -287,9 +263,9 @@ void QWebSocketFrame::clear()
     m_closeReason.clear();
     m_isFinalFrame = true;
     m_mask = 0;
-    m_rsv1 = 0;
-    m_rsv2 = 0;
-    m_rsv3 = 0;
+    m_rsv1 = false;
+    m_rsv2 = false;
+    m_rsv3 = false;
     m_opCode = QWebSocketProtocol::OpCodeReservedC;
     m_length = 0;
     m_payload.clear();

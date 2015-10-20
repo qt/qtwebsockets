@@ -34,6 +34,17 @@
 #ifndef QWEBSOCKETFRAME_P_H
 #define QWEBSOCKETFRAME_P_H
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
 #include <QtCore/QString>
 #include <QtCore/QByteArray>
 #include <QtCore/QCoreApplication>
@@ -75,9 +86,9 @@ public:
     bool isContinuationFrame() const;
     bool hasMask() const;
     quint32 mask() const;    //returns 0 if no mask
-    int rsv1() const;
-    int rsv2() const;
-    int rsv3() const;
+    inline bool rsv1() const { return m_rsv1; }
+    inline bool rsv2() const { return m_rsv2; }
+    inline bool rsv3() const { return m_rsv3; }
     QWebSocketProtocol::OpCode opCode() const;
     QByteArray payload() const;
 
@@ -90,16 +101,15 @@ public:
 private:
     QWebSocketProtocol::CloseCode m_closeCode;
     QString m_closeReason;
-    bool m_isFinalFrame;
     quint32 m_mask;
-    int m_rsv1;
-    int m_rsv2;
-    int m_rsv3;
     QWebSocketProtocol::OpCode m_opCode;
-
     quint8 m_length;
     QByteArray m_payload;
 
+    bool m_isFinalFrame;
+    bool m_rsv1;
+    bool m_rsv2;
+    bool m_rsv3;
     bool m_isValid;
 
     enum ProcessingState

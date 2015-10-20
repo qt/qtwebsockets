@@ -4,7 +4,7 @@ project                                             = QtWebSockets
 description                                         = Qt WebSockets Reference Documentation
 version                                             = $QT_VERSION
 
-examplesinstallpath                                 = websockets
+examplesinstallpath                                 = qtwebsockets/websockets
 
 qhp.projects                                        = QtWebSockets
 
@@ -56,7 +56,11 @@ examples.fileextensions                             += "*.html"
 imagedirs                                           += ../../../examples/websockets/doc/images \
                                                        images
 
-manifestmeta.thumbnail.names                        += "QtWebSockets/*"
+#add generic thumbnail images for example documentation that does not have an image.
+manifestmeta.thumbnail.names                        += "QtWebSockets/Echo Client*" \
+                                                       "QtWebSockets/QML*" \
+                                                       "QtWebSockets/SSL*" \
+                                                       "QtWebSockets/Simple*"
 
 navigation.landingpage                              = "Qt WebSockets"
 navigation.cppclassespage                           = "Qt WebSockets C++ Classes"

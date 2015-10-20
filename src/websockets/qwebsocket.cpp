@@ -281,6 +281,8 @@ QWebSocket::QWebSocket(const QString &origin,
  */
 QWebSocket::~QWebSocket()
 {
+    Q_D(QWebSocket);
+    d->closeGoingAway();
 }
 
 /*!
