@@ -690,7 +690,7 @@ void tst_QWebSocket::tst_moveToThread()
 
     socket->asyncClose();
 
-    QCOMPARE(timer.isActive(), false);
+    QTRY_COMPARE_WITH_TIMEOUT(loop.isRunning(), false, 200);
     QCOMPARE(socket->receivedMessage, textMessage);
 
     socket->deleteLater();
