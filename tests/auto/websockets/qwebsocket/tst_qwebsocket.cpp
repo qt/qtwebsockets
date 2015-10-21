@@ -675,7 +675,9 @@ void tst_QWebSocket::tst_moveToThread()
     QUrl url = QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
                     QStringLiteral(":") + QString::number(echoServer.port()));
     url.setPath("/segment/with spaces");
-    url.addQueryItem("queryitem", "with encoded characters");
+    QUrlQuery query;
+    query.addQueryItem("queryitem", "with encoded characters");
+    url.setQuery(query);
 
     socket->asyncOpen(url);
     if (socketConnectedSpy.count() == 0)
