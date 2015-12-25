@@ -60,8 +60,7 @@ QT_USE_NAMESPACE
 //! [constructor]
 SslEchoServer::SslEchoServer(quint16 port, QObject *parent) :
     QObject(parent),
-    m_pWebSocketServer(Q_NULLPTR),
-    m_clients()
+    m_pWebSocketServer(Q_NULLPTR)
 {
     m_pWebSocketServer = new QWebSocketServer(QStringLiteral("SSL Echo Server"),
                                               QWebSocketServer::SecureMode,

@@ -59,7 +59,6 @@ EchoServer::EchoServer(quint16 port, bool debug, QObject *parent) :
     QObject(parent),
     m_pWebSocketServer(new QWebSocketServer(QStringLiteral("Echo Server"),
                                             QWebSocketServer::NonSecureMode, this)),
-    m_clients(),
     m_debug(debug)
 {
     if (m_pWebSocketServer->listen(QHostAddress::Any, port)) {

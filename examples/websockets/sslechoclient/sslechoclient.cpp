@@ -56,8 +56,7 @@ QT_USE_NAMESPACE
 
 //! [constructor]
 SslEchoClient::SslEchoClient(const QUrl &url, QObject *parent) :
-    QObject(parent),
-    m_webSocket()
+    QObject(parent)
 {
     connect(&m_webSocket, &QWebSocket::connected, this, &SslEchoClient::onConnected);
     typedef void (QWebSocket:: *sslErrorsSignal)(const QList<QSslError> &);
