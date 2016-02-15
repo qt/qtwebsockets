@@ -528,10 +528,10 @@ bool QWebSocketFrame::checkValidity()
     } else if (isControlFrame()) {
         if (Q_UNLIKELY(m_length > 125)) {
             setError(QWebSocketProtocol::CloseCodeProtocolError,
-                     tr("Controle frame is larger than 125 bytes"));
+                     tr("Control frame is larger than 125 bytes"));
         } else if (Q_UNLIKELY(!m_isFinalFrame)) {
             setError(QWebSocketProtocol::CloseCodeProtocolError,
-                     tr("Controle frames cannot be fragmented"));
+                     tr("Control frames cannot be fragmented"));
         } else {
             m_isValid = true;
         }
