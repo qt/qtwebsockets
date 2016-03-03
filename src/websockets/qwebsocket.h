@@ -62,7 +62,7 @@ class Q_WEBSOCKETS_EXPORT QWebSocket : public QObject
 public:
     explicit QWebSocket(const QString &origin = QString(),
                         QWebSocketProtocol::Version version = QWebSocketProtocol::VersionLatest,
-                        QObject *parent = 0);
+                        QObject *parent = Q_NULLPTR);
     virtual ~QWebSocket();
 
     void abort();
