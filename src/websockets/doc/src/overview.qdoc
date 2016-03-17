@@ -90,23 +90,22 @@ for push notification when there is a change in price of a few stocks.
 The module provides both C++ and QML versions of the API, so you can choose
 the alternative that suits your need.
 
-\section2 Qt WebSockets with Qt Cloud Services
+\section2 Qt WebSockets with Cloud Services
 
 The client application usually depends on an external service for data. Most of
 these service providers do not support WebSocket yet, so you end up developing
-a WebSocket-aware server application to bridge the gap. You can choose to run
-the server on an enterprise WebSocket gateway service such as Qt Cloud
-Services, avoiding the hassle of maintaining the necessary infrastructure
-required to host such a service.
+a WebSocket-aware server application to bridge the gap. You can run the server
+on an enterprise WebSocket gateway service such as a cloud service, avoiding
+the hassle of maintaining the necessary infrastructure required to host such
+a service.
 
-The Qt Cloud Services provides a Managed Application Runtime (MAR) backend,
-which enables deploying and running an instance of server application on the
-cloud. The server instance running on MAR gets a WebSocket URL, which can be
-used by the client applications to connect and receive data.
+Most of the cloud Services provide a Platform as a service (PaaS) backend,
+which enables deploying and running an instance of your server application on
+the cloud. The client applications can connect to the running server using a
+WebSocket URL and receive data.
 
 \section2 Related Information
 \list
 \li \l {http://tools.ietf.org/html/rfc6455}{WebSocket RFC 6455}
-\li \l {https://qtcloudservices.com}{Qt Cloud Services}
 \endlist
 */
