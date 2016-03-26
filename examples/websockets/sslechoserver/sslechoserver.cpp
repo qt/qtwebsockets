@@ -109,7 +109,6 @@ void SslEchoServer::onNewConnection()
     connect(pSocket, &QWebSocket::binaryMessageReceived,
             this, &SslEchoServer::processBinaryMessage);
     connect(pSocket, &QWebSocket::disconnected, this, &SslEchoServer::socketDisconnected);
-    //connect(pSocket, &QWebSocket::pong, this, &SslEchoServer::processPong);
 
     m_clients << pSocket;
 }
