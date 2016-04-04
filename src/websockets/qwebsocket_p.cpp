@@ -757,7 +757,6 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
     if (Q_UNLIKELY(numFrames == 0))
         numFrames = 1;
     quint64 currentPosition = 0;
-    qint64 bytesWritten = 0;
     quint64 bytesLeft = data.size();
 
     for (int i = 0; i < numFrames; ++i) {
@@ -773,7 +772,7 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
                                                                : QWebSocketProtocol::OpCodeContinue;
 
         //write header
-        bytesWritten += m_pSocket->write(getFrameHeader(opcode, size, maskingKey, isLastFrame));
+        m_pSocket->write(getFrameHeader(opcode, size, maskingKey, isLastFrame));
 
         //write payload
         if (Q_LIKELY(size > 0)) {
@@ -782,7 +781,6 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
                 QWebSocketProtocol::mask(currentData, size, maskingKey);
             qint64 written = m_pSocket->write(currentData, static_cast<qint64>(size));
             if (Q_LIKELY(written > 0)) {
-                bytesWritten += written;
                 payloadWritten += written;
             } else {
                 m_pSocket->flush();
