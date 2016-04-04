@@ -866,7 +866,7 @@ qint64 QWebSocketPrivate::writeFrame(const QByteArray &frame)
 /*!
     \internal
  */
-QString readLine(QTcpSocket *pSocket)
+static QString readLine(QTcpSocket *pSocket)
 {
     Q_ASSERT(pSocket);
     QString line;
