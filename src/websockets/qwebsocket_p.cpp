@@ -693,12 +693,11 @@ QByteArray QWebSocketPrivate::getFrameHeader(QWebSocketProtocol::OpCode opCode,
                                              bool lastFrame)
 {
     QByteArray header;
-    quint8 byte = 0x00;
     bool ok = payloadLength <= 0x7FFFFFFFFFFFFFFFULL;
 
     if (Q_LIKELY(ok)) {
         //FIN, RSV1-3, opcode (RSV-1, RSV-2 and RSV-3 are zero)
-        byte = static_cast<quint8>((opCode & 0x0F) | (lastFrame ? 0x80 : 0x00));
+        quint8 byte = static_cast<quint8>((opCode & 0x0F) | (lastFrame ? 0x80 : 0x00));
         header.append(static_cast<char>(byte));
 
         byte = 0x00;
