@@ -60,17 +60,16 @@
     Calling close() makes QWebSocketServer stop listening for incoming connections.
 
     QWebSocketServer currently does not support
-    \l {http://tools.ietf.org/html/rfc6455#page-39} {extensions} and
-    \l {http://tools.ietf.org/html/rfc6455#page-12} {subprotocols}.
+    \l {WebSocket Extensions} and
+    \l {WebSocket Subprotocols}.
 
-    \note When working with self-signed certificates, FireFox currently has a
-    \l {https://bugzilla.mozilla.org/show_bug.cgi?id=594502} {bug} that prevents it to
+    \note When working with self-signed certificates, \l{Firefox bug 594502} prevents \l{Firefox} to
     connect to a secure WebSocket server. To work around this problem, first browse to the
     secure WebSocket server using HTTPS. FireFox will indicate that the certificate is invalid.
     From here on, the certificate can be added to the exceptions. After this, the secure WebSockets
     connection should work.
 
-    QWebSocketServer only supports version 13 of the WebSocket protocol, as outlined in RFC 6455.
+    QWebSocketServer only supports version 13 of the WebSocket protocol, as outlined in \l{RFC 6455}.
 
     \sa {WebSocket Server Example}, QWebSocket
 */

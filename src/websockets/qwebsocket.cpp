@@ -41,17 +41,17 @@
     WebSockets is a web technology providing full-duplex communications channels over
     a single TCP connection.
     The WebSocket protocol was standardized by the IETF as
-    \l {http://tools.ietf.org/html/rfc6455} {RFC 6455} in 2011.
+    \l {RFC 6455} in 2011.
     QWebSocket can both be used in a client application and server application.
 
     This class was modeled after QAbstractSocket.
 
     QWebSocket currently does not support
-    \l {http://tools.ietf.org/html/rfc6455#page-39} {extensions} and
-    \l {http://tools.ietf.org/html/rfc6455#page-12} {subprotocols}.
+    \l {WebSocket Extensions} and
+    \l {WebSocket Subprotocols}.
 
     QWebSocket only supports version 13 of the WebSocket protocol, as outlined in
-    \l {http://tools.ietf.org/html/rfc6455}{RFC 6455}.
+    \l {RFC 6455}.
 
     \note Some proxies do not understand certain HTTP headers used during a WebSocket handshake.
     In that case, non-secure WebSocket connections fail. The best way to mitigate against
@@ -60,7 +60,7 @@
     \warning To generate masks, this implementation of WebSockets uses the cryptographically
     insecure qrand() function.
     For more information about the importance of good masking,
-    see \l {http://w2spconf.com/2011/papers/websocket.pdf}.
+    see \l {"Talking to Yourself for Fun and Profit" by Lin-Shung Huang et al}.
     The best measure against attacks mentioned in the document above,
     is to use QWebSocket over a secure connection (\e wss://).
     In general, always be careful to not have 3rd party script access to
@@ -259,12 +259,12 @@ QT_BEGIN_NAMESPACE
  * \brief Creates a new QWebSocket with the given \a origin,
  * the \a version of the protocol to use and \a parent.
  *
- * The \a origin of the client is as specified in \l {http://tools.ietf.org/html/rfc6454}{RFC 6454}.
+ * The \a origin of the client is as specified in \l {RFC 6454}.
  * (The \a origin is not required for non-web browser clients
- * (see \l {http://tools.ietf.org/html/rfc6455}{RFC 6455})).
+ * (see \l {RFC 6455})).
  * The \a origin may not contain new line characters, otherwise the connection will be
  * aborted immediately during the handshake phase.
- * \note Currently only V13 (\l {http://tools.ietf.org/html/rfc6455} {RFC 6455}) is supported
+ * \note Currently only V13 (\l {RFC 6455}) is supported
  */
 QWebSocket::QWebSocket(const QString &origin,
                        QWebSocketProtocol::Version version,

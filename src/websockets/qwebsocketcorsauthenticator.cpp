@@ -53,7 +53,7 @@
     \note Checking on the origin does not make much sense when the server is accessed
     via a non-browser client, as that client can set whatever origin header it likes.
     In case of a browser client, the server SHOULD check the validity of the origin.
-    \sa http://tools.ietf.org/html/rfc6455#section-10
+    \sa {WebSocket Security Considerations}
 
     \sa QWebSocketServer
 */

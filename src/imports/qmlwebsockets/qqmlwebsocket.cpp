@@ -42,8 +42,7 @@
 
     WebSockets is a web technology providing full-duplex communications channels over a
     single TCP connection.
-    The WebSocket protocol was standardized by the IETF as
-    \l {http://tools.ietf.org/html/rfc6455} {RFC 6455} in 2011.
+    The WebSocket protocol was standardized by the IETF as \l {RFC 6455} in 2011.
 */
 
 /*!

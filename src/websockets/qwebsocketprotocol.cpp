@@ -76,40 +76,34 @@ QT_BEGIN_NAMESPACE
     \brief The different defined versions of the WebSocket protocol.
 
     For an overview of the differences between the different protocols, see
-    <http://code.google.com/p/pywebsocket/wiki/WebSocketProtocolSpec>
+    \l {pywebsocket's WebSocketProtocolSpec}.
 
     \value VersionUnknown   Unknown or unspecified version.
-    \value Version0         hixie76:
-                            http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76 &
-                            hybi-00:
-                            http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-00.
+    \value Version0         \l{hixie76} and \l{hybi-00}.
                             Works with key1, key2 and a key in the payload.
                             Attribute: Sec-WebSocket-Draft value 0.
                             Not supported by QtWebSockets.
-    \value Version4         hybi-04:
-                            http://tools.ietf.org/id/draft-ietf-hybi-thewebsocketprotocol-04.txt.
+    \value Version4         \l{hybi-04}.
                             Changed handshake: key1, key2, key3
                             ==> Sec-WebSocket-Key, Sec-WebSocket-Nonce, Sec-WebSocket-Accept
                             Sec-WebSocket-Draft renamed to Sec-WebSocket-Version
                             Sec-WebSocket-Version = 4.
                             Not supported by QtWebSockets.
-    \value Version5         hybi-05:
-                            http://tools.ietf.org/id/draft-ietf-hybi-thewebsocketprotocol-05.txt.
+    \value Version5         \l{hybi-05}.
                             Sec-WebSocket-Version = 5
                             Removed Sec-WebSocket-Nonce
                             Added Sec-WebSocket-Accept.
                             Not supported by QtWebSockets.
     \value Version6         Sec-WebSocket-Version = 6.
                             Not supported by QtWebSockets.
-    \value Version7         hybi-07:
-                            http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-07.
+    \value Version7         \l{hybi-07}.
                             Sec-WebSocket-Version = 7.
                             Not supported by QtWebSockets.
     \value Version8         hybi-8, hybi-9, hybi-10, hybi-11 and hybi-12.
                             Status codes 1005 and 1006 are added and all codes are now unsigned
                             Internal error results in 1006.
                             Not supported by QtWebSockets.
-    \value Version13        hybi-13, hybi14, hybi-15, hybi-16, hybi-17 and RFC 6455.
+    \value Version13        hybi-13, hybi14, hybi-15, hybi-16, hybi-17 and \l{RFC 6455}.
                             Sec-WebSocket-Version = 13
                             Status code 1004 is now reserved
                             Added 1008, 1009 and 1010

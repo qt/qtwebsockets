@@ -34,7 +34,7 @@
     \class QWebSocketDataProcessor
     The class QWebSocketDataProcessor is responsible for reading, validating and
     interpreting data from a WebSocket.
-    It reads data from a QIODevice, validates it against RFC 6455, and parses it into
+    It reads data from a QIODevice, validates it against \l{RFC 6455}, and parses it into
     frames (data, control).
     It emits signals that correspond to the type of the frame: textFrameReceived(),
     binaryFrameReceived(), textMessageReceived(), binaryMessageReceived(), pingReceived(),

@@ -37,11 +37,11 @@
 
     \brief The QDefaultMaskGenerator class provides the default mask generator for QtWebSockets.
 
-    The WebSockets specification as outlined in {http://tools.ietf.org/html/rfc6455}{RFC 6455}
+    The WebSockets specification as outlined in \l {RFC 6455}
     requires that all communication from client to server must be masked. This is to prevent
     malicious scripts to attack bad behaving proxies.
     For more information about the importance of good masking,
-    see \l {http://w2spconf.com/2011/papers/websocket.pdf}.
+    see \l {"Talking to Yourself for Fun and Profit" by Lin-Shung Huang et al}.
     The default mask generator uses the cryptographically insecure qrand() function.
     The best measure against attacks mentioned in the document above,
     is to use QWebSocket over a secure connection (\e wss://).

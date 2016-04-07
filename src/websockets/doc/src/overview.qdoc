@@ -106,6 +106,6 @@ WebSocket URL and receive data.
 
 \section2 Related Information
 \list
-\li \l {http://tools.ietf.org/html/rfc6455}{WebSocket RFC 6455}
+\li \l{RFC 6455}
 \endlist
 */
