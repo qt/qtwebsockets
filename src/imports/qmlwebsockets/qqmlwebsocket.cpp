@@ -86,9 +86,9 @@
 /*!
   \qmlsignal WebSocket::statusChanged(Status status)
   This signal is emitted when the status of the WebSocket changes.
-  the \l {WebSocket::status}{status} argument provides the current status.
+  the \l [QML]{WebSocket::status}{status} argument provides the current status.
 
-  \sa WebSocket::status
+  \sa {QtWebSockets::}{WebSocket::status}
   */
 
 /*!

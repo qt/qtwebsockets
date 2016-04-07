@@ -90,7 +90,7 @@ QT_USE_NAMESPACE
 
 /*!
   \qmlsignal WebSocketServer::clientConnected(WebSocket webSocket)
-  This signal is emitted when a client connects to this server.
+  This signal is emitted when a client connects to this server. \a webSocket is the newly created \l [QML]{WebSocket}.
   */
 
 QQmlWebSocketServer::QQmlWebSocketServer(QObject *parent)
