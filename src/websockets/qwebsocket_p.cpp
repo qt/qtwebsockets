@@ -1142,10 +1142,13 @@ void QWebSocketPrivate::processData()
 {
     Q_ASSERT(m_pSocket);
     while (m_pSocket->bytesAvailable()) {
-        if (state() == QAbstractSocket::ConnectingState)
+        if (state() == QAbstractSocket::ConnectingState) {
+            if (!m_pSocket->canReadLine())
+                break;
             processHandshake(m_pSocket);
-        else
+        } else {
             m_dataProcessor.process(m_pSocket);
+        }
     }
 }
 
