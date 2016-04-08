@@ -77,10 +77,10 @@
     \page qtwebsockets-testing.html
     \title Testing Qt WebSockets
 
-    \l {http://autobahn.ws/testsuite/}{Autobahn|Testsuite}, a standard test
-    suite for WebSocket Protocol (RFC 6455), can be used for testing the
-    conformance of Qt WebSockets. Refer to Autobahn|Testsuite
-    \l {http://autobahn.ws/testsuite/installation.html}{installation documentation}
+    \l {Autobahn|Testsuite}, a standard test
+    suite for WebSocket Protocol (\l{RFC 6455}), can be used for testing the
+    conformance of Qt WebSockets. Refer to
+    \l {Autobahn|Testsuite installation documentation}
     to set up the test suite.
 
     \include README testsuite

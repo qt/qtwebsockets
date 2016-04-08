@@ -281,6 +281,15 @@ void QWebSocketPrivate::ignoreSslErrors()
     }
 }
 
+/*!
+* \internal
+*/
+void QWebSocketPrivate::_q_updateSslConfiguration()
+{
+    if (QSslSocket *sslSock = qobject_cast<QSslSocket *>(m_pSocket))
+        m_configuration.m_sslConfiguration = sslSock->sslConfiguration();
+}
+
 #endif
 
 /*!
@@ -300,6 +309,10 @@ QWebSocket *QWebSocketPrivate::upgradeFrom(QTcpSocket *pTcpSocket,
             headerIter.next();
             netRequest.setRawHeader(headerIter.key().toLatin1(), headerIter.value().toLatin1());
         }
+#ifndef QT_NO_SSL
+        if (QSslSocket *sslSock = qobject_cast<QSslSocket *>(pTcpSocket))
+            pWebSocket->setSslConfiguration(sslSock->sslConfiguration());
+#endif
         pWebSocket->d_func()->setExtension(response.acceptedExtension());
         pWebSocket->d_func()->setOrigin(request.origin());
         pWebSocket->d_func()->setRequest(netRequest);
@@ -585,6 +598,8 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
             QObject::connect(sslSocket,
                              static_cast<sslErrorSignalType>(&QSslSocket::sslErrors),
                              q, &QWebSocket::sslErrors);
+            QObjectPrivate::connect(sslSocket, &QSslSocket::encrypted,
+                                    this, &QWebSocketPrivate::_q_updateSslConfiguration);
         } else
 #endif // QT_NO_SSL
         {
@@ -1061,6 +1076,10 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
 
     switch (socketState) {
     case QAbstractSocket::ConnectedState:
+#ifndef QT_NO_SSL
+        if (QSslSocket *sslSock = qobject_cast<QSslSocket *>(m_pSocket))
+            m_configuration.m_sslConfiguration = sslSock->sslConfiguration();
+#endif
         if (webSocketState == QAbstractSocket::ConnectingState) {
             m_key = generateKey();
 
@@ -1126,10 +1145,13 @@ void QWebSocketPrivate::processData()
 {
     Q_ASSERT(m_pSocket);
     while (m_pSocket->bytesAvailable()) {
-        if (state() == QAbstractSocket::ConnectingState)
+        if (state() == QAbstractSocket::ConnectingState) {
+            if (!m_pSocket->canReadLine())
+                break;
             processHandshake(m_pSocket);
-        else
+        } else {
             m_dataProcessor.process(m_pSocket);
+        }
     }
 }
 
