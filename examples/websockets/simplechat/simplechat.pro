@@ -14,4 +14,7 @@ SOURCES += \
 HEADERS += \
     chatserver.h
 
-OTHER_FILES += *.html
+EXAMPLE_FILES += chatclient.html
+
+target.path = $$[QT_INSTALL_EXAMPLES]/websockets/simplechat
+INSTALLS += target

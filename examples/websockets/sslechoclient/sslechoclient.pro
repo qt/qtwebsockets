@@ -13,3 +13,6 @@ SOURCES += \
 
 HEADERS += \
     sslechoclient.h
+
+target.path = $$[QT_INSTALL_EXAMPLES]/websockets/sslechoclient
+INSTALLS += target
