@@ -119,6 +119,7 @@ void QSslServer::incomingConnection(qintptr socket)
             connect(pSslSocket, static_cast<sslErrorsSignal>(&QSslSocket::sslErrors),
                     this, &QSslServer::sslErrors);
             connect(pSslSocket, &QSslSocket::encrypted, this, &QSslServer::newEncryptedConnection);
+            connect(pSslSocket, &QSslSocket::preSharedKeyAuthenticationRequired, this, &QSslServer::preSharedKeyAuthenticationRequired);
 
             addPendingConnection(pSslSocket);
 

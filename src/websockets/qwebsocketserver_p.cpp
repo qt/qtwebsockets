@@ -104,6 +104,8 @@ void QWebSocketServerPrivate::init()
                              q_ptr, &QWebSocketServer::peerVerifyError);
             QObject::connect(pSslServer, &QSslServer::sslErrors,
                              q_ptr, &QWebSocketServer::sslErrors);
+            QObject::connect(pSslServer, &QSslServer::preSharedKeyAuthenticationRequired,
+                             q_ptr, &QWebSocketServer::preSharedKeyAuthenticationRequired);
         }
 #else
         qFatal("SSL not supported on this platform.");

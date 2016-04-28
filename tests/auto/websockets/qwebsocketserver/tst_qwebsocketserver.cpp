@@ -28,6 +28,10 @@
 #include <QString>
 #include <QtTest>
 #include <QNetworkProxy>
+#ifndef QT_NO_OPENSSL
+#include <QtNetwork/qsslpresharedkeyauthenticator.h>
+#include <QtNetwork/qsslcipher.h>
+#endif
 #include <QtWebSockets/QWebSocketServer>
 #include <QtWebSockets/QWebSocket>
 #include <QtWebSockets/QWebSocketCorsAuthenticator>
@@ -41,6 +45,47 @@ Q_DECLARE_METATYPE(QWebSocketServer::SslMode)
 Q_DECLARE_METATYPE(QWebSocketCorsAuthenticator *)
 #ifndef QT_NO_SSL
 Q_DECLARE_METATYPE(QSslError)
+#endif
+
+#ifndef QT_NO_OPENSSL
+// Use this cipher to force PSK key sharing.
+static const QString PSK_CIPHER_WITHOUT_AUTH = QStringLiteral("PSK-AES256-CBC-SHA");
+static const QByteArray PSK_CLIENT_PRESHAREDKEY = QByteArrayLiteral("\x1a\x2b\x3c\x4d\x5e\x6f");
+static const QByteArray PSK_SERVER_IDENTITY_HINT = QByteArrayLiteral("QtTestServerHint");
+static const QByteArray PSK_CLIENT_IDENTITY = QByteArrayLiteral("Client_identity");
+
+class PskProvider : public QObject
+{
+    Q_OBJECT
+
+public:
+    bool m_server = false;
+    QByteArray m_identity;
+    QByteArray m_psk;
+
+public slots:
+    void providePsk(QSslPreSharedKeyAuthenticator *authenticator)
+    {
+        QVERIFY(authenticator);
+        QCOMPARE(authenticator->identityHint(), PSK_SERVER_IDENTITY_HINT);
+        if (m_server)
+            QCOMPARE(authenticator->maximumIdentityLength(), 0);
+        else
+            QVERIFY(authenticator->maximumIdentityLength() > 0);
+
+        QVERIFY(authenticator->maximumPreSharedKeyLength() > 0);
+
+        if (!m_identity.isEmpty()) {
+            authenticator->setIdentity(m_identity);
+            QCOMPARE(authenticator->identity(), m_identity);
+        }
+
+        if (!m_psk.isEmpty()) {
+            authenticator->setPreSharedKey(m_psk);
+            QCOMPARE(authenticator->preSharedKey(), m_psk);
+        }
+    }
+};
 #endif
 
 class tst_QWebSocketServer : public QObject
@@ -58,6 +103,7 @@ private Q_SLOTS:
     void tst_settersAndGetters();
     void tst_listening();
     void tst_connectivity();
+    void tst_preSharedKey();
     void tst_maxPendingConnections();
     void tst_serverDestroyedWhileSocketConnected();
 };
@@ -74,6 +120,9 @@ void tst_QWebSocketServer::init()
     qRegisterMetaType<QWebSocketCorsAuthenticator *>("QWebSocketCorsAuthenticator *");
 #ifndef QT_NO_SSL
     qRegisterMetaType<QSslError>("QSslError");
+#ifndef QT_NO_OPENSSL
+    qRegisterMetaType<QSslPreSharedKeyAuthenticator *>();
+#endif
 #endif
 }
 
@@ -266,6 +315,84 @@ void tst_QWebSocketServer::tst_connectivity()
     QCOMPARE(sslErrorsSpy.count(), 0);
 #endif
     QCOMPARE(serverErrorSpy.count(), 0);
+}
+
+void tst_QWebSocketServer::tst_preSharedKey()
+{
+#ifndef QT_NO_OPENSSL
+    QWebSocketServer server(QString(), QWebSocketServer::SecureMode);
+
+    bool cipherFound = false;
+    const QList<QSslCipher> supportedCiphers = QSslSocket::supportedCiphers();
+    for (const QSslCipher &cipher : supportedCiphers) {
+        if (cipher.name() == PSK_CIPHER_WITHOUT_AUTH) {
+            cipherFound = true;
+            break;
+        }
+    }
+
+    if (!cipherFound)
+        QSKIP("SSL implementation does not support the necessary cipher");
+
+    QSslCipher cipher(PSK_CIPHER_WITHOUT_AUTH);
+    QList<QSslCipher> list;
+    list << cipher;
+
+    QSslConfiguration config = QSslConfiguration::defaultConfiguration();
+    config.setCiphers(list);
+    config.setPeerVerifyMode(QSslSocket::VerifyNone);
+    config.setPreSharedKeyIdentityHint(PSK_SERVER_IDENTITY_HINT);
+    server.setSslConfiguration(config);
+
+    PskProvider providerServer;
+    providerServer.m_server = true;
+    providerServer.m_identity = PSK_CLIENT_IDENTITY;
+    providerServer.m_psk = PSK_CLIENT_PRESHAREDKEY;
+    connect(&server, &QWebSocketServer::preSharedKeyAuthenticationRequired, &providerServer, &PskProvider::providePsk);
+
+    QSignalSpy serverPskRequiredSpy(&server, &QWebSocketServer::preSharedKeyAuthenticationRequired);
+    QSignalSpy serverConnectionSpy(&server, &QWebSocketServer::newConnection);
+    QSignalSpy serverErrorSpy(&server,
+                              SIGNAL(serverError(QWebSocketProtocol::CloseCode)));
+    QSignalSpy serverClosedSpy(&server, &QWebSocketServer::closed);
+    QSignalSpy sslErrorsSpy(&server, SIGNAL(sslErrors(QList<QSslError>)));
+
+    QWebSocket socket;
+    QSslConfiguration socketConfig = QSslConfiguration::defaultConfiguration();
+    socketConfig.setPeerVerifyMode(QSslSocket::VerifyNone);
+    socketConfig.setCiphers(list);
+    socket.setSslConfiguration(socketConfig);
+
+    PskProvider providerClient;
+    providerClient.m_identity = PSK_CLIENT_IDENTITY;
+    providerClient.m_psk = PSK_CLIENT_PRESHAREDKEY;
+    connect(&socket, &QWebSocket::preSharedKeyAuthenticationRequired, &providerClient, &PskProvider::providePsk);
+    QSignalSpy socketPskRequiredSpy(&socket, &QWebSocket::preSharedKeyAuthenticationRequired);
+    QSignalSpy socketConnectedSpy(&socket, &QWebSocket::connected);
+
+    QVERIFY(server.listen());
+    QCOMPARE(server.serverAddress(), QHostAddress(QHostAddress::Any));
+    QCOMPARE(server.serverUrl(), QUrl(QString::asprintf("wss://%ls:%d",
+                                 qUtf16Printable(QHostAddress(QHostAddress::LocalHost).toString()), server.serverPort())));
+
+    socket.open(server.serverUrl().toString());
+
+    if (socketConnectedSpy.count() == 0)
+        QVERIFY(socketConnectedSpy.wait());
+    QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
+    QCOMPARE(serverConnectionSpy.count(), 1);
+    QCOMPARE(serverPskRequiredSpy.count(), 1);
+    QCOMPARE(socketPskRequiredSpy.count(), 1);
+
+    QCOMPARE(serverClosedSpy.count(), 0);
+
+    server.close();
+
+    QVERIFY(serverClosedSpy.wait());
+    QCOMPARE(serverClosedSpy.count(), 1);
+    QCOMPARE(sslErrorsSpy.count(), 0);
+    QCOMPARE(serverErrorSpy.count(), 0);
+#endif
 }
 
 void tst_QWebSocketServer::tst_maxPendingConnections()

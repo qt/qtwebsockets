@@ -60,6 +60,7 @@
 #ifndef QT_NO_SSL
 #include <QtNetwork/QSslConfiguration>
 #include <QtNetwork/QSslError>
+#include <QtNetwork/QSslPreSharedKeyAuthenticator>
 #endif
 
 #include <QtCore/QDebug>
@@ -592,6 +593,8 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
 #ifndef QT_NO_SSL
         const QSslSocket * const sslSocket = qobject_cast<const QSslSocket *>(pTcpSocket);
         if (sslSocket) {
+            QObject::connect(sslSocket, &QSslSocket::preSharedKeyAuthenticationRequired, q,
+                             &QWebSocket::preSharedKeyAuthenticationRequired);
             QObject::connect(sslSocket, &QSslSocket::encryptedBytesWritten, q,
                              &QWebSocket::bytesWritten);
             typedef void (QSslSocket:: *sslErrorSignalType)(const QList<QSslError> &);

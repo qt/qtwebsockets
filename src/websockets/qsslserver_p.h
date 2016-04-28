@@ -54,6 +54,7 @@
 #include <QtNetwork/QTcpServer>
 #include <QtNetwork/QSslError>
 #include <QtNetwork/QSslConfiguration>
+#include <QtNetwork/QSslPreSharedKeyAuthenticator>
 #include <QtCore/QList>
 
 QT_BEGIN_NAMESPACE
@@ -74,6 +75,7 @@ Q_SIGNALS:
     void sslErrors(const QList<QSslError> &errors);
     void peerVerifyError(const QSslError &error);
     void newEncryptedConnection();
+    void preSharedKeyAuthenticationRequired(QSslPreSharedKeyAuthenticator *authenticator);
 
 protected:
     virtual void incomingConnection(qintptr socket);

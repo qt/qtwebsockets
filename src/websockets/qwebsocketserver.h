@@ -128,6 +128,7 @@ Q_SIGNALS:
 #ifndef QT_NO_SSL
     void peerVerifyError(const QSslError &error);
     void sslErrors(const QList<QSslError> &errors);
+    void preSharedKeyAuthenticationRequired(QSslPreSharedKeyAuthenticator *authenticator);
 #endif
     void closed();
 };
