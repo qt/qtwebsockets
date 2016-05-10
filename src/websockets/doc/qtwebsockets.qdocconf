@@ -4,7 +4,7 @@ project                                             = QtWebSockets
 description                                         = Qt WebSockets Reference Documentation
 version                                             = $QT_VERSION
 
-examplesinstallpath                                 = qtwebsockets/websockets
+examplesinstallpath                                 = websockets
 
 qhp.projects                                        = QtWebSockets
 
