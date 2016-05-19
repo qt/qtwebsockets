@@ -14,4 +14,7 @@ SOURCES += \
 HEADERS += \
     echoserver.h
 
-OTHER_FILES += echoclient.html
+EXAMPLE_FILES += echoclient.html
+
+target.path = $$[QT_INSTALL_EXAMPLES]/websockets/echoserver
+INSTALLS += target
