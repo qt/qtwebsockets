@@ -41,15 +41,21 @@
     Qt applications to act as a server that can process WebSocket requests,
     or a client that can consume data received from the server, or both.
 
-    To use this module in your application, use the following include
-    statement:
+    \section1 Getting Started
+
+    To include the definitions of the module's classes, use the following directive:
 
     \code
     #include <QtWebSockets/QtWebSockets>
     \endcode
 
-    To link against the module, add this line to your \l qmake \c
-    .pro file:
+    To  import the QML types into your application, use the following import statement in your .qml file:
+
+    \code
+    import QtWebSockets 1.0
+    \endcode
+
+    To link against the module, add this line to your qmake .pro file:
 
     \code
     QT += websockets
