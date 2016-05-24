@@ -13,3 +13,6 @@ SOURCES += \
 
 HEADERS += \
     echoclient.h
+
+target.path = $$[QT_INSTALL_EXAMPLES]/websockets/echoclient
+INSTALLS += target
