@@ -48,7 +48,7 @@
 */
 
 /*!
-    \qmlmodule QtWebSockets 1.0
+    \qmlmodule QtWebSockets 1.1
     \title Qt WebSockets QML Types
     \ingroup qmlmodules
     \brief Provides QML types for WebSocket-based communication.
@@ -56,7 +56,7 @@
 
     The QML types are accessed by using:
     \code
-    import QtWebSockets 1.0
+    import QtWebSockets 1.1
     \endcode
 
     \note Prior to Qt 5.5, the import statement was \c{import Qt.WebSockets 1.0}
