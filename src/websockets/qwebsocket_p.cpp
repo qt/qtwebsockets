@@ -981,7 +981,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
         }
 
         if (m_handshakeState != ParsingHeaderState) {
-            if (pSocket->atEnd()) {
+            if (pSocket->state() != QAbstractSocket::ConnectedState) {
                 errorDescription = QWebSocket::tr("QWebSocketPrivate::processHandshake: Connection closed while reading header.");
                 break;
             }
