@@ -40,7 +40,7 @@ SOURCES += \
     $$PWD/qmaskgenerator.cpp \
     $$PWD/qdefaultmaskgenerator_p.cpp
 
-contains(QT_CONFIG, ssl) | contains(QT_CONFIG, openssl) | contains(QT_CONFIG, openssl-linked) {
+qtConfig(ssl) {
     SOURCES += $$PWD/qsslserver.cpp
     PRIVATE_HEADERS += $$PWD/qsslserver_p.h
 }

@@ -10,4 +10,4 @@ QT = core testlib websockets websockets-private
 
 SOURCES += tst_websocketprotocol.cpp
 
-requires(contains(QT_CONFIG, private_tests))
+requires(qtConfig(private_tests))
