@@ -1087,7 +1087,8 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
             m_key = generateKey();
 
             QList<QPair<QString, QString> > headers;
-            foreach (const QByteArray &key, m_request.rawHeaderList())
+            const auto headerList = m_request.rawHeaderList();
+            for (const QByteArray &key : headerList)
                 headers << qMakePair(QString::fromLatin1(key),
                                      QString::fromLatin1(m_request.rawHeader(key)));
 
