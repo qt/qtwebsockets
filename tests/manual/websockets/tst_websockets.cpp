@@ -152,12 +152,11 @@ void tst_WebSocketsTest::testLocalAddress()
 void tst_WebSocketsTest::testPeerAddress()
 {
     QHostInfo hostInfo = QHostInfo::fromName(m_url.host());
-    QList<QHostAddress> addresses = hostInfo.addresses();
+    const QList<QHostAddress> addresses = hostInfo.addresses();
     QVERIFY(addresses.length() > 0);
     QHostAddress peer = m_pWebSocket->peerAddress();
     bool found = false;
-    Q_FOREACH (const QHostAddress &a, addresses)
-    {
+    for (const QHostAddress &a : addresses) {
         if (a == peer)
         {
             found = true;

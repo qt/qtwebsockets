@@ -193,7 +193,7 @@ private:
                                    QString extensions,
                                    QString protocols,
                                    QByteArray key,
-                                   QList<QPair<QString, QString> > headers);
+                                   const QList<QPair<QString, QString> > &headers);
 
     static QWebSocket *upgradeFrom(QTcpSocket *tcpSocket,
                                    const QWebSocketHandshakeRequest &request,

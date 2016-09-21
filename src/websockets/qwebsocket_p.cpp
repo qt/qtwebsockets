@@ -305,11 +305,9 @@ QWebSocket *QWebSocketPrivate::upgradeFrom(QTcpSocket *pTcpSocket,
     QWebSocket *pWebSocket = new QWebSocket(pTcpSocket, response.acceptedVersion(), parent);
     if (Q_LIKELY(pWebSocket)) {
         QNetworkRequest netRequest(request.requestUrl());
-        QMapIterator<QString, QString> headerIter(request.headers());
-        while (headerIter.hasNext()) {
-            headerIter.next();
-            netRequest.setRawHeader(headerIter.key().toLatin1(), headerIter.value().toLatin1());
-        }
+        const auto headers = request.headers();
+        for (auto it = headers.begin(), end = headers.end(); it != end; ++it)
+            netRequest.setRawHeader(it.key().toLatin1(), it.value().toLatin1());
 #ifndef QT_NO_SSL
         if (QSslSocket *sslSock = qobject_cast<QSslSocket *>(pTcpSocket))
             pWebSocket->setSslConfiguration(sslSock->sslConfiguration());
@@ -1204,7 +1202,7 @@ QString QWebSocketPrivate::createHandShakeRequest(QString resourceName,
                                                   QString extensions,
                                                   QString protocols,
                                                   QByteArray key,
-                                                  QList<QPair<QString, QString> > headers)
+                                                  const QList<QPair<QString, QString> > &headers)
 {
     QStringList handshakeRequest;
     if (resourceName.contains(QStringLiteral("\r\n"))) {
@@ -1247,11 +1245,9 @@ QString QWebSocketPrivate::createHandShakeRequest(QString resourceName,
     if (protocols.length() > 0)
         handshakeRequest << QStringLiteral("Sec-WebSocket-Protocol: ") % protocols;
 
-    QListIterator<QPair<QString, QString> > headerIter(headers);
-    while (headerIter.hasNext()) {
-        const QPair<QString,QString> &header = headerIter.next();
+    for (const auto &header : headers)
         handshakeRequest << header.first % QStringLiteral(": ") % header.second;
-    }
+
     handshakeRequest << QStringLiteral("\r\n");
 
     return handshakeRequest.join(QStringLiteral("\r\n"));
