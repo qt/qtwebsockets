@@ -289,7 +289,7 @@ bool QWebSocketFrame::isValid() const
 // The arm compiler of Visual Studio 2013 Update 3 crashes when
 // trying to optimize QWebSocketFrame::readFrame. Hence turn
 // those off for this snippet
-#if (defined(Q_OS_WINPHONE) || defined(Q_OS_WINRT)) && defined(__ARM__)
+#if defined(Q_OS_WINRT) && defined(__ARM__)
 #  pragma optimize("", off)
 #endif
 
@@ -501,7 +501,7 @@ QWebSocketFrame QWebSocketFrame::readFrame(QIODevice *pIoDevice)
     return frame;
 }
 
-#if (defined(Q_OS_WINPHONE) || defined(Q_OS_WINRT)) && defined(__ARM__)
+#if defined(Q_OS_WINRT) && defined(__ARM__)
 #  pragma optimize("", on)
 #endif
 
