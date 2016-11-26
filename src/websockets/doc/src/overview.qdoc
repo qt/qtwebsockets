@@ -39,7 +39,7 @@ Historically, web applications that needed bidirectional communication or
 push notifications had to use one of the HTTP-based solutions available. These
 solutions employed different techniques such as polling, long-polling, and
 streaming, to overcome the limitations of HTTP protocol, which is not designed
-for such use cases. As a result, high network latency, unnecessary data
+for such use cases. This resulted in high network latency, unnecessary data
 exchange, and stale or old data. The WebSocket offering by IETF helps to
 overcome these problems to a large extent.
 
