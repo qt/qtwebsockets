@@ -392,18 +392,20 @@ void QWebSocketServerPrivate::onNewConnection()
         QObjectPrivate::connect(pTcpSocket, &QTcpSocket::readyRead,
                                 this, &QWebSocketServerPrivate::handshakeReceived,
                                 Qt::QueuedConnection);
+        QObjectPrivate::connect(pTcpSocket, &QTcpSocket::disconnected,
+                                this, &QWebSocketServerPrivate::onSocketDisconnected);
     }
 }
 
 /*!
     \internal
  */
-void QWebSocketServerPrivate::onCloseConnection()
+void QWebSocketServerPrivate::onSocketDisconnected()
 {
     if (Q_LIKELY(currentSender)) {
         QTcpSocket *pTcpSocket = qobject_cast<QTcpSocket*>(currentSender->sender);
         if (Q_LIKELY(pTcpSocket))
-            pTcpSocket->close();
+            pTcpSocket->deleteLater();
     }
 }
 

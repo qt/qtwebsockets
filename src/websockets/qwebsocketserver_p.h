@@ -136,7 +136,7 @@ private:
                                  const QString &errorDescription);
 
     void onNewConnection();
-    void onCloseConnection();
+    void onSocketDisconnected();
     void handshakeReceived();
 };
 
