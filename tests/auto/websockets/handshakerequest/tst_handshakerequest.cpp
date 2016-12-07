@@ -72,6 +72,9 @@ private Q_SLOTS:
     void tst_qtbug_39355();
     void tst_qtbug_48123_data();
     void tst_qtbug_48123();
+
+    void tst_qtbug_57357_data();
+    void tst_qtbug_57357(); // ipv6 related
 };
 
 tst_HandshakeRequest::tst_HandshakeRequest()
@@ -378,6 +381,106 @@ void tst_HandshakeRequest::tst_qtbug_48123()
     request.readHandshake(textStream, MAX_HEADERLINE_LENGTH, MAX_HEADERS);
 
     QCOMPARE(request.isValid(), shouldBeValid);
+}
+
+void tst_HandshakeRequest::tst_qtbug_57357_data()
+{
+    QTest::addColumn<QString>("header");
+    QTest::addColumn<bool>("valid");
+    QTest::addColumn<QString>("host");
+    QTest::addColumn<int>("port");
+
+    QString header = QLatin1String("GET /ABC/DEF/ HTTP/1.1\r\nHost: %1%2\r\n"
+                                   "Sec-WebSocket-Version: 13\r\n"
+                                   "Sec-WebSocket-Key: 2Wg20829/4ziWlmsUAD8Dg==\r\n"
+                                   "Upgrade: websocket\r\n"
+                                   "Connection: Upgrade\r\n\r\n");
+
+    QTest::newRow("ipv4-1") << header.arg(QStringLiteral("10.0.0.1")).arg(QStringLiteral(":1234")) << true
+                            << QStringLiteral("10.0.0.1")
+                            << 1234;
+    QTest::newRow("ipv4-2") << header.arg(QStringLiteral("127.0.0.1")).arg(QStringLiteral(":1111")) << true
+                            << QStringLiteral("127.0.0.1")
+                            << 1111;
+    QTest::newRow("ipv4-wo-port") << header.arg(QStringLiteral("10.0.0.1")).arg(QStringLiteral("")) << true
+                            << QStringLiteral("10.0.0.1")
+                            << 8080;
+
+    QTest::newRow("ipv6-1") << header.arg(QStringLiteral("[56:56:56:56:56:56:56:56]")).arg(QStringLiteral(":1234")) << true
+                            << QStringLiteral("56:56:56:56:56:56:56:56")
+                            << 1234;
+    QTest::newRow("ipv6-2") << header.arg(QStringLiteral("[::ffff:129.144.52.38]")).arg(QStringLiteral(":1111")) << true
+                            << QStringLiteral("::ffff:129.144.52.38")
+                            << 1111;
+    QTest::newRow("ipv6-wo-port") << header.arg(QStringLiteral("[56:56:56:56:56:56:56:56]")).arg(QStringLiteral("")) << true
+                            << QStringLiteral("56:56:56:56:56:56:56:56")
+                            << 8080;
+    QTest::newRow("ipv6-invalid-1") << header.arg(QStringLiteral("56:56:56:56:56:56:56:56]")).arg(QStringLiteral(":1234")) << false
+                            << QStringLiteral("")
+                            << 1234;
+
+    QTest::newRow("host-1") << header.arg(QStringLiteral("foo.com")).arg(QStringLiteral(":1234")) << true
+                            << QStringLiteral("foo.com")
+                            << 1234;
+    QTest::newRow("host-2") << header.arg(QStringLiteral("bar.net")).arg(QStringLiteral(":1111")) << true
+                            << QStringLiteral("bar.net")
+                            << 1111;
+    QTest::newRow("host-wo-port") << header.arg(QStringLiteral("foo.com")).arg(QStringLiteral("")) << true
+                            << QStringLiteral("foo.com")
+                            << 8080;
+
+    QTest::newRow("localhost-1") << header.arg(QStringLiteral("localhost")).arg(QStringLiteral(":1234")) << true
+                            << QStringLiteral("localhost")
+                            << 1234;
+    QTest::newRow("localhost-2") << header.arg(QStringLiteral("localhost")).arg(QStringLiteral(":1111")) << true
+                            << QStringLiteral("localhost")
+                            << 1111;
+    QTest::newRow("localhost-wo-port") << header.arg(QStringLiteral("localhost")).arg(QStringLiteral("")) << true
+                            << QStringLiteral("localhost")
+                            << 8080;
+
+    // reference: qtbase/tests/auto/corelib/io/qurl/tst_qurl.cpp: void tst_QUrl::ipvfuture_data()
+    QTest::newRow("ipvfuture-1") << header.arg(QStringLiteral("[v7.1234]")).arg(QStringLiteral(":1234")) << true
+                            << QStringLiteral("v7.1234")
+                            << 1234;
+
+    QTest::newRow("invalid-1") << header.arg(QStringLiteral("abc:def@foo.com")).arg(QStringLiteral("")) << false
+                            << QStringLiteral("foo.com")
+                            << 8080;
+    QTest::newRow("invalid-2") << header.arg(QStringLiteral(":def@foo.com")).arg(QStringLiteral("")) << false
+                            << QStringLiteral("foo.com")
+                            << 8080;
+    QTest::newRow("invalid-3") << header.arg(QStringLiteral("abc:@foo.com")).arg(QStringLiteral("")) << false
+                            << QStringLiteral("foo.com")
+                            << 8080;
+    QTest::newRow("invalid-4") << header.arg(QStringLiteral("@foo.com")).arg(QStringLiteral("")) << false
+                            << QStringLiteral("foo.com")
+                            << 8080;
+    QTest::newRow("invalid-5") << header.arg(QStringLiteral("foo.com/")).arg(QStringLiteral("")) << false
+                            << QStringLiteral("foo.com")
+                            << 8080;
+}
+
+void tst_HandshakeRequest::tst_qtbug_57357()
+{
+    QFETCH(QString, header);
+    QFETCH(bool, valid);
+    QFETCH(QString, host);
+    QFETCH(int, port);
+
+    QByteArray data;
+    QTextStream textStream(&data);
+    QWebSocketHandshakeRequest request(8080, false);
+
+    textStream << header;
+    textStream.seek(0);
+    request.readHandshake(textStream, MAX_HEADERLINE_LENGTH, MAX_HEADERS);
+
+    QCOMPARE(request.isValid(), valid);
+    if (valid) {
+        QCOMPARE(request.host(), host);
+        QCOMPARE(request.port(), port);
+    }
 }
 
 QTEST_MAIN(tst_HandshakeRequest)

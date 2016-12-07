@@ -269,16 +269,12 @@ void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream, int maxH
     if (m_requestUrl.isRelative()) {
         // see http://tools.ietf.org/html/rfc6455#page-17
         // No. 4 item in "The requirements for this handshake"
-        int idx = host.indexOf(QStringLiteral(":"));
-        bool ok = false;
-        int port = 0;
-        if (idx != -1) {
-            port = host.rightRef(host.length() - idx - 1).toInt(&ok);
-            host.truncate(idx);
+        m_requestUrl.setAuthority(host);
+        if (!m_requestUrl.userName().isNull()) { // If the username is null, the password must be too.
+            m_isValid = false;
+            clear();
+            return;
         }
-        m_requestUrl.setHost(host);
-        if (ok)
-            m_requestUrl.setPort(port);
     }
     if (m_requestUrl.scheme().isEmpty()) {
         const QString scheme =  isSecure() ? QStringLiteral("wss") : QStringLiteral("ws");
@@ -331,7 +327,7 @@ void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream, int maxH
 
     //TODO: authentication field
 
-    m_isValid = !(host.isEmpty() ||
+    m_isValid = !(m_requestUrl.host().isEmpty() ||
                   resourceName.isEmpty() ||
                   m_versions.isEmpty() ||
                   m_key.isEmpty() ||
