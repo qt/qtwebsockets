@@ -63,11 +63,11 @@
 
   The status can have the following values:
   \list
-  \li WebSockets.Connecting
-  \li WebSockets.Open
-  \li WebSockets.Closing
-  \li WebSockets.Closed
-  \li WebSockets.Error
+  \li WebSocket.Connecting
+  \li WebSocket.Open
+  \li WebSocket.Closing
+  \li WebSocket.Closed
+  \li WebSocket.Error
   \endlist
   */
 
