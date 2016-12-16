@@ -10,3 +10,5 @@ TEMPLATE = app
 
 SOURCES += tst_qwebsocketserver.cpp
 
+RESOURCES += $$PWD/../shared/qwebsocketshared.qrc
+

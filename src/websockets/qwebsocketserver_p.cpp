@@ -435,7 +435,7 @@ void QWebSocketServerPrivate::handshakeReceived()
                this, &QWebSocketServerPrivate::handshakeReceived);
     Q_Q(QWebSocketServer);
     bool success = false;
-    bool isSecure = false;
+    bool isSecure = (m_secureMode == SecureMode);
 
     if (m_pendingConnections.length() >= maxPendingConnections()) {
         pTcpSocket->close();

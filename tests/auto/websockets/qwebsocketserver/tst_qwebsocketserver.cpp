@@ -32,6 +32,9 @@
 #include <QtNetwork/qsslpresharedkeyauthenticator.h>
 #include <QtNetwork/qsslcipher.h>
 #endif
+#ifndef QT_NO_SSL
+#include <QtNetwork/qsslkey.h>
+#endif
 #include <QtWebSockets/QWebSocketServer>
 #include <QtWebSockets/QWebSocket>
 #include <QtWebSockets/QWebSocketCorsAuthenticator>
@@ -106,6 +109,7 @@ private Q_SLOTS:
     void tst_preSharedKey();
     void tst_maxPendingConnections();
     void tst_serverDestroyedWhileSocketConnected();
+    void tst_scheme(); // qtbug-55927
 };
 
 tst_QWebSocketServer::tst_QWebSocketServer()
@@ -505,6 +509,58 @@ void tst_QWebSocketServer::tst_serverDestroyedWhileSocketConnected()
     if (socketDisconnectedSpy.count() == 0)
         QVERIFY(socketDisconnectedSpy.wait());
     QCOMPARE(socketDisconnectedSpy.count(), 1);
+}
+
+void tst_QWebSocketServer::tst_scheme()
+{
+    QWebSocketServer plainServer(QString(), QWebSocketServer::NonSecureMode);
+    QSignalSpy plainServerConnectionSpy(&plainServer, SIGNAL(newConnection()));
+
+    QVERIFY(plainServer.listen());
+
+    QWebSocket plainSocket;
+    plainSocket.open(plainServer.serverUrl().toString());
+
+    if (plainServerConnectionSpy.count() == 0)
+        QVERIFY(plainServerConnectionSpy.wait());
+    QScopedPointer<QWebSocket> plainServerSocket(plainServer.nextPendingConnection());
+    QVERIFY(!plainServerSocket.isNull());
+    QCOMPARE(plainServerSocket->requestUrl().scheme(), QStringLiteral("ws"));
+    plainServer.close();
+
+#ifndef QT_NO_SSL
+    QWebSocketServer secureServer(QString(), QWebSocketServer::SecureMode);
+    QSslConfiguration sslConfiguration;
+    QFile certFile(QStringLiteral(":/localhost.cert"));
+    QFile keyFile(QStringLiteral(":/localhost.key"));
+    QVERIFY(certFile.open(QIODevice::ReadOnly));
+    QVERIFY(keyFile.open(QIODevice::ReadOnly));
+    QSslCertificate certificate(&certFile, QSsl::Pem);
+    QSslKey sslKey(&keyFile, QSsl::Rsa, QSsl::Pem);
+    certFile.close();
+    keyFile.close();
+    sslConfiguration.setPeerVerifyMode(QSslSocket::VerifyNone);
+    sslConfiguration.setLocalCertificate(certificate);
+    sslConfiguration.setPrivateKey(sslKey);
+    sslConfiguration.setProtocol(QSsl::TlsV1SslV3);
+    secureServer.setSslConfiguration(sslConfiguration);
+    QSignalSpy secureServerConnectionSpy(&secureServer, SIGNAL(newConnection()));
+
+    QVERIFY(secureServer.listen());
+
+    QWebSocket secureSocket;
+    typedef void (QWebSocket::* ignoreSslErrorsSlot)();
+    connect(&secureSocket, &QWebSocket::sslErrors,
+            &secureSocket, static_cast<ignoreSslErrorsSlot>(&QWebSocket::ignoreSslErrors));
+    secureSocket.open(secureServer.serverUrl().toString());
+
+    if (secureServerConnectionSpy.count() == 0)
+        QVERIFY(secureServerConnectionSpy.wait());
+    QScopedPointer<QWebSocket> secureServerSocket(secureServer.nextPendingConnection());
+    QVERIFY(!secureServerSocket.isNull());
+    QCOMPARE(secureServerSocket->requestUrl().scheme(), QStringLiteral("wss"));
+    secureServer.close();
+#endif
 }
 
 QTEST_MAIN(tst_QWebSocketServer)
