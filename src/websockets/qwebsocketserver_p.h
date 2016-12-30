@@ -65,6 +65,7 @@
 QT_BEGIN_NAMESPACE
 
 class QTcpServer;
+class QTcpSocket;
 class QWebSocketServer;
 
 class QWebSocketServerPrivate : public QObjectPrivate
@@ -119,6 +120,8 @@ public:
 #endif
 
     void setError(QWebSocketProtocol::CloseCode code, const QString &errorString);
+
+    void handleConnection(QTcpSocket *pTcpSocket) const;
 
     QWebSocketServer * const q_ptr;
 

@@ -384,17 +384,8 @@ void QWebSocketServerPrivate::setError(QWebSocketProtocol::CloseCode code, const
  */
 void QWebSocketServerPrivate::onNewConnection()
 {
-    while (m_pTcpServer->hasPendingConnections()) {
-        QTcpSocket *pTcpSocket = m_pTcpServer->nextPendingConnection();
-        //use a queued connection because a QSslSocket
-        //needs the event loop to process incoming data
-        //if not queued, data is incomplete when handshakeReceived is called
-        QObjectPrivate::connect(pTcpSocket, &QTcpSocket::readyRead,
-                                this, &QWebSocketServerPrivate::handshakeReceived,
-                                Qt::QueuedConnection);
-        QObjectPrivate::connect(pTcpSocket, &QTcpSocket::disconnected,
-                                this, &QWebSocketServerPrivate::onSocketDisconnected);
-    }
+    while (m_pTcpServer->hasPendingConnections())
+        handleConnection(m_pTcpServer->nextPendingConnection());
 }
 
 /*!
@@ -488,6 +479,19 @@ void QWebSocketServerPrivate::handshakeReceived()
     }
     if (!success) {
         pTcpSocket->close();
+    }
+}
+
+void QWebSocketServerPrivate::handleConnection(QTcpSocket *pTcpSocket) const
+{
+    if (Q_LIKELY(pTcpSocket)) {
+        // Use a queued connection because a QSslSocket needs the event loop to process incoming
+        // data. If not queued, data is incomplete when handshakeReceived is called.
+        QObjectPrivate::connect(pTcpSocket, &QTcpSocket::readyRead,
+                                this, &QWebSocketServerPrivate::handshakeReceived,
+                                Qt::QueuedConnection);
+        QObjectPrivate::connect(pTcpSocket, &QTcpSocket::disconnected,
+                                this, &QWebSocketServerPrivate::onSocketDisconnected);
     }
 }
 

@@ -54,6 +54,7 @@
 
 QT_BEGIN_NAMESPACE
 
+class QTcpSocket;
 class QWebSocketServerPrivate;
 class QWebSocket;
 class QWebSocketCorsAuthenticator;
@@ -117,6 +118,8 @@ public:
 #endif
 
     QList<QWebSocketProtocol::Version> supportedVersions() const;
+
+    void handleConnection(QTcpSocket *socket) const;
 
 Q_SIGNALS:
     void acceptError(QAbstractSocket::SocketError socketError);

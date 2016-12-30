@@ -28,6 +28,7 @@
 #include <QString>
 #include <QtTest>
 #include <QNetworkProxy>
+#include <QTcpServer>
 #ifndef QT_NO_OPENSSL
 #include <QtNetwork/qsslpresharedkeyauthenticator.h>
 #include <QtNetwork/qsslcipher.h>
@@ -110,6 +111,7 @@ private Q_SLOTS:
     void tst_maxPendingConnections();
     void tst_serverDestroyedWhileSocketConnected();
     void tst_scheme(); // qtbug-55927
+    void tst_handleConnection();
 };
 
 tst_QWebSocketServer::tst_QWebSocketServer()
@@ -561,6 +563,38 @@ void tst_QWebSocketServer::tst_scheme()
     QCOMPARE(secureServerSocket->requestUrl().scheme(), QStringLiteral("wss"));
     secureServer.close();
 #endif
+}
+
+void tst_QWebSocketServer::tst_handleConnection()
+{
+    QWebSocketServer wsServer(QString(), QWebSocketServer::NonSecureMode);
+    QSignalSpy wsServerConnectionSpy(&wsServer, &QWebSocketServer::newConnection);
+
+    QTcpServer tcpServer;
+    connect(&tcpServer, &QTcpServer::newConnection,
+            [&tcpServer, &wsServer]() {
+        wsServer.handleConnection(tcpServer.nextPendingConnection());
+    });
+    QVERIFY(tcpServer.listen());
+
+    QWebSocket webSocket;
+    QSignalSpy wsConnectedSpy(&webSocket, &QWebSocket::connected);
+    webSocket.open(QStringLiteral("ws://localhost:%1").arg(tcpServer.serverPort()));
+    QVERIFY(wsConnectedSpy.wait());
+
+    if (wsServerConnectionSpy.isEmpty())
+        QVERIFY(wsServerConnectionSpy.wait());
+
+    QScopedPointer<QWebSocket> webServerSocket(wsServer.nextPendingConnection());
+    QVERIFY(!webServerSocket.isNull());
+
+    QSignalSpy wsMessageReceivedSpy(webServerSocket.data(), &QWebSocket::textMessageReceived);
+    webSocket.sendTextMessage("dummy");
+    wsMessageReceivedSpy.wait();
+
+    QCOMPARE(wsMessageReceivedSpy.count(), 1);
+    QList<QVariant> arguments = wsMessageReceivedSpy.takeFirst();
+    QCOMPARE(arguments.first().toString(), QString("dummy"));
 }
 
 QTEST_MAIN(tst_QWebSocketServer)
