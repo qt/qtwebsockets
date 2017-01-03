@@ -182,12 +182,16 @@ void QWebSocketDataProcessor::process(QIODevice *pIoDevice)
                 }
 
                 if (frame.isFinalFrame()) {
-                    if (m_opCode == QWebSocketProtocol::OpCodeText)
-                        Q_EMIT textMessageReceived(m_textMessage);
-                    else
-                        Q_EMIT binaryMessageReceived(m_binaryMessage);
-                    clear();
                     isDone = true;
+                    if (m_opCode == QWebSocketProtocol::OpCodeText) {
+                        const QString textMessage(m_textMessage);
+                        clear();
+                        Q_EMIT textMessageReceived(textMessage);
+                    } else {
+                        const QByteArray binaryMessage(m_binaryMessage);
+                        clear();
+                        Q_EMIT binaryMessageReceived(binaryMessage);
+                    }
                 }
             }
         } else {
