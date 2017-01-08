@@ -14,6 +14,7 @@ Qt 5.x
 
 ### Build And Usage
 Checkout the source code from code.qt.io
+
 Go into the source directory and execute:
 
     qmake
