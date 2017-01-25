@@ -173,6 +173,8 @@ private Q_SLOTS:
     void minimumSizeRequirement();
     void minimumSizeRequirement_data();
 
+    void clearDataBuffers(); // qtbug-55506
+
 private:
     //helper function that constructs a new row of test data for invalid UTF8 sequences
     void invalidUTF8(const char *dataTag, const char *utf8Sequence, bool isCloseFrame);
@@ -243,7 +245,7 @@ void tst_DataProcessor::goodBinaryFrame()
     QWebSocketDataProcessor dataProcessor;
     QFETCH(QByteArray, payload);
 
-    data.append((char)(FIN | QWebSocketProtocol::OpCodeBinary));
+    data.append(char(FIN | QWebSocketProtocol::OpCodeBinary));
 
     if (payload.length() < 126)
     {
@@ -337,7 +339,7 @@ void tst_DataProcessor::goodTextFrame()
     QFETCH(QByteArray, payload);
     QFETCH(int, size);
 
-    data.append((char)(FIN | QWebSocketProtocol::OpCodeText));
+    data.append(char(FIN | QWebSocketProtocol::OpCodeText));
 
     if (payload.length() < 126)
     {
@@ -407,7 +409,7 @@ void tst_DataProcessor::goodControlFrame()
     QSignalSpy pingReceivedSpy(&dataProcessor, SIGNAL(pingReceived(QByteArray)));
     QSignalSpy pongReceivedSpy(&dataProcessor, SIGNAL(pongReceived(QByteArray)));
 
-    data.append((char)(FIN | QWebSocketProtocol::OpCodePing));
+    data.append(char(FIN | QWebSocketProtocol::OpCodePing));
     data.append(QChar::fromLatin1(0));
     buffer.setData(data);
     buffer.open(QIODevice::ReadOnly);
@@ -425,7 +427,7 @@ void tst_DataProcessor::goodControlFrame()
     data.clear();
     pingReceivedSpy.clear();
     pongReceivedSpy.clear();
-    data.append((char)(FIN | QWebSocketProtocol::OpCodePong));
+    data.append(char(FIN | QWebSocketProtocol::OpCodePong));
     data.append(QChar::fromLatin1(0));
     buffer.setData(data);
     buffer.open(QIODevice::ReadOnly);
@@ -537,7 +539,7 @@ void tst_DataProcessor::goodOpcodes()
     QWebSocketDataProcessor dataProcessor;
     QFETCH(QWebSocketProtocol::OpCode, opCode);
 
-    data.append((char)(FIN | opCode));
+    data.append(char(FIN | opCode));
     data.append(char(0));   //zero length
 
     buffer.setData(data);
@@ -584,7 +586,7 @@ void tst_DataProcessor::goodCloseFrame()
     quint16 swapped = qToBigEndian<quint16>(closeCode);
     const char *wireRepresentation = static_cast<const char *>(static_cast<const void *>(&swapped));
 
-    data.append((char)(FIN | QWebSocketProtocol::OpCodeClose));
+    data.append(char(FIN | QWebSocketProtocol::OpCodeClose));
     if (swapped != 0)
     {
         data.append(char(payload.length() + 2)).append(wireRepresentation, 2).append(payload);
@@ -800,7 +802,7 @@ void tst_DataProcessor::frameTooSmall()
 
     {
         //text frame with final bit not set
-        data.append((char)(QWebSocketProtocol::OpCodeText)).append(char(0x0));
+        data.append(char(QWebSocketProtocol::OpCodeText)).append(char(0x0));
         buffer.setData(data);
         buffer.open(QIODevice::ReadOnly);
 
@@ -842,7 +844,7 @@ void tst_DataProcessor::frameTooSmall()
         data.clear();
 
         //text frame with final bit not set
-        data.append((char)(QWebSocketProtocol::OpCodeText)).append(char(0x0));
+        data.append(char(QWebSocketProtocol::OpCodeText)).append(char(0x0));
         buffer.setData(data);
         buffer.open(QIODevice::ReadOnly);
         dataProcessor.process(&buffer);
@@ -1830,6 +1832,42 @@ void tst_DataProcessor::insertIncompleteSizeFieldTest(quint8 payloadCode, quint8
             << QByteArray(numBytesFollowing, quint8(1))
             << true
             << QWebSocketProtocol::CloseCodeGoingAway;
+}
+
+void tst_DataProcessor::clearDataBuffers()
+{
+    const QByteArray binaryData("Hello!");
+    QByteArray data;
+    data.append(char(FIN | QWebSocketProtocol::OpCodeBinary));
+    data.append(char(binaryData.length()));
+    data.append(binaryData);
+
+    QWebSocketDataProcessor dataProcessor;
+    connect(&dataProcessor, &QWebSocketDataProcessor::binaryMessageReceived,
+            [&binaryData](const QByteArray &message)
+    {
+        QCOMPARE(message, binaryData);
+        QEventLoop loop;
+        QTimer::singleShot(2000, &loop, SLOT(quit()));
+        loop.exec();
+    });
+
+    QBuffer buffer;
+    buffer.setData(data);
+    auto processData = [&dataProcessor, &buffer]()
+    {
+        buffer.open(QIODevice::ReadOnly);
+        dataProcessor.process(&buffer);
+        buffer.close();
+    };
+
+    QTimer timer;
+    timer.setSingleShot(true);
+    connect(&timer, &QTimer::timeout, processData);
+
+    timer.start(1000);
+    processData();
+    QTest::qWait(2000);
 }
 
 QTEST_MAIN(tst_DataProcessor)

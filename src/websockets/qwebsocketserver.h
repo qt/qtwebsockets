@@ -69,9 +69,9 @@ class Q_WEBSOCKETS_EXPORT QWebSocketServer : public QObject
 public:
     enum SslMode {
 #ifndef QT_NO_SSL
-        SecureMode,
+        SecureMode = 0,
 #endif
-        NonSecureMode
+        NonSecureMode = 1
     };
 
     explicit QWebSocketServer(const QString &serverName, SslMode secureMode,
