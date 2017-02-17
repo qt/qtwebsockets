@@ -1,3 +1,3 @@
 TEMPLATE = subdirs
 
-SUBDIRS += qmlwebsockets qmlwebsockets_compat
+!uikit: SUBDIRS += qmlwebsockets qmlwebsockets_compat
