@@ -32,6 +32,12 @@
 #include <QDebug>
 #include "QtWebSockets/QWebSocket"
 
+// Run 'wstest -m echoserver -w ws://localhost:9000' before launching
+// the test.
+
+// wstest is part of the autobahn-testsuite:
+// https://github.com/crossbario/autobahn-testsuite
+
 class tst_WebSocketsTest : public QObject
 {
     Q_OBJECT
