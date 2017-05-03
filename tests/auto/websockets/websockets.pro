@@ -14,3 +14,6 @@ qtConfig(private_tests): SUBDIRS += \
 SUBDIRS += \
     qwebsocket \
     qwebsocketserver
+
+# QTBUG-60268
+boot2qt: SUBDIRS -= qwebsocketserver
