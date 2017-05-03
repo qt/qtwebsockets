@@ -181,9 +181,7 @@ void QQmlWebSocket::setUrl(const QUrl &url)
     }
     m_url = url;
     Q_EMIT urlChanged();
-    if (m_webSocket) {
-        m_webSocket->open(m_url);
-    }
+    open();
 }
 
 QQmlWebSocket::Status QQmlWebSocket::status() const
