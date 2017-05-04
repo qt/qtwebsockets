@@ -953,7 +953,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
     case NothingDoneState:
         m_headers.clear();
         m_handshakeState = ReadingStatusState;
-        // no break
+        Q_FALLTHROUGH();
     case ReadingStatusState:
         if (!pSocket->canReadLine())
             return;
@@ -963,7 +963,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
             break;
         }
         m_handshakeState = ReadingHeaderState;
-        // no break
+        Q_FALLTHROUGH();
     case ReadingHeaderState:
         while (pSocket->canReadLine()) {
             QString headerLine = readLine(pSocket);
@@ -985,7 +985,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
             }
             return;
         }
-        // no break
+        Q_FALLTHROUGH();
     case ParsingHeaderState: {
         const QString acceptKey = m_headers.value(QStringLiteral("sec-websocket-accept"), QString());
         const QString upgrade = m_headers.value(QStringLiteral("upgrade"), QString());
