@@ -179,7 +179,7 @@ private:
     void processHandshake(QTcpSocket *pSocket);
     void processStateChanged(QAbstractSocket::SocketState socketState);
 
-    qint64 doWriteFrames(const QByteArray &data, bool isBinary) Q_REQUIRED_RESULT;
+    Q_REQUIRED_RESULT qint64 doWriteFrames(const QByteArray &data, bool isBinary);
 
     void makeConnections(const QTcpSocket *pTcpSocket);
     void releaseConnections(const QTcpSocket *pTcpSocket);
@@ -195,15 +195,16 @@ private:
                                    QByteArray key,
                                    const QList<QPair<QString, QString> > &headers);
 
-    static QWebSocket *upgradeFrom(QTcpSocket *tcpSocket,
-                                   const QWebSocketHandshakeRequest &request,
-                                   const QWebSocketHandshakeResponse &response,
-                                   QObject *parent = Q_NULLPTR) Q_REQUIRED_RESULT;
+    Q_REQUIRED_RESULT static QWebSocket *
+    upgradeFrom(QTcpSocket *tcpSocket,
+                const QWebSocketHandshakeRequest &request,
+                const QWebSocketHandshakeResponse &response,
+                QObject *parent = Q_NULLPTR);
 
     quint32 generateMaskingKey() const;
     QByteArray generateKey() const;
-    qint64 writeFrames(const QList<QByteArray> &frames) Q_REQUIRED_RESULT;
-    qint64 writeFrame(const QByteArray &frame) Q_REQUIRED_RESULT;
+    Q_REQUIRED_RESULT qint64 writeFrames(const QList<QByteArray> &frames);
+    Q_REQUIRED_RESULT qint64 writeFrame(const QByteArray &frame);
 
     QTcpSocket *m_pSocket;
     QString m_errorString;
