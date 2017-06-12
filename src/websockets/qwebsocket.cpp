@@ -63,8 +63,8 @@
     In that case, non-secure WebSocket connections fail. The best way to mitigate against
     this problem is to use WebSocket over a secure connection.
 
-    \warning To generate masks, this implementation of WebSockets uses the cryptographically
-    insecure qrand() function.
+    \warning To generate masks, this implementation of WebSockets uses the reasonably
+    secure QRandomGenerator::get32() function.
     For more information about the importance of good masking,
     see \l {"Talking to Yourself for Fun and Profit" by Lin-Shung Huang et al}.
     The best measure against attacks mentioned in the document above,

@@ -48,7 +48,7 @@
     malicious scripts to attack bad behaving proxies.
     For more information about the importance of good masking,
     see \l {"Talking to Yourself for Fun and Profit" by Lin-Shung Huang et al}.
-    The default mask generator uses the cryptographically insecure qrand() function.
+    The default mask generator uses the reasonably secure QRandomGenerator::get32() function.
     The best measure against attacks mentioned in the document above,
     is to use QWebSocket over a secure connection (\e wss://).
     In general, always be careful to not have 3rd party script access to
@@ -58,8 +58,7 @@
 */
 
 #include "qdefaultmaskgenerator_p.h"
-#include <QDateTime>
-#include <limits>
+#include <QRandomGenerator>
 
 QT_BEGIN_NAMESPACE
 
@@ -83,25 +82,26 @@ QDefaultMaskGenerator::~QDefaultMaskGenerator()
 }
 
 /*!
-    Seeds the QDefaultMaskGenerator using qsrand().
-    When seed() is not called, no seed is used at all.
-
     \internal
 */
 bool QDefaultMaskGenerator::seed() Q_DECL_NOEXCEPT
 {
-    qsrand(static_cast<uint>(QDateTime::currentMSecsSinceEpoch()));
     return true;
 }
 
 /*!
-    Generates a new random mask using the insecure qrand() method.
+    Generates a new random mask using the insecure QRandomGenerator::get32() method.
 
     \internal
 */
 quint32 QDefaultMaskGenerator::nextMask() Q_DECL_NOEXCEPT
 {
-    return quint32((double(qrand()) / RAND_MAX) * std::numeric_limits<quint32>::max());
+    quint32 value = QRandomGenerator::get32();
+    while (Q_UNLIKELY(value == 0)) {
+        // a mask of zero has a special meaning
+        value = QRandomGenerator::get32();
+    }
+    return value;
 }
 
 QT_END_NAMESPACE
