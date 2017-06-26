@@ -12,3 +12,4 @@ SOURCES += tst_qwebsocketserver.cpp
 
 RESOURCES += $$PWD/../shared/qwebsocketshared.qrc
 
+boot2qt: DEFINES += SHOULD_CHECK_SYSCALL_SUPPORT

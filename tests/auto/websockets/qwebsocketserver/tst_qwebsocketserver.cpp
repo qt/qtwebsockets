@@ -112,9 +112,15 @@ private Q_SLOTS:
     void tst_serverDestroyedWhileSocketConnected();
     void tst_scheme(); // qtbug-55927
     void tst_handleConnection();
+
+private:
+    bool m_shouldSkipUnsupportedIpv6Test;
+#ifdef SHOULD_CHECK_SYSCALL_SUPPORT
+    bool ipv6GetsockoptionMissing(int level, int optname);
+#endif
 };
 
-tst_QWebSocketServer::tst_QWebSocketServer()
+tst_QWebSocketServer::tst_QWebSocketServer() : m_shouldSkipUnsupportedIpv6Test(false)
 {
 }
 
@@ -132,8 +138,42 @@ void tst_QWebSocketServer::init()
 #endif
 }
 
+#ifdef SHOULD_CHECK_SYSCALL_SUPPORT
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <errno.h>
+#include <unistd.h>
+
+bool tst_QWebSocketServer::ipv6GetsockoptionMissing(int level, int optname)
+{
+    int testSocket;
+
+    testSocket = socket(PF_INET6, SOCK_STREAM, 0);
+
+    // If we can't test here, assume it's not missing
+    if (testSocket == -1)
+        return false;
+
+    bool result = false;
+    if (getsockopt(testSocket, level, optname, nullptr, 0) == -1) {
+        if (errno == EOPNOTSUPP) {
+            result = true;
+        }
+    }
+
+    close(testSocket);
+    return result;
+}
+
+#endif //SHOULD_CHECK_SYSCALL_SUPPORT
+
 void tst_QWebSocketServer::initTestCase()
 {
+#ifdef SHOULD_CHECK_SYSCALL_SUPPORT
+    // Qemu does not have required support for IPV6 socket options.
+    // If this is detected, skip the test
+    m_shouldSkipUnsupportedIpv6Test = ipv6GetsockoptionMissing(SOL_IPV6, IPV6_V6ONLY);
+#endif
 }
 
 void tst_QWebSocketServer::cleanupTestCase()
@@ -283,6 +323,9 @@ void tst_QWebSocketServer::tst_listening()
 
 void tst_QWebSocketServer::tst_connectivity()
 {
+    if (m_shouldSkipUnsupportedIpv6Test)
+        QSKIP("Syscalls needed for ipv6 sockoptions missing functionality");
+
     QWebSocketServer server(QString(), QWebSocketServer::NonSecureMode);
     QSignalSpy serverConnectionSpy(&server, SIGNAL(newConnection()));
     QSignalSpy serverErrorSpy(&server,
@@ -325,6 +368,9 @@ void tst_QWebSocketServer::tst_connectivity()
 
 void tst_QWebSocketServer::tst_preSharedKey()
 {
+    if (m_shouldSkipUnsupportedIpv6Test)
+        QSKIP("Syscalls needed for ipv6 sockoptions missing functionality");
+
 #ifndef QT_NO_OPENSSL
     QWebSocketServer server(QString(), QWebSocketServer::SecureMode);
 
@@ -403,6 +449,9 @@ void tst_QWebSocketServer::tst_preSharedKey()
 
 void tst_QWebSocketServer::tst_maxPendingConnections()
 {
+    if (m_shouldSkipUnsupportedIpv6Test)
+        QSKIP("Syscalls needed for ipv6 sockoptions missing functionality");
+
     //tests if maximum connections are respected
     //also checks if there are no side-effects like signals that are unexpectedly thrown
     QWebSocketServer server(QString(), QWebSocketServer::NonSecureMode);
@@ -481,6 +530,9 @@ void tst_QWebSocketServer::tst_maxPendingConnections()
 
 void tst_QWebSocketServer::tst_serverDestroyedWhileSocketConnected()
 {
+    if (m_shouldSkipUnsupportedIpv6Test)
+        QSKIP("Syscalls needed for ipv6 sockoptions missing functionality");
+
     QWebSocketServer * server = new QWebSocketServer(QString(), QWebSocketServer::NonSecureMode);
     QSignalSpy serverConnectionSpy(server, SIGNAL(newConnection()));
     QSignalSpy corsAuthenticationSpy(server,
@@ -515,6 +567,9 @@ void tst_QWebSocketServer::tst_serverDestroyedWhileSocketConnected()
 
 void tst_QWebSocketServer::tst_scheme()
 {
+    if (m_shouldSkipUnsupportedIpv6Test)
+        QSKIP("Syscalls needed for ipv6 sockoptions missing functionality");
+
     QWebSocketServer plainServer(QString(), QWebSocketServer::NonSecureMode);
     QSignalSpy plainServerConnectionSpy(&plainServer, SIGNAL(newConnection()));
 
