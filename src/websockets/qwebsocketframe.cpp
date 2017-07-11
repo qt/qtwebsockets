@@ -286,13 +286,6 @@ bool QWebSocketFrame::isValid() const
     return m_isValid;
 }
 
-// The arm compiler of Visual Studio 2013 Update 3 crashes when
-// trying to optimize QWebSocketFrame::readFrame. Hence turn
-// those off for this snippet
-#if defined(Q_OS_WINRT) && defined(__ARM__)
-#  pragma optimize("", off)
-#endif
-
 #define WAIT_FOR_MORE_DATA(dataSizeInBytes)  \
     { returnState = processingState; \
       processingState = PS_WAIT_FOR_MORE_DATA; dataWaitSize = dataSizeInBytes; }
@@ -500,10 +493,6 @@ QWebSocketFrame QWebSocketFrame::readFrame(QIODevice *pIoDevice)
 
     return frame;
 }
-
-#if defined(Q_OS_WINRT) && defined(__ARM__)
-#  pragma optimize("", on)
-#endif
 
 /*!
     \internal
