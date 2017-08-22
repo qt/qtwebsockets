@@ -633,7 +633,7 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
 void QWebSocketPrivate::releaseConnections(const QTcpSocket *pTcpSocket)
 {
     if (Q_LIKELY(pTcpSocket))
-        pTcpSocket->disconnect(pTcpSocket);
+        pTcpSocket->disconnect();
     m_dataProcessor.disconnect();
 }
 
