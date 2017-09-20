@@ -1145,7 +1145,8 @@ void QWebSocketPrivate::socketDestroyed(QObject *socket)
  */
 void QWebSocketPrivate::processData()
 {
-    Q_ASSERT(m_pSocket);
+    if (!m_pSocket) // disconnected with data still in-bound
+        return;
     while (m_pSocket->bytesAvailable()) {
         if (state() == QAbstractSocket::ConnectingState) {
             if (!m_pSocket->canReadLine())
