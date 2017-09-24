@@ -80,7 +80,7 @@ QWebSocketConfiguration::QWebSocketConfiguration() :
 #ifndef QT_NO_NETWORKPROXY
     m_proxy(QNetworkProxy::DefaultProxy),
 #endif
-    m_pSocket(Q_NULLPTR)
+    m_pSocket(nullptr)
 {
 }
 
@@ -91,7 +91,7 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
                                      QWebSocket *pWebSocket) :
     QObjectPrivate(),
     q_ptr(pWebSocket),
-    m_pSocket(Q_NULLPTR),
+    m_pSocket(nullptr),
     m_errorString(),
     m_version(version),
     m_resourceName(),
@@ -376,7 +376,7 @@ void QWebSocketPrivate::open(const QNetworkRequest &request, bool mask)
     if (m_pSocket) {
         releaseConnections(m_pSocket);
         m_pSocket->deleteLater();
-        m_pSocket = Q_NULLPTR;
+        m_pSocket = nullptr;
     }
     //if (m_url != url)
     if (Q_LIKELY(!m_pSocket)) {
@@ -1137,7 +1137,7 @@ void QWebSocketPrivate::socketDestroyed(QObject *socket)
 {
     Q_ASSERT(m_pSocket);
     if (m_pSocket == socket)
-        m_pSocket = Q_NULLPTR;
+        m_pSocket = nullptr;
 }
 
 /*!

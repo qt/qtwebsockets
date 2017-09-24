@@ -62,7 +62,7 @@ class SslEchoServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit SslEchoServer(quint16 port, QObject *parent = Q_NULLPTR);
+    explicit SslEchoServer(quint16 port, QObject *parent = nullptr);
     virtual ~SslEchoServer();
 
 private Q_SLOTS:

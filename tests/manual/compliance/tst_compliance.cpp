@@ -109,7 +109,7 @@ void tst_ComplianceTest::runTestCase(int nbr, int total)
     spy.wait(60000);
     pWebSocket->close();
     delete pWebSocket;
-    pWebSocket = Q_NULLPTR;
+    pWebSocket = nullptr;
     runTestCase(nbr + 1, total);
 }
 

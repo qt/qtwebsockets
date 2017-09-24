@@ -61,7 +61,7 @@ class ChatServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit ChatServer(quint16 port, QObject *parent = Q_NULLPTR);
+    explicit ChatServer(quint16 port, QObject *parent = nullptr);
     virtual ~ChatServer();
 
 private Q_SLOTS:

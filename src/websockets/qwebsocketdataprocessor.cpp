@@ -83,7 +83,7 @@ QWebSocketDataProcessor::QWebSocketDataProcessor(QObject *parent) :
     m_binaryMessage(),
     m_textMessage(),
     m_payloadLength(0),
-    m_pConverterState(Q_NULLPTR),
+    m_pConverterState(nullptr),
     m_pTextCodec(QTextCodec::codecForName("UTF-8"))
 {
     clear();
@@ -97,7 +97,7 @@ QWebSocketDataProcessor::~QWebSocketDataProcessor()
     clear();
     if (m_pConverterState) {
         delete m_pConverterState;
-        m_pConverterState = Q_NULLPTR;
+        m_pConverterState = nullptr;
     }
 }
 
@@ -219,7 +219,7 @@ void QWebSocketDataProcessor::clear()
     if (m_pConverterState) {
         if ((m_pConverterState->remainingChars != 0) || (m_pConverterState->invalidChars != 0)) {
             delete m_pConverterState;
-            m_pConverterState = Q_NULLPTR;
+            m_pConverterState = nullptr;
         }
     }
     if (!m_pConverterState)

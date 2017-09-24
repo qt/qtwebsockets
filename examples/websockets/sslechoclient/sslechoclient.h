@@ -63,7 +63,7 @@ class SslEchoClient : public QObject
 {
     Q_OBJECT
 public:
-    explicit SslEchoClient(const QUrl &url, QObject *parent = Q_NULLPTR);
+    explicit SslEchoClient(const QUrl &url, QObject *parent = nullptr);
 
 private Q_SLOTS:
     void onConnected();

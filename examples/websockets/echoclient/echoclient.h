@@ -57,7 +57,7 @@ class EchoClient : public QObject
 {
     Q_OBJECT
 public:
-    explicit EchoClient(const QUrl &url, bool debug = false, QObject *parent = Q_NULLPTR);
+    explicit EchoClient(const QUrl &url, bool debug = false, QObject *parent = nullptr);
 
 Q_SIGNALS:
     void closed();

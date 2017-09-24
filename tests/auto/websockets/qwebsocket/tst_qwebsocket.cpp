@@ -39,7 +39,7 @@ class EchoServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit EchoServer(QObject *parent = Q_NULLPTR);
+    explicit EchoServer(QObject *parent = nullptr);
     ~EchoServer();
 
     QHostAddress hostAddress() const { return m_pWebSocketServer->serverAddress(); }

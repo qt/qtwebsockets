@@ -354,7 +354,7 @@ int QWebSocketServer::maxPendingConnections() const
     QWebSocketServer does not take ownership of the returned QWebSocket object.
     It is up to the caller to delete the object explicitly when it will no longer be used,
     otherwise a memory leak will occur.
-    Q_NULLPTR is returned if this function is called when there are no pending connections.
+    nullptr is returned if this function is called when there are no pending connections.
 
     Note: The returned QWebSocket object cannot be used from another thread.
 

@@ -76,7 +76,7 @@ public:
     };
 
     explicit QWebSocketServer(const QString &serverName, SslMode secureMode,
-                              QObject *parent = Q_NULLPTR);
+                              QObject *parent = nullptr);
     virtual ~QWebSocketServer();
 
     bool listen(const QHostAddress &address = QHostAddress::Any, quint16 port = 0);

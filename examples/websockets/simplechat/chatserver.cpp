@@ -57,7 +57,7 @@ QT_USE_NAMESPACE
 //! [constructor]
 ChatServer::ChatServer(quint16 port, QObject *parent) :
     QObject(parent),
-    m_pWebSocketServer(Q_NULLPTR)
+    m_pWebSocketServer(nullptr)
 {
     m_pWebSocketServer = new QWebSocketServer(QStringLiteral("Chat Server"),
                                               QWebSocketServer::NonSecureMode,

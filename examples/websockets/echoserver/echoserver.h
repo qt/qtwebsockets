@@ -61,7 +61,7 @@ class EchoServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit EchoServer(quint16 port, bool debug = false, QObject *parent = Q_NULLPTR);
+    explicit EchoServer(quint16 port, bool debug = false, QObject *parent = nullptr);
     ~EchoServer();
 
 Q_SIGNALS:

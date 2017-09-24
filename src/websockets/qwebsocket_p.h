@@ -199,7 +199,7 @@ private:
     upgradeFrom(QTcpSocket *tcpSocket,
                 const QWebSocketHandshakeRequest &request,
                 const QWebSocketHandshakeResponse &response,
-                QObject *parent = Q_NULLPTR);
+                QObject *parent = nullptr);
 
     quint32 generateMaskingKey() const;
     QByteArray generateKey() const;

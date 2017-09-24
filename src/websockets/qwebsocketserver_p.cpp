@@ -69,7 +69,7 @@ QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName,
                                                  QWebSocketServer * const pWebSocketServer) :
     QObjectPrivate(),
     q_ptr(pWebSocketServer),
-    m_pTcpServer(Q_NULLPTR),
+    m_pTcpServer(nullptr),
     m_serverName(serverName),
     m_secureMode(secureMode),
     m_pendingConnections(),
@@ -211,7 +211,7 @@ void QWebSocketServerPrivate::setErrorFromSocketError(QAbstractSocket::SocketErr
  */
 QWebSocket *QWebSocketServerPrivate::nextPendingConnection()
 {
-    QWebSocket *pWebSocket = Q_NULLPTR;
+    QWebSocket *pWebSocket = nullptr;
     if (Q_LIKELY(!m_pendingConnections.isEmpty()))
         pWebSocket = m_pendingConnections.dequeue();
     return pWebSocket;

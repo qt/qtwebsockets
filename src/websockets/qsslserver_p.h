@@ -65,7 +65,7 @@ class QSslServer : public QTcpServer
     Q_DISABLE_COPY(QSslServer)
 
 public:
-    explicit QSslServer(QObject *parent = Q_NULLPTR);
+    explicit QSslServer(QObject *parent = nullptr);
     virtual ~QSslServer();
 
     void setSslConfiguration(const QSslConfiguration &sslConfiguration);

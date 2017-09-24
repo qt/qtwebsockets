@@ -684,7 +684,7 @@ void QWebSocket::setProxy(const QNetworkProxy &networkProxy)
 
 /*!
     Sets the generator to use for creating masks to \a maskGenerator.
-    The default QWebSocket generator can be reset by supplying a \e Q_NULLPTR.
+    The default QWebSocket generator can be reset by supplying a \e nullptr.
     The mask generator can be changed at any time, even while the connection is open.
  */
 void QWebSocket::setMaskGenerator(const QMaskGenerator *maskGenerator)
