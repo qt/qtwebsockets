@@ -1011,7 +1011,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
                 if (!ok)
                     errorDescription =
                       QWebSocket::tr("Accept-Key received from server %1 does not match the client key %2.")
-                            .arg(acceptKey).arg(accept);
+                            .arg(acceptKey, accept);
             } else {
                 errorDescription =
                     QWebSocket::tr("QWebSocketPrivate::processHandshake: Invalid statusline in response: %1.")
