@@ -563,11 +563,9 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
 
     if (Q_LIKELY(pTcpSocket)) {
         //pass through signals
-        typedef void (QAbstractSocket:: *ASErrorSignal)(QAbstractSocket::SocketError);
-        typedef void (QWebSocket:: *WSErrorSignal)(QAbstractSocket::SocketError);
         QObject::connect(pTcpSocket,
-                         static_cast<ASErrorSignal>(&QAbstractSocket::error),
-                         q, static_cast<WSErrorSignal>(&QWebSocket::error));
+                         QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
+                         q, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error));
 #ifndef QT_NO_NETWORKPROXY
         QObject::connect(pTcpSocket, &QAbstractSocket::proxyAuthenticationRequired, q,
                          &QWebSocket::proxyAuthenticationRequired);
@@ -595,9 +593,8 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
                              &QWebSocket::preSharedKeyAuthenticationRequired);
             QObject::connect(sslSocket, &QSslSocket::encryptedBytesWritten, q,
                              &QWebSocket::bytesWritten);
-            typedef void (QSslSocket:: *sslErrorSignalType)(const QList<QSslError> &);
             QObject::connect(sslSocket,
-                             static_cast<sslErrorSignalType>(&QSslSocket::sslErrors),
+                             QOverload<const QList<QSslError>&>::of(&QSslSocket::sslErrors),
                              q, &QWebSocket::sslErrors);
             QObjectPrivate::connect(sslSocket, &QSslSocket::encrypted,
                                     this, &QWebSocketPrivate::_q_updateSslConfiguration);

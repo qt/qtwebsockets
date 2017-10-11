@@ -115,11 +115,12 @@ void QSslServer::incomingConnection(qintptr socket)
         if (Q_LIKELY(pSslSocket->setSocketDescriptor(socket))) {
             connect(pSslSocket, &QSslSocket::peerVerifyError, this, &QSslServer::peerVerifyError);
 
-            typedef void (QSslSocket::* sslErrorsSignal)(const QList<QSslError> &);
-            connect(pSslSocket, static_cast<sslErrorsSignal>(&QSslSocket::sslErrors),
+            connect(pSslSocket, QOverload<const QList<QSslError>&>::of(&QSslSocket::sslErrors),
                     this, &QSslServer::sslErrors);
-            connect(pSslSocket, &QSslSocket::encrypted, this, &QSslServer::newEncryptedConnection);
-            connect(pSslSocket, &QSslSocket::preSharedKeyAuthenticationRequired, this, &QSslServer::preSharedKeyAuthenticationRequired);
+            connect(pSslSocket, &QSslSocket::encrypted,
+                    this, &QSslServer::newEncryptedConnection);
+            connect(pSslSocket, &QSslSocket::preSharedKeyAuthenticationRequired,
+                    this, &QSslServer::preSharedKeyAuthenticationRequired);
 
             addPendingConnection(pSslSocket);
 

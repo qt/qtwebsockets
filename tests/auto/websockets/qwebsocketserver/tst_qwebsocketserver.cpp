@@ -606,9 +606,8 @@ void tst_QWebSocketServer::tst_scheme()
     QVERIFY(secureServer.listen());
 
     QWebSocket secureSocket;
-    typedef void (QWebSocket::* ignoreSslErrorsSlot)();
     connect(&secureSocket, &QWebSocket::sslErrors,
-            &secureSocket, static_cast<ignoreSslErrorsSlot>(&QWebSocket::ignoreSslErrors));
+            &secureSocket, QOverload<>::of(&QWebSocket::ignoreSslErrors));
     secureSocket.open(secureServer.serverUrl().toString());
 
     if (secureServerConnectionSpy.count() == 0)

@@ -59,8 +59,7 @@ SslEchoClient::SslEchoClient(const QUrl &url, QObject *parent) :
     QObject(parent)
 {
     connect(&m_webSocket, &QWebSocket::connected, this, &SslEchoClient::onConnected);
-    typedef void (QWebSocket:: *sslErrorsSignal)(const QList<QSslError> &);
-    connect(&m_webSocket, static_cast<sslErrorsSignal>(&QWebSocket::sslErrors),
+    connect(&m_webSocket, QOverload<const QList<QSslError>&>::of(&QWebSocket::sslErrors),
             this, &SslEchoClient::onSslErrors);
     m_webSocket.open(QUrl(url));
 }
