@@ -633,7 +633,7 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
 void QWebSocketPrivate::releaseConnections(const QTcpSocket *pTcpSocket)
 {
     if (Q_LIKELY(pTcpSocket))
-        pTcpSocket->disconnect(pTcpSocket);
+        pTcpSocket->disconnect();
     m_dataProcessor.disconnect();
 }
 
@@ -1011,7 +1011,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
                 if (!ok)
                     errorDescription =
                       QWebSocket::tr("Accept-Key received from server %1 does not match the client key %2.")
-                            .arg(acceptKey).arg(accept);
+                            .arg(acceptKey, accept);
             } else {
                 errorDescription =
                     QWebSocket::tr("QWebSocketPrivate::processHandshake: Invalid statusline in response: %1.")
@@ -1145,7 +1145,8 @@ void QWebSocketPrivate::socketDestroyed(QObject *socket)
  */
 void QWebSocketPrivate::processData()
 {
-    Q_ASSERT(m_pSocket);
+    if (!m_pSocket) // disconnected with data still in-bound
+        return;
     while (m_pSocket->bytesAvailable()) {
         if (state() == QAbstractSocket::ConnectingState) {
             if (!m_pSocket->canReadLine())

@@ -5,17 +5,20 @@
     <body>
         <h1>WebSocket Chat Client</h1>
         <p>
+            Host: <input id="webSocketHost" type="text" value="localhost:1234"/>
+        </p>
+        <p>
             <button onClick="initWebSocket();">Connect</button>
-            <button onClick="stopWebSocket();">Disconnect</button>
+            <button id="disconnectButton" onClick="stopWebSocket();" disabled>Disconnect</button>
             <button onClick="checkSocket();">State</button>
         </p>
         <p>
-            <textarea id="debugTextArea" style="width:400px;height:200px;"></textarea>
+            <textarea id="debugTextArea" style="width:400px;height:200px;" readonly></textarea>
         </p>
         <p>
             <input type="text" id="inputNick" value="nickname" />
             <input type="text" id="inputText" onkeydown="if(event.keyCode==13)sendMessage();"/>
-            <button onClick="sendMessage();">Send</button>
+            <button id="sendButton" onClick="sendMessage();" disabled>Send</button>
         </p>
 
         <script type="text/javascript">
@@ -38,7 +41,6 @@
                 }
             }
 
-            var wsUri = "ws://localhost:1234";
             var websocket = null;
 
             function initWebSocket() {
@@ -47,12 +49,17 @@
                         WebSocket = MozWebSocket;
                     if ( websocket && websocket.readyState == 1 )
                         websocket.close();
+                    var wsUri = "ws://" + document.getElementById("webSocketHost").value;
                     websocket = new WebSocket( wsUri );
                     websocket.onopen = function (evt) {
                         debug("CONNECTED");
+                        document.getElementById("disconnectButton").disabled = false;
+                        document.getElementById("sendButton").disabled = false;
                     };
                     websocket.onclose = function (evt) {
                         debug("DISCONNECTED");
+                        document.getElementById("disconnectButton").disabled = true;
+                        document.getElementById("sendButton").disabled = true;
                     };
                     websocket.onmessage = function (evt) {
                         console.log( "Message received :", evt.data );

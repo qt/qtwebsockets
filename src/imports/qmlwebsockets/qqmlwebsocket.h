@@ -54,7 +54,6 @@ class QQmlWebSocket : public QObject, public QQmlParserStatus
     Q_DISABLE_COPY(QQmlWebSocket)
     Q_INTERFACES(QQmlParserStatus)
 
-    Q_ENUMS(Status)
     Q_PROPERTY(QUrl url READ url WRITE setUrl NOTIFY urlChanged)
     Q_PROPERTY(Status status READ status NOTIFY statusChanged)
     Q_PROPERTY(QString errorString READ errorString NOTIFY errorStringChanged)
@@ -73,6 +72,7 @@ public:
         Closed      = 3,
         Error       = 4
     };
+    Q_ENUM(Status)
 
     QUrl url() const;
     void setUrl(const QUrl &url);
