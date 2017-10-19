@@ -31,9 +31,9 @@
 #include <QTcpServer>
 #ifndef QT_NO_OPENSSL
 #include <QtNetwork/qsslpresharedkeyauthenticator.h>
-#include <QtNetwork/qsslcipher.h>
 #endif
 #ifndef QT_NO_SSL
+#include <QtNetwork/qsslcipher.h>
 #include <QtNetwork/qsslkey.h>
 #endif
 #include <QtWebSockets/QWebSocketServer>
@@ -539,10 +539,13 @@ void tst_QWebSocketServer::tst_scheme()
 
     QVERIFY(secureServer.listen());
 
+    QSslCipher sessionCipher;
     QWebSocket secureSocket;
-    typedef void (QWebSocket::* ignoreSslErrorsSlot)();
     connect(&secureSocket, &QWebSocket::sslErrors,
-            &secureSocket, static_cast<ignoreSslErrorsSlot>(&QWebSocket::ignoreSslErrors));
+            &secureSocket, [&] {
+                secureSocket.ignoreSslErrors();
+                sessionCipher = secureSocket.sslConfiguration().sessionCipher();
+            });
     secureSocket.open(secureServer.serverUrl().toString());
 
     QTRY_COMPARE(secureServerConnectionSpy.count(), 1);
@@ -550,6 +553,7 @@ void tst_QWebSocketServer::tst_scheme()
     QVERIFY(!secureServerSocket.isNull());
     QCOMPARE(secureServerSocket->requestUrl().scheme(), QStringLiteral("wss"));
     secureServer.close();
+    QVERIFY(!sessionCipher.isNull());
 #endif
 }
 
