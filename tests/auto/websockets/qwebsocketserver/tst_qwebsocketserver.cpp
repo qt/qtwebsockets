@@ -261,7 +261,7 @@ void tst_QWebSocketServer::tst_listening()
     QVERIFY(server.isListening());
     QCOMPARE(serverClosedSpy.count(), 0);
     server.close();
-    QVERIFY(serverClosedSpy.wait(1000));
+    QTRY_COMPARE(serverClosedSpy.count(), 1);
     QVERIFY(!server.isListening());
     QCOMPARE(serverErrorSpy.count(), 0);
 
@@ -304,8 +304,7 @@ void tst_QWebSocketServer::tst_connectivity()
 
     socket.open(server.serverUrl().toString());
 
-    if (socketConnectedSpy.count() == 0)
-        QVERIFY(socketConnectedSpy.wait());
+    QTRY_COMPARE(socketConnectedSpy.count(), 1);
     QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
     QCOMPARE(serverConnectionSpy.count(), 1);
     QCOMPARE(corsAuthenticationSpy.count(), 1);
@@ -314,8 +313,7 @@ void tst_QWebSocketServer::tst_connectivity()
 
     server.close();
 
-    QVERIFY(serverClosedSpy.wait());
-    QCOMPARE(serverClosedSpy.count(), 1);
+    QTRY_COMPARE(serverClosedSpy.count(), 1);
 #ifndef QT_NO_SSL
     QCOMPARE(peerVerifyErrorSpy.count(), 0);
     QCOMPARE(sslErrorsSpy.count(), 0);
@@ -383,8 +381,7 @@ void tst_QWebSocketServer::tst_preSharedKey()
 
     socket.open(server.serverUrl().toString());
 
-    if (socketConnectedSpy.count() == 0)
-        QVERIFY(socketConnectedSpy.wait());
+    QTRY_COMPARE(socketConnectedSpy.count(), 1);
     QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
     QCOMPARE(serverConnectionSpy.count(), 1);
     QCOMPARE(serverPskRequiredSpy.count(), 1);
@@ -394,8 +391,7 @@ void tst_QWebSocketServer::tst_preSharedKey()
 
     server.close();
 
-    QVERIFY(serverClosedSpy.wait());
-    QCOMPARE(serverClosedSpy.count(), 1);
+    QTRY_COMPARE(serverClosedSpy.count(), 1);
     QCOMPARE(sslErrorsSpy.count(), 0);
     QCOMPARE(serverErrorSpy.count(), 0);
 #endif
@@ -431,20 +427,18 @@ void tst_QWebSocketServer::tst_maxPendingConnections()
 
     socket1.open(server.serverUrl().toString());
 
-    if (socket1ConnectedSpy.count() == 0)
-        QVERIFY(socket1ConnectedSpy.wait());
+    QTRY_COMPARE(socket1ConnectedSpy.count(), 1);
     QCOMPARE(socket1.state(), QAbstractSocket::ConnectedState);
     QCOMPARE(serverConnectionSpy.count(), 1);
     QCOMPARE(corsAuthenticationSpy.count(), 1);
     socket2.open(server.serverUrl().toString());
-    if (socket2ConnectedSpy.count() == 0)
-        QVERIFY(socket2ConnectedSpy.wait());
+    QTRY_COMPARE(socket2ConnectedSpy.count(), 1);
     QCOMPARE(socket2.state(), QAbstractSocket::ConnectedState);
     QCOMPARE(serverConnectionSpy.count(), 2);
     QCOMPARE(corsAuthenticationSpy.count(), 2);
     socket3.open(server.serverUrl().toString());
-    if (socket3ConnectedSpy.count() == 0)
-        QVERIFY(!socket3ConnectedSpy.wait(250));
+    QVERIFY(!socket3ConnectedSpy.wait(250));
+    QCOMPARE(socket3ConnectedSpy.count(), 0);
     QCOMPARE(socket3.state(), QAbstractSocket::UnconnectedState);
     QCOMPARE(serverConnectionSpy.count(), 2);
     QCOMPARE(corsAuthenticationSpy.count(), 2);
@@ -470,8 +464,7 @@ void tst_QWebSocketServer::tst_maxPendingConnections()
 
     server.close();
 
-    QVERIFY(serverClosedSpy.wait());
-    QCOMPARE(serverClosedSpy.count(), 1);
+    QTRY_COMPARE(serverClosedSpy.count(), 1);
 #ifndef QT_NO_SSL
     QCOMPARE(peerVerifyErrorSpy.count(), 0);
     QCOMPARE(sslErrorsSpy.count(), 0);
@@ -498,8 +491,7 @@ void tst_QWebSocketServer::tst_serverDestroyedWhileSocketConnected()
 
     socket.open(server->serverUrl().toString());
 
-    if (socketConnectedSpy.count() == 0)
-        QVERIFY(socketConnectedSpy.wait());
+    QTRY_COMPARE(socketConnectedSpy.count(), 1);
     QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
     QCOMPARE(serverConnectionSpy.count(), 1);
     QCOMPARE(corsAuthenticationSpy.count(), 1);
@@ -508,9 +500,7 @@ void tst_QWebSocketServer::tst_serverDestroyedWhileSocketConnected()
 
     delete server;
 
-    if (socketDisconnectedSpy.count() == 0)
-        QVERIFY(socketDisconnectedSpy.wait());
-    QCOMPARE(socketDisconnectedSpy.count(), 1);
+    QTRY_COMPARE(socketDisconnectedSpy.count(), 1);
 }
 
 void tst_QWebSocketServer::tst_scheme()
@@ -523,8 +513,7 @@ void tst_QWebSocketServer::tst_scheme()
     QWebSocket plainSocket;
     plainSocket.open(plainServer.serverUrl().toString());
 
-    if (plainServerConnectionSpy.count() == 0)
-        QVERIFY(plainServerConnectionSpy.wait());
+    QTRY_COMPARE(plainServerConnectionSpy.count(), 1);
     QScopedPointer<QWebSocket> plainServerSocket(plainServer.nextPendingConnection());
     QVERIFY(!plainServerSocket.isNull());
     QCOMPARE(plainServerSocket->requestUrl().scheme(), QStringLiteral("ws"));
@@ -556,8 +545,7 @@ void tst_QWebSocketServer::tst_scheme()
             &secureSocket, static_cast<ignoreSslErrorsSlot>(&QWebSocket::ignoreSslErrors));
     secureSocket.open(secureServer.serverUrl().toString());
 
-    if (secureServerConnectionSpy.count() == 0)
-        QVERIFY(secureServerConnectionSpy.wait());
+    QTRY_COMPARE(secureServerConnectionSpy.count(), 1);
     QScopedPointer<QWebSocket> secureServerSocket(secureServer.nextPendingConnection());
     QVERIFY(!secureServerSocket.isNull());
     QCOMPARE(secureServerSocket->requestUrl().scheme(), QStringLiteral("wss"));
@@ -580,19 +568,17 @@ void tst_QWebSocketServer::tst_handleConnection()
     QWebSocket webSocket;
     QSignalSpy wsConnectedSpy(&webSocket, &QWebSocket::connected);
     webSocket.open(QStringLiteral("ws://localhost:%1").arg(tcpServer.serverPort()));
-    QVERIFY(wsConnectedSpy.wait());
+    QTRY_COMPARE(wsConnectedSpy.count(), 1);
 
-    if (wsServerConnectionSpy.isEmpty())
-        QVERIFY(wsServerConnectionSpy.wait());
+    QTRY_COMPARE(wsServerConnectionSpy.count(), 1);
 
     QScopedPointer<QWebSocket> webServerSocket(wsServer.nextPendingConnection());
     QVERIFY(!webServerSocket.isNull());
 
     QSignalSpy wsMessageReceivedSpy(webServerSocket.data(), &QWebSocket::textMessageReceived);
     webSocket.sendTextMessage("dummy");
-    wsMessageReceivedSpy.wait();
 
-    QCOMPARE(wsMessageReceivedSpy.count(), 1);
+    QTRY_COMPARE(wsMessageReceivedSpy.count(), 1);
     QList<QVariant> arguments = wsMessageReceivedSpy.takeFirst();
     QCOMPARE(arguments.first().toString(), QString("dummy"));
 }
