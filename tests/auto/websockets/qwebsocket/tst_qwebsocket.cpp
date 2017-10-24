@@ -659,7 +659,7 @@ void tst_QWebSocket::tst_moveToThread()
 
     EchoServer echoServer;
 
-    QThread* thread = new QThread;
+    QThread* thread = new QThread(this);
     thread->start();
 
     WebSocket* socket = new WebSocket;
@@ -696,7 +696,7 @@ void tst_QWebSocket::tst_moveToThread()
 
     socket->deleteLater();
     thread->quit();
-    thread->deleteLater();
+    thread->wait();
 }
 
 void tst_QWebSocket::tst_moveToThreadNoWarning()
