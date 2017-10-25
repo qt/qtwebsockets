@@ -64,7 +64,7 @@
     this problem is to use WebSocket over a secure connection.
 
     \warning To generate masks, this implementation of WebSockets uses the reasonably
-    secure QRandomGenerator::get32() function.
+    secure QRandomGenerator::global()->generate() function.
     For more information about the importance of good masking,
     see \l {"Talking to Yourself for Fun and Profit" by Lin-Shung Huang et al}.
     The best measure against attacks mentioned in the document above,

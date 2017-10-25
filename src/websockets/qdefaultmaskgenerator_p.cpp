@@ -48,7 +48,7 @@
     malicious scripts to attack bad behaving proxies.
     For more information about the importance of good masking,
     see \l {"Talking to Yourself for Fun and Profit" by Lin-Shung Huang et al}.
-    The default mask generator uses the reasonably secure QRandomGenerator::get32() function.
+    The default mask generator uses the reasonably secure QRandomGenerator::global()->generate() function.
     The best measure against attacks mentioned in the document above,
     is to use QWebSocket over a secure connection (\e wss://).
     In general, always be careful to not have 3rd party script access to
@@ -90,16 +90,16 @@ bool QDefaultMaskGenerator::seed() Q_DECL_NOEXCEPT
 }
 
 /*!
-    Generates a new random mask using the insecure QRandomGenerator::get32() method.
+    Generates a new random mask using the insecure QRandomGenerator::global()->generate() method.
 
     \internal
 */
 quint32 QDefaultMaskGenerator::nextMask() Q_DECL_NOEXCEPT
 {
-    quint32 value = QRandomGenerator::get32();
+    quint32 value = QRandomGenerator::global()->generate();
     while (Q_UNLIKELY(value == 0)) {
         // a mask of zero has a special meaning
-        value = QRandomGenerator::get32();
+        value = QRandomGenerator::global()->generate();
     }
     return value;
 }
