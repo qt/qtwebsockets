@@ -130,7 +130,7 @@ QUrl QQmlWebSocketServer::url() const
     QUrl url;
     url.setPort(m_port);
     url.setHost(m_host);
-    url.setScheme("ws");
+    url.setScheme(QStringLiteral("ws"));
     return url;
 }
 
