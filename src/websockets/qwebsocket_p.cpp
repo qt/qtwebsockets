@@ -596,6 +596,9 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
             QObject::connect(sslSocket, &QSslSocket::encryptedBytesWritten, q,
                              &QWebSocket::bytesWritten);
             typedef void (QSslSocket:: *sslErrorSignalType)(const QList<QSslError> &);
+            QObjectPrivate::connect(sslSocket,
+                                    static_cast<sslErrorSignalType>(&QSslSocket::sslErrors),
+                                    this, &QWebSocketPrivate::_q_updateSslConfiguration);
             QObject::connect(sslSocket,
                              static_cast<sslErrorSignalType>(&QSslSocket::sslErrors),
                              q, &QWebSocket::sslErrors);

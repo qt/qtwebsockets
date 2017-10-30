@@ -490,6 +490,11 @@ void QWebSocketServerPrivate::handleConnection(QTcpSocket *pTcpSocket) const
         QObjectPrivate::connect(pTcpSocket, &QTcpSocket::readyRead,
                                 this, &QWebSocketServerPrivate::handshakeReceived,
                                 Qt::QueuedConnection);
+        if (pTcpSocket->canReadLine()) {
+            // We received some data! We must emit now to be sure that handshakeReceived is called
+            // since the data could have been received before the signal and slot was connected.
+            emit pTcpSocket->readyRead();
+        }
         QObjectPrivate::connect(pTcpSocket, &QTcpSocket::disconnected,
                                 this, &QWebSocketServerPrivate::onSocketDisconnected);
     }
