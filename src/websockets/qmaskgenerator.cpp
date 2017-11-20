@@ -50,7 +50,7 @@
     malicious scripts from attacking badly behaving proxies.
     For more information about the importance of good masking,
     see \l {"Talking to Yourself for Fun and Profit" by Lin-Shung Huang et al}.
-    By default QWebSocket uses the reasonably secure QRandomGenerator::get32() function.
+    By default QWebSocket uses the reasonably secure QRandomGenerator::global()->generate() function.
     The best measure against attacks mentioned in the document above,
     is to use QWebSocket over a secure connection (\e wss://).
     In general, always be careful to not have 3rd party script access to

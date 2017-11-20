@@ -593,6 +593,9 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
                              &QWebSocket::preSharedKeyAuthenticationRequired);
             QObject::connect(sslSocket, &QSslSocket::encryptedBytesWritten, q,
                              &QWebSocket::bytesWritten);
+            QObjectPrivate::connect(sslSocket,
+                                    QOverload<const QList<QSslError>&>::of(&QSslSocket::sslErrors),
+                                    this, &QWebSocketPrivate::_q_updateSslConfiguration);
             QObject::connect(sslSocket,
                              QOverload<const QList<QSslError>&>::of(&QSslSocket::sslErrors),
                              q, &QWebSocket::sslErrors);
