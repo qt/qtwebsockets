@@ -964,17 +964,32 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
         }
         m_handshakeState = ReadingHeaderState;
         Q_FALLTHROUGH();
-    case ReadingHeaderState:
+    case ReadingHeaderState: {
+        // TODO: this should really use the existing code from QHttpNetworkReplyPrivate::parseHeader
+        auto lastHeader = m_headers.end();
         while (pSocket->canReadLine()) {
             QString headerLine = readLine(pSocket);
-            const QStringList headerField = headerLine.split(QStringLiteral(": "),
-                                                             QString::SkipEmptyParts);
-            if (headerField.size() == 2) {
-                m_headers.insertMulti(headerField[0].toLower(), headerField[1]);
-            }
-            if (headerField.isEmpty()) {
+
+            if (headerLine.isEmpty()) {
+                // end of headers
                 m_handshakeState = ParsingHeaderState;
                 break;
+            } else if (headerLine.startsWith(QLatin1Char(' ')) || headerLine.startsWith(QLatin1Char('\t'))) {
+                // continuation line -- add this to the last header field
+                if (Q_UNLIKELY(lastHeader == m_headers.end())) {
+                    errorDescription = QWebSocket::tr("Malformed header in response: %1.").arg(headerLine);
+                    break;
+                }
+                lastHeader.value().append(QLatin1Char(' '));
+                lastHeader.value().append(headerLine.trimmed());
+            } else {
+                int colonPos = headerLine.indexOf(QLatin1Char(':'));
+                if (Q_UNLIKELY(colonPos <= 0)) {
+                    errorDescription = QWebSocket::tr("Malformed header in response: %1.").arg(headerLine);
+                    break;
+                }
+                lastHeader = m_headers.insertMulti(headerLine.left(colonPos).trimmed().toLower(),
+                                                   headerLine.mid(colonPos + 1).trimmed());
             }
         }
 
@@ -986,6 +1001,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
             return;
         }
         Q_FALLTHROUGH();
+    }
     case ParsingHeaderState: {
         const QString acceptKey = m_headers.value(QStringLiteral("sec-websocket-accept"), QString());
         const QString upgrade = m_headers.value(QStringLiteral("upgrade"), QString());

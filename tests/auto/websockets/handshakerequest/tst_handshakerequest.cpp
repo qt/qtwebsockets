@@ -63,6 +63,7 @@ private Q_SLOTS:
 
     void tst_multipleValuesInConnectionHeader();
     void tst_multipleVersions();
+    void tst_parsingWhitespaceInHeaders();
 
     void tst_qtbug_39355();
     void tst_qtbug_48123_data();
@@ -194,6 +195,17 @@ void tst_HandshakeRequest::tst_invalidStream_data()
                QStringLiteral("Sec-WebSocket-Key: AVDFBDDFF\r\n") +
                QStringLiteral("Upgrade: websocket,ftp\r\n") +
                QStringLiteral("Connection: Upgrade\r\n\r\n");
+    QTest::newRow("Invalid header - starts with continuation")
+            << QStringLiteral("GET . HTTP/1.1\r\n Host: foo\r\nSec-WebSocket-Version: 13\r\n") +
+               QStringLiteral("Sec-WebSocket-Key: AVDFBDDFF\r\n") +
+               QStringLiteral("Upgrade: websocket\r\n") +
+               QStringLiteral("Connection: Upgrade\r\n\r\n");
+    QTest::newRow("Invalid header - no colon")
+            << QStringLiteral("GET . HTTP/1.1\r\nHost: foo\r\nSec-WebSocket-Version: 13\r\n") +
+               QStringLiteral("Sec-WebSocket-Key: AVDFBDDFF\r\n") +
+               QStringLiteral("Upgrade: websocket\r\n") +
+               QStringLiteral("X-Custom foo\r\n") +
+               QStringLiteral("Connection: Upgrade\r\n\r\n");
 }
 
 void tst_HandshakeRequest::tst_invalidStream()
@@ -255,6 +267,34 @@ void tst_HandshakeRequest::tst_multipleValuesInConnectionHeader()
     QCOMPARE(request.requestUrl(), QUrl("ws://foo.com/test"));
     QCOMPARE(request.host(), QStringLiteral("foo.com"));
     QCOMPARE(request.resourceName().length(), 5);
+    QCOMPARE(request.versions().length(), 1);
+    QCOMPARE(request.versions().at(0), QWebSocketProtocol::Version13);
+}
+
+/*
+ * This is a regression test
+ * Checks for RFC compliant header parsing
+ */
+void tst_HandshakeRequest::tst_parsingWhitespaceInHeaders()
+{
+    //doing extensive QStringLiteral concatenations here, because
+    //MSVC 2010 complains when using concatenation literal strings about
+    //concatenation of wide and narrow strings (error C2308)
+    QString header = QStringLiteral("GET /test HTTP/1.1\r\nHost: ") +
+                     QStringLiteral("foo.com\r\nSec-WebSocket-Version:13\r\n") +
+                     QStringLiteral("Sec-WebSocket-Key:   AVD  \r\n\tFBDDFF \r\n") +
+                     QStringLiteral("Upgrade:websocket \r\n") +
+                     QStringLiteral("Connection: Upgrade,keepalive\r\n\r\n");
+    QByteArray data;
+    QTextStream textStream(&data);
+    QWebSocketHandshakeRequest request(80, false);
+
+    textStream << header;
+    textStream.seek(0);
+    request.readHandshake(textStream, MAX_HEADERLINE_LENGTH, MAX_HEADERS);
+
+    QVERIFY(request.isValid());
+    QCOMPARE(request.key(), QStringLiteral("AVD FBDDFF"));
     QCOMPARE(request.versions().length(), 1);
     QCOMPARE(request.versions().at(0), QWebSocketProtocol::Version13);
 }
