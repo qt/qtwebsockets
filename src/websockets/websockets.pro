@@ -16,7 +16,6 @@ PUBLIC_HEADERS += \
     $$PWD/qmaskgenerator.h
 
 PRIVATE_HEADERS += \
-    $$PWD/qwebsocket_p.h \
     $$PWD/qwebsocketserver_p.h \
     $$PWD/qwebsocketprotocol_p.h \
     $$PWD/qwebsockethandshakerequest_p.h \
@@ -28,7 +27,6 @@ PRIVATE_HEADERS += \
 
 SOURCES += \
     $$PWD/qwebsocket.cpp \
-    $$PWD/qwebsocket_p.cpp \
     $$PWD/qwebsocketserver.cpp \
     $$PWD/qwebsocketserver_p.cpp \
     $$PWD/qwebsocketprotocol.cpp \
@@ -39,6 +37,18 @@ SOURCES += \
     $$PWD/qwebsocketframe.cpp \
     $$PWD/qmaskgenerator.cpp \
     $$PWD/qdefaultmaskgenerator_p.cpp
+
+emscripten: {
+    SOURCES += \
+    $$PWD/qwebsocket_wasm_p.cpp
+    PRIVATE_HEADERS += \
+    $$PWD/qwebsocket_wasm_p.h
+ } else {
+    SOURCES += \
+    $$PWD/qwebsocket_p.cpp
+    PRIVATE_HEADERS += \
+    $$PWD/qwebsocket_p.h
+}
 
 qtConfig(ssl) {
     SOURCES += $$PWD/qsslserver.cpp

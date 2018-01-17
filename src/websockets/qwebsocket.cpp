@@ -270,7 +270,11 @@ not been filled in with new information when the signal returns.
     \sa ping()
   */
 #include "qwebsocket.h"
+#ifndef Q_OS_HTML5
 #include "qwebsocket_p.h"
+#else
+#include "qwebsocket_wasm_p.h"
+#endif
 
 #include <QtCore/QUrl>
 #include <QtNetwork/QTcpSocket>
@@ -662,6 +666,7 @@ quint16 QWebSocket::peerPort() const
     return d->peerPort();
 }
 
+#ifndef Q_OS_HTML5
 #ifndef QT_NO_NETWORKPROXY
 /*!
     Returns the currently configured proxy
@@ -681,7 +686,7 @@ void QWebSocket::setProxy(const QNetworkProxy &networkProxy)
     d->setProxy(networkProxy);
 }
 #endif
-
+#endif
 /*!
     Sets the generator to use for creating masks to \a maskGenerator.
     The default QWebSocket generator can be reset by supplying a \e nullptr.
