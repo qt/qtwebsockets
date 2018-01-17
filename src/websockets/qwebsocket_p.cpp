@@ -224,6 +224,8 @@ bool QWebSocketPrivate::flush()
     return result;
 }
 
+#ifndef Q_OS_WASM
+
 /*!
     \internal
  */
@@ -239,6 +241,8 @@ qint64 QWebSocketPrivate::sendBinaryMessage(const QByteArray &data)
 {
     return doWriteFrames(data, true);
 }
+
+#endif
 
 #ifndef QT_NO_SSL
 /*!
@@ -319,6 +323,8 @@ QWebSocket *QWebSocketPrivate::upgradeFrom(QTcpSocket *pTcpSocket,
 
     return pWebSocket;
 }
+
+#ifndef Q_OS_WASM
 
 /*!
     \internal
@@ -467,6 +473,8 @@ void QWebSocketPrivate::open(const QNetworkRequest &request, bool mask)
         }
     }
 }
+
+#endif
 
 /*!
     \internal
