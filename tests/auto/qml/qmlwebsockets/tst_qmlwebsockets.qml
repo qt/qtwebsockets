@@ -52,8 +52,8 @@ Rectangle {
 
     TestCase {
         function ensureConnected() {
-            socket.active = true;
             server.listen = true;
+            socket.active = true;
             tryCompare(socket, 'status', WebSocket.Open);
             verify(server.currentSocket);
         }
