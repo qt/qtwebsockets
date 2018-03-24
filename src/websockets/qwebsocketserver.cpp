@@ -241,7 +241,7 @@ QT_BEGIN_NAMESPACE
 /*!
     Constructs a new QWebSocketServer with the given \a serverName.
     The \a serverName will be used in the HTTP handshake phase to identify the server.
-    It can be empty, in which case an empty server name will be sent to the client.
+    It can be empty, in which case no server name will be sent to the client.
     The \a secureMode parameter indicates whether the server operates over wss (\l{SecureMode})
     or over ws (\l{NonSecureMode}).
 

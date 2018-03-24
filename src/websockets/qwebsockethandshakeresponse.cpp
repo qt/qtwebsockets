@@ -186,8 +186,9 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(
                     if (origin.isEmpty())
                         origin = QStringLiteral("*");
                     QDateTime datetime = QDateTime::currentDateTimeUtc();
-                    response << QStringLiteral("Server: ") % serverName                      <<
-                                QStringLiteral("Access-Control-Allow-Credentials: false")    <<
+                    if (!serverName.isEmpty())
+                        response << QStringLiteral("Server: ") % serverName;
+                    response << QStringLiteral("Access-Control-Allow-Credentials: false")    <<
                                 QStringLiteral("Access-Control-Allow-Methods: GET")          <<
                                 QStringLiteral("Access-Control-Allow-Headers: content-type") <<
                                 QStringLiteral("Access-Control-Allow-Origin: ") % origin     <<
