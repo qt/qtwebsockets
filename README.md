@@ -32,6 +32,3 @@ To use, add `websockets` to the QT variable.
 
 ### Missing Features
 * Extensions and sub-protocols
-
-### License
-This code is licensed under LGPLv3 or LGPLv2.1.
