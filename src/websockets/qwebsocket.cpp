@@ -772,4 +772,17 @@ bool QWebSocket::isValid() const
     return d->isValid();
 }
 
+/*!
+    \since 5.12
+    Returns the number of bytes that are waiting to be written. The bytes are written when control
+    goes back to the event loop or when flush() is called.
+
+    \sa flush
+ */
+qint64 QWebSocket::bytesToWrite() const
+{
+    Q_D(const QWebSocket);
+    return d->m_pSocket ? d->m_pSocket->bytesToWrite() : 0;
+}
+
 QT_END_NAMESPACE

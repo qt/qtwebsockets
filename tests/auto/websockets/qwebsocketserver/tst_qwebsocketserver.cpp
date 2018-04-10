@@ -640,6 +640,14 @@ void tst_QWebSocketServer::tst_handleConnection()
     QTRY_COMPARE(wsMessageReceivedSpy.count(), 1);
     QList<QVariant> arguments = wsMessageReceivedSpy.takeFirst();
     QCOMPARE(arguments.first().toString(), QString("dummy"));
+
+    QSignalSpy clientMessageReceivedSpy(&webSocket, &QWebSocket::textMessageReceived);
+    webServerSocket->sendTextMessage("hello");
+    QVERIFY(webServerSocket->bytesToWrite() > 5); // 5 + a few extra bytes for header
+    QTRY_COMPARE(webServerSocket->bytesToWrite(), 0);
+    QTRY_COMPARE(clientMessageReceivedSpy.count(), 1);
+    arguments = clientMessageReceivedSpy.takeFirst();
+    QCOMPARE(arguments.first().toString(), QString("hello"));
 }
 
 QTEST_MAIN(tst_QWebSocketServer)

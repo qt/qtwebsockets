@@ -113,6 +113,8 @@ public:
     QSslConfiguration sslConfiguration() const;
 #endif
 
+    qint64 bytesToWrite() const;
+
 public Q_SLOTS:
     void close(QWebSocketProtocol::CloseCode closeCode = QWebSocketProtocol::CloseCodeNormal,
                const QString &reason = QString());
