@@ -573,8 +573,6 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
         QObject::connect(pTcpSocket, &QAbstractSocket::readChannelFinished, q,
                          &QWebSocket::readChannelFinished);
         QObject::connect(pTcpSocket, &QAbstractSocket::aboutToClose, q, &QWebSocket::aboutToClose);
-        QObject::connect(pTcpSocket, &QAbstractSocket::bytesWritten, q, &QWebSocket::bytesWritten);
-
 
         QObjectPrivate::connect(pTcpSocket, &QObject::destroyed,
                                 this, &QWebSocketPrivate::socketDestroyed);
