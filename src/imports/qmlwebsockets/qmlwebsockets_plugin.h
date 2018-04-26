@@ -42,13 +42,6 @@
 
 #include <QQmlExtensionPlugin>
 
-static void initResources()
-{
-#ifdef QT_STATIC
-    Q_INIT_RESOURCE(qmake_QtWebSockets);
-#endif
-}
-
 QT_BEGIN_NAMESPACE
 
 class QtWebSocketsDeclarativeModule : public QQmlExtensionPlugin
@@ -57,7 +50,7 @@ class QtWebSocketsDeclarativeModule : public QQmlExtensionPlugin
     Q_PLUGIN_METADATA(IID QQmlExtensionInterface_iid)
 
 public:
-    QtWebSocketsDeclarativeModule(QObject *parent = 0) : QQmlExtensionPlugin(parent) { initResources(); }
+    QtWebSocketsDeclarativeModule(QObject *parent = 0) : QQmlExtensionPlugin(parent) { }
     void registerTypes(const char *uri);
 };
 
