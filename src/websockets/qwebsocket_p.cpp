@@ -1104,16 +1104,18 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
                 headers << qMakePair(QString::fromLatin1(key),
                                      QString::fromLatin1(m_request.rawHeader(key)));
 
-            const QString handshake =
-                    createHandShakeRequest(m_resourceName,
-                                           m_request.url().host()
-                                                % QStringLiteral(":")
-                                                % QString::number(m_request.url().port(port)),
-                                           origin(),
-                                           QString(),
-                                           QString(),
-                                           m_key,
-                                           headers);
+            const auto format = QUrl::RemoveScheme | QUrl::RemoveUserInfo
+                                | QUrl::RemovePath | QUrl::RemoveQuery
+                                | QUrl::RemoveFragment | QUrl::RemovePort;
+            const QString host = m_request.url().toString(format).mid(2);
+            const QString handshake = createHandShakeRequest(m_resourceName,
+                                                             host % QStringLiteral(":")
+                                                                  % QString::number(m_request.url().port(port)),
+                                                             origin(),
+                                                             QString(),
+                                                             QString(),
+                                                             m_key,
+                                                             headers);
             if (handshake.isEmpty()) {
                 m_pSocket->abort();
                 Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
