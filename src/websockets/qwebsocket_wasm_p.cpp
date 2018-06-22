@@ -410,32 +410,40 @@ void QWebSocketPrivate::open(const QNetworkRequest &request, bool mask)
         Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
         return;
     }
-    QList <QByteArray> headerList = request.rawHeaderList();
-    if (headerList.count() > 0) {
 
-    }
+    // HTML WebSockets do not support arbitrary request headers, but
+    // do support the WebSocket protocol header. This header is
+    // required for some use cases like MQTT.
+    QByteArray protocolHeaderValue = request.rawHeader("Sec-WebSocket-Protocol");
+
     jsRequest(url.toString(),
+              protocolHeaderValue,
               (void *)&onOpenCallback,
               (void *)&onCloseCallback,
               (void *)&onErrorCallback,
               (void *)&onIncomingMessageCallback);
 }
 
-void QWebSocketPrivate::jsRequest(const QString &url, void *openCallback, void *closeCallback, void *errorCallback, void *incomingMessageCallback)
+void QWebSocketPrivate::jsRequest(const QString &url, const QByteArray &protocolHeader, void *openCallback, void *closeCallback, void *errorCallback, void *incomingMessageCallback)
 {
     EM_ASM_ARGS({
                     var wsUri = Pointer_stringify($0);
-                    var handler = $1;
-                    var onOpenCallbackPointer = $2;
-                    var onCloseCallback = $3;
-                    var onErrorCallback = $4;
-                    var onIncomingMessageCallback = $5;
+                    var wsProtocol = Pointer_stringify($1);
+                    var handler = $2;
+                    var onOpenCallbackPointer = $3;
+                    var onCloseCallback = $4;
+                    var onErrorCallback = $5;
+                    var onIncomingMessageCallback = $6;
 
                     function connectWebSocket() {
                         if (window.webSocker == undefined) {
                             window.webSocker = {};
 
-                            window.webSocker = new WebSocket(wsUri);
+                            if (wsProtocol.length > 0) {
+                                window.webSocker = new WebSocket(wsUri, wsProtocol);
+                            } else {
+                                window.webSocker = new WebSocket(wsUri);
+                            }
 
                             window.webSocker.onopen = onOpen;
                             window.webSocker.onclose = onClose;
@@ -490,6 +498,7 @@ void QWebSocketPrivate::jsRequest(const QString &url, void *openCallback, void *
                     connectWebSocket();
 
                 }, url.toLatin1().data(),
+                protocolHeader.constData(),
                 this,
                 (void *)openCallback,
                 (void *)closeCallback,

@@ -219,7 +219,7 @@ private:
 
     friend class QWebSocketServerPrivate;
 
-    void jsRequest(const QString &url, void *openCallback, void *closeCallback, void *errorCallback, void *incomingMessageCallback);
+    void jsRequest(const QString &url, const QByteArray &protocol, void *openCallback, void *closeCallback, void *errorCallback, void *incomingMessageCallback);
     QAbstractSocket::SocketError m_lastError;
 };
 
