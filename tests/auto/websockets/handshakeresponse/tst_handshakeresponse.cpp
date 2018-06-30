@@ -29,6 +29,7 @@
 #include <QtTest/qtestcase.h>
 #include <QtCore/QDebug>
 #include <QtCore/QByteArray>
+#include <QtCore/QRegularExpression>
 #include <QtCore/QtEndian>
 
 #include "private/qwebsockethandshakerequest_p.h"
@@ -97,7 +98,7 @@ void tst_HandshakeResponse::tst_date_response()
     output << response;
 
     QStringList list = data.split("\r\n");
-    int index = list.indexOf(QRegExp("Date:.*"));
+    int index = list.indexOf(QRegularExpression("Date:.*"));
     QVERIFY(index > -1);
     QVERIFY(QLocale::c().toDateTime(list[index], "'Date:' ddd, dd MMM yyyy hh:mm:ss 'GMT'").isValid());
 }
