@@ -334,12 +334,14 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
     if (!m_isClosingHandshakeSent) {
         Q_Q(QWebSocket);
         m_closeCode = closeCode;
-        m_closeReason = reason;
+        // 125 is the maximum length of a control frame, and 2 bytes are used for the close code:
+        const QByteArray reasonUtf8 = reason.toUtf8().left(123);
+        m_closeReason = QString::fromUtf8(reasonUtf8);
         const quint16 code = qToBigEndian<quint16>(closeCode);
         QByteArray payload;
         payload.append(static_cast<const char *>(static_cast<const void *>(&code)), 2);
-        if (!reason.isEmpty())
-            payload.append(reason.toUtf8());
+        if (!reasonUtf8.isEmpty())
+            payload.append(reasonUtf8);
         quint32 maskingKey = 0;
         if (m_mustMask) {
             maskingKey = generateMaskingKey();
@@ -347,6 +349,8 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
         }
         QByteArray frame = getFrameHeader(QWebSocketProtocol::OpCodeClose,
                                           payload.size(), maskingKey, true);
+
+        Q_ASSERT(payload.length() <= 125);
         frame.append(payload);
         m_pSocket->write(frame);
         m_pSocket->flush();
