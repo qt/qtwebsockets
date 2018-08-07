@@ -143,6 +143,7 @@ private Q_SLOTS:
 #ifndef QT_NO_NETWORKPROXY
     void tst_setProxy();
 #endif
+    void overlongCloseReason();
 };
 
 tst_QWebSocket::tst_QWebSocket()
@@ -731,6 +732,34 @@ void tst_QWebSocket::tst_setProxy()
     QCOMPARE(socket.proxy().port(), quint16(123));
     socket.setProxy(proxy);
     QCOMPARE(socket.proxy(), proxy);
+}
+
+void tst_QWebSocket::overlongCloseReason()
+{
+    EchoServer echoServer;
+
+    QWebSocket socket;
+
+    //should return 0 because socket is not open yet
+    QCOMPARE(socket.sendTextMessage(QStringLiteral("1234")), 0);
+
+    QSignalSpy socketConnectedSpy(&socket, SIGNAL(connected()));
+    QSignalSpy socketDisconnectedSpy(&socket, SIGNAL(disconnected()));
+    QSignalSpy serverConnectedSpy(&echoServer, SIGNAL(newConnection(QUrl)));
+
+    QUrl url = QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
+                    QStringLiteral(":") + QString::number(echoServer.port()));
+    socket.open(url);
+    QTRY_COMPARE(socketConnectedSpy.count(), 1);
+    QTRY_COMPARE(serverConnectedSpy.count(), 1);
+
+    const QString reason(200, QChar::fromLatin1('a'));
+    socket.close(QWebSocketProtocol::CloseCodeGoingAway, reason);
+    QCOMPARE(socket.closeCode(), QWebSocketProtocol::CloseCodeGoingAway);
+    // Max length of a control frame is 125, but 2 bytes are used for the close code:
+    QCOMPARE(socket.closeReason().length(), 123);
+    QCOMPARE(socket.closeReason(), reason.leftRef(123));
+    QTRY_COMPARE(socketDisconnectedSpy.count(), 1);
 }
 #endif // QT_NO_NETWORKPROXY
 

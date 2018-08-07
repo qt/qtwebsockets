@@ -402,7 +402,10 @@ qint64 QWebSocket::sendBinaryMessage(const QByteArray &data)
 
     Any data in the write buffer is flushed before the socket is closed.
     The \a closeCode is a QWebSocketProtocol::CloseCode indicating the reason to close, and
-    \a reason describes the reason of the closure more in detail
+    \a reason describes the reason of the closure more in detail. All control
+    frames, including the Close frame, are limited to 125 bytes. Since two of
+    these are used for \a closeCode the maximum length of \a reason is 123! If
+    \a reason exceeds this limit it will be truncated.
  */
 void QWebSocket::close(QWebSocketProtocol::CloseCode closeCode, const QString &reason)
 {
