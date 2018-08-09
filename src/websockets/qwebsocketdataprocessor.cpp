@@ -150,9 +150,9 @@ void QWebSocketDataProcessor::process(QIODevice *pIoDevice)
                     m_opCode = frame.opCode();
                     m_isFragmented = !frame.isFinalFrame();
                 }
-                quint64 messageLength = (quint64)(m_opCode == QWebSocketProtocol::OpCodeText)
-                        ? m_textMessage.length()
-                        : m_binaryMessage.length();
+                quint64 messageLength = m_opCode == QWebSocketProtocol::OpCodeText
+                        ? quint64(m_textMessage.length())
+                        : quint64(m_binaryMessage.length());
                 if (Q_UNLIKELY((messageLength + quint64(frame.payload().length())) >
                                MAX_MESSAGE_SIZE_IN_BYTES)) {
                     clear();
