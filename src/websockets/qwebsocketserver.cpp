@@ -574,6 +574,7 @@ void QWebSocketServer::setMaxPendingConnections(int numConnections)
     d->setMaxPendingConnections(numConnections);
 }
 
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
 /*!
     Sets the socket descriptor this server should use when listening for incoming connections to
     \a socketDescriptor.
@@ -582,8 +583,9 @@ void QWebSocketServer::setMaxPendingConnections(int numConnections)
     The socket is assumed to be in listening state.
 
     \sa socketDescriptor(), isListening()
+    \since 5.3
  */
-bool QWebSocketServer::setSocketDescriptor(int socketDescriptor)
+bool QWebSocketServer::setSocketDescriptor(qintptr socketDescriptor)
 {
     Q_D(QWebSocketServer);
     return d->setSocketDescriptor(socketDescriptor);
@@ -596,12 +598,104 @@ bool QWebSocketServer::setSocketDescriptor(int socketDescriptor)
     native socket functions.
 
     \sa setSocketDescriptor(), isListening()
+    \since 5.3
  */
-int QWebSocketServer::socketDescriptor() const
+qintptr QWebSocketServer::socketDescriptor() const
 {
     Q_D(const QWebSocketServer);
     return d->socketDescriptor();
 }
+
+/*!
+    \fn QWebSocketServer::nativeDescriptor
+    \deprecated
+
+    Returns the native socket descriptor the server uses to listen for incoming instructions,
+    or -1 if the server is not listening.
+    If the server is using QNetworkProxy, the returned descriptor may not be usable with
+    native socket functions.
+
+    \sa socketDescriptor(), setSocketDescriptor(), setNativeDescriptor(), isListening()
+    \since 5.12
+ */
+/*!
+    \fn QWebSocketServer::setNativeDescriptor
+    \deprecated
+
+    Sets the socket descriptor this server should use when listening for incoming connections to
+    \a socketDescriptor.
+
+    Returns true if the socket is set successfully; otherwise returns false.
+    The socket is assumed to be in listening state.
+
+    \sa socketDescriptor(), setSocketDescriptor(), nativeDescriptor(), isListening()
+    \since 5.12
+ */
+#else // ### Qt 6: Remove leftovers
+/*!
+    \deprecated
+
+    Sets the socket descriptor this server should use when listening for incoming connections to
+    \a socketDescriptor.
+
+    Returns true if the socket is set successfully; otherwise returns false.
+    The socket is assumed to be in listening state.
+
+    \sa socketDescriptor(), setSocketDescriptor(), nativeDescriptor(), isListening()
+    \since 5.3
+ */
+bool QWebSocketServer::setSocketDescriptor(int socketDescriptor)
+{
+    return setNativeDescriptor(socketDescriptor);
+}
+
+/*!
+    \deprecated
+
+    Returns the native socket descriptor the server uses to listen for incoming instructions,
+    or -1 if the server is not listening.
+    If the server is using QNetworkProxy, the returned descriptor may not be usable with
+    native socket functions.
+
+    \sa nativeDescriptor(), setNativeDescriptor(), setSocketDescriptor(), isListening()
+    \since 5.3
+ */
+int QWebSocketServer::socketDescriptor() const
+{
+    return int(nativeDescriptor());
+}
+
+/*!
+    Sets the socket descriptor this server should use when listening for incoming connections to
+    \a socketDescriptor.
+
+    Returns true if the socket is set successfully; otherwise returns false.
+    The socket is assumed to be in listening state.
+
+    \sa nativeDescriptor(), isListening()
+    \since 5.12
+ */
+bool QWebSocketServer::setNativeDescriptor(qintptr socketDescriptor)
+{
+    Q_D(QWebSocketServer);
+    return d->setSocketDescriptor(socketDescriptor);
+}
+
+/*!
+    Returns the native socket descriptor the server uses to listen for incoming instructions,
+    or -1 if the server is not listening.
+    If the server is using QNetworkProxy, the returned descriptor may not be usable with
+    native socket functions.
+
+    \sa setNativeDescriptor(), isListening()
+    \since 5.12
+ */
+qintptr QWebSocketServer::nativeDescriptor() const
+{
+    Q_D(const QWebSocketServer);
+    return d->socketDescriptor();
+}
+#endif // (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
 
 /*!
   Returns a list of WebSocket versions that this server is supporting.

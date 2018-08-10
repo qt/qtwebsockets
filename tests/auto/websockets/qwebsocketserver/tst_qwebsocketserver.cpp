@@ -191,7 +191,11 @@ void tst_QWebSocketServer::tst_initialisation()
         QCOMPARE(server.maxPendingConnections(), 30);
         QCOMPARE(server.serverPort(), quint16(0));
         QCOMPARE(server.serverAddress(), QHostAddress());
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
         QCOMPARE(server.socketDescriptor(), -1);
+#else // ### Qt 6: Remove leftovers
+        QCOMPARE(server.nativeDescriptor(), -1);
+#endif // (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
         QVERIFY(!server.hasPendingConnections());
         QVERIFY(!server.nextPendingConnection());
         QCOMPARE(server.error(), QWebSocketProtocol::CloseCodeNormal);
@@ -216,7 +220,11 @@ void tst_QWebSocketServer::tst_initialisation()
         QCOMPARE(server.maxPendingConnections(), 30);
         QCOMPARE(server.serverPort(), quint16(0));
         QCOMPARE(server.serverAddress(), QHostAddress());
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
         QCOMPARE(server.socketDescriptor(), -1);
+#else // ### Qt 6: Remove leftovers
+        QCOMPARE(server.nativeDescriptor(), -1);
+#endif // (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
         QVERIFY(!server.hasPendingConnections());
         QVERIFY(!server.nextPendingConnection());
         QCOMPARE(server.error(), QWebSocketProtocol::CloseCodeNormal);
@@ -252,8 +260,13 @@ void tst_QWebSocketServer::tst_settersAndGetters()
     server.setMaxPendingConnections(INT_MAX);
     QCOMPARE(server.maxPendingConnections(), INT_MAX);
 
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
     QVERIFY(!server.setSocketDescriptor(-2));
     QCOMPARE(server.socketDescriptor(), -1);
+#else // ### Qt 6: Remove leftovers
+    QVERIFY(!server.setNativeDescriptor(-2));
+    QCOMPARE(server.nativeDescriptor(), -1);
+#endif // (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
 
     server.setServerName(QStringLiteral("Qt WebSocketServer"));
     QCOMPARE(server.serverName(), QStringLiteral("Qt WebSocketServer"));
