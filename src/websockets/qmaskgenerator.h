@@ -51,7 +51,7 @@ class Q_WEBSOCKETS_EXPORT QMaskGenerator : public QObject
 
 public:
     explicit QMaskGenerator(QObject *parent = nullptr);
-    virtual ~QMaskGenerator();
+    ~QMaskGenerator() override;
 
     virtual bool seed() = 0;
     virtual quint32 nextMask() = 0;

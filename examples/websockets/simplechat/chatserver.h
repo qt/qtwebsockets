@@ -62,7 +62,7 @@ class ChatServer : public QObject
     Q_OBJECT
 public:
     explicit ChatServer(quint16 port, QObject *parent = nullptr);
-    virtual ~ChatServer();
+    ~ChatServer() override;
 
 private slots:
     void onNewConnection();

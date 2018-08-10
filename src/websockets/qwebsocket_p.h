@@ -104,7 +104,7 @@ public:
     explicit QWebSocketPrivate(const QString &origin,
                                QWebSocketProtocol::Version version,
                                QWebSocket * const pWebSocket);
-    virtual ~QWebSocketPrivate();
+    ~QWebSocketPrivate() override;
 
     void init();
     void abort();

@@ -70,7 +70,7 @@ class Q_AUTOTEST_EXPORT QWebSocketDataProcessor : public QObject
 
 public:
     explicit QWebSocketDataProcessor(QObject *parent = nullptr);
-    virtual ~QWebSocketDataProcessor();
+    ~QWebSocketDataProcessor() override;
 
     static quint64 maxMessageSize();
     static quint64 maxFrameSize();

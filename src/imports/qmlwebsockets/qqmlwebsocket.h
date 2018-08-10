@@ -62,7 +62,7 @@ class QQmlWebSocket : public QObject, public QQmlParserStatus
 public:
     explicit QQmlWebSocket(QObject *parent = 0);
     explicit QQmlWebSocket(QWebSocket *socket, QObject *parent = 0);
-    virtual ~QQmlWebSocket();
+    ~QQmlWebSocket() override;
 
     enum Status
     {
@@ -94,8 +94,8 @@ Q_SIGNALS:
     void urlChanged();
 
 public:
-    void classBegin() Q_DECL_OVERRIDE;
-    void componentComplete() Q_DECL_OVERRIDE;
+    void classBegin() override;
+    void componentComplete() override;
 
 private Q_SLOTS:
     void onError(QAbstractSocket::SocketError error);

@@ -69,7 +69,7 @@ public:
     explicit QWebSocket(const QString &origin = QString(),
                         QWebSocketProtocol::Version version = QWebSocketProtocol::VersionLatest,
                         QObject *parent = nullptr);
-    virtual ~QWebSocket();
+    ~QWebSocket() override;
 
     void abort();
     QAbstractSocket::SocketError error() const;

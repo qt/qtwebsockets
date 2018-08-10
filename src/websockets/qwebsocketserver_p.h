@@ -82,7 +82,7 @@ public:
 
     explicit QWebSocketServerPrivate(const QString &serverName, SslMode secureMode,
                                      QWebSocketServer * const pWebSocketServer);
-    virtual ~QWebSocketServerPrivate();
+    ~QWebSocketServerPrivate() override;
 
     void init();
     void close(bool aboutToDestroy = false);

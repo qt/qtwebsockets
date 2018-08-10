@@ -73,7 +73,7 @@ public:
                       const QList<QString> &supportedProtocols,
                       const QList<QString> &supportedExtensions);
 
-    virtual ~QWebSocketHandshakeResponse();
+    ~QWebSocketHandshakeResponse() override;
 
     bool isValid() const;
     bool canUpgrade() const;

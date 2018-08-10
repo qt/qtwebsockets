@@ -63,10 +63,10 @@ class QQmlWebSocketServer : public QObject, public QQmlParserStatus
 
 public:
     explicit QQmlWebSocketServer(QObject *parent = Q_NULLPTR);
-    virtual ~QQmlWebSocketServer();
+    ~QQmlWebSocketServer() override;
 
-    void classBegin() Q_DECL_OVERRIDE;
-    void componentComplete() Q_DECL_OVERRIDE;
+    void classBegin() override;
+    void componentComplete() override;
 
     QUrl url() const;
 
