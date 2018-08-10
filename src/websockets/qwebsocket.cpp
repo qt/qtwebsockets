@@ -297,7 +297,7 @@ QT_BEGIN_NAMESPACE
 QWebSocket::QWebSocket(const QString &origin,
                        QWebSocketProtocol::Version version,
                        QObject *parent) :
-    QObject(*(new QWebSocketPrivate(origin, version, this)), parent)
+    QObject(*(new QWebSocketPrivate(origin, version)), parent)
 {
     Q_D(QWebSocket);
     d->init();
@@ -340,7 +340,7 @@ QAbstractSocket::SocketError QWebSocket::error() const
  */
 QWebSocket::QWebSocket(QTcpSocket *pTcpSocket,
                        QWebSocketProtocol::Version version, QObject *parent) :
-    QObject(*(new QWebSocketPrivate(pTcpSocket, version, this)), parent)
+    QObject(*(new QWebSocketPrivate(pTcpSocket, version)), parent)
 {
     Q_D(QWebSocket);
     d->init();

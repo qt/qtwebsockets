@@ -64,6 +64,7 @@
 #include <QtCore/QTime>
 #include <private/qobject_p.h>
 
+#include "qwebsocket.h"
 #include "qwebsocketprotocol.h"
 #include "qwebsocketdataprocessor_p.h"
 #include "qdefaultmaskgenerator_p.h"
@@ -102,8 +103,7 @@ class QWebSocketPrivate : public QObjectPrivate
 public:
     Q_DECLARE_PUBLIC(QWebSocket)
     explicit QWebSocketPrivate(const QString &origin,
-                               QWebSocketProtocol::Version version,
-                               QWebSocket * const pWebSocket);
+                               QWebSocketProtocol::Version version);
     ~QWebSocketPrivate() override;
 
     void init();
@@ -155,11 +155,8 @@ public:
     void open(const QNetworkRequest &request, bool mask);
     void ping(const QByteArray &payload);
 
-    QWebSocket * const q_ptr;
-
 private:
-    QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version,
-                      QWebSocket *pWebSocket);
+    QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version);
     void setVersion(QWebSocketProtocol::Version version);
     void setResourceName(const QString &resourceName);
     void setRequest(const QNetworkRequest &request);

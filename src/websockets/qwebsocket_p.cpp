@@ -87,10 +87,8 @@ QWebSocketConfiguration::QWebSocketConfiguration() :
 /*!
     \internal
 */
-QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::Version version,
-                                     QWebSocket *pWebSocket) :
+QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::Version version) :
     QObjectPrivate(),
-    q_ptr(pWebSocket),
     m_pSocket(nullptr),
     m_errorString(),
     m_version(version),
@@ -120,10 +118,8 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
 /*!
     \internal
 */
-QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version,
-                                     QWebSocket *pWebSocket) :
+QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version) :
     QObjectPrivate(),
-    q_ptr(pWebSocket),
     m_pSocket(pTcpSocket),
     m_errorString(pTcpSocket->errorString()),
     m_version(version),
@@ -416,7 +412,7 @@ void QWebSocketPrivate::open(const QNetworkRequest &request, bool mask)
                 setErrorString(message);
                 Q_EMIT q->error(QAbstractSocket::UnsupportedSocketOperationError);
             } else {
-                QSslSocket *sslSocket = new QSslSocket(q_ptr);
+                QSslSocket *sslSocket = new QSslSocket(q);
                 m_pSocket = sslSocket;
                 if (Q_LIKELY(m_pSocket)) {
                     m_pSocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
@@ -445,7 +441,7 @@ void QWebSocketPrivate::open(const QNetworkRequest &request, bool mask)
         } else
     #endif
         if (url.scheme() == QStringLiteral("ws")) {
-            m_pSocket = new QTcpSocket(q_ptr);
+            m_pSocket = new QTcpSocket(q);
             if (Q_LIKELY(m_pSocket)) {
                 m_pSocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
                 m_pSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
@@ -710,6 +706,7 @@ QByteArray QWebSocketPrivate::getFrameHeader(QWebSocketProtocol::OpCode opCode,
                                              quint64 payloadLength, quint32 maskingKey,
                                              bool lastFrame)
 {
+    Q_Q(QWebSocket);
     QByteArray header;
     bool ok = payloadLength <= 0x7FFFFFFFFFFFFFFFULL;
 
@@ -743,7 +740,7 @@ QByteArray QWebSocketPrivate::getFrameHeader(QWebSocketProtocol::OpCode opCode,
         }
     } else {
         setErrorString(QStringLiteral("WebSocket::getHeader: payload too big!"));
-        Q_EMIT q_ptr->error(QAbstractSocket::DatagramTooLargeError);
+        Q_EMIT q->error(QAbstractSocket::DatagramTooLargeError);
     }
 
     return header;

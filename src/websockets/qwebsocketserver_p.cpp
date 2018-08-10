@@ -65,10 +65,8 @@ const int MAX_HEADERLINES = 100;            //maximum number of http request hea
     \internal
  */
 QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName,
-                                                 QWebSocketServerPrivate::SslMode secureMode,
-                                                 QWebSocketServer * const pWebSocketServer) :
+                                                 QWebSocketServerPrivate::SslMode secureMode) :
     QObjectPrivate(),
-    q_ptr(pWebSocketServer),
     m_pTcpServer(nullptr),
     m_serverName(serverName),
     m_secureMode(secureMode),
@@ -76,17 +74,16 @@ QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName,
     m_error(QWebSocketProtocol::CloseCodeNormal),
     m_errorString(),
     m_maxPendingConnections(30)
-{
-    Q_ASSERT(pWebSocketServer);
-}
+{}
 
 /*!
     \internal
  */
 void QWebSocketServerPrivate::init()
 {
+    Q_Q(QWebSocketServer);
     if (m_secureMode == NonSecureMode) {
-        m_pTcpServer = new QTcpServer(q_ptr);
+        m_pTcpServer = new QTcpServer(q);
         if (Q_LIKELY(m_pTcpServer))
             QObjectPrivate::connect(m_pTcpServer, &QTcpServer::newConnection,
                                     this, &QWebSocketServerPrivate::onNewConnection);
@@ -94,24 +91,24 @@ void QWebSocketServerPrivate::init()
             qFatal("Could not allocate memory for tcp server.");
     } else {
 #ifndef QT_NO_SSL
-        QSslServer *pSslServer = new QSslServer(q_ptr);
+        QSslServer *pSslServer = new QSslServer(q);
         m_pTcpServer = pSslServer;
         if (Q_LIKELY(m_pTcpServer)) {
             QObjectPrivate::connect(pSslServer, &QSslServer::newEncryptedConnection,
                                     this, &QWebSocketServerPrivate::onNewConnection,
                                     Qt::QueuedConnection);
             QObject::connect(pSslServer, &QSslServer::peerVerifyError,
-                             q_ptr, &QWebSocketServer::peerVerifyError);
+                             q, &QWebSocketServer::peerVerifyError);
             QObject::connect(pSslServer, &QSslServer::sslErrors,
-                             q_ptr, &QWebSocketServer::sslErrors);
+                             q, &QWebSocketServer::sslErrors);
             QObject::connect(pSslServer, &QSslServer::preSharedKeyAuthenticationRequired,
-                             q_ptr, &QWebSocketServer::preSharedKeyAuthenticationRequired);
+                             q, &QWebSocketServer::preSharedKeyAuthenticationRequired);
         }
 #else
         qFatal("SSL not supported on this platform.");
 #endif
     }
-    QObject::connect(m_pTcpServer, &QTcpServer::acceptError, q_ptr, &QWebSocketServer::acceptError);
+    QObject::connect(m_pTcpServer, &QTcpServer::acceptError, q, &QWebSocketServer::acceptError);
 }
 
 /*!

@@ -253,11 +253,11 @@ QWebSocketServer::QWebSocketServer(const QString &serverName, SslMode secureMode
                                       #ifndef QT_NO_SSL
                                       (secureMode == SecureMode) ?
                                           QWebSocketServerPrivate::SecureMode :
-                                          QWebSocketServerPrivate::NonSecureMode,
+                                          QWebSocketServerPrivate::NonSecureMode
                                       #else
-                                      QWebSocketServerPrivate::NonSecureMode,
+                                      QWebSocketServerPrivate::NonSecureMode
                                       #endif
-                                      this)), parent)
+                                      )), parent)
 {
 #ifdef QT_NO_SSL
     Q_UNUSED(secureMode)

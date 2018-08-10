@@ -55,6 +55,7 @@
 #include <QtCore/QString>
 #include <QtNetwork/QHostAddress>
 #include <private/qobject_p.h>
+#include "qwebsocketserver.h"
 #include "qwebsocket.h"
 
 #ifndef QT_NO_SSL
@@ -66,7 +67,6 @@ QT_BEGIN_NAMESPACE
 
 class QTcpServer;
 class QTcpSocket;
-class QWebSocketServer;
 
 class QWebSocketServerPrivate : public QObjectPrivate
 {
@@ -80,8 +80,7 @@ public:
         NonSecureMode
     };
 
-    explicit QWebSocketServerPrivate(const QString &serverName, SslMode secureMode,
-                                     QWebSocketServer * const pWebSocketServer);
+    explicit QWebSocketServerPrivate(const QString &serverName, SslMode secureMode);
     ~QWebSocketServerPrivate() override;
 
     void init();
@@ -122,8 +121,6 @@ public:
     void setError(QWebSocketProtocol::CloseCode code, const QString &errorString);
 
     void handleConnection(QTcpSocket *pTcpSocket) const;
-
-    QWebSocketServer * const q_ptr;
 
 private:
     QTcpServer *m_pTcpServer;
