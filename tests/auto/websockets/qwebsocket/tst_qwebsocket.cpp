@@ -658,7 +658,7 @@ struct Warned
             origHandler(type, context, str);
     }
 };
-QtMessageHandler Warned::origHandler = 0;
+QtMessageHandler Warned::origHandler = nullptr;
 bool Warned::warned = false;
 
 

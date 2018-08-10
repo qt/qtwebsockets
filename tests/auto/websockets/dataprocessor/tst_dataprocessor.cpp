@@ -901,7 +901,7 @@ void tst_DataProcessor::frameTooBig_data()
     QTest::addColumn<QWebSocketProtocol::CloseCode>("expectedCloseCode");
 
     quint64 swapped64 = 0;
-    const char *wireRepresentation = 0;
+    const char *wireRepresentation = nullptr;
 
     //only data frames are checked for being too big
     //control frames have explicit checking on a maximum payload size of 125,

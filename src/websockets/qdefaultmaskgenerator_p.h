@@ -61,7 +61,7 @@ class Q_AUTOTEST_EXPORT QDefaultMaskGenerator : public QMaskGenerator
     Q_DISABLE_COPY(QDefaultMaskGenerator)
 
 public:
-    explicit QDefaultMaskGenerator(QObject *parent = 0);
+    explicit QDefaultMaskGenerator(QObject *parent = nullptr);
     ~QDefaultMaskGenerator() override;
 
     bool seed() Q_DECL_NOEXCEPT override;
