@@ -456,7 +456,7 @@ QWebSocketFrame QWebSocketFrame::readFrame(QIODevice *pIoDevice)
             } else {
                 quint64 bytesAvailable = quint64(pIoDevice->bytesAvailable());
                 if (bytesAvailable >= payloadLength) {
-                    frame.m_payload = pIoDevice->read(payloadLength);
+                    frame.m_payload = pIoDevice->read(int(payloadLength));
                     //payloadLength can be safely cast to an integer,
                     //because MAX_FRAME_SIZE_IN_BYTES = MAX_INT
                     if (Q_UNLIKELY(frame.m_payload.length() != int(payloadLength))) {

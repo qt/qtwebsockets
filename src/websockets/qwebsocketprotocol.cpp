@@ -193,7 +193,7 @@ QWebSocketProtocol::Version QWebSocketProtocol::versionFromString(const QString 
 void QWebSocketProtocol::mask(QByteArray *payload, quint32 maskingKey)
 {
     Q_ASSERT(payload);
-    mask(payload->data(), payload->size(), maskingKey);
+    mask(payload->data(), quint64(payload->size()), maskingKey);
 }
 
 /*!

@@ -341,10 +341,10 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
         quint32 maskingKey = 0;
         if (m_mustMask) {
             maskingKey = generateMaskingKey();
-            QWebSocketProtocol::mask(payload.data(), payload.size(), maskingKey);
+            QWebSocketProtocol::mask(payload.data(), quint64(payload.size()), maskingKey);
         }
         QByteArray frame = getFrameHeader(QWebSocketProtocol::OpCodeClose,
-                                          payload.size(), maskingKey, true);
+                                          quint64(payload.size()), maskingKey, true);
 
         Q_ASSERT(payload.length() <= 125);
         frame.append(payload);
@@ -431,7 +431,7 @@ void QWebSocketPrivate::open(const QNetworkRequest &request, bool mask)
     #ifndef QT_NO_NETWORKPROXY
                     sslSocket->setProxy(m_configuration.m_proxy);
     #endif
-                    sslSocket->connectToHostEncrypted(url.host(), url.port(443));
+                    sslSocket->connectToHostEncrypted(url.host(), quint16(url.port(443)));
                 } else {
                     const QString message = QWebSocket::tr("Out of memory.");
                     setErrorString(message);
@@ -453,7 +453,7 @@ void QWebSocketPrivate::open(const QNetworkRequest &request, bool mask)
     #ifndef QT_NO_NETWORKPROXY
                 m_pSocket->setProxy(m_configuration.m_proxy);
     #endif
-                m_pSocket->connectToHost(url.host(), url.port(80));
+                m_pSocket->connectToHost(url.host(), quint16(url.port(80)));
             } else {
                 const QString message = QWebSocket::tr("Out of memory.");
                 setErrorString(message);
@@ -478,7 +478,8 @@ void QWebSocketPrivate::ping(const QByteArray &payload)
     quint32 maskingKey = 0;
     if (m_mustMask)
         maskingKey = generateMaskingKey();
-    QByteArray pingFrame = getFrameHeader(QWebSocketProtocol::OpCodePing, payloadTruncated.size(),
+    QByteArray pingFrame = getFrameHeader(QWebSocketProtocol::OpCodePing,
+                                          quint64(payloadTruncated.size()),
                                           maskingKey, true);
     if (m_mustMask)
         QWebSocketProtocol::mask(&payloadTruncated, maskingKey);
@@ -759,7 +760,7 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
     const QWebSocketProtocol::OpCode firstOpCode = isBinary ?
                 QWebSocketProtocol::OpCodeBinary : QWebSocketProtocol::OpCodeText;
 
-    int numFrames = data.size() / FRAME_SIZE_IN_BYTES;
+    int numFrames = data.size() / int(FRAME_SIZE_IN_BYTES);
     QByteArray tmpData(data);
     tmpData.detach();
     char *payload = tmpData.data();
@@ -772,7 +773,7 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
     if (Q_UNLIKELY(numFrames == 0))
         numFrames = 1;
     quint64 currentPosition = 0;
-    quint64 bytesLeft = data.size();
+    quint64 bytesLeft = quint64(data.size());
 
     for (int i = 0; i < numFrames; ++i) {
         quint32 maskingKey = 0;
@@ -1184,7 +1185,10 @@ void QWebSocketPrivate::processPing(const QByteArray &data)
     quint32 maskingKey = 0;
     if (m_mustMask)
         maskingKey = generateMaskingKey();
-    m_pSocket->write(getFrameHeader(QWebSocketProtocol::OpCodePong, data.size(), maskingKey, true));
+    m_pSocket->write(getFrameHeader(QWebSocketProtocol::OpCodePong,
+                                    unsigned(data.size()),
+                                    maskingKey,
+                                    true));
     if (data.size() > 0) {
         QByteArray maskedData = data;
         if (m_mustMask)
