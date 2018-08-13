@@ -1146,8 +1146,6 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
         //do nothing
         //to make C++ compiler happy;
         break;
-    default:
-        break;
     }
 }
 
