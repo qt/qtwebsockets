@@ -37,116 +37,74 @@ class tst_ComplianceTest : public QObject
 {
     Q_OBJECT
 
-public:
-    tst_ComplianceTest();
-
 private Q_SLOTS:
-    void initTestCase();
     void cleanupTestCase();
-    void init();
-    void cleanup();
-    /**
-     * @brief Runs the autobahn tests against our implementation
-     */
+
+    void autobahnTest_data();
     void autobahnTest();
-
-private:
-    QUrl m_url;
-
-    void runTestCases(int startNbr, int stopNbr = -1);
-    void runTestCase(int nbr, int total);
 };
 
-tst_ComplianceTest::tst_ComplianceTest() :
-    m_url("ws://localhost:9001")
-{
-}
-
-void tst_ComplianceTest::initTestCase()
-{
-}
+static const QUrl baseUrl { "ws://localhost:9001" };
+static const auto agent = QStringLiteral("QtWebSockets/" QT_VERSION_STR);
 
 void tst_ComplianceTest::cleanupTestCase()
 {
-}
-
-void tst_ComplianceTest::init()
-{
-}
-
-void tst_ComplianceTest::cleanup()
-{
-}
-
-void tst_ComplianceTest::runTestCase(int nbr, int total)
-{
-    if (nbr == total)
-    {
-        return;
-    }
-
-    QWebSocket *pWebSocket = new QWebSocket;
-    QSignalSpy spy(pWebSocket, SIGNAL(disconnected()));
-
-    //next for every case, connect to url
-    //ws://ipaddress:port/runCase?case=<number>&agent=<agentname>
-    //where agent name will be QWebSocket
-    QObject::connect(pWebSocket, &QWebSocket::textMessageReceived, [=](QString message) {
-        pWebSocket->sendTextMessage(message);
-    });
-    QObject::connect(pWebSocket, &QWebSocket::binaryMessageReceived, [=](QByteArray message) {
-        pWebSocket->sendBinaryMessage(message);
-    });
-
-    qDebug() << "Executing test" << (nbr + 1) << "/" << total;
-    QUrl url = m_url;
-    url.setPath(QStringLiteral("/runCase"));
+    QWebSocket webSocket;
+    QSignalSpy spy(&webSocket, &QWebSocket::disconnected);
+    auto url = baseUrl;
+    url.setPath(QStringLiteral("/updateReports"));
     QUrlQuery query;
-    query.addQueryItem(QStringLiteral("case"), QString::number(nbr + 1));
-    query.addQueryItem(QStringLiteral("agent"), QStringLiteral("QtWebSockets/1.0"));
+    query.addQueryItem(QStringLiteral("agent"), agent);
     url.setQuery(query);
-    pWebSocket->open(url);
-    spy.wait(60000);
-    pWebSocket->close();
-    delete pWebSocket;
-    pWebSocket = nullptr;
-    runTestCase(nbr + 1, total);
+    webSocket.open(url);
+    QVERIFY(spy.wait());
 }
 
-void tst_ComplianceTest::runTestCases(int startNbr, int stopNbr)
+void tst_ComplianceTest::autobahnTest_data()
 {
-    runTestCase(startNbr, stopNbr);
+    QTest::addColumn<int>("testCase");
+
+    // Ask /getCaseCount how many tests we have
+    QWebSocket webSocket;
+    QSignalSpy spy(&webSocket, &QWebSocket::disconnected);
+
+    connect(&webSocket, &QWebSocket::textMessageReceived, [](QString message) {
+        bool ok;
+        const auto numberOfTestCases = message.toInt(&ok);
+        if (!ok)
+            QSKIP("Unable to parse /getCaseCount result");
+        for (auto i = 1; i <= numberOfTestCases; ++i)
+            QTest::addRow("%d", i) << i;
+    });
+
+    auto url = baseUrl;
+    url.setPath(QStringLiteral("/getCaseCount"));
+    webSocket.open(url);
+    if (!spy.wait())
+        QSKIP("AutoBahn test server didn't deliver case-count");
 }
 
 void tst_ComplianceTest::autobahnTest()
 {
-    //connect to autobahn server at url ws://ipaddress:port/getCaseCount
-    QWebSocket *pWebSocket = new QWebSocket;
-    QUrl url = m_url;
-    int numberOfTestCases = 0;
-    QSignalSpy spy(pWebSocket, SIGNAL(disconnected()));
-    QObject::connect(pWebSocket, &QWebSocket::textMessageReceived, [&](QString message) {
-        numberOfTestCases = message.toInt();
-    });
+    QFETCH(int, testCase);
+    QWebSocket webSocket;
+    QSignalSpy spy(&webSocket, &QWebSocket::disconnected);
+    connect(&webSocket, &QWebSocket::textMessageReceived,
+            &webSocket, &QWebSocket::sendTextMessage);
+    connect(&webSocket, &QWebSocket::binaryMessageReceived,
+            &webSocket, &QWebSocket::sendBinaryMessage);
 
-    url.setPath(QStringLiteral("/getCaseCount"));
-    pWebSocket->open(url);
-    spy.wait(60000);
-    QVERIFY(numberOfTestCases > 0);
-
-    QObject::disconnect(pWebSocket, &QWebSocket::textMessageReceived, nullptr, nullptr);
-    runTestCases(0, numberOfTestCases);
-
-    url.setPath(QStringLiteral("/updateReports"));
+    // Ask /runCase?case=<number>&agent=<agent> to run the test-case.
+    auto url = baseUrl;
+    url.setPath(QStringLiteral("/runCase"));
     QUrlQuery query;
-    query.addQueryItem(QStringLiteral("agent"), QStringLiteral("QtWebSockets"));
+    query.addQueryItem(QStringLiteral("case"), QString::number(testCase));
+    query.addQueryItem(QStringLiteral("agent"), agent);
     url.setQuery(query);
-    pWebSocket->open(url);
-    spy.wait(60000);
-    delete pWebSocket;
+    webSocket.open(url);
+    QVERIFY(spy.wait());
 }
 
 QTEST_MAIN(tst_ComplianceTest)
 
 #include "tst_compliance.moc"
-
