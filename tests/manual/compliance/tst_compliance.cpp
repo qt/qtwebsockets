@@ -134,7 +134,7 @@ void tst_ComplianceTest::autobahnTest()
     spy.wait(60000);
     QVERIFY(numberOfTestCases > 0);
 
-    QObject::disconnect(pWebSocket, &QWebSocket::textMessageReceived, 0, 0);
+    QObject::disconnect(pWebSocket, &QWebSocket::textMessageReceived, nullptr, nullptr);
     runTestCases(0, numberOfTestCases);
 
     url.setPath(QStringLiteral("/updateReports"));
