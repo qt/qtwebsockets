@@ -1,4 +1,4 @@
-QT += core qml quick websockets
+QT += quick websockets
 
 TARGET = qmlwebsocketserver
 

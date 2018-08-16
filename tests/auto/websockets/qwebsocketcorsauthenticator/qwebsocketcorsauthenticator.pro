@@ -6,7 +6,7 @@ TEMPLATE = app
 
 TARGET = tst_qwebsocketcorsauthenticator
 
-QT = core testlib websockets
+QT = testlib websockets
 
 SOURCES += tst_qwebsocketcorsauthenticator.cpp
 

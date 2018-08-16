@@ -1,5 +1,4 @@
-QT       += core websockets
-QT       -= gui
+QT = websockets
 
 TARGET = echoserver
 CONFIG   += console

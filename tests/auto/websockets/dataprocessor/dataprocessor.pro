@@ -6,7 +6,7 @@ TEMPLATE = app
 
 TARGET = tst_dataprocessor
 
-QT = core testlib websockets websockets-private
+QT = testlib websockets-private
 
 SOURCES += tst_dataprocessor.cpp
 

@@ -2,7 +2,7 @@ CONFIG += console
 CONFIG += testcase
 CONFIG -= app_bundle
 
-QT       = core testlib websockets
+QT = testlib websockets
 
 TARGET = tst_qwebsocketserver
 

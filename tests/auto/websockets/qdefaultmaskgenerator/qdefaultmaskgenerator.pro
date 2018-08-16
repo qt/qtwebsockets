@@ -6,7 +6,7 @@ TEMPLATE = app
 
 TARGET = tst_defaultmaskgenerator
 
-QT = core testlib websockets websockets-private
+QT = testlib websockets-private
 
 SOURCES += tst_defaultmaskgenerator.cpp
 

@@ -6,7 +6,7 @@ TEMPLATE = app
 
 TARGET = tst_websocketprotocol
 
-QT = core testlib websockets websockets-private
+QT = testlib websockets-private
 
 SOURCES += tst_websocketprotocol.cpp
 
