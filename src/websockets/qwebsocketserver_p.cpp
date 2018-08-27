@@ -416,7 +416,9 @@ void QWebSocketServerPrivate::handshakeReceived()
     //For Safari, the handshake is delivered at once
     //FIXME: For FireFox, the readyRead signal is never emitted
     //This is a bug in FireFox (see https://bugzilla.mozilla.org/show_bug.cgi?id=594502)
-    if (!pTcpSocket->canReadLine()) {
+
+    // According to RFC822 the body is separated from the headers by a null line (CRLF)
+    if (!pTcpSocket->peek(pTcpSocket->bytesAvailable()).endsWith(QByteArrayLiteral("\r\n\r\n"))) {
         return;
     }
     disconnect(pTcpSocket, &QTcpSocket::readyRead,
