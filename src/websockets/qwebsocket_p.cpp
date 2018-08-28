@@ -965,7 +965,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
     case ReadingStatusState:
         if (!pSocket->canReadLine())
             return;
-        m_statusLine = pSocket->readLine();
+        m_statusLine = pSocket->readLine().trimmed();
         if (Q_UNLIKELY(!parseStatusLine(m_statusLine, &m_httpMajorVersion, &m_httpMinorVersion, &m_httpStatusCode, &m_httpStatusMessage))) {
             errorDescription = QWebSocket::tr("Invalid statusline in response: %1.").arg(QString::fromLatin1(m_statusLine));
             break;
