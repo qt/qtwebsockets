@@ -88,7 +88,7 @@ public:
 Q_SIGNALS:
     void textMessageReceived(QString message);
     Q_REVISION(1) void binaryMessageReceived(QByteArray message);
-    void statusChanged(Status status);
+    void statusChanged(QQmlWebSocket::Status status);
     void activeChanged(bool isActive);
     void errorStringChanged(QString errorString);
     void urlChanged();
