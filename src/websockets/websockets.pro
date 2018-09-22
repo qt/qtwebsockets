@@ -40,6 +40,8 @@ SOURCES += \
     $$PWD/qmaskgenerator.cpp \
     $$PWD/qdefaultmaskgenerator_p.cpp
 
+wasm: SOURCES += $$PWD/qwebsocket_wasm_p.cpp
+
 qtConfig(ssl) {
     SOURCES += $$PWD/qsslserver.cpp
     PRIVATE_HEADERS += $$PWD/qsslserver_p.h
