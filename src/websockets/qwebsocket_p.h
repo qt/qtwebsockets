@@ -69,6 +69,10 @@
 #include "qwebsocketdataprocessor_p.h"
 #include "qdefaultmaskgenerator_p.h"
 
+#ifdef Q_OS_WASM
+#include <emscripten/val.h>
+#endif
+
 QT_BEGIN_NAMESPACE
 
 class QWebSocketHandshakeRequest;
@@ -247,6 +251,9 @@ private:
     QMap<QString, QString> m_headers;
 
     friend class QWebSocketServerPrivate;
+#ifdef Q_OS_WASM
+    emscripten::val socketContext = emscripten::val::null();
+#endif
 };
 
 QT_END_NAMESPACE

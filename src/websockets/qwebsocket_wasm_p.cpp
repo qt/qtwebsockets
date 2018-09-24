@@ -42,92 +42,104 @@
 #include <QtCore/qcoreapplication.h>
 
 #include <emscripten.h>
-#include <emscripten/html5.h>
 #include <emscripten/bind.h>
 
 using namespace emscripten;
 
-QByteArray g_messageArray;
-// easiest way to transliterate binary data to js/wasm
-
-val getBinaryMessage()
+static void q_onErrorCallback(val event)
 {
-    return val(typed_memory_view(g_messageArray.size(),
-                                 reinterpret_cast<const unsigned char *>(g_messageArray.constData())));
+    val target = event["target"];
+
+    QWebSocketPrivate *wsp = reinterpret_cast<QWebSocketPrivate*>(target["data-context"].as<quintptr>());
+    Q_ASSERT (wsp);
+
+    emit wsp->q_func()->error(wsp->error());
 }
+
+static void q_onCloseCallback(val event)
+{
+    val target = event["target"];
+
+    QWebSocketPrivate *wsp = reinterpret_cast<QWebSocketPrivate*>(target["data-context"].as<quintptr>());
+    Q_ASSERT (wsp);
+
+    emit wsp->q_func()->disconnected();
+}
+
+static void q_onOpenCallback(val event)
+{
+    val target = event["target"];
+
+    QWebSocketPrivate *wsp = reinterpret_cast<QWebSocketPrivate*>(target["data-context"].as<quintptr>());
+    Q_ASSERT (wsp);
+
+    emit wsp->q_func()->connected();
+}
+
+static void q_onIncomingMessageCallback(val event)
+{
+    val target = event["target"];
+
+    if (event["data"].typeOf().as<std::string>() == "string") {
+        QWebSocketPrivate *wsp = reinterpret_cast<QWebSocketPrivate*>(target["data-context"].as<quintptr>());
+        Q_ASSERT (wsp);
+
+        const QString message = QString::fromStdString(event["data"].as<std::string>());
+        if (!message.isEmpty())
+            wsp->q_func()->textMessageReceived(message);
+    } else {
+        val reader = val::global("FileReader").new_();
+        reader.set("onload", val::module_property("QWebSocketPrivate_readBlob"));
+        reader.set("data-context", target["data-context"]);
+        reader.call<void>("readAsArrayBuffer", event["data"]);
+    }
+}
+
+static void q_readBlob(val event)
+{
+    val fileReader = event["target"];
+
+    QWebSocketPrivate *wsp = reinterpret_cast<QWebSocketPrivate*>(fileReader["data-context"].as<quintptr>());
+    Q_ASSERT (wsp);
+
+    // Set up source typed array
+    val result = fileReader["result"]; // ArrayBuffer
+    val Uint8Array = val::global("Uint8Array");
+    val sourceTypedArray = Uint8Array.new_(result);
+
+    // Allocate and set up destination typed array
+    const size_t size = result["byteLength"].as<size_t>();
+    QByteArray buffer(size, Qt::Uninitialized);
+
+    val destinationTypedArray = Uint8Array.new_(val::module_property("HEAPU8")["buffer"],
+                                                reinterpret_cast<quintptr>(buffer.data()), size);
+    destinationTypedArray.call<void>("set", sourceTypedArray);
+
+    wsp->q_func()->binaryMessageReceived(buffer);
+}
+
 
 EMSCRIPTEN_BINDINGS(wasm_module) {
-    function("getBinaryMessage", &getBinaryMessage);
-}
-
-static void onOpenCallback(void *data)
-{
-    auto handler = reinterpret_cast<QWebSocketPrivate *>(data);
-    Q_ASSERT (handler);
-    emit handler->q_func()->connected();
-}
-
-static void onCloseCallback(void *data, int message)
-{
-    Q_UNUSED(message);
-    auto handler = reinterpret_cast<QWebSocketPrivate *>(data);
-    Q_ASSERT (handler);
-    emit handler->q_func()->disconnected();
-}
-
-static void onErrorCallback(void *data, int message)
-{
-    Q_UNUSED(message);
-    auto handler = reinterpret_cast<QWebSocketPrivate *>(data);
-    Q_ASSERT (handler);
-    emit handler->q_func()->error(handler->error());
-}
-
-static void onIncomingMessageCallback(void *data, int message, int length, int dataType)
-{
-    QWebSocketPrivate *handler = reinterpret_cast<QWebSocketPrivate *>(data);
-    Q_ASSERT (handler);
-
-    QWebSocket *webSocket = handler->q_func();
-    const char *text = reinterpret_cast<const char *>(message);
-
-    switch (dataType) {
-    case 0: //string
-        webSocket->textMessageReceived(QLatin1String(text));
-        break;
-    case 1: //blob
-    case 2: //arraybuffer
-        webSocket->binaryMessageReceived(QByteArray::fromRawData(text, length));
-        break;
-    };
+    function("QWebSocketPrivate_onErrorCallback", q_onErrorCallback);
+    function("QWebSocketPrivate_onCloseCallback", q_onCloseCallback);
+    function("QWebSocketPrivate_onOpenCallback", q_onOpenCallback);
+    function("QWebSocketPrivate_onIncomingMessageCallback", q_onIncomingMessageCallback);
+    function("QWebSocketPrivate_readBlob", q_readBlob);
 }
 
 qint64 QWebSocketPrivate::sendTextMessage(const QString &message)
 {
-    EM_ASM_ARGS({
-        if (window.qWebSocket === undefined)
-            console.log("cannot find websocket object");
-        else
-            window.qWebSocket.send(Pointer_stringify($0));
-     }, message.toLocal8Bit().constData());
-
+    socketContext.call<void>("send", message.toStdString());
     return message.length();
 }
 
 qint64 QWebSocketPrivate::sendBinaryMessage(const QByteArray &data)
 {
-    g_messageArray = data;
-    EM_ASM({
-        if (window.qWebSocket === undefined) {
-            console.log("cannot find websocket object");
-        } else {
-            var array = Module.getBinaryMessage();
-            window.qWebSocket.binaryType = 'arraybuffer';
-            window.qWebSocket.send(array);
-        }
-    });
+    socketContext.call<void>("send",
+                             val(typed_memory_view(data.size(),
+                                                   reinterpret_cast<const unsigned char *>
+                                                   (data.constData()))));
 
-    g_messageArray.clear();
     return data.length();
 }
 
@@ -136,19 +148,10 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
     Q_Q(QWebSocket);
     m_closeCode = closeCode;
     m_closeReason = reason;
-    const quint16 closeReason = (quint16)closeCode;
     Q_EMIT q->aboutToClose();
-    QCoreApplication::processEvents();
 
-    EM_ASM_ARGS({
-        if (window.qWebSocket === undefined) {
-            console.log("cannot find websocket object");
-        } else {
-            var reasonMessage = Pointer_stringify($0);
-            window.qWebSocket.close($1, reasonMessage);
-            window.qWebSocket = undefined;
-        }
-    }, reason.toLatin1().data(), closeReason);
+    socketContext.call<void>("close", static_cast<quint16>(closeCode),
+                             reason.toLatin1().toStdString());
 }
 
 void QWebSocketPrivate::open(const QNetworkRequest &request, bool mask)
@@ -162,74 +165,21 @@ void QWebSocketPrivate::open(const QNetworkRequest &request, bool mask)
         return;
     }
 
-    QByteArray urlbytes = url.toString().toUtf8();
+    const std::string urlbytes = url.toString().toStdString();
 
     // HTML WebSockets do not support arbitrary request headers, but
     // do support the WebSocket protocol header. This header is
     // required for some use cases like MQTT.
-    QByteArray protocolHeaderValue = request.rawHeader("Sec-WebSocket-Protocol");
+    const std::string protocolHeaderValue = request.rawHeader("Sec-WebSocket-Protocol").toStdString();
+    val webSocket = val::global("WebSocket");
 
-    EM_ASM_ARGS({
-        if (window.qWebSocket != undefined)
-            return;
+    socketContext = !protocolHeaderValue.empty()
+            ? webSocket.new_(urlbytes, protocolHeaderValue)
+            : webSocket.new_(urlbytes);
 
-        var wsUri = Pointer_stringify($0);
-        var wsProtocol = Pointer_stringify($1);
-        var handler = $2;
-        var onOpenCb = $3;
-        var onCloseCb = $4;
-        var onErrorCb = $5;
-        var onIncomingMessageCb = $6;
-
-        window.qWebSocket = wsProtocol.length > 0
-                           ? new WebSocket(wsUri, wsProtocol)
-                           : new WebSocket(wsUri);
-
-        window.qWebSocket.onopen = function(event) {
-            Runtime.dynCall('vi', onOpenCb, [handler]);
-        };
-
-        window.qWebSocket.onclose = function(event) {
-            window.qWebSocket = undefined;
-            Runtime.dynCall('vii', onCloseCb, [handler, event.code]);
-        };
-
-        window.qWebSocket.onerror = function(event) {
-            Runtime.dynCall('vii', onErrorCb, [handler, event.error]);
-        };
-
-        window.qWebSocket.onmessage = function(event) {
-            var outgoingMessage;
-            var bufferLength = 0;
-            var dataType;
-
-            if (window.qWebSocket.binaryType == 'arraybuffer' && typeof event.data == 'object') {
-
-                var byteArray = new Uint8Array(event.data);
-                bufferLength = byteArray.length;
-
-                outgoingMessage = _malloc(byteArray.length);
-                HEAPU8.set(byteArray, outgoingMessage);
-
-                dataType = 2;
-            } else if (typeof event.data == 'string') {
-                 dataType = 0;
-                 outgoingMessage = allocate(intArrayFromString(event.data), 'i8', ALLOC_NORMAL);
-            } else if (window.qWebSocket.binaryType == 'blob') {
-                 var byteArray = new Int8Array($0);
-                 outgoingMessage = new Blob(byteArray.buffer);
-                 dataType = 1;
-            }
-
-            Runtime.dynCall('viiii', onIncomingMessageCb, [handler, outgoingMessage, bufferLength, dataType]);
-            _free(outgoingMessage);
-        };
-
-    }, urlbytes.constData(),
-    protocolHeaderValue.data(),
-    this,
-    reinterpret_cast<void *>(onOpenCallback),
-    reinterpret_cast<void *>(onCloseCallback),
-    reinterpret_cast<void *>(onErrorCallback),
-    reinterpret_cast<void *>(onIncomingMessageCallback));
+    socketContext.set("onerror", val::module_property("QWebSocketPrivate_onErrorCallback"));
+    socketContext.set("onclose", val::module_property("QWebSocketPrivate_onCloseCallback"));
+    socketContext.set("onopen", val::module_property("QWebSocketPrivate_onOpenCallback"));
+    socketContext.set("onmessage", val::module_property("QWebSocketPrivate_onIncomingMessageCallback"));
+    socketContext.set("data-context", val(quintptr(reinterpret_cast<void *>(this))));
 }
