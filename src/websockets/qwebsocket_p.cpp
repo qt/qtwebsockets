@@ -436,6 +436,7 @@ void QWebSocketPrivate::open(const QNetworkRequest &request, bool mask)
                         sslSocket->ignoreSslErrors(m_configuration.m_ignoredSslErrors);
     #ifndef QT_NO_NETWORKPROXY
                     sslSocket->setProxy(m_configuration.m_proxy);
+                    m_pSocket->setProtocolTag(QStringLiteral("https"));
     #endif
                     sslSocket->connectToHostEncrypted(url.host(), quint16(url.port(443)));
                 } else {
@@ -458,6 +459,7 @@ void QWebSocketPrivate::open(const QNetworkRequest &request, bool mask)
                 setSocketState(QAbstractSocket::ConnectingState);
     #ifndef QT_NO_NETWORKPROXY
                 m_pSocket->setProxy(m_configuration.m_proxy);
+                m_pSocket->setProtocolTag(QStringLiteral("http"));
     #endif
                 m_pSocket->connectToHost(url.host(), quint16(url.port(80)));
             } else {
