@@ -35,6 +35,7 @@
 #ifndef QT_NO_SSL
 #include <QtNetwork/qsslcipher.h>
 #include <QtNetwork/qsslkey.h>
+#include <QtNetwork/qsslsocket.h>
 #endif
 #include <QtWebSockets/QWebSocketServer>
 #include <QtWebSockets/QWebSocket>
@@ -402,6 +403,8 @@ void tst_QWebSocketServer::tst_preSharedKey()
     list << cipher;
 
     QSslConfiguration config = QSslConfiguration::defaultConfiguration();
+    if (QSslSocket::sslLibraryVersionNumber() >= 0x10101000L)
+        config.setProtocol(QSsl::TlsV1_2); // With TLS 1.3 there are some issues with PSK, force 1.2
     config.setCiphers(list);
     config.setPeerVerifyMode(QSslSocket::VerifyNone);
     config.setPreSharedKeyIdentityHint(PSK_SERVER_IDENTITY_HINT);
@@ -422,6 +425,8 @@ void tst_QWebSocketServer::tst_preSharedKey()
 
     QWebSocket socket;
     QSslConfiguration socketConfig = QSslConfiguration::defaultConfiguration();
+    if (QSslSocket::sslLibraryVersionNumber() >= 0x10101000L)
+        socketConfig.setProtocol(QSsl::TlsV1_2); // With TLS 1.3 there are some issues with PSK, force 1.2
     socketConfig.setPeerVerifyMode(QSslSocket::VerifyNone);
     socketConfig.setCiphers(list);
     socket.setSslConfiguration(socketConfig);
