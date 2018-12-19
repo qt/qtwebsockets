@@ -158,6 +158,7 @@ public:
     void close(QWebSocketProtocol::CloseCode closeCode, QString reason);
     void open(const QNetworkRequest &request, bool mask);
     void ping(const QByteArray &payload);
+    void setSocketState(QAbstractSocket::SocketState state);
 
 private:
     QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version);
@@ -168,7 +169,6 @@ private:
     void setProtocol(const QString &protocol);
     void setExtension(const QString &extension);
     void enableMasking(bool enable);
-    void setSocketState(QAbstractSocket::SocketState state);
     void setErrorString(const QString &errorString);
 
     void socketDestroyed(QObject *socket);
