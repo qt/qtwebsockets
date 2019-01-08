@@ -63,6 +63,7 @@ static void q_onCloseCallback(val event)
     QWebSocketPrivate *wsp = reinterpret_cast<QWebSocketPrivate*>(target["data-context"].as<quintptr>());
     Q_ASSERT (wsp);
 
+    wsp->setSocketState(QAbstractSocket::UnconnectedState);
     emit wsp->q_func()->disconnected();
 }
 
@@ -73,6 +74,7 @@ static void q_onOpenCallback(val event)
     QWebSocketPrivate *wsp = reinterpret_cast<QWebSocketPrivate*>(target["data-context"].as<quintptr>());
     Q_ASSERT (wsp);
 
+    wsp->setSocketState(QAbstractSocket::ConnectedState);
     emit wsp->q_func()->connected();
 }
 
@@ -149,6 +151,7 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
     m_closeCode = closeCode;
     m_closeReason = reason;
     Q_EMIT q->aboutToClose();
+    setSocketState(QAbstractSocket::ClosingState);
 
     socketContext.call<void>("close", static_cast<quint16>(closeCode),
                              reason.toLatin1().toStdString());
@@ -165,6 +168,7 @@ void QWebSocketPrivate::open(const QNetworkRequest &request, bool mask)
         return;
     }
 
+    setSocketState(QAbstractSocket::ConnectingState);
     const std::string urlbytes = url.toString().toStdString();
 
     // HTML WebSockets do not support arbitrary request headers, but
