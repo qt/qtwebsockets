@@ -390,8 +390,10 @@ void QWebSocketServerPrivate::onNewConnection()
  */
 void QWebSocketServerPrivate::onSocketDisconnected()
 {
-    if (Q_LIKELY(currentSender)) {
-        QTcpSocket *pTcpSocket = qobject_cast<QTcpSocket*>(currentSender->sender);
+    Q_Q(QWebSocketServer);
+    QObject *sender = q->sender();
+    if (Q_LIKELY(sender)) {
+        QTcpSocket *pTcpSocket = qobject_cast<QTcpSocket*>(sender);
         if (Q_LIKELY(pTcpSocket))
             pTcpSocket->deleteLater();
     }
@@ -402,10 +404,12 @@ void QWebSocketServerPrivate::onSocketDisconnected()
  */
 void QWebSocketServerPrivate::handshakeReceived()
 {
-    if (Q_UNLIKELY(!currentSender)) {
+    Q_Q(QWebSocketServer);
+    QObject *sender = q->sender();
+    if (Q_UNLIKELY(!sender)) {
         return;
     }
-    QTcpSocket *pTcpSocket = qobject_cast<QTcpSocket*>(currentSender->sender);
+    QTcpSocket *pTcpSocket = qobject_cast<QTcpSocket*>(sender);
     if (Q_UNLIKELY(!pTcpSocket)) {
         return;
     }
@@ -423,7 +427,6 @@ void QWebSocketServerPrivate::handshakeReceived()
     }
     disconnect(pTcpSocket, &QTcpSocket::readyRead,
                this, &QWebSocketServerPrivate::handshakeReceived);
-    Q_Q(QWebSocketServer);
     bool success = false;
     bool isSecure = (m_secureMode == SecureMode);
 
