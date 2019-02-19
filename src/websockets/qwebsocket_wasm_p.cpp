@@ -187,3 +187,9 @@ void QWebSocketPrivate::open(const QNetworkRequest &request, bool mask)
     socketContext.set("onmessage", val::module_property("QWebSocketPrivate_onIncomingMessageCallback"));
     socketContext.set("data-context", val(quintptr(reinterpret_cast<void *>(this))));
 }
+
+bool QWebSocketPrivate::isValid() const
+{
+    return (!socketContext.isUndefined() &&
+            (m_socketState == QAbstractSocket::ConnectedState));
+}

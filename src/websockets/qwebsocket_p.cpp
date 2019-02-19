@@ -1451,6 +1451,7 @@ void QWebSocketPrivate::setReadBufferSize(qint64 size)
         m_pSocket->setReadBufferSize(m_readBufferSize);
 }
 
+#ifndef Q_OS_WASM
 /*!
     \internal
  */
@@ -1459,5 +1460,6 @@ bool QWebSocketPrivate::isValid() const
     return (m_pSocket && m_pSocket->isValid() &&
             (m_socketState == QAbstractSocket::ConnectedState));
 }
+#endif
 
 QT_END_NAMESPACE
