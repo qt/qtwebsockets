@@ -59,6 +59,8 @@
 
 QT_BEGIN_NAMESPACE
 
+class QSslSocket;
+
 class QSslServer : public QTcpServer
 {
     Q_OBJECT
@@ -76,9 +78,13 @@ Q_SIGNALS:
     void peerVerifyError(const QSslError &error);
     void newEncryptedConnection();
     void preSharedKeyAuthenticationRequired(QSslPreSharedKeyAuthenticator *authenticator);
+    void startedEncryptionHandshake(QSslSocket *socket);
 
 protected:
     void incomingConnection(qintptr socket) override;
+
+private slots:
+    void socketEncrypted();
 
 private:
     QSslConfiguration m_sslConfiguration;

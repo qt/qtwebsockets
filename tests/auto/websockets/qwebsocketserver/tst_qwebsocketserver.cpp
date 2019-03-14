@@ -29,6 +29,7 @@
 #include <QtTest>
 #include <QNetworkProxy>
 #include <QTcpServer>
+#include <QtCore/QScopedPointer>
 #ifndef QT_NO_OPENSSL
 #include <QtNetwork/qsslpresharedkeyauthenticator.h>
 #endif
@@ -113,6 +114,7 @@ private Q_SLOTS:
     void tst_serverDestroyedWhileSocketConnected();
     void tst_scheme(); // qtbug-55927
     void tst_handleConnection();
+    void tst_handshakeTimeout(); // qtbug-63312, qtbug-57026
 
 private:
     bool m_shouldSkipUnsupportedIpv6Test;
@@ -573,6 +575,26 @@ void tst_QWebSocketServer::tst_serverDestroyedWhileSocketConnected()
     QTRY_COMPARE(socketDisconnectedSpy.count(), 1);
 }
 
+#ifndef QT_NO_SSL
+static void setupSecureServer(QWebSocketServer *secureServer)
+{
+    QSslConfiguration sslConfiguration;
+    QFile certFile(QStringLiteral(":/localhost.cert"));
+    QFile keyFile(QStringLiteral(":/localhost.key"));
+    QVERIFY(certFile.open(QIODevice::ReadOnly));
+    QVERIFY(keyFile.open(QIODevice::ReadOnly));
+    QSslCertificate certificate(&certFile, QSsl::Pem);
+    QSslKey sslKey(&keyFile, QSsl::Rsa, QSsl::Pem);
+    certFile.close();
+    keyFile.close();
+    sslConfiguration.setPeerVerifyMode(QSslSocket::VerifyNone);
+    sslConfiguration.setLocalCertificate(certificate);
+    sslConfiguration.setPrivateKey(sslKey);
+    sslConfiguration.setProtocol(QSsl::TlsV1SslV3);
+    secureServer->setSslConfiguration(sslConfiguration);
+}
+#endif
+
 void tst_QWebSocketServer::tst_scheme()
 {
     if (m_shouldSkipUnsupportedIpv6Test)
@@ -594,20 +616,9 @@ void tst_QWebSocketServer::tst_scheme()
 
 #ifndef QT_NO_SSL
     QWebSocketServer secureServer(QString(), QWebSocketServer::SecureMode);
-    QSslConfiguration sslConfiguration;
-    QFile certFile(QStringLiteral(":/localhost.cert"));
-    QFile keyFile(QStringLiteral(":/localhost.key"));
-    QVERIFY(certFile.open(QIODevice::ReadOnly));
-    QVERIFY(keyFile.open(QIODevice::ReadOnly));
-    QSslCertificate certificate(&certFile, QSsl::Pem);
-    QSslKey sslKey(&keyFile, QSsl::Rsa, QSsl::Pem);
-    certFile.close();
-    keyFile.close();
-    sslConfiguration.setPeerVerifyMode(QSslSocket::VerifyNone);
-    sslConfiguration.setLocalCertificate(certificate);
-    sslConfiguration.setPrivateKey(sslKey);
-    sslConfiguration.setProtocol(QSsl::TlsV1SslV3);
-    secureServer.setSslConfiguration(sslConfiguration);
+    setupSecureServer(&secureServer);
+    if (QTest::currentTestFailed())
+        return;
     QSignalSpy secureServerConnectionSpy(&secureServer, SIGNAL(newConnection()));
 
     QVERIFY(secureServer.listen());
@@ -666,6 +677,135 @@ void tst_QWebSocketServer::tst_handleConnection()
     QTRY_COMPARE(clientMessageReceivedSpy.count(), 1);
     arguments = clientMessageReceivedSpy.takeFirst();
     QCOMPARE(arguments.first().toString(), QString("hello"));
+}
+
+struct SocketSpy {
+    QTcpSocket *socket;
+    QSignalSpy *disconnectSpy;
+    ~SocketSpy() {
+        delete socket;
+        delete disconnectSpy;
+    }
+};
+
+static void openManyConnections(QList<SocketSpy *> *sockets, quint16 port)
+{
+    /* do some incomplete connections */
+    for (int i = 0; i < 50; i++) {
+        QTcpSocket *c = new QTcpSocket;
+        QSignalSpy *spy = new QSignalSpy(c, &QTcpSocket::disconnected);
+
+        QString hostname = "localhost";
+        c->connectToHost("localhost", port);
+
+        sockets->append(new SocketSpy{c, spy});
+    }
+}
+
+void tst_QWebSocketServer::tst_handshakeTimeout()
+{
+    { // No Timeout
+        QWebSocketServer plainServer(QString(), QWebSocketServer::NonSecureMode);
+        plainServer.setHandshakeTimeout(-1);
+        QSignalSpy plainServerConnectionSpy(&plainServer, SIGNAL(newConnection()));
+
+        QVERIFY(plainServer.listen());
+
+        QWebSocket socket;
+        socket.open(plainServer.serverUrl().toString());
+
+        QTRY_COMPARE(plainServerConnectionSpy.count(), 1);
+        QScopedPointer<QWebSocket> plainServerSocket(plainServer.nextPendingConnection());
+        QVERIFY(!plainServerSocket.isNull());
+
+        plainServer.close();
+    }
+
+    { // Unencrypted
+        QWebSocketServer plainServer(QString(), QWebSocketServer::NonSecureMode);
+        plainServer.setHandshakeTimeout(500);
+        QSignalSpy plainServerConnectionSpy(&plainServer, SIGNAL(newConnection()));
+
+        QVERIFY(plainServer.listen());
+
+        QList<SocketSpy *> sockets;
+        auto cleaner = qScopeGuard([&sockets]() { qDeleteAll(sockets); });
+        openManyConnections(&sockets, plainServer.serverPort());
+
+        QCoreApplication::processEvents();
+        QCOMPARE(plainServerConnectionSpy.count(), 0);
+
+        QWebSocket socket;
+        socket.open(plainServer.serverUrl().toString());
+
+        QTRY_COMPARE(plainServerConnectionSpy.count(), 1);
+        QScopedPointer<QWebSocket> plainServerSocket(plainServer.nextPendingConnection());
+        QVERIFY(!plainServerSocket.isNull());
+
+        for (auto s : sockets)
+            QTRY_COMPARE(s->disconnectSpy->count(), 1);
+
+        plainServer.close();
+    }
+
+#if QT_CONFIG(ssl)
+    { // Encrypted
+        QWebSocketServer secureServer(QString(), QWebSocketServer::SecureMode);
+        setupSecureServer(&secureServer);
+        if (QTest::currentTestFailed())
+            return;
+        secureServer.setHandshakeTimeout(500);
+
+        QSignalSpy secureServerConnectionSpy(&secureServer, SIGNAL(newConnection()));
+
+        QVERIFY(secureServer.listen());
+
+        QList<SocketSpy *> sockets;
+        auto cleaner = qScopeGuard([&sockets]() { qDeleteAll(sockets); });
+        openManyConnections(&sockets, secureServer.serverPort());
+
+        QCoreApplication::processEvents();
+        QCOMPARE(secureServerConnectionSpy.count(), 0);
+
+        QWebSocket secureSocket;
+        QSslConfiguration config = secureSocket.sslConfiguration();
+        config.setPeerVerifyMode(QSslSocket::VerifyNone);
+        secureSocket.setSslConfiguration(config);
+
+        secureSocket.open(secureServer.serverUrl().toString());
+
+        QTRY_COMPARE(secureServerConnectionSpy.count(), 1);
+        QScopedPointer<QWebSocket> serverSocket(secureServer.nextPendingConnection());
+        QVERIFY(!serverSocket.isNull());
+
+        for (auto s : sockets)
+            QTRY_COMPARE(s->disconnectSpy->count(), 1);
+
+        secureServer.close();
+    }
+#endif
+
+    { // Ensure properly handshaked connections are not timed out
+        QWebSocketServer plainServer(QString(), QWebSocketServer::NonSecureMode);
+        plainServer.setHandshakeTimeout(250);
+        QSignalSpy plainServerConnectionSpy(&plainServer, SIGNAL(newConnection()));
+
+        QVERIFY(plainServer.listen());
+
+        QWebSocket socket;
+        QSignalSpy socketConnectedSpy(&socket, &QWebSocket::connected);
+        QSignalSpy socketDisconnectedSpy(&socket, &QWebSocket::disconnected);
+        socket.open(plainServer.serverUrl().toString());
+
+        QTRY_COMPARE(plainServerConnectionSpy.count(), 1);
+        QTRY_COMPARE(socketConnectedSpy.count(), 1);
+
+        QEventLoop loop;
+        QTimer::singleShot(500, &loop, &QEventLoop::quit);
+        loop.exec();
+
+        QCOMPARE(socketDisconnectedSpy.count(), 0);
+    }
 }
 
 QTEST_MAIN(tst_QWebSocketServer)

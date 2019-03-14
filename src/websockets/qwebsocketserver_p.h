@@ -90,6 +90,9 @@ public:
     bool isListening() const;
     bool listen(const QHostAddress &address = QHostAddress::Any, quint16 port = 0);
     int maxPendingConnections() const;
+    int handshakeTimeout() const {
+        return m_handshakeTimeout;
+    }
     virtual QWebSocket *nextPendingConnection();
     void pauseAccepting();
 #ifndef QT_NO_NETWORKPROXY
@@ -101,6 +104,9 @@ public:
     QWebSocketProtocol::CloseCode serverError() const;
     quint16 serverPort() const;
     void setMaxPendingConnections(int numConnections);
+    void setHandshakeTimeout(int msec) {
+        m_handshakeTimeout = msec;
+    }
     bool setSocketDescriptor(qintptr socketDescriptor);
     qintptr socketDescriptor() const;
 
@@ -122,6 +128,9 @@ public:
 
     void handleConnection(QTcpSocket *pTcpSocket) const;
 
+private slots:
+    void startHandshakeTimeout(QTcpSocket *pTcpSocket);
+
 private:
     QTcpServer *m_pTcpServer;
     QString m_serverName;
@@ -130,6 +139,7 @@ private:
     QWebSocketProtocol::CloseCode m_error;
     QString m_errorString;
     int m_maxPendingConnections;
+    int m_handshakeTimeout;
 
     void addPendingConnection(QWebSocket *pWebSocket);
     void setErrorFromSocketError(QAbstractSocket::SocketError error,
@@ -138,6 +148,7 @@ private:
     void onNewConnection();
     void onSocketDisconnected();
     void handshakeReceived();
+    void finishHandshakeTimeout(QTcpSocket *pTcpSocket);
 };
 
 QT_END_NAMESPACE

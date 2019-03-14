@@ -77,6 +77,9 @@
 
     QWebSocketServer only supports version 13 of the WebSocket protocol, as outlined in \l{RFC 6455}.
 
+    There is a default connection handshake timeout of 10 seconds to avoid denial of service,
+    which can be customized using setHandshakeTimeout().
+
     \sa {WebSocket Server Example}, QWebSocket
 */
 
@@ -350,6 +353,20 @@ int QWebSocketServer::maxPendingConnections() const
 }
 
 /*!
+    Returns the handshake timeout for new connections in milliseconds.
+
+    The default is 10 seconds. If a peer uses more time to complete the
+    handshake their connection is closed.
+
+    \sa setHandshakeTimeout()
+ */
+int QWebSocketServer::handshakeTimeout() const
+{
+    Q_D(const QWebSocketServer);
+    return d->handshakeTimeout();
+}
+
+/*!
     Returns the next pending connection as a connected QWebSocket object.
     QWebSocketServer does not take ownership of the returned QWebSocket object.
     It is up to the caller to delete the object explicitly when it will no longer be used,
@@ -572,6 +589,21 @@ void QWebSocketServer::setMaxPendingConnections(int numConnections)
 {
     Q_D(QWebSocketServer);
     d->setMaxPendingConnections(numConnections);
+}
+
+/*!
+    Sets the handshake timeout for new connections to \a msec milliseconds.
+
+    By default this is set to 10 seconds. If a peer uses more time to
+    complete the handshake, their connection is closed. You can pass a
+    negative value (e.g. -1) to disable the timeout.
+
+    \sa handshakeTimeout()
+ */
+void QWebSocketServer::setHandshakeTimeout(int msec)
+{
+    Q_D(QWebSocketServer);
+    d->setHandshakeTimeout(msec);
 }
 
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))

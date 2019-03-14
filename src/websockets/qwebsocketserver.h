@@ -86,6 +86,9 @@ public:
     void setMaxPendingConnections(int numConnections);
     int maxPendingConnections() const;
 
+    void setHandshakeTimeout(int msec);
+    int handshakeTimeout() const;
+
     quint16 serverPort() const;
     QHostAddress serverAddress() const;
     QUrl serverUrl() const;

@@ -118,17 +118,28 @@ void QSslServer::incomingConnection(qintptr socket)
             connect(pSslSocket, QOverload<const QList<QSslError>&>::of(&QSslSocket::sslErrors),
                     this, &QSslServer::sslErrors);
             connect(pSslSocket, &QSslSocket::encrypted,
-                    this, &QSslServer::newEncryptedConnection);
+                    this, &QSslServer::socketEncrypted);
             connect(pSslSocket, &QSslSocket::preSharedKeyAuthenticationRequired,
                     this, &QSslServer::preSharedKeyAuthenticationRequired);
 
-            addPendingConnection(pSslSocket);
+            Q_EMIT startedEncryptionHandshake(pSslSocket);
 
             pSslSocket->startServerEncryption();
         } else {
            delete pSslSocket;
         }
     }
+}
+
+void QSslServer::socketEncrypted()
+{
+    QSslSocket *pSslSocket = qobject_cast<QSslSocket *>(sender());
+
+    // We do not add the connection until the encryption handshake is complete.
+    // In case the handshake is aborted, we would be left with a stale
+    // connection in the queue otherwise.
+    addPendingConnection(pSslSocket);
+    Q_EMIT newEncryptedConnection();
 }
 
 QT_END_NAMESPACE
