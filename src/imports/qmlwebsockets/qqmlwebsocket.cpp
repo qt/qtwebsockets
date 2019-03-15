@@ -87,31 +87,33 @@
 /*!
   \qmlsignal WebSocket::textMessageReceived(QString message)
   This signal is emitted when a text message is received.
+  \a message contains the bytes received.
   */
 
 /*!
   \qmlsignal WebSocket::binaryMessageReceived(QString message)
   \since 5.8
   This signal is emitted when a binary message is received.
+  \a message contains the bytes received.
   */
 
 /*!
   \qmlsignal WebSocket::statusChanged(Status status)
   This signal is emitted when the status of the WebSocket changes.
-  the \l [QML]{WebSocket::status}{status} argument provides the current status.
+  The \a status argument provides the current status.
 
   \sa {QtWebSockets::}{WebSocket::status}
   */
 
 /*!
   \qmlmethod void WebSocket::sendTextMessage(string message)
-  Sends \c message to the server.
+  Sends \a message to the server.
   */
 
 /*!
   \qmlmethod void WebSocket::sendBinaryMessage(ArrayBuffer message)
   \since 5.8
-  Sends \c message to the server.
+  Sends the parameter \a message to the server.
   */
 
 #include "qqmlwebsocket.h"
