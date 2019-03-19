@@ -38,7 +38,7 @@ Module {
         }
         Signal {
             name: "statusChanged"
-            Parameter { name: "status"; type: "Status" }
+            Parameter { name: "status"; type: "QQmlWebSocket::Status" }
         }
         Signal {
             name: "activeChanged"
