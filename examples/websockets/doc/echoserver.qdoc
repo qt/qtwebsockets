@@ -59,7 +59,7 @@
     sends back the messages it receives, using the \l {Qt WebSockets}{WebSocket} API.
 
     If your web browser supports \l {Qt WebSockets}{WebSocket}, you can also use it
-    to open the \l {echoserver/echoclient.html}{echoclient.html} file, and operate
+    to open the \c {echoserver/echoclient.html}{echoclient.html} file, and operate
     like the following screenshot.
 
     \image echoclient-html-example.png Screenshot of the HTML version of Echo
