@@ -55,6 +55,9 @@ void QtWebSocketsDeclarativeModule::registerTypes(const char *uri)
     qmlRegisterType<QQmlWebSocket>(uri, 1 /*major*/, 0 /*minor*/, "WebSocket");
     qmlRegisterType<QQmlWebSocket, 1>(uri, 1 /*major*/, 1 /*minor*/, "WebSocket");
     qmlRegisterType<QQmlWebSocketServer>(uri, 1 /*major*/, 0 /*minor*/, "WebSocketServer");
+
+    // Auto-increment the import to stay in sync with ALL future QtQuick minor versions
+    qmlRegisterModule(uri, 1, QT_VERSION_MINOR);
 }
 
 QT_END_NAMESPACE

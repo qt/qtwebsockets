@@ -51,9 +51,9 @@
 
     To  import the QML types into your application, use the following import statement in your .qml file:
 
-    \code
-    import QtWebSockets 1.0
-    \endcode
+    \qml \QtMinorVersion
+    import QtWebSockets 1.\1
+    \endqml
 
     To link against the module, add this line to your qmake .pro file:
 

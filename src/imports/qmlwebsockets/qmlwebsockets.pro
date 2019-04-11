@@ -12,6 +12,6 @@ SOURCES +=  qmlwebsockets_plugin.cpp \
 
 OTHER_FILES += qmldir
 
-IMPORT_VERSION = 1.1
+IMPORT_VERSION = 1.$$QT_MINOR_VERSION
 
 load(qml_plugin)
