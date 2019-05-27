@@ -389,7 +389,7 @@ void tst_QWebSocketServer::tst_preSharedKey()
     QWebSocketServer server(QString(), QWebSocketServer::SecureMode);
 
     bool cipherFound = false;
-    const QList<QSslCipher> supportedCiphers = QSslSocket::supportedCiphers();
+    const QList<QSslCipher> supportedCiphers = QSslConfiguration::supportedCiphers();
     for (const QSslCipher &cipher : supportedCiphers) {
         if (cipher.name() == PSK_CIPHER_WITHOUT_AUTH) {
             cipherFound = true;
