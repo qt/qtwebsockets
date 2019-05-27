@@ -28,6 +28,7 @@
 #include <QString>
 #include <QtTest>
 #include <QNetworkProxy>
+#include <QTcpSocket>
 #include <QTcpServer>
 #include <QtCore/QScopedPointer>
 #ifndef QT_NO_OPENSSL
