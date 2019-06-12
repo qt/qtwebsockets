@@ -126,7 +126,7 @@ private:
         PS_READ_PAYLOAD,
         PS_DISPATCH_RESULT,
         PS_WAIT_FOR_MORE_DATA
-    };
+    } m_processingState{PS_READ_HEADER};
 
     ProcessingState readFrameHeader(QIODevice *pIoDevice);
     ProcessingState readFramePayloadLength(QIODevice *pIoDevice);

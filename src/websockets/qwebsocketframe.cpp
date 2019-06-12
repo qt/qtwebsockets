@@ -93,7 +93,8 @@ QWebSocketFrame::QWebSocketFrame(const QWebSocketFrame &other) :
     m_rsv1(other.m_rsv1),
     m_rsv2(other.m_rsv2),
     m_rsv3(other.m_rsv3),
-    m_isValid(other.m_isValid)
+    m_isValid(other.m_isValid),
+    m_processingState(other.m_processingState)
 {
 }
 
@@ -113,6 +114,7 @@ QWebSocketFrame &QWebSocketFrame::operator =(const QWebSocketFrame &other)
     m_length = other.m_length;
     m_payload = other.m_payload;
     m_isValid = other.m_isValid;
+    m_processingState = other.m_processingState;
 
     return *this;
 }
@@ -132,7 +134,8 @@ QWebSocketFrame::QWebSocketFrame(QWebSocketFrame &&other) :
     m_rsv1(qMove(other.m_rsv1)),
     m_rsv2(qMove(other.m_rsv2)),
     m_rsv3(qMove(other.m_rsv3)),
-    m_isValid(qMove(other.m_isValid))
+    m_isValid(qMove(other.m_isValid)),
+    m_processingState(qMove(other.m_processingState))
 {}
 
 
@@ -152,6 +155,7 @@ QWebSocketFrame &QWebSocketFrame::operator =(QWebSocketFrame &&other)
     qSwap(m_length, other.m_length);
     qSwap(m_payload, other.m_payload);
     qSwap(m_isValid, other.m_isValid);
+    qSwap(m_processingState, other.m_processingState);
 
     return *this;
 }
@@ -175,6 +179,7 @@ void QWebSocketFrame::swap(QWebSocketFrame &other)
         qSwap(m_length, other.m_length);
         qSwap(m_payload, other.m_payload);
         qSwap(m_isValid, other.m_isValid);
+        qSwap(m_processingState, other.m_processingState);
     }
 }
 
@@ -276,6 +281,7 @@ void QWebSocketFrame::clear()
     m_length = 0;
     m_payload.clear();
     m_isValid = false;
+    m_processingState = PS_READ_HEADER;
 }
 
 /*!
@@ -286,9 +292,9 @@ bool QWebSocketFrame::isValid() const
     return m_isValid;
 }
 
-#define WAIT_FOR_MORE_DATA(dataSizeInBytes)  \
-    { returnState = processingState; \
-      processingState = PS_WAIT_FOR_MORE_DATA; dataWaitSize = dataSizeInBytes; }
+#define WAIT_FOR_MORE_DATA(returnState)  \
+    { needMoreData = true; \
+      frame.m_processingState = (returnState); }
 
 /*!
     \internal
@@ -297,73 +303,56 @@ QWebSocketFrame QWebSocketFrame::readFrame(QIODevice *pIoDevice)
 {
     bool isDone = false;
     QWebSocketFrame frame;
-    quint64 dataWaitSize = 0;
-    Q_UNUSED(dataWaitSize); // value is used in MACRO, Q_UNUSED to avoid compiler warnings
-    ProcessingState processingState = PS_READ_HEADER;
-    ProcessingState returnState = PS_READ_HEADER;
 
     while (!isDone)
     {
-        switch (processingState) {
-        case PS_WAIT_FOR_MORE_DATA:
-            //TODO: waitForReadyRead should really be changed
-            //now, when a WebSocket is used in a GUI thread
-            //the GUI will hang for at most 5 seconds
-            //maybe, a QStateMachine should be used
-            if (!pIoDevice->waitForReadyRead(5000)) {
-                frame.setError(QWebSocketProtocol::CloseCodeGoingAway,
-                               tr("Timeout when reading data from socket."));
-                processingState = PS_DISPATCH_RESULT;
-            } else {
-                processingState = returnState;
-            }
-            break;
-
+        bool needMoreData = false;
+        switch (frame.m_processingState) {
         case PS_READ_HEADER:
-            processingState = frame.readFrameHeader(pIoDevice);
-            if (processingState == PS_WAIT_FOR_MORE_DATA) {
-                processingState = PS_READ_HEADER;
-                WAIT_FOR_MORE_DATA(2);
-            }
+            frame.m_processingState = frame.readFrameHeader(pIoDevice);
+            if (frame.m_processingState == PS_WAIT_FOR_MORE_DATA)
+                WAIT_FOR_MORE_DATA(PS_READ_HEADER);
             break;
 
         case PS_READ_PAYLOAD_LENGTH:
-            processingState = frame.readFramePayloadLength(pIoDevice);
-            if (processingState == PS_WAIT_FOR_MORE_DATA) {
-                processingState = PS_READ_PAYLOAD_LENGTH;
-                WAIT_FOR_MORE_DATA(frame.m_length == 126 ? 2 : 8);
-            }
+            frame.m_processingState = frame.readFramePayloadLength(pIoDevice);
+            if (frame.m_processingState == PS_WAIT_FOR_MORE_DATA)
+                WAIT_FOR_MORE_DATA(PS_READ_PAYLOAD_LENGTH);
             break;
 
         case PS_READ_MASK:
-            processingState = frame.readFrameMask(pIoDevice);
-            if (processingState == PS_WAIT_FOR_MORE_DATA) {
-                processingState = PS_READ_MASK;
-                WAIT_FOR_MORE_DATA(4);
-            }
+            frame.m_processingState = frame.readFrameMask(pIoDevice);
+            if (frame.m_processingState == PS_WAIT_FOR_MORE_DATA)
+                WAIT_FOR_MORE_DATA(PS_READ_MASK);
             break;
 
         case PS_READ_PAYLOAD:
-            processingState = frame.readFramePayload(pIoDevice);
-            if (processingState == PS_WAIT_FOR_MORE_DATA) {
-                processingState = PS_READ_PAYLOAD;
-                // if payload is too big, then this will timeout
-                WAIT_FOR_MORE_DATA(frame.m_length);
-            }
+            frame.m_processingState = frame.readFramePayload(pIoDevice);
+            if (frame.m_processingState == PS_WAIT_FOR_MORE_DATA)
+                WAIT_FOR_MORE_DATA(PS_READ_PAYLOAD);
             break;
 
         case PS_DISPATCH_RESULT:
-            processingState = PS_READ_HEADER;
+            frame.m_processingState = PS_DISPATCH_RESULT;
             isDone = true;
             break;
 
         default:
-            //should not come here
-            qWarning() << "DataProcessor::process: Found invalid state. This should not happen!";
-            frame.clear();
-            isDone = true;
+            Q_UNREACHABLE();
             break;
-        }	//end switch
+        }
+
+        if (needMoreData) {
+            // TODO: waitForReadyRead should really be changed
+            // now, when a WebSocket is used in a GUI thread
+            // the GUI will hang for at most 5 seconds
+            // maybe, a QStateMachine should be used
+            if (!pIoDevice->waitForReadyRead(5000)) {
+                frame.setError(QWebSocketProtocol::CloseCodeGoingAway,
+                               tr("Timeout when reading data from socket."));
+                frame.m_processingState = PS_DISPATCH_RESULT;
+            }
+        }
     }
 
     return frame;
