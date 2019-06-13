@@ -109,7 +109,7 @@ private:
     QString m_closeReason;
     quint32 m_mask;
     QWebSocketProtocol::OpCode m_opCode;
-    quint8 m_length;
+    quint64 m_length;
     QByteArray m_payload;
 
     bool m_isFinalFrame;
@@ -122,12 +122,16 @@ private:
     {
         PS_READ_HEADER,
         PS_READ_PAYLOAD_LENGTH,
-        PS_READ_BIG_PAYLOAD_LENGTH,
         PS_READ_MASK,
         PS_READ_PAYLOAD,
         PS_DISPATCH_RESULT,
         PS_WAIT_FOR_MORE_DATA
     };
+
+    ProcessingState readFrameHeader(QIODevice *pIoDevice);
+    ProcessingState readFramePayloadLength(QIODevice *pIoDevice);
+    ProcessingState readFrameMask(QIODevice *pIoDevice);
+    ProcessingState readFramePayload(QIODevice *pIoDevice);
 
     void setError(QWebSocketProtocol::CloseCode code, const QString &closeReason);
     bool checkValidity();

@@ -296,14 +296,11 @@ bool QWebSocketFrame::isValid() const
 QWebSocketFrame QWebSocketFrame::readFrame(QIODevice *pIoDevice)
 {
     bool isDone = false;
-    qint64 bytesRead = 0;
     QWebSocketFrame frame;
     quint64 dataWaitSize = 0;
     Q_UNUSED(dataWaitSize); // value is used in MACRO, Q_UNUSED to avoid compiler warnings
     ProcessingState processingState = PS_READ_HEADER;
     ProcessingState returnState = PS_READ_HEADER;
-    bool hasMask = false;
-    quint64 payloadLength = 0;
 
     while (!isDone)
     {
@@ -323,157 +320,35 @@ QWebSocketFrame QWebSocketFrame::readFrame(QIODevice *pIoDevice)
             break;
 
         case PS_READ_HEADER:
-            if (Q_LIKELY(pIoDevice->bytesAvailable() >= 2)) {
-                //FIN, RSV1-3, Opcode
-                char header[2] = {0};
-                bytesRead = pIoDevice->read(header, 2);
-                frame.m_isFinalFrame = (header[0] & 0x80) != 0;
-                frame.m_rsv1 = (header[0] & 0x40);
-                frame.m_rsv2 = (header[0] & 0x20);
-                frame.m_rsv3 = (header[0] & 0x10);
-                frame.m_opCode = static_cast<QWebSocketProtocol::OpCode>(header[0] & 0x0F);
-
-                //Mask, PayloadLength
-                hasMask = (header[1] & 0x80) != 0;
-                frame.m_length = (header[1] & 0x7F);
-
-                switch (frame.m_length)
-                {
-                    case 126:
-                    {
-                        processingState = PS_READ_PAYLOAD_LENGTH;
-                        break;
-                    }
-                    case 127:
-                    {
-                        processingState = PS_READ_BIG_PAYLOAD_LENGTH;
-                        break;
-                    }
-                    default:
-                    {
-                        payloadLength = frame.m_length;
-                        processingState = hasMask ? PS_READ_MASK : PS_READ_PAYLOAD;
-                        break;
-                    }
-                }
-                if (!frame.checkValidity())
-                    processingState = PS_DISPATCH_RESULT;
-            } else {
+            processingState = frame.readFrameHeader(pIoDevice);
+            if (processingState == PS_WAIT_FOR_MORE_DATA) {
+                processingState = PS_READ_HEADER;
                 WAIT_FOR_MORE_DATA(2);
             }
             break;
 
         case PS_READ_PAYLOAD_LENGTH:
-            if (Q_LIKELY(pIoDevice->bytesAvailable() >= 2)) {
-                uchar length[2] = {0};
-                bytesRead = pIoDevice->read(reinterpret_cast<char *>(length), 2);
-                if (Q_UNLIKELY(bytesRead == -1)) {
-                    frame.setError(QWebSocketProtocol::CloseCodeGoingAway,
-                                   tr("Error occurred while reading from the network: %1")
-                                        .arg(pIoDevice->errorString()));
-                    processingState = PS_DISPATCH_RESULT;
-                } else {
-                    payloadLength = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(length));
-                    if (Q_UNLIKELY(payloadLength < 126)) {
-                        //see http://tools.ietf.org/html/rfc6455#page-28 paragraph 5.2
-                        //"in all cases, the minimal number of bytes MUST be used to encode
-                        //the length, for example, the length of a 124-byte-long string
-                        //can't be encoded as the sequence 126, 0, 124"
-                        frame.setError(QWebSocketProtocol::CloseCodeProtocolError,
-                                       tr("Lengths smaller than 126 " \
-                                                   "must be expressed as one byte."));
-                        processingState = PS_DISPATCH_RESULT;
-                    } else {
-                        processingState = hasMask ? PS_READ_MASK : PS_READ_PAYLOAD;
-                    }
-                }
-            } else {
-                WAIT_FOR_MORE_DATA(2);
+            processingState = frame.readFramePayloadLength(pIoDevice);
+            if (processingState == PS_WAIT_FOR_MORE_DATA) {
+                processingState = PS_READ_PAYLOAD_LENGTH;
+                WAIT_FOR_MORE_DATA(frame.m_length == 126 ? 2 : 8);
             }
-            break;
-
-        case PS_READ_BIG_PAYLOAD_LENGTH:
-            if (Q_LIKELY(pIoDevice->bytesAvailable() >= 8)) {
-                uchar length[8] = {0};
-                bytesRead = pIoDevice->read(reinterpret_cast<char *>(length), 8);
-                if (Q_UNLIKELY(bytesRead < 8)) {
-                    frame.setError(QWebSocketProtocol::CloseCodeAbnormalDisconnection,
-                                   tr("Something went wrong during "\
-                                               "reading from the network."));
-                    processingState = PS_DISPATCH_RESULT;
-                } else {
-                    //Most significant bit must be set to 0 as
-                    //per http://tools.ietf.org/html/rfc6455#section-5.2
-                    payloadLength = qFromBigEndian<quint64>(length);
-                    if (Q_UNLIKELY(payloadLength & (quint64(1) << 63))) {
-                        frame.setError(QWebSocketProtocol::CloseCodeProtocolError,
-                                       tr("Highest bit of payload length is not 0."));
-                        processingState = PS_DISPATCH_RESULT;
-                    } else if (Q_UNLIKELY(payloadLength <= 0xFFFFu)) {
-                        //see http://tools.ietf.org/html/rfc6455#page-28 paragraph 5.2
-                        //"in all cases, the minimal number of bytes MUST be used to encode
-                        //the length, for example, the length of a 124-byte-long string
-                        //can't be encoded as the sequence 126, 0, 124"
-                        frame.setError(QWebSocketProtocol::CloseCodeProtocolError,
-                                       tr("Lengths smaller than 65536 (2^16) " \
-                                                   "must be expressed as 2 bytes."));
-                        processingState = PS_DISPATCH_RESULT;
-                    } else {
-                        processingState = hasMask ? PS_READ_MASK : PS_READ_PAYLOAD;
-                    }
-                }
-            } else {
-                WAIT_FOR_MORE_DATA(8);
-            }
-
             break;
 
         case PS_READ_MASK:
-            if (Q_LIKELY(pIoDevice->bytesAvailable() >= 4)) {
-                bytesRead = pIoDevice->read(reinterpret_cast<char *>(&frame.m_mask),
-                                            sizeof(frame.m_mask));
-                if (bytesRead == -1) {
-                    frame.setError(QWebSocketProtocol::CloseCodeGoingAway,
-                                   tr("Error while reading from the network: %1.")
-                                        .arg(pIoDevice->errorString()));
-                    processingState = PS_DISPATCH_RESULT;
-                } else {
-                    frame.m_mask = qFromBigEndian(frame.m_mask);
-                    processingState = PS_READ_PAYLOAD;
-                }
-            } else {
+            processingState = frame.readFrameMask(pIoDevice);
+            if (processingState == PS_WAIT_FOR_MORE_DATA) {
+                processingState = PS_READ_MASK;
                 WAIT_FOR_MORE_DATA(4);
             }
             break;
 
         case PS_READ_PAYLOAD:
-            if (!payloadLength) {
-                processingState = PS_DISPATCH_RESULT;
-            } else if (Q_UNLIKELY(payloadLength > MAX_FRAME_SIZE_IN_BYTES)) {
-                frame.setError(QWebSocketProtocol::CloseCodeTooMuchData,
-                               tr("Maximum framesize exceeded."));
-                processingState = PS_DISPATCH_RESULT;
-            } else {
-                quint64 bytesAvailable = quint64(pIoDevice->bytesAvailable());
-                if (bytesAvailable >= payloadLength) {
-                    frame.m_payload = pIoDevice->read(int(payloadLength));
-                    //payloadLength can be safely cast to an integer,
-                    //because MAX_FRAME_SIZE_IN_BYTES = MAX_INT
-                    if (Q_UNLIKELY(frame.m_payload.length() != int(payloadLength))) {
-                        //some error occurred; refer to the Qt documentation of QIODevice::read()
-                        frame.setError(QWebSocketProtocol::CloseCodeAbnormalDisconnection,
-                                       tr("Some serious error occurred " \
-                                                   "while reading from the network."));
-                        processingState = PS_DISPATCH_RESULT;
-                    } else {
-                        if (hasMask)
-                            QWebSocketProtocol::mask(&frame.m_payload, frame.m_mask);
-                        processingState = PS_DISPATCH_RESULT;
-                    }
-                } else {
-                    //if payload is too big, then this will timeout
-                    WAIT_FOR_MORE_DATA(payloadLength);
-                }
+            processingState = frame.readFramePayload(pIoDevice);
+            if (processingState == PS_WAIT_FOR_MORE_DATA) {
+                processingState = PS_READ_PAYLOAD;
+                // if payload is too big, then this will timeout
+                WAIT_FOR_MORE_DATA(frame.m_length);
             }
             break;
 
@@ -492,6 +367,152 @@ QWebSocketFrame QWebSocketFrame::readFrame(QIODevice *pIoDevice)
     }
 
     return frame;
+}
+
+/*!
+    \internal
+ */
+QWebSocketFrame::ProcessingState QWebSocketFrame::readFrameHeader(QIODevice *pIoDevice)
+{
+    if (Q_LIKELY(pIoDevice->bytesAvailable() >= 2)) {
+        // FIN, RSV1-3, Opcode
+        char header[2] = {0};
+        if (Q_UNLIKELY(pIoDevice->read(header, 2) < 2)) {
+            setError(QWebSocketProtocol::CloseCodeGoingAway,
+                     tr("Error occurred while reading header from the network: %1")
+                        .arg(pIoDevice->errorString()));
+            return PS_DISPATCH_RESULT;
+        }
+        m_isFinalFrame = (header[0] & 0x80) != 0;
+        m_rsv1 = (header[0] & 0x40);
+        m_rsv2 = (header[0] & 0x20);
+        m_rsv3 = (header[0] & 0x10);
+        m_opCode = static_cast<QWebSocketProtocol::OpCode>(header[0] & 0x0F);
+
+        // Mask
+        // Use zero as mask value to mean there's no mask to read.
+        // When the mask value is read, it over-writes this non-zero value.
+        m_mask = header[1] & 0x80;
+        // PayloadLength
+        m_length = (header[1] & 0x7F);
+
+        if (!checkValidity())
+            return PS_DISPATCH_RESULT;
+
+        switch (m_length) {
+        case 126:
+        case 127:
+            return PS_READ_PAYLOAD_LENGTH;
+        default:
+            return hasMask() ? PS_READ_MASK : PS_READ_PAYLOAD;
+        }
+    }
+    return PS_WAIT_FOR_MORE_DATA;
+}
+
+/*!
+    \internal
+ */
+QWebSocketFrame::ProcessingState QWebSocketFrame::readFramePayloadLength(QIODevice *pIoDevice)
+{
+    // see http://tools.ietf.org/html/rfc6455#page-28 paragraph 5.2
+    // in all cases, the minimal number of bytes MUST be used to encode the length,
+    // for example, the length of a 124-byte-long string can't be encoded as the
+    // sequence 126, 0, 124"
+    switch (m_length) {
+    case 126:
+        if (Q_LIKELY(pIoDevice->bytesAvailable() >= 2)) {
+            uchar length[2] = {0};
+            if (Q_UNLIKELY(pIoDevice->read(reinterpret_cast<char *>(length), 2) < 2)) {
+                setError(QWebSocketProtocol::CloseCodeGoingAway,
+                         tr("Error occurred while reading from the network: %1")
+                            .arg(pIoDevice->errorString()));
+                return PS_DISPATCH_RESULT;
+            }
+            m_length = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(length));
+            if (Q_UNLIKELY(m_length < 126)) {
+
+                setError(QWebSocketProtocol::CloseCodeProtocolError,
+                            tr("Lengths smaller than 126 must be expressed as one byte."));
+                return PS_DISPATCH_RESULT;
+            }
+            return hasMask() ? PS_READ_MASK : PS_READ_PAYLOAD;
+        }
+        break;
+    case 127:
+        if (Q_LIKELY(pIoDevice->bytesAvailable() >= 8)) {
+            uchar length[8] = {0};
+            if (Q_UNLIKELY(pIoDevice->read(reinterpret_cast<char *>(length), 8) < 8)) {
+                setError(QWebSocketProtocol::CloseCodeAbnormalDisconnection,
+                         tr("Something went wrong during reading from the network."));
+                return PS_DISPATCH_RESULT;
+            }
+            // Most significant bit must be set to 0 as
+            // per http://tools.ietf.org/html/rfc6455#section-5.2
+            m_length = qFromBigEndian<quint64>(length);
+            if (Q_UNLIKELY(m_length & (quint64(1) << 63))) {
+                setError(QWebSocketProtocol::CloseCodeProtocolError,
+                            tr("Highest bit of payload length is not 0."));
+                return PS_DISPATCH_RESULT;
+            }
+            if (Q_UNLIKELY(m_length <= 0xFFFFu)) {
+                setError(QWebSocketProtocol::CloseCodeProtocolError,
+                            tr("Lengths smaller than 65536 (2^16) must be expressed as 2 bytes."));
+                return PS_DISPATCH_RESULT;
+            }
+            return hasMask() ? PS_READ_MASK : PS_READ_PAYLOAD;
+        }
+        break;
+    default:
+        Q_UNREACHABLE();
+        break;
+    }
+    return PS_WAIT_FOR_MORE_DATA;
+}
+
+/*!
+    \internal
+ */
+QWebSocketFrame::ProcessingState QWebSocketFrame::readFrameMask(QIODevice *pIoDevice)
+{
+    if (Q_LIKELY(pIoDevice->bytesAvailable() >= 4)) {
+        if (Q_UNLIKELY(pIoDevice->read(reinterpret_cast<char *>(&m_mask), sizeof(m_mask)) < 4)) {
+            setError(QWebSocketProtocol::CloseCodeGoingAway,
+                     tr("Error while reading from the network: %1.").arg(pIoDevice->errorString()));
+            return PS_DISPATCH_RESULT;
+        }
+        m_mask = qFromBigEndian(m_mask);
+        return PS_READ_PAYLOAD;
+    }
+    return PS_WAIT_FOR_MORE_DATA;
+}
+
+/*!
+    \internal
+ */
+QWebSocketFrame::ProcessingState QWebSocketFrame::readFramePayload(QIODevice *pIoDevice)
+{
+    if (!m_length)
+        return PS_DISPATCH_RESULT;
+
+    if (Q_UNLIKELY(m_length > MAX_FRAME_SIZE_IN_BYTES)) {
+        setError(QWebSocketProtocol::CloseCodeTooMuchData, tr("Maximum framesize exceeded."));
+        return PS_DISPATCH_RESULT;
+    }
+    if (quint64(pIoDevice->bytesAvailable()) >= m_length) {
+        m_payload = pIoDevice->read(int(m_length));
+        // m_length can be safely cast to an integer,
+        // because MAX_FRAME_SIZE_IN_BYTES = MAX_INT
+        if (Q_UNLIKELY(m_payload.length() != int(m_length))) {
+            // some error occurred; refer to the Qt documentation of QIODevice::read()
+            setError(QWebSocketProtocol::CloseCodeAbnormalDisconnection,
+                     tr("Some serious error occurred while reading from the network."));
+        } else if (hasMask()) {
+            QWebSocketProtocol::mask(&m_payload, mask());
+        }
+        return PS_DISPATCH_RESULT;
+    }
+    return PS_WAIT_FOR_MORE_DATA;
 }
 
 /*!
