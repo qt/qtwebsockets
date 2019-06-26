@@ -689,18 +689,24 @@ struct SocketSpy {
     }
 };
 
-static void openManyConnections(QList<SocketSpy *> *sockets, quint16 port)
+static void openManyConnections(QList<SocketSpy *> *sockets, quint16 port, int numConnections)
 {
-    /* do some incomplete connections */
-    for (int i = 0; i < 50; i++) {
+    for (int i = 0; i < numConnections; i++) {
         QTcpSocket *c = new QTcpSocket;
         QSignalSpy *spy = new QSignalSpy(c, &QTcpSocket::disconnected);
 
-        QString hostname = "localhost";
-        c->connectToHost("localhost", port);
+        c->connectToHost("127.0.0.1", port);
 
         sockets->append(new SocketSpy{c, spy});
     }
+}
+
+// Sum the counts together, for better output on failure (e.g. "FAIL: Actual: 49, Expected: 50")
+static int sumSocketSpyCount(const QList<SocketSpy *> &sockets)
+{
+    return std::accumulate(sockets.cbegin(), sockets.cend(), 0, [](int c, SocketSpy *s) {
+        return c + s->disconnectSpy->count();
+    });
 }
 
 void tst_QWebSocketServer::tst_handshakeTimeout()
@@ -729,22 +735,30 @@ void tst_QWebSocketServer::tst_handshakeTimeout()
 
         QVERIFY(plainServer.listen());
 
+        /* QTcpServer has a default of 30 pending connections. The test checks
+         * whether, when that list is full, the connections are dropped after
+         * a timeout and later pending connections are processed. */
+        const int numConnections = 50;
         QList<SocketSpy *> sockets;
         auto cleaner = qScopeGuard([&sockets]() { qDeleteAll(sockets); });
-        openManyConnections(&sockets, plainServer.serverPort());
+        openManyConnections(&sockets, plainServer.serverPort(), numConnections);
 
         QCoreApplication::processEvents();
+
+        /* We have 50 plain TCP connections open, that are not proper websockets. */
         QCOMPARE(plainServerConnectionSpy.count(), 0);
 
         QWebSocket socket;
         socket.open(plainServer.serverUrl().toString());
 
+        /* Check that a real websocket will be processed after some non-websocket
+         * TCP connections timeout. */
         QTRY_COMPARE(plainServerConnectionSpy.count(), 1);
         QScopedPointer<QWebSocket> plainServerSocket(plainServer.nextPendingConnection());
         QVERIFY(!plainServerSocket.isNull());
 
-        for (auto s : sockets)
-            QTRY_COMPARE(s->disconnectSpy->count(), 1);
+        /* Check that all non websocket connections eventually timeout. */
+        QTRY_COMPARE(sumSocketSpyCount(sockets), numConnections);
 
         plainServer.close();
     }
@@ -761,9 +775,10 @@ void tst_QWebSocketServer::tst_handshakeTimeout()
 
         QVERIFY(secureServer.listen());
 
+        const int numConnections = 50;
         QList<SocketSpy *> sockets;
         auto cleaner = qScopeGuard([&sockets]() { qDeleteAll(sockets); });
-        openManyConnections(&sockets, secureServer.serverPort());
+        openManyConnections(&sockets, secureServer.serverPort(), numConnections);
 
         QCoreApplication::processEvents();
         QCOMPARE(secureServerConnectionSpy.count(), 0);
@@ -779,8 +794,7 @@ void tst_QWebSocketServer::tst_handshakeTimeout()
         QScopedPointer<QWebSocket> serverSocket(secureServer.nextPendingConnection());
         QVERIFY(!serverSocket.isNull());
 
-        for (auto s : sockets)
-            QTRY_COMPARE(s->disconnectSpy->count(), 1);
+        QTRY_COMPARE(sumSocketSpyCount(sockets), numConnections);
 
         secureServer.close();
     }
