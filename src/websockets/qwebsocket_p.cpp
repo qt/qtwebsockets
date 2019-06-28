@@ -1173,10 +1173,10 @@ void QWebSocketPrivate::processData()
 {
     if (!m_pSocket) // disconnected with data still in-bound
         return;
-    while (m_pSocket->bytesAvailable()) {
+    if (m_pSocket->bytesAvailable()) {
         if (state() == QAbstractSocket::ConnectingState) {
             if (!m_pSocket->canReadLine())
-                break;
+                return;
             processHandshake(m_pSocket);
         } else {
             m_dataProcessor.process(m_pSocket);

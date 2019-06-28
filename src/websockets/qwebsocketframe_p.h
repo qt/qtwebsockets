@@ -101,6 +101,7 @@ public:
     void clear();
 
     bool isValid() const;
+    bool isDone() const;
 
     void readFrame(QIODevice *pIoDevice);
 

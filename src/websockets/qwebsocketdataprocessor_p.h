@@ -55,6 +55,7 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QString>
 #include <QtCore/QTextCodec>
+#include <QTimer>
 #include "qwebsocketframe_p.h"
 #include "qwebsocketprotocol.h"
 #include "qwebsocketprotocol_p.h"
@@ -113,8 +114,10 @@ private:
     QTextCodec::ConverterState *m_pConverterState;
     QTextCodec *m_pTextCodec;
     QWebSocketFrame frame;
+    QTimer waitTimer;
 
     bool processControlFrame(const QWebSocketFrame &frame);
+    void timeout();
 };
 
 QT_END_NAMESPACE

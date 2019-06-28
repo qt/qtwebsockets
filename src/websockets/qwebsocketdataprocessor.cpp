@@ -87,6 +87,10 @@ QWebSocketDataProcessor::QWebSocketDataProcessor(QObject *parent) :
     m_pTextCodec(QTextCodec::codecForName("UTF-8"))
 {
     clear();
+    // initialize the internal timeout timer
+    waitTimer.setInterval(5000);
+    waitTimer.setSingleShot(true);
+    waitTimer.callOnTimeout(this, &QWebSocketDataProcessor::timeout);
 }
 
 /*!
@@ -126,7 +130,13 @@ void QWebSocketDataProcessor::process(QIODevice *pIoDevice)
 
     while (!isDone) {
         frame.readFrame(pIoDevice);
-        if (Q_LIKELY(frame.isValid())) {
+        if (!frame.isDone()) {
+            // waiting for more data available
+            QObject::connect(pIoDevice, &QIODevice::readyRead,
+                             &waitTimer, &QTimer::stop, Qt::UniqueConnection);
+            waitTimer.start();
+            return;
+        } else if (Q_LIKELY(frame.isValid())) {
             if (frame.isControlFrame()) {
                 isDone = processControlFrame(frame);
             } else {
@@ -300,6 +310,16 @@ bool QWebSocketDataProcessor::processControlFrame(const QWebSocketFrame &frame)
         break;
     }
     return mustStopProcessing;
+}
+
+/*!
+    \internal
+ */
+void QWebSocketDataProcessor::timeout()
+{
+    clear();
+    Q_EMIT errorEncountered(QWebSocketProtocol::CloseCodeGoingAway,
+                            tr("Timeout when reading data from socket."));
 }
 
 QT_END_NAMESPACE

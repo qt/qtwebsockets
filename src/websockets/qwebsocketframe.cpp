@@ -188,7 +188,7 @@ void QWebSocketFrame::swap(QWebSocketFrame &other)
  */
 QWebSocketProtocol::CloseCode QWebSocketFrame::closeCode() const
 {
-    return m_closeCode;
+    return isDone() ? m_closeCode : QWebSocketProtocol::CloseCodeGoingAway;
 }
 
 /*!
@@ -196,7 +196,7 @@ QWebSocketProtocol::CloseCode QWebSocketFrame::closeCode() const
  */
 QString QWebSocketFrame::closeReason() const
 {
-    return m_closeReason;
+    return isDone() ? m_closeReason : tr("Waiting for more data from socket.");
 }
 
 /*!
@@ -289,67 +289,63 @@ void QWebSocketFrame::clear()
  */
 bool QWebSocketFrame::isValid() const
 {
-    return m_isValid;
+    return isDone() && m_isValid;
 }
 
-#define WAIT_FOR_MORE_DATA(returnState)  \
-    { needMoreData = true; \
-      m_processingState = (returnState); }
+/*!
+    \internal
+ */
+bool QWebSocketFrame::isDone() const
+{
+    return m_processingState == PS_DISPATCH_RESULT;
+}
 
 /*!
     \internal
  */
 void QWebSocketFrame::readFrame(QIODevice *pIoDevice)
 {
-    bool isDone = false;
-    while (!isDone)
+    while (true)
     {
-        bool needMoreData = false;
         switch (m_processingState) {
         case PS_READ_HEADER:
             m_processingState = readFrameHeader(pIoDevice);
-            if (m_processingState == PS_WAIT_FOR_MORE_DATA)
-                WAIT_FOR_MORE_DATA(PS_READ_HEADER);
+            if (m_processingState == PS_WAIT_FOR_MORE_DATA) {
+                m_processingState = PS_READ_HEADER;
+                return;
+            }
             break;
 
         case PS_READ_PAYLOAD_LENGTH:
             m_processingState = readFramePayloadLength(pIoDevice);
-            if (m_processingState == PS_WAIT_FOR_MORE_DATA)
-                WAIT_FOR_MORE_DATA(PS_READ_PAYLOAD_LENGTH);
+            if (m_processingState == PS_WAIT_FOR_MORE_DATA) {
+                m_processingState = PS_READ_PAYLOAD_LENGTH;
+                return;
+            }
             break;
 
         case PS_READ_MASK:
             m_processingState = readFrameMask(pIoDevice);
-            if (m_processingState == PS_WAIT_FOR_MORE_DATA)
-                WAIT_FOR_MORE_DATA(PS_READ_MASK);
+            if (m_processingState == PS_WAIT_FOR_MORE_DATA) {
+                m_processingState = PS_READ_MASK;
+                return;
+            }
             break;
 
         case PS_READ_PAYLOAD:
             m_processingState = readFramePayload(pIoDevice);
-            if (m_processingState == PS_WAIT_FOR_MORE_DATA)
-                WAIT_FOR_MORE_DATA(PS_READ_PAYLOAD);
+            if (m_processingState == PS_WAIT_FOR_MORE_DATA) {
+                m_processingState = PS_READ_PAYLOAD;
+                return;
+            }
             break;
 
         case PS_DISPATCH_RESULT:
-            m_processingState = PS_DISPATCH_RESULT;
-            isDone = true;
-            break;
+            return;
 
         default:
             Q_UNREACHABLE();
-            break;
-        }
-
-        if (needMoreData) {
-            // TODO: waitForReadyRead should really be changed
-            // now, when a WebSocket is used in a GUI thread
-            // the GUI will hang for at most 5 seconds
-            // maybe, a QStateMachine should be used
-            if (!pIoDevice->waitForReadyRead(5000)) {
-                setError(QWebSocketProtocol::CloseCodeGoingAway,
-                         tr("Timeout when reading data from socket."));
-                m_processingState = PS_DISPATCH_RESULT;
-            }
+            return;
         }
     }
 }
