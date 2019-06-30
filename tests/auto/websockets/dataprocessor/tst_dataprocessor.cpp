@@ -811,7 +811,23 @@ void tst_DataProcessor::frameTooSmall()
         dataProcessor.process(&buffer);
 
         QTRY_VERIFY_WITH_TIMEOUT(errorSpy.count(), 7000);
+        QCOMPARE(errorSpy.count(), 1);
+        QCOMPARE(closeSpy.count(), 0);
+        QCOMPARE(pingMessageSpy.count(), 0);
+        QCOMPARE(pongMessageSpy.count(), 0);
+        QCOMPARE(textMessageSpy.count(), 0);
+        QCOMPARE(binaryMessageSpy.count(), 0);
+        QCOMPARE(textFrameSpy.count(), 1);
+        QCOMPARE(binaryFrameSpy.count(), 0);
 
+        errorSpy.clear();
+        closeSpy.clear();
+        pingMessageSpy.clear();
+        pongMessageSpy.clear();
+        textMessageSpy.clear();
+        binaryMessageSpy.clear();
+        textFrameSpy.clear();
+        binaryFrameSpy.clear();
         buffer.close();
         data.clear();
 
@@ -820,8 +836,6 @@ void tst_DataProcessor::frameTooSmall()
         //meaning the socket will be closed
         buffer.setData(data);
         buffer.open(QIODevice::ReadOnly);
-        QSignalSpy errorSpy(&dataProcessor,
-                            SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
         dataProcessor.process(&buffer);
 
         QTRY_VERIFY_WITH_TIMEOUT(errorSpy.count(), 7000);
@@ -831,7 +845,7 @@ void tst_DataProcessor::frameTooSmall()
         QCOMPARE(pongMessageSpy.count(), 0);
         QCOMPARE(textMessageSpy.count(), 0);
         QCOMPARE(binaryMessageSpy.count(), 0);
-        QCOMPARE(textFrameSpy.count(), 1);
+        QCOMPARE(textFrameSpy.count(), 0);
         QCOMPARE(binaryFrameSpy.count(), 0);
 
         QList<QVariant> arguments = errorSpy.takeFirst();
