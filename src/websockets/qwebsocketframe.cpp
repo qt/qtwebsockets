@@ -294,46 +294,44 @@ bool QWebSocketFrame::isValid() const
 
 #define WAIT_FOR_MORE_DATA(returnState)  \
     { needMoreData = true; \
-      frame.m_processingState = (returnState); }
+      m_processingState = (returnState); }
 
 /*!
     \internal
  */
-QWebSocketFrame QWebSocketFrame::readFrame(QIODevice *pIoDevice)
+void QWebSocketFrame::readFrame(QIODevice *pIoDevice)
 {
     bool isDone = false;
-    QWebSocketFrame frame;
-
     while (!isDone)
     {
         bool needMoreData = false;
-        switch (frame.m_processingState) {
+        switch (m_processingState) {
         case PS_READ_HEADER:
-            frame.m_processingState = frame.readFrameHeader(pIoDevice);
-            if (frame.m_processingState == PS_WAIT_FOR_MORE_DATA)
+            m_processingState = readFrameHeader(pIoDevice);
+            if (m_processingState == PS_WAIT_FOR_MORE_DATA)
                 WAIT_FOR_MORE_DATA(PS_READ_HEADER);
             break;
 
         case PS_READ_PAYLOAD_LENGTH:
-            frame.m_processingState = frame.readFramePayloadLength(pIoDevice);
-            if (frame.m_processingState == PS_WAIT_FOR_MORE_DATA)
+            m_processingState = readFramePayloadLength(pIoDevice);
+            if (m_processingState == PS_WAIT_FOR_MORE_DATA)
                 WAIT_FOR_MORE_DATA(PS_READ_PAYLOAD_LENGTH);
             break;
 
         case PS_READ_MASK:
-            frame.m_processingState = frame.readFrameMask(pIoDevice);
-            if (frame.m_processingState == PS_WAIT_FOR_MORE_DATA)
+            m_processingState = readFrameMask(pIoDevice);
+            if (m_processingState == PS_WAIT_FOR_MORE_DATA)
                 WAIT_FOR_MORE_DATA(PS_READ_MASK);
             break;
 
         case PS_READ_PAYLOAD:
-            frame.m_processingState = frame.readFramePayload(pIoDevice);
-            if (frame.m_processingState == PS_WAIT_FOR_MORE_DATA)
+            m_processingState = readFramePayload(pIoDevice);
+            if (m_processingState == PS_WAIT_FOR_MORE_DATA)
                 WAIT_FOR_MORE_DATA(PS_READ_PAYLOAD);
             break;
 
         case PS_DISPATCH_RESULT:
-            frame.m_processingState = PS_DISPATCH_RESULT;
+            m_processingState = PS_DISPATCH_RESULT;
             isDone = true;
             break;
 
@@ -348,14 +346,12 @@ QWebSocketFrame QWebSocketFrame::readFrame(QIODevice *pIoDevice)
             // the GUI will hang for at most 5 seconds
             // maybe, a QStateMachine should be used
             if (!pIoDevice->waitForReadyRead(5000)) {
-                frame.setError(QWebSocketProtocol::CloseCodeGoingAway,
-                               tr("Timeout when reading data from socket."));
-                frame.m_processingState = PS_DISPATCH_RESULT;
+                setError(QWebSocketProtocol::CloseCodeGoingAway,
+                         tr("Timeout when reading data from socket."));
+                m_processingState = PS_DISPATCH_RESULT;
             }
         }
     }
-
-    return frame;
 }
 
 /*!

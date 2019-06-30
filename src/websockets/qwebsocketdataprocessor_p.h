@@ -55,6 +55,7 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QString>
 #include <QtCore/QTextCodec>
+#include "qwebsocketframe_p.h"
 #include "qwebsocketprotocol.h"
 #include "qwebsocketprotocol_p.h"
 
@@ -111,6 +112,7 @@ private:
     quint64 m_payloadLength;
     QTextCodec::ConverterState *m_pConverterState;
     QTextCodec *m_pTextCodec;
+    QWebSocketFrame frame;
 
     bool processControlFrame(const QWebSocketFrame &frame);
 };

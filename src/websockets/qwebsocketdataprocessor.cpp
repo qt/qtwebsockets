@@ -125,7 +125,7 @@ void QWebSocketDataProcessor::process(QIODevice *pIoDevice)
     bool isDone = false;
 
     while (!isDone) {
-        QWebSocketFrame frame = QWebSocketFrame::readFrame(pIoDevice);
+        frame.readFrame(pIoDevice);
         if (Q_LIKELY(frame.isValid())) {
             if (frame.isControlFrame()) {
                 isDone = processControlFrame(frame);
@@ -199,6 +199,7 @@ void QWebSocketDataProcessor::process(QIODevice *pIoDevice)
             clear();
             isDone = true;
         }
+        frame.clear();
     }
 }
 

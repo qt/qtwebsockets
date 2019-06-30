@@ -102,7 +102,7 @@ public:
 
     bool isValid() const;
 
-    static QWebSocketFrame readFrame(QIODevice *pIoDevice);
+    void readFrame(QIODevice *pIoDevice);
 
 private:
     QWebSocketProtocol::CloseCode m_closeCode;

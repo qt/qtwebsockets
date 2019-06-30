@@ -197,7 +197,8 @@ void tst_WebSocketFrame::tst_copyConstructorAndAssignment()
     QBuffer buffer(&payload);
     buffer.open(QIODevice::ReadOnly);
 
-    QWebSocketFrame frame = QWebSocketFrame::readFrame(&buffer);
+    QWebSocketFrame frame;
+    frame.readFrame(&buffer);
     buffer.close();
 
     {
@@ -330,7 +331,8 @@ void tst_WebSocketFrame::tst_goodFrames()
     QBuffer buffer;
     buffer.setData(wireRepresentation);
     buffer.open(QIODevice::ReadOnly);
-    QWebSocketFrame frame = QWebSocketFrame::readFrame(&buffer);
+    QWebSocketFrame frame;
+    frame.readFrame(&buffer);
     buffer.close();
     QVERIFY(frame.isValid());
     QCOMPARE(frame.rsv1(), rsv1);
@@ -495,7 +497,8 @@ void tst_WebSocketFrame::tst_invalidFrames()
     QBuffer buffer;
     buffer.setData(wireRepresentation);
     buffer.open(QIODevice::ReadOnly);
-    QWebSocketFrame frame = QWebSocketFrame::readFrame(&buffer);
+    QWebSocketFrame frame;
+    frame.readFrame(&buffer);
     buffer.close();
 
     QVERIFY(!frame.isValid());
@@ -606,7 +609,8 @@ void tst_WebSocketFrame::tst_malformedFrames()
     QBuffer buffer;
     buffer.setData(payload);
     buffer.open(QIODevice::ReadOnly);
-    QWebSocketFrame frame = QWebSocketFrame::readFrame(&buffer);
+    QWebSocketFrame frame;
+    frame.readFrame(&buffer);
     buffer.close();
 
     QVERIFY(!frame.isValid());
