@@ -162,13 +162,16 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(
         if (request.isValid()) {
             const QString acceptKey = calculateAcceptKey(request.key());
             const QList<QString> matchingProtocols =
-                listIntersection(supportedProtocols, request.protocols(), std::less<>());
+                listIntersection(supportedProtocols, request.protocols(),
+                                 std::less<QString>());
             //TODO: extensions must be kept in the order in which they arrive
             //cannot use set.intersect() to get the supported extensions
             const QList<QString> matchingExtensions =
-                listIntersection(supportedExtensions, request.extensions(), std::less<>());
+                listIntersection(supportedExtensions, request.extensions(),
+                                 std::less<QString>());
             const QList<QWebSocketProtocol::Version> matchingVersions =
-                listIntersection(supportedVersions, request.versions(), std::greater<>()); //sort in descending order
+                listIntersection(supportedVersions, request.versions(),
+                                 std::greater<QWebSocketProtocol::Version>()); //sort in descending order
 
             if (Q_UNLIKELY(matchingVersions.isEmpty())) {
                 m_error = QWebSocketProtocol::CloseCodeProtocolError;
