@@ -113,6 +113,7 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
     m_defaultMaskGenerator(),
     m_handshakeState(NothingDoneState)
 {
+    m_pingTimer.start();
 }
 
 /*!
@@ -144,6 +145,7 @@ QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol:
     m_defaultMaskGenerator(),
     m_handshakeState(NothingDoneState)
 {
+    m_pingTimer.start();
 }
 
 /*!
