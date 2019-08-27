@@ -1180,8 +1180,8 @@ void QWebSocketPrivate::processData()
             if (!m_pSocket->canReadLine())
                 return;
             processHandshake(m_pSocket);
-        } else {
-            m_dataProcessor.process(m_pSocket);
+        } else if (!m_dataProcessor.process(m_pSocket)) {
+            return;
         }
     }
 }

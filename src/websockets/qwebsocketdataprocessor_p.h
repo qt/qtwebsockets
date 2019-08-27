@@ -88,7 +88,7 @@ Q_SIGNALS:
     void errorEncountered(QWebSocketProtocol::CloseCode code, const QString &description);
 
 public Q_SLOTS:
-    void process(QIODevice *pIoDevice);
+    bool process(QIODevice *pIoDevice);
     void clear();
 
 private:
