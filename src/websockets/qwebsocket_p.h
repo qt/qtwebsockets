@@ -61,7 +61,7 @@
 #include <QtNetwork/QSslError>
 #include <QtNetwork/QSslSocket>
 #endif
-#include <QtCore/QTime>
+#include <QtCore/QElapsedTimer>
 #include <private/qobject_p.h>
 
 #include "qwebsocket.h"
@@ -229,7 +229,7 @@ private:
     QWebSocketProtocol::CloseCode m_closeCode;
     QString m_closeReason;
 
-    QTime m_pingTimer;
+    QElapsedTimer m_pingTimer;
 
     QWebSocketDataProcessor m_dataProcessor;
     QWebSocketConfiguration m_configuration;

@@ -116,6 +116,7 @@ private Q_SLOTS:
     void tst_scheme(); // qtbug-55927
     void tst_handleConnection();
     void tst_handshakeTimeout(); // qtbug-63312, qtbug-57026
+    void multipleFrames();
 
 private:
     bool m_shouldSkipUnsupportedIpv6Test;
@@ -821,6 +822,33 @@ void tst_QWebSocketServer::tst_handshakeTimeout()
 
         QCOMPARE(socketDisconnectedSpy.count(), 0);
     }
+}
+
+void tst_QWebSocketServer::multipleFrames()
+{
+    QWebSocketServer server(QString(), QWebSocketServer::NonSecureMode);
+    QSignalSpy serverConnectionSpy(&server, &QWebSocketServer::newConnection);
+    QVERIFY(server.listen());
+
+    QWebSocket socket;
+    QSignalSpy socketConnectedSpy(&socket, &QWebSocket::connected);
+    QSignalSpy messageReceivedSpy(&socket, &QWebSocket::binaryMessageReceived);
+    socket.open(server.serverUrl().toString());
+
+    QVERIFY(serverConnectionSpy.wait());
+    QVERIFY(socketConnectedSpy.wait());
+
+    auto serverSocket = std::unique_ptr<QWebSocket>(server.nextPendingConnection());
+    QVERIFY(serverSocket);
+    for (int i = 0; i < 10; i++)
+        serverSocket->sendBinaryMessage(QByteArray("abc"));
+    if (serverSocket->bytesToWrite())
+        QVERIFY(serverSocket->flush());
+
+    QVERIFY(messageReceivedSpy.wait());
+    // Since there's no guarantee the operating system will fit all 10 websocket frames into 1 tcp
+    // frame, let's just assume it will do at least 2. EXCEPT_FAIL any which doesn't merge any.
+    QVERIFY2(messageReceivedSpy.count() > 1, "Received only 1 message in the TCP frame!");
 }
 
 QTEST_MAIN(tst_QWebSocketServer)
