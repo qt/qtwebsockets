@@ -113,6 +113,7 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
     m_defaultMaskGenerator(),
     m_handshakeState(NothingDoneState)
 {
+    m_pingTimer.start();
 }
 
 /*!
@@ -144,6 +145,7 @@ QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol:
     m_defaultMaskGenerator(),
     m_handshakeState(NothingDoneState)
 {
+    m_pingTimer.start();
 }
 
 /*!
@@ -1173,13 +1175,13 @@ void QWebSocketPrivate::processData()
 {
     if (!m_pSocket) // disconnected with data still in-bound
         return;
-    if (m_pSocket->bytesAvailable()) {
+    while (m_pSocket->bytesAvailable()) {
         if (state() == QAbstractSocket::ConnectingState) {
             if (!m_pSocket->canReadLine())
                 return;
             processHandshake(m_pSocket);
-        } else {
-            m_dataProcessor.process(m_pSocket);
+        } else if (!m_dataProcessor.process(m_pSocket)) {
+            return;
         }
     }
 }
