@@ -359,6 +359,7 @@ int QWebSocketServer::maxPendingConnections() const
     handshake their connection is closed.
 
     \sa setHandshakeTimeout()
+    \since 5.14
  */
 int QWebSocketServer::handshakeTimeout() const
 {
@@ -599,6 +600,7 @@ void QWebSocketServer::setMaxPendingConnections(int numConnections)
     negative value (e.g. -1) to disable the timeout.
 
     \sa handshakeTimeout()
+    \since 5.14
  */
 void QWebSocketServer::setHandshakeTimeout(int msec)
 {
