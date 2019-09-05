@@ -472,8 +472,8 @@ void tst_QWebSocket::tst_sendTextMessage()
     QCOMPARE(urlConnected, url);
     QCOMPARE(socket.bytesToWrite(), 0);
 
-    // transmit a long text message with 64 kb
-    QString longString(65536, 'a');
+    // transmit a long text message with 1 MB
+    QString longString(0x100000, 'a');
     socket.sendTextMessage(longString);
     QVERIFY(socket.bytesToWrite() > longString.length());
     QVERIFY(textMessageReceived.wait());
