@@ -39,118 +39,104 @@
 
 #include "qwebsocket_p.h"
 
-#include <QtCore/qcoreapplication.h>
+#if QT_CONFIG(thread)
+#include <QtCore/qthread.h>
+#include <emscripten/threading.h>
+#endif
 
 #include <emscripten.h>
-#include <emscripten/bind.h>
+#include <emscripten/websocket.h>
+#include <emscripten/val.h>
 
-using namespace emscripten;
-
-static void q_onErrorCallback(val event)
+static EM_BOOL q_onWebSocketErrorCallback(int eventType,
+                                          const EmscriptenWebSocketErrorEvent *e,
+                                          void *userData)
 {
-    val target = event["target"];
+    Q_UNUSED(eventType)
+    Q_UNUSED(e)
 
-    QWebSocketPrivate *wsp = reinterpret_cast<QWebSocketPrivate*>(target["data-context"].as<quintptr>());
+    QWebSocketPrivate *wsp = reinterpret_cast<QWebSocketPrivate *>(userData);
     Q_ASSERT (wsp);
 
     emit wsp->q_func()->error(wsp->error());
+    return EM_FALSE;
 }
 
-static void q_onCloseCallback(val event)
+static EM_BOOL q_onWebSocketCloseCallback(int eventType,
+                                          const EmscriptenWebSocketCloseEvent *emCloseEvent,
+                                          void *userData)
 {
-    val target = event["target"];
-
-    QWebSocketPrivate *wsp = reinterpret_cast<QWebSocketPrivate*>(target["data-context"].as<quintptr>());
+    Q_UNUSED(eventType)
+    QWebSocketPrivate *wsp = reinterpret_cast<QWebSocketPrivate *>(userData);
     Q_ASSERT (wsp);
 
-    wsp->setSocketState(QAbstractSocket::UnconnectedState);
-    emit wsp->q_func()->disconnected();
+    wsp->setSocketClosed(emCloseEvent);
+    return EM_FALSE;
 }
 
-static void q_onOpenCallback(val event)
+static EM_BOOL q_onWebSocketOpenCallback(int eventType,
+                                         const EmscriptenWebSocketOpenEvent *e, void *userData)
 {
-    val target = event["target"];
+    Q_UNUSED(eventType)
+    Q_UNUSED(e)
 
-    QWebSocketPrivate *wsp = reinterpret_cast<QWebSocketPrivate*>(target["data-context"].as<quintptr>());
+    QWebSocketPrivate *wsp = reinterpret_cast<QWebSocketPrivate *>(userData);
     Q_ASSERT (wsp);
 
     wsp->setSocketState(QAbstractSocket::ConnectedState);
     emit wsp->q_func()->connected();
+    return EM_FALSE;
 }
 
-static void q_onIncomingMessageCallback(val event)
+static EM_BOOL q_onWebSocketIncomingMessageCallback(int eventType,
+                                                    const EmscriptenWebSocketMessageEvent *e,
+                                                    void *userData)
 {
-    val target = event["target"];
+    Q_UNUSED(eventType)
+    QWebSocketPrivate *wsp = reinterpret_cast<QWebSocketPrivate *>(userData);
+    Q_ASSERT(wsp);
 
-    if (event["data"].typeOf().as<std::string>() == "string") {
-        QWebSocketPrivate *wsp = reinterpret_cast<QWebSocketPrivate*>(target["data-context"].as<quintptr>());
-        Q_ASSERT (wsp);
-
-        const QString message = QString::fromStdString(event["data"].as<std::string>());
-        if (!message.isEmpty())
-            wsp->q_func()->textMessageReceived(message);
+    if (!e->isText) {
+        QByteArray buffer(reinterpret_cast<const char *>(e->data), e->numBytes);
+        if (!buffer.isEmpty())
+            emit wsp->q_func()->binaryMessageReceived(buffer);
     } else {
-        val reader = val::global("FileReader").new_();
-        reader.set("onload", val::module_property("QWebSocketPrivate_readBlob"));
-        reader.set("data-context", target["data-context"]);
-        reader.call<void>("readAsArrayBuffer", event["data"]);
+        QString buffer = QString::fromUtf8(reinterpret_cast<const char *>(e->data), e->numBytes - 1);
+        emit wsp->q_func()->textMessageReceived(buffer);
     }
-}
 
-static void q_readBlob(val event)
-{
-    val fileReader = event["target"];
-
-    QWebSocketPrivate *wsp = reinterpret_cast<QWebSocketPrivate*>(fileReader["data-context"].as<quintptr>());
-    Q_ASSERT (wsp);
-
-    // Set up source typed array
-    val result = fileReader["result"]; // ArrayBuffer
-    val Uint8Array = val::global("Uint8Array");
-    val sourceTypedArray = Uint8Array.new_(result);
-
-    // Allocate and set up destination typed array
-    const size_t size = result["byteLength"].as<size_t>();
-    QByteArray buffer(size, Qt::Uninitialized);
-
-    val destinationTypedArray = Uint8Array.new_(val::module_property("HEAPU8")["buffer"],
-                                                reinterpret_cast<quintptr>(buffer.data()), size);
-    destinationTypedArray.call<void>("set", sourceTypedArray);
-
-    wsp->q_func()->binaryMessageReceived(buffer);
-}
-
-
-EMSCRIPTEN_BINDINGS(wasm_module) {
-    function("QWebSocketPrivate_onErrorCallback", q_onErrorCallback);
-    function("QWebSocketPrivate_onCloseCallback", q_onCloseCallback);
-    function("QWebSocketPrivate_onOpenCallback", q_onOpenCallback);
-    function("QWebSocketPrivate_onIncomingMessageCallback", q_onIncomingMessageCallback);
-    function("QWebSocketPrivate_readBlob", q_readBlob);
+    return 0;
 }
 
 qint64 QWebSocketPrivate::sendTextMessage(const QString &message)
 {
-    socketContext.call<void>("send", message.toStdString());
-    return message.length();
+    int result = 0;
+    emscripten_websocket_get_ready_state(m_socketContext, &m_readyState);
+
+    if (m_readyState == 1) {
+        result = emscripten_websocket_send_utf8_text(m_socketContext, message.toUtf8());
+        if (result < 0)
+            emit q_func()->error(QAbstractSocket::UnknownSocketError);
+    } else
+        qWarning() << "Could not send message. Websocket is not open";
+
+    return result;
 }
 
 qint64 QWebSocketPrivate::sendBinaryMessage(const QByteArray &data)
 {
-    // Make a copy of the payload data; we don't know how long WebSocket.send() will
-    // retain the memory view, while the QByteArray passed to this function may be
-    // destroyed as soon as this function returns. In addition, the WebSocket.send()
-    // API does not accept data from a view backet by a SharedArrayBuffer, which will
-    // be the case for the view produced by typed_memory_view() when threads are enabled.
-    val Uint8Array = val::global("Uint8Array");
-    val dataCopy = Uint8Array.new_(data.size());
-    val dataView = val(typed_memory_view(data.size(),
-                       reinterpret_cast<const unsigned char *>
-                       (data.constData())));
-    dataCopy.call<void>("set", dataView);
+    int result = 0;
+    emscripten_websocket_get_ready_state(m_socketContext, &m_readyState);
+    if (m_readyState == 1) {
+        result = emscripten_websocket_send_binary(
+                m_socketContext, const_cast<void *>(reinterpret_cast<const void *>(data.constData())),
+                data.size());
+        if (result < 0)
+            emit q_func()->error(QAbstractSocket::UnknownSocketError);
+    } else
+        qWarning() << "Could not send message. Websocket is not open";
 
-    socketContext.call<void>("send", dataCopy);
-    return data.length();
+    return result;
 }
 
 void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString reason)
@@ -161,49 +147,138 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
     Q_EMIT q->aboutToClose();
     setSocketState(QAbstractSocket::ClosingState);
 
-    socketContext.call<void>("close", static_cast<quint16>(closeCode),
-                             reason.toLatin1().toStdString());
+
+    emscripten_websocket_get_ready_state(m_socketContext, &m_readyState);
+
+    if (m_readyState == 1) {
+        emscripten_websocket_close(m_socketContext, (int)closeCode, reason.toUtf8());
+    }
+    emscripten_websocket_get_ready_state(m_socketContext, &m_readyState);
+
 }
 
 void QWebSocketPrivate::open(const QNetworkRequest &request,
                              const QWebSocketHandshakeOptions &options, bool mask)
 {
     Q_UNUSED(mask);
+    Q_UNUSED(options)
     Q_Q(QWebSocket);
+
+    emscripten_websocket_get_ready_state(m_socketContext, &m_readyState);
+
+    if ((m_readyState == 1 || m_readyState == 3) && m_socketContext != 0) {
+        emit q->error(QAbstractSocket::OperationError);
+        return;
+    }
+
     const QUrl url = request.url();
-    if (!url.isValid() || url.toString().contains(QStringLiteral("\r\n"))) {
-        setErrorString(QWebSocket::tr("Invalid URL."));
+
+    emscripten::val navProtocol = emscripten::val::global("window")["location"]["protocol"];
+
+    //  An insecure WebSocket connection may not be initiated from a page loaded over HTTPS.
+    // and causes emscripten to assert
+    bool isSecureContext = (navProtocol.as<std::string>().find("https") == 0);
+
+    if (!url.isValid()
+            || url.toString().contains(QStringLiteral("\r\n"))
+            || (isSecureContext && url.scheme() == QStringLiteral("ws"))) {
+        setErrorString(QWebSocket::tr("Connection refused"));
         Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
         return;
     }
 
-    setSocketState(QAbstractSocket::ConnectingState);
-    const std::string urlbytes = url.toString().toStdString();
+    EmscriptenWebSocketCreateAttributes *attr = new EmscriptenWebSocketCreateAttributes;
 
+    emscripten_websocket_init_create_attributes(attr); // memset
+
+    attr->url = url.toString(QUrl::FullyEncoded).toUtf8().constData();
+
+#if QT_CONFIG(thread)
+    // see https://github.com/emscripten-core/emscripten/blob/main/system/include/emscripten/websocket.h
+    // choose a default: create websocket on calling thread
+    attr->createOnMainThread = false;
+#endif
     // HTML WebSockets do not support arbitrary request headers, but
     // do support the WebSocket protocol header. This header is
     // required for some use cases like MQTT.
-    const std::string protocolHeaderValue = request.rawHeader("Sec-WebSocket-Protocol").toStdString();
 
-    val jsSubprotocols = val::array();
-    if (!protocolHeaderValue.empty())
-        jsSubprotocols.call<void>("push", protocolHeaderValue);
-    const auto requestedSubProtocols = options.subprotocols();
-    for (const auto &protocol : requestedSubProtocols)
-        jsSubprotocols.call<void>("push", protocol.toStdString());
+    // add user subprotocol options
+    QStringList protocols = handshakeOptions().subprotocols();
 
-    val webSocket = val::global("WebSocket");
-    socketContext = webSocket.new_(urlbytes, jsSubprotocols);
+    if (request.hasRawHeader("Sec-WebSocket-Protocol")) {
+        QByteArray secProto = request.rawHeader("Sec-WebSocket-Protocol");
+        if (!protocols.contains(secProto)) {
+            protocols.append(QString::fromLatin1(secProto));
+        }
+    }
+    if (!protocols.isEmpty()) {
+        // comma-separated list of protocol strings, no spaces
+        attr->protocols = protocols.join(QStringLiteral(",")).toLatin1().constData();
+    }
 
-    socketContext.set("onerror", val::module_property("QWebSocketPrivate_onErrorCallback"));
-    socketContext.set("onclose", val::module_property("QWebSocketPrivate_onCloseCallback"));
-    socketContext.set("onopen", val::module_property("QWebSocketPrivate_onOpenCallback"));
-    socketContext.set("onmessage", val::module_property("QWebSocketPrivate_onIncomingMessageCallback"));
-    socketContext.set("data-context", val(quintptr(reinterpret_cast<void *>(this))));
+    // create and connect
+    setSocketState(QAbstractSocket::ConnectingState);
+    m_socketContext = emscripten_websocket_new(attr);
+
+    if (m_socketContext <= 0) { // m_readyState might not be changed yet
+        // error
+        emit q->error(QAbstractSocket::UnknownSocketError);
+        return;
+    }
+
+#if QT_CONFIG(thread)
+    emscripten_websocket_set_onopen_callback_on_thread(m_socketContext, (void *)this,
+                                                       q_onWebSocketOpenCallback,
+                                                       (quintptr)QThread::currentThreadId());
+    emscripten_websocket_set_onmessage_callback_on_thread(m_socketContext, (void *)this,
+                                                          q_onWebSocketIncomingMessageCallback,
+                                                          (quintptr)QThread::currentThreadId());
+    emscripten_websocket_set_onerror_callback_on_thread(m_socketContext, (void *)this,
+                                                        q_onWebSocketErrorCallback,
+                                                        (quintptr)QThread::currentThreadId());
+    emscripten_websocket_set_onclose_callback_on_thread(m_socketContext, (void *)this,
+                                                        q_onWebSocketCloseCallback,
+                                                        (quintptr)QThread::currentThreadId());
+#else
+    emscripten_websocket_set_onopen_callback(m_socketContext, (void *)this,
+                                             q_onWebSocketOpenCallback);
+    emscripten_websocket_set_onmessage_callback(m_socketContext, (void *)this,
+                                                q_onWebSocketIncomingMessageCallback);
+    emscripten_websocket_set_onerror_callback(m_socketContext, (void *)this,
+                                              q_onWebSocketErrorCallback);
+    emscripten_websocket_set_onclose_callback(m_socketContext, (void *)this,
+                                              q_onWebSocketCloseCallback);
+#endif
 }
 
 bool QWebSocketPrivate::isValid() const
 {
-    return (!socketContext.isUndefined() &&
-            (m_socketState == QAbstractSocket::ConnectedState));
+    return (m_socketContext > 0 && m_socketState == QAbstractSocket::ConnectedState);
+}
+
+void QWebSocketPrivate::setSocketClosed(const EmscriptenWebSocketCloseEvent *emCloseEvent)
+{
+    Q_Q(QWebSocket);
+    m_closeCode = (QWebSocketProtocol::CloseCode)emCloseEvent->code;
+    if (m_closeReason.isEmpty()) {
+        m_closeReason = QString::fromUtf8(emCloseEvent->reason);
+    }
+
+    if (m_socketState == QAbstractSocket::ConnectedState) {
+        Q_EMIT q->aboutToClose();
+        setSocketState(QAbstractSocket::ClosingState);
+    }
+
+    if (!emCloseEvent->wasClean) {
+        m_errorString = QStringLiteral("The remote host closed the connection");
+        emit q->error(error());
+    }
+    setSocketState(QAbstractSocket::UnconnectedState);
+    emit q->disconnected();
+    emscripten_websocket_get_ready_state(m_socketContext, &m_readyState);
+
+    if (m_readyState == 3) { // closed
+        emscripten_websocket_delete(emCloseEvent->socket);
+        m_socketContext = 0;
+    }
 }

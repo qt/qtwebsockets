@@ -71,7 +71,7 @@
 #include "qdefaultmaskgenerator_p.h"
 
 #ifdef Q_OS_WASM
-#include <emscripten/val.h>
+#    include <emscripten/websocket.h>
 #endif
 
 QT_BEGIN_NAMESPACE
@@ -173,7 +173,9 @@ public:
     void setOutgoingFrameSize(quint64 outgoingFrameSize);
     quint64 outgoingFrameSize() const;
     static quint64 maxOutgoingFrameSize();
-
+#ifdef Q_OS_WASM
+    void setSocketClosed(const EmscriptenWebSocketCloseEvent *emCloseEvent);
+#endif
 private:
     QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version);
     void setVersion(QWebSocketProtocol::Version version);
@@ -262,7 +264,8 @@ private:
 
     friend class QWebSocketServerPrivate;
 #ifdef Q_OS_WASM
-    emscripten::val socketContext = emscripten::val::null();
+    EMSCRIPTEN_WEBSOCKET_T m_socketContext = 0;
+    uint16_t m_readyState = 0;
 #endif
 };
 

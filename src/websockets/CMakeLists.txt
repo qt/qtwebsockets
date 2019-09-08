@@ -38,6 +38,8 @@ qt_internal_add_module(WebSockets
 qt_internal_extend_target(WebSockets CONDITION WASM
     SOURCES
         qwebsocket_wasm_p.cpp
+    LIBRARIES
+        websocket.js
 )
 
 qt_internal_extend_target(WebSockets CONDITION QT_FEATURE_ssl
