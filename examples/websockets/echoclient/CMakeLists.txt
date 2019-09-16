@@ -1,0 +1,30 @@
+# Generated from echoclient.pro.
+
+cmake_minimum_required(VERSION 3.14)
+project(echoclient LANGUAGES CXX)
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
+set(INSTALL_EXAMPLEDIR "examples")
+
+find_package(Qt6 COMPONENTS Core)
+find_package(Qt6 COMPONENTS WebSockets)
+
+add_executable(echoclient
+    echoclient.cpp echoclient.h
+    main.cpp
+)
+target_link_libraries(echoclient PUBLIC
+    Qt::Core
+    Qt::WebSockets
+)
+
+install(TARGETS echoclient
+    RUNTIME DESTINATION "${INSTALL_EXAMPLEDIR}"
+    BUNDLE DESTINATION "${INSTALL_EXAMPLEDIR}"
+    LIBRARY DESTINATION "${INSTALL_EXAMPLEDIR}"
+)
