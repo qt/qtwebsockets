@@ -294,6 +294,18 @@ void tst_QWebSocketServer::tst_settersAndGetters()
     QCOMPARE(sslServer.sslConfiguration(), sslConfiguration);
     QVERIFY(sslServer.sslConfiguration() != QSslConfiguration::defaultConfiguration());
 #endif
+
+    server.setHandshakeTimeout(64);
+    QCOMPARE(server.handshakeTimeoutMS(), 64);
+#if QT_HAS_INCLUDE(<chrono>)
+    auto expected = std::chrono::milliseconds(64);
+    QCOMPARE(server.handshakeTimeout(), expected);
+
+    expected = std::chrono::milliseconds(242);
+    server.setHandshakeTimeout(expected);
+    QCOMPARE(server.handshakeTimeoutMS(), 242);
+    QCOMPARE(server.handshakeTimeout(), expected);
+#endif
 }
 
 void tst_QWebSocketServer::tst_listening()
