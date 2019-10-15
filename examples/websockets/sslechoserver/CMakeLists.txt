@@ -9,7 +9,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(INSTALL_EXAMPLEDIR "examples")
+set(INSTALL_EXAMPLEDIR "examples/websockets/sslechoserver")
 
 find_package(Qt6 COMPONENTS WebSockets)
 
@@ -21,19 +21,19 @@ target_link_libraries(sslechoserver PUBLIC
     Qt::WebSockets
 )
 
+
 # Resources:
 set(securesocketclient_resource_files
     "localhost.cert"
     "localhost.key"
 )
 
-QT6_ADD_RESOURCES(sslechoserver "securesocketclient"
+qt6_add_resources(sslechoserver "securesocketclient"
     PREFIX
         "/"
     FILES
         ${securesocketclient_resource_files}
 )
-
 
 install(TARGETS sslechoserver
     RUNTIME DESTINATION "${INSTALL_EXAMPLEDIR}"

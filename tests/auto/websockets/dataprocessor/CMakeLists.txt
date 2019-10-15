@@ -1,5 +1,9 @@
 # Generated from dataprocessor.pro.
 
+if(NOT QT_FEATURE_private_tests)
+    return()
+endif()
+
 #####################################################################
 ## tst_dataprocessor Test:
 #####################################################################
@@ -15,3 +19,4 @@ add_qt_test(tst_dataprocessor
 
 #### Keys ignored in scope 1:.:.:dataprocessor.pro:<TRUE>:
 # TEMPLATE = "app"
+# _REQUIREMENTS = "qtConfig(private_tests)"

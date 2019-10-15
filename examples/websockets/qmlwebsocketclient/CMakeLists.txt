@@ -9,7 +9,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(INSTALL_EXAMPLEDIR "examples")
+set(INSTALL_EXAMPLEDIR "examples/websockets/qmlwebsocketclient")
 
 find_package(Qt6 COMPONENTS Core)
 find_package(Qt6 COMPONENTS Gui)
@@ -26,18 +26,18 @@ target_link_libraries(qmlwebsocketclient PUBLIC
     Qt::WebSockets
 )
 
+
 # Resources:
 set(data_resource_files
     "qml/qmlwebsocketclient/main.qml"
 )
 
-QT6_ADD_RESOURCES(qmlwebsocketclient "data"
+qt6_add_resources(qmlwebsocketclient "data"
     PREFIX
         "/"
     FILES
         ${data_resource_files}
 )
-
 
 install(TARGETS qmlwebsocketclient
     RUNTIME DESTINATION "${INSTALL_EXAMPLEDIR}"

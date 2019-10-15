@@ -8,6 +8,7 @@ add_qml_module(qmlwebsockets
     URI "QtWebSockets"
     VERSION "1.0" #special case
     CLASSNAME QtWebSocketsDeclarativeModule
+    SKIP_TYPE_REGISTRATION
     SOURCES
         qmlwebsockets_plugin.cpp qmlwebsockets_plugin.h
         qqmlwebsocket.cpp qqmlwebsocket.h

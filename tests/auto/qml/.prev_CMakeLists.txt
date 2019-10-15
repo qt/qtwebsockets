@@ -2,5 +2,5 @@
 
 if(NOT APPLE_UIKIT)
     add_subdirectory(qmlwebsockets)
-    # add_subdirectory(qmlwebsockets_compat) # special case remove
+    add_subdirectory(qmlwebsockets_compat)
 endif()

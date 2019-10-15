@@ -43,7 +43,7 @@ extend_target(WebSockets CONDITION QT_FEATURE_ssl
 
 #### Keys ignored in scope 3:.:.:websockets.pro:QT_FEATURE_ssl:
 # PRIVATE_HEADERS = "$$PWD/qsslserver_p.h"
-add_qt_docs(
+add_qt_docs(WebSockets
     doc/qtwebsockets.qdocconf
 )
 
