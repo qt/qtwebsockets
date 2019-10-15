@@ -457,12 +457,46 @@ void tst_QWebSocket::tst_sendTextMessage()
     QVERIFY(isLastFrame);
 
     socket.close();
-
-    //QTBUG-36762: QWebSocket emits multiplied signals when socket was reopened
     socketConnectedSpy.clear();
     textMessageReceived.clear();
     textFrameReceived.clear();
 
+    // QTBUG-74464 QWebsocket doesn't receive text (binary) message with size > 32 kb
+    socket.open(url);
+
+    QTRY_COMPARE(socketConnectedSpy.count(), 1);
+    QCOMPARE(socketError.count(), 0);
+    QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
+    arguments = serverConnectedSpy.takeFirst();
+    urlConnected = arguments.at(0).toUrl();
+    QCOMPARE(urlConnected, url);
+    QCOMPARE(socket.bytesToWrite(), 0);
+
+    // transmit a long text message with 1 MB
+    QString longString(0x100000, 'a');
+    socket.sendTextMessage(longString);
+    QVERIFY(socket.bytesToWrite() > longString.length());
+    QVERIFY(textMessageReceived.wait());
+    QCOMPARE(socket.bytesToWrite(), 0);
+
+    QCOMPARE(textMessageReceived.count(), 1);
+    QCOMPARE(binaryMessageReceived.count(), 0);
+    QCOMPARE(binaryFrameReceived.count(), 0);
+    arguments = textMessageReceived.takeFirst();
+    messageReceived = arguments.at(0).toString();
+    QCOMPARE(messageReceived.length(), longString.length());
+    QCOMPARE(messageReceived, longString);
+
+    arguments = textFrameReceived.takeLast();
+    isLastFrame = arguments.at(1).toBool();
+    QVERIFY(isLastFrame);
+
+    socket.close();
+    socketConnectedSpy.clear();
+    textMessageReceived.clear();
+    textFrameReceived.clear();
+
+    //QTBUG-36762: QWebSocket emits multiplied signals when socket was reopened
     socket.open(QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
                      QStringLiteral(":") + QString::number(echoServer.port())));
 

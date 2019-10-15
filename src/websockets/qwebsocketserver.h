@@ -52,6 +52,10 @@
 #include <QtNetwork/QSslError>
 #endif
 
+#if QT_HAS_INCLUDE(<chrono>)
+#include <chrono>
+#endif
+
 QT_BEGIN_NAMESPACE
 
 class QTcpSocket;
@@ -86,8 +90,18 @@ public:
     void setMaxPendingConnections(int numConnections);
     int maxPendingConnections() const;
 
+#if QT_HAS_INCLUDE(<chrono>) || defined(Q_CLANG_QDOC)
+    void setHandshakeTimeout(std::chrono::milliseconds msec)
+    {
+        setHandshakeTimeout(int(msec.count()));
+    }
+    std::chrono::milliseconds handshakeTimeout() const
+    {
+        return std::chrono::milliseconds(handshakeTimeoutMS());
+    }
+#endif
     void setHandshakeTimeout(int msec);
-    int handshakeTimeout() const;
+    int handshakeTimeoutMS() const;
 
     quint16 serverPort() const;
     QHostAddress serverAddress() const;

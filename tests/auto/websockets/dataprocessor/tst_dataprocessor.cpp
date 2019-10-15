@@ -193,7 +193,7 @@ private:
     //sequences
     void nonCharacterSequence(const char *sequence);
 
-    void doTest();
+    void doTest(int timeout = 0);
     void doCloseFrameTest();
 
     QString opCodeToString(quint8 opCode);
@@ -744,6 +744,7 @@ void tst_DataProcessor::frameTooSmall()
 
     dataProcessor.process(&buffer);
 
+    QTRY_VERIFY_WITH_TIMEOUT(errorSpy.count(), 7000);
     QCOMPARE(errorSpy.count(), 1);
     QCOMPARE(closeSpy.count(), 0);
     QCOMPARE(pingMessageSpy.count(), 0);
@@ -776,6 +777,7 @@ void tst_DataProcessor::frameTooSmall()
 
     dataProcessor.process(&buffer);
 
+    QTRY_VERIFY_WITH_TIMEOUT(errorSpy.count(), 7000);
     QCOMPARE(errorSpy.count(), 1);
     QCOMPARE(closeSpy.count(), 0);
     QCOMPARE(pingMessageSpy.count(), 0);
@@ -808,6 +810,24 @@ void tst_DataProcessor::frameTooSmall()
 
         dataProcessor.process(&buffer);
 
+        QTRY_VERIFY_WITH_TIMEOUT(errorSpy.count(), 7000);
+        QCOMPARE(errorSpy.count(), 1);
+        QCOMPARE(closeSpy.count(), 0);
+        QCOMPARE(pingMessageSpy.count(), 0);
+        QCOMPARE(pongMessageSpy.count(), 0);
+        QCOMPARE(textMessageSpy.count(), 0);
+        QCOMPARE(binaryMessageSpy.count(), 0);
+        QCOMPARE(textFrameSpy.count(), 1);
+        QCOMPARE(binaryFrameSpy.count(), 0);
+
+        errorSpy.clear();
+        closeSpy.clear();
+        pingMessageSpy.clear();
+        pongMessageSpy.clear();
+        textMessageSpy.clear();
+        binaryMessageSpy.clear();
+        textFrameSpy.clear();
+        binaryFrameSpy.clear();
         buffer.close();
         data.clear();
 
@@ -816,17 +836,16 @@ void tst_DataProcessor::frameTooSmall()
         //meaning the socket will be closed
         buffer.setData(data);
         buffer.open(QIODevice::ReadOnly);
-        QSignalSpy errorSpy(&dataProcessor,
-                            SIGNAL(errorEncountered(QWebSocketProtocol::CloseCode,QString)));
         dataProcessor.process(&buffer);
 
+        QTRY_VERIFY_WITH_TIMEOUT(errorSpy.count(), 7000);
         QCOMPARE(errorSpy.count(), 1);
         QCOMPARE(closeSpy.count(), 0);
         QCOMPARE(pingMessageSpy.count(), 0);
         QCOMPARE(pongMessageSpy.count(), 0);
         QCOMPARE(textMessageSpy.count(), 0);
         QCOMPARE(binaryMessageSpy.count(), 0);
-        QCOMPARE(textFrameSpy.count(), 1);
+        QCOMPARE(textFrameSpy.count(), 0);
         QCOMPARE(binaryFrameSpy.count(), 0);
 
         QList<QVariant> arguments = errorSpy.takeFirst();
@@ -849,6 +868,7 @@ void tst_DataProcessor::frameTooSmall()
         buffer.open(QIODevice::ReadOnly);
         dataProcessor.process(&buffer);
 
+        QTRY_VERIFY_WITH_TIMEOUT(errorSpy.count(), 7000);
         QCOMPARE(errorSpy.count(), 1);
         QCOMPARE(closeSpy.count(), 0);
         QCOMPARE(pingMessageSpy.count(), 0);
@@ -877,6 +897,7 @@ void tst_DataProcessor::frameTooSmall()
         buffer.open(QIODevice::ReadOnly);
 
         dataProcessor.process(&buffer);
+        QTRY_VERIFY_WITH_TIMEOUT(errorSpy.count(), 7000);
         QCOMPARE(errorSpy.count(), 1);
         QCOMPARE(closeSpy.count(), 0);
         QCOMPARE(pingMessageSpy.count(), 0);
@@ -1400,7 +1421,7 @@ void tst_DataProcessor::incompletePayload_data()
 
 void tst_DataProcessor::incompletePayload()
 {
-    doTest();
+    doTest(7000);
 }
 
 void tst_DataProcessor::incompleteSizeField_data()
@@ -1430,13 +1451,13 @@ void tst_DataProcessor::incompleteSizeField_data()
 
 void tst_DataProcessor::incompleteSizeField()
 {
-    doTest();
+    doTest(7000);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /// HELPER FUNCTIONS
 //////////////////////////////////////////////////////////////////////////////////////////
-void tst_DataProcessor::doTest()
+void tst_DataProcessor::doTest(int timeout)
 {
     QFETCH(quint8, firstByte);
     QFETCH(quint8, secondByte);
@@ -1465,6 +1486,7 @@ void tst_DataProcessor::doTest()
     buffer.setData(data);
     buffer.open(QIODevice::ReadOnly);
     dataProcessor.process(&buffer);
+    QTRY_VERIFY_WITH_TIMEOUT(errorSpy.count(), timeout);
     QCOMPARE(errorSpy.count(), 1);
     QCOMPARE(textMessageSpy.count(), 0);
     QCOMPARE(binaryMessageSpy.count(), 0);

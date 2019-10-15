@@ -353,14 +353,26 @@ int QWebSocketServer::maxPendingConnections() const
 }
 
 /*!
+    \fn std::chrono::milliseconds QWebSocketServer::handshakeTimeout() const
     Returns the handshake timeout for new connections in milliseconds.
 
     The default is 10 seconds. If a peer uses more time to complete the
     handshake their connection is closed.
 
-    \sa setHandshakeTimeout()
+    \sa setHandshakeTimeout(), handshakeTimeoutMS()
+    \since 5.14
  */
-int QWebSocketServer::handshakeTimeout() const
+
+/*!
+    Returns the handshake timeout for new connections in milliseconds.
+
+    The default is 10 seconds. If a peer uses more time to complete the
+    handshake their connection is closed.
+
+    \sa setHandshakeTimeout(), handshakeTimeout()
+    \since 5.14
+ */
+int QWebSocketServer::handshakeTimeoutMS() const
 {
     Q_D(const QWebSocketServer);
     return d->handshakeTimeout();
@@ -592,14 +604,20 @@ void QWebSocketServer::setMaxPendingConnections(int numConnections)
 }
 
 /*!
+    \fn void QWebSocketServer::setHandshakeTimeout(std::chrono::milliseconds msec)
     Sets the handshake timeout for new connections to \a msec milliseconds.
 
     By default this is set to 10 seconds. If a peer uses more time to
     complete the handshake, their connection is closed. You can pass a
     negative value (e.g. -1) to disable the timeout.
 
-    \sa handshakeTimeout()
+    \sa handshakeTimeout(), handshakeTimeoutMS()
+    \since 5.14
  */
+
+/*!
+    \overload
+*/
 void QWebSocketServer::setHandshakeTimeout(int msec)
 {
     Q_D(QWebSocketServer);

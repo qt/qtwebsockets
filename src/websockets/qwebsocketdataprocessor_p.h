@@ -55,6 +55,8 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QString>
 #include <QtCore/QTextCodec>
+#include <QTimer>
+#include "qwebsocketframe_p.h"
 #include "qwebsocketprotocol.h"
 #include "qwebsocketprotocol_p.h"
 
@@ -86,7 +88,7 @@ Q_SIGNALS:
     void errorEncountered(QWebSocketProtocol::CloseCode code, const QString &description);
 
 public Q_SLOTS:
-    void process(QIODevice *pIoDevice);
+    bool process(QIODevice *pIoDevice);
     void clear();
 
 private:
@@ -111,8 +113,11 @@ private:
     quint64 m_payloadLength;
     QTextCodec::ConverterState *m_pConverterState;
     QTextCodec *m_pTextCodec;
+    QWebSocketFrame frame;
+    QTimer waitTimer;
 
     bool processControlFrame(const QWebSocketFrame &frame);
+    void timeout();
 };
 
 QT_END_NAMESPACE

@@ -113,6 +113,7 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
     m_defaultMaskGenerator(),
     m_handshakeState(NothingDoneState)
 {
+    m_pingTimer.start();
 }
 
 /*!
@@ -144,6 +145,7 @@ QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol:
     m_defaultMaskGenerator(),
     m_handshakeState(NothingDoneState)
 {
+    m_pingTimer.start();
 }
 
 /*!
@@ -1176,10 +1178,10 @@ void QWebSocketPrivate::processData()
     while (m_pSocket->bytesAvailable()) {
         if (state() == QAbstractSocket::ConnectingState) {
             if (!m_pSocket->canReadLine())
-                break;
+                return;
             processHandshake(m_pSocket);
-        } else {
-            m_dataProcessor.process(m_pSocket);
+        } else if (!m_dataProcessor.process(m_pSocket)) {
+            return;
         }
     }
 }
