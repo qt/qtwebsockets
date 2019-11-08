@@ -285,6 +285,18 @@ void QWebSocketPrivate::ignoreSslErrors()
 }
 
 /*!
+ * \internal
+ */
+void QWebSocketPrivate::continueInterruptedHandshake()
+{
+    if (Q_LIKELY(m_pSocket)) {
+        QSslSocket *pSslSocket = qobject_cast<QSslSocket *>(m_pSocket);
+        if (Q_LIKELY(pSslSocket))
+            pSslSocket->continueInterruptedHandshake();
+    }
+}
+
+/*!
 * \internal
 */
 void QWebSocketPrivate::_q_updateSslConfiguration()
@@ -612,6 +624,14 @@ void QWebSocketPrivate::makeConnections(QTcpSocket *pTcpSocket)
                              q, &QWebSocket::sslErrors);
             QObjectPrivate::connect(sslSocket, &QSslSocket::encrypted,
                                     this, &QWebSocketPrivate::_q_updateSslConfiguration);
+            QObject::connect(sslSocket, &QSslSocket::peerVerifyError,
+                             q, &QWebSocket::peerVerifyError);
+            QObject::connect(sslSocket, &QSslSocket::alertSent,
+                             q, &QWebSocket::alertSent);
+            QObject::connect(sslSocket, &QSslSocket::alertReceived,
+                             q, &QWebSocket::alertReceived);
+            QObject::connect(sslSocket, &QSslSocket::handshakeInterruptedOnError,
+                             q, &QWebSocket::handshakeInterruptedOnError);
         } else
 #endif // QT_NO_SSL
         {

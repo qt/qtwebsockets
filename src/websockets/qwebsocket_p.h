@@ -149,6 +149,7 @@ public:
 #ifndef QT_NO_SSL
     void ignoreSslErrors(const QList<QSslError> &errors);
     void ignoreSslErrors();
+    void continueInterruptedHandshake();
     void setSslConfiguration(const QSslConfiguration &sslConfiguration);
     QSslConfiguration sslConfiguration() const;
     void _q_updateSslConfiguration();

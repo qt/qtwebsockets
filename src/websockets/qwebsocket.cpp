@@ -261,6 +261,67 @@ not been filled in with new information when the signal returns.
     \sa QSslSocket::preSharedKeyAuthenticationRequired()
 */
 /*!
+    \fn void QWebSocket::peerVerifyError(const QSslError &error)
+    \since 6.0
+
+    QWebSocket can emit this signal several times during the SSL handshake,
+    before encryption has been established, to indicate that an error has
+    occurred while establishing the identity of the peer. The \a error is
+    usually an indication that QWebSocket is unable to securely identify the
+    peer.
+
+    This signal provides you with an early indication when something's wrong.
+    By connecting to this signal, you can manually choose to tear down the
+    connection from inside the connected slot before the handshake has
+    completed. If no action is taken, QWebSocket will proceed to emitting
+    QWebSocket::sslErrors().
+
+    \sa sslErrors()
+*/
+/*!
+    \fn void QWebSocket::alertSent(QAlertLevel level, QAlertType type, const QString &description)
+    \since 6.0
+
+    QWebSocket emits this signal if an alert message was sent to a peer. \a level
+    describes if it was a warning or a fatal error. \a type gives the code
+    of the alert message. When a textual description of the alert message is
+    available, it is supplied in \a description.
+
+    \note This signal is mostly informational and can be used for debugging
+    purposes, normally it does not require any actions from the application.
+    \note Not all backends support this functionality.
+
+    \sa alertReceived(), QSslSocket::QAlertLevel, QSslSocket::QAlertType
+*/
+/*!
+    \fn void QWebSocket::alertReceived(QAlertLevel level, QAlertType type, const QString &description)
+    \since 6.0
+
+    QWebSocket emits this signal if an alert message was received from a peer.
+    \a level tells if the alert was fatal or it was a warning. \a type is the
+    code explaining why the alert was sent. When a textual description of
+    the alert message is available, it is supplied in \a description.
+
+    \note The signal is mostly for informational and debugging purposes and does not
+    require any handling in the application. If the alert was fatal, underlying
+    backend will handle it and close the connection.
+    \note Not all backends support this functionality.
+
+    \sa alertSent(), QSslSocket::QAlertLevel, QSslSocket::QAlertType
+*/
+/*!
+    \fn void QWebSocket::handshakeInterruptedOnError(const QSslError &error)
+    \since 6.0
+
+    QWebSocket emits this signal if a certificate verification error was
+    found and if early error reporting was enabled in QSslConfiguration.
+    An application is expected to inspect the \a error and decide if
+    it wants to continue the handshake, or abort it and send an alert message
+    to the peer. The signal-slot connection must be direct.
+
+    \sa continueInterruptedHandshake(), sslErrors(), QSslConfiguration::setHandshakeMustInterruptOnError()
+*/
+/*!
     \fn void QWebSocket::pong(quint64 elapsedTime, const QByteArray &payload)
 
     Emitted when a pong message is received in reply to a previous ping.
@@ -480,6 +541,22 @@ void QWebSocket::ignoreSslErrors()
 {
     Q_D(QWebSocket);
     d->ignoreSslErrors();
+}
+
+/*!
+    \since 6.0
+
+    If an application wants to conclude a handshake even after receiving
+    handshakeInterruptedOnError() signal, it must call this function.
+    This call must be done from a slot function attached to the signal.
+    The signal-slot connection must be direct.
+
+    \sa handshakeInterruptedOnError(), QSslConfiguration::setHandshakeMustInterruptOnError()
+*/
+void QWebSocket::continueInterruptedHandshake()
+{
+    Q_D(QWebSocket);
+    d->continueInterruptedHandshake();
 }
 
 /*!
