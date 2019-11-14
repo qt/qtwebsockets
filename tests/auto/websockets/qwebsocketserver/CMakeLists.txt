@@ -4,7 +4,7 @@
 ## tst_qwebsocketserver Test:
 #####################################################################
 
-add_qt_test(tst_qwebsocketserver
+qt_add_test(tst_qwebsocketserver
     SOURCES
         tst_qwebsocketserver.cpp
     PUBLIC_LIBRARIES
@@ -23,7 +23,7 @@ set(qwebsocketshared_resource_files
     "localhost.key"
 )
 
-add_qt_resource(tst_qwebsocketserver "qwebsocketshared"
+qt_add_resource(tst_qwebsocketserver "qwebsocketshared"
     PREFIX
         "/"
     BASE
@@ -39,7 +39,7 @@ add_qt_resource(tst_qwebsocketserver "qwebsocketshared"
 ## Scopes:
 #####################################################################
 
-extend_target(tst_qwebsocketserver CONDITION boot2qt
+qt_extend_target(tst_qwebsocketserver CONDITION boot2qt
     DEFINES
         SHOULD_CHECK_SYSCALL_SUPPORT
 )

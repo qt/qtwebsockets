@@ -8,7 +8,7 @@ endif()
 ## tst_handshakerequest Test:
 #####################################################################
 
-add_qt_test(tst_handshakerequest
+qt_add_test(tst_handshakerequest
     SOURCES
         tst_handshakerequest.cpp
     LIBRARIES

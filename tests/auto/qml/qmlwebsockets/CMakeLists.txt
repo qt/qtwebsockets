@@ -4,7 +4,7 @@
 ## tst_qmlwebsockets Test:
 #####################################################################
 
-add_qt_test(tst_qmlwebsockets
+qt_add_test(tst_qmlwebsockets
     QMLTEST
     SOURCES
         tst_qmlwebsockets.cpp

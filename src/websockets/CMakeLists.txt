@@ -4,7 +4,7 @@
 ## WebSockets Module:
 #####################################################################
 
-add_qt_module(WebSockets
+qt_add_module(WebSockets
     SOURCES
         qdefaultmaskgenerator_p.cpp qdefaultmaskgenerator_p.h
         qmaskgenerator.cpp qmaskgenerator.h
@@ -26,24 +26,23 @@ add_qt_module(WebSockets
 
 #### Keys ignored in scope 1:.:.:websockets.pro:<TRUE>:
 # OTHER_FILES = "doc/src/*.qdoc" "doc/snippets/*.cpp" "doc/qtwebsockets.qdocconf"
-# _LOADED = "qt_module"
 
 ## Scopes:
 #####################################################################
 
-extend_target(WebSockets CONDITION WASM
+qt_extend_target(WebSockets CONDITION WASM
     SOURCES
         qwebsocket_wasm_p.cpp
 )
 
-extend_target(WebSockets CONDITION QT_FEATURE_ssl
+qt_extend_target(WebSockets CONDITION QT_FEATURE_ssl
     SOURCES
         qsslserver.cpp
 )
 
 #### Keys ignored in scope 3:.:.:websockets.pro:QT_FEATURE_ssl:
 # PRIVATE_HEADERS = "$$PWD/qsslserver_p.h"
-add_qt_docs(WebSockets
+qt_add_docs(WebSockets
     doc/qtwebsockets.qdocconf
 )
 

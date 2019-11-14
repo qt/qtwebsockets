@@ -4,7 +4,7 @@
 ## tst_qwebsocket Test:
 #####################################################################
 
-add_qt_test(tst_qwebsocket
+qt_add_test(tst_qwebsocket
     SOURCES
         tst_qwebsocket.cpp
     PUBLIC_LIBRARIES

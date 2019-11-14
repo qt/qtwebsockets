@@ -8,7 +8,7 @@ endif()
 ## tst_websocketframe Test:
 #####################################################################
 
-add_qt_test(tst_websocketframe
+qt_add_test(tst_websocketframe
     SOURCES
         tst_websocketframe.cpp
     LIBRARIES

@@ -16,7 +16,7 @@ find_package(Qt6 COMPONENTS Gui)
 find_package(Qt6 COMPONENTS Quick)
 find_package(Qt6 COMPONENTS WebSockets)
 
-add_qt_gui_executable(qmlwebsocketclient
+add_executable(qmlwebsocketclient
     main.cpp
 )
 target_link_libraries(qmlwebsocketclient PUBLIC

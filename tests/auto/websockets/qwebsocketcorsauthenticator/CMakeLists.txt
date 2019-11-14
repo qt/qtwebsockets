@@ -4,7 +4,7 @@
 ## tst_qwebsocketcorsauthenticator Test:
 #####################################################################
 
-add_qt_test(tst_qwebsocketcorsauthenticator
+qt_add_test(tst_qwebsocketcorsauthenticator
     SOURCES
         tst_qwebsocketcorsauthenticator.cpp
     PUBLIC_LIBRARIES
