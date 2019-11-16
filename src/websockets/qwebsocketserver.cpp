@@ -656,31 +656,6 @@ qintptr QWebSocketServer::socketDescriptor() const
     return d->socketDescriptor();
 }
 
-/*!
-    \fn QWebSocketServer::nativeDescriptor
-    \deprecated
-
-    Returns the native socket descriptor the server uses to listen for incoming instructions,
-    or -1 if the server is not listening.
-    If the server is using QNetworkProxy, the returned descriptor may not be usable with
-    native socket functions.
-
-    \sa socketDescriptor(), setSocketDescriptor(), setNativeDescriptor(), isListening()
-    \since 5.12
- */
-/*!
-    \fn QWebSocketServer::setNativeDescriptor
-    \deprecated
-
-    Sets the socket descriptor this server should use when listening for incoming connections to
-    \a socketDescriptor.
-
-    Returns true if the socket is set successfully; otherwise returns false.
-    The socket is assumed to be in listening state.
-
-    \sa socketDescriptor(), setSocketDescriptor(), nativeDescriptor(), isListening()
-    \since 5.12
- */
 #else // ### Qt 6: Remove leftovers
 /*!
     \deprecated
