@@ -432,10 +432,18 @@ void QWebSocketServerPrivate::handshakeReceived()
     // According to RFC822 the body is separated from the headers by a null line (CRLF)
     const QByteArray& endOfHeaderMarker = QByteArrayLiteral("\r\n\r\n");
 
-    QByteArray header = pTcpSocket->peek(pTcpSocket->bytesAvailable());
+    const qint64 byteAvailable = pTcpSocket->bytesAvailable();
+    QByteArray header = pTcpSocket->peek(byteAvailable);
     const int endOfHeaderIndex = header.indexOf(endOfHeaderMarker);
     if (endOfHeaderIndex < 0) {
         //then we don't have our header complete yet
+        //check that no one is trying to exhaust our virtual memory
+        const qint64 maxHeaderLength = MAX_HEADERLINE_LENGTH * MAX_HEADERLINES + endOfHeaderMarker.size();
+        if (byteAvailable > maxHeaderLength) {
+            pTcpSocket->close();
+            setError(QWebSocketProtocol::CloseCodeTooMuchData,
+                 QWebSocketServer::tr("Header is too large."));
+        }
         return;
     }
     const int headerSize = endOfHeaderIndex + endOfHeaderMarker.size();
