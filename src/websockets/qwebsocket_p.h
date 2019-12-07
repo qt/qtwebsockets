@@ -182,7 +182,7 @@ private:
 
     Q_REQUIRED_RESULT qint64 doWriteFrames(const QByteArray &data, bool isBinary);
 
-    void makeConnections(const QTcpSocket *pTcpSocket);
+    void makeConnections(QTcpSocket *pTcpSocket);
     void releaseConnections(const QTcpSocket *pTcpSocket);
 
     QByteArray getFrameHeader(QWebSocketProtocol::OpCode opCode, quint64 payloadLength,
