@@ -440,7 +440,6 @@ void QWebSocketServerPrivate::handshakeReceived()
 
     if (m_pendingConnections.length() >= maxPendingConnections()) {
         pTcpSocket->close();
-        pTcpSocket->deleteLater();
         setError(QWebSocketProtocol::CloseCodeAbnormalDisconnection,
                  QWebSocketServer::tr("Too many pending connections."));
         return;
