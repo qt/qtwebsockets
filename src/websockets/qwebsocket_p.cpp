@@ -569,7 +569,7 @@ void QWebSocketPrivate::enableMasking(bool enable)
 /*!
  * \internal
  */
-void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
+void QWebSocketPrivate::makeConnections(QTcpSocket *pTcpSocket)
 {
     Q_ASSERT(pTcpSocket);
     Q_Q(QWebSocket);
@@ -636,6 +636,10 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
                             &QWebSocketPrivate::processPong);
     QObjectPrivate::connect(&m_dataProcessor, &QWebSocketDataProcessor::closeReceived, this,
                             &QWebSocketPrivate::processClose);
+
+    //fire readyread, in case we already have data inside the tcpSocket
+    if (pTcpSocket->bytesAvailable())
+        Q_EMIT pTcpSocket->readyRead();
 }
 
 /*!
