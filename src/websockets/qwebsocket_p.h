@@ -160,6 +160,17 @@ public:
     void ping(const QByteArray &payload);
     void setSocketState(QAbstractSocket::SocketState state);
 
+    void setMaxAllowedIncomingFrameSize(quint64 maxAllowedIncomingFrameSize);
+    quint64 maxAllowedIncomingFrameSize() const;
+    void setMaxAllowedIncomingMessageSize(quint64 maxAllowedIncomingMessageSize);
+    quint64 maxAllowedIncomingMessageSize() const;
+    static quint64 maxIncomingMessageSize();
+    static quint64 maxIncomingFrameSize();
+
+    void setOutgoingFrameSize(quint64 outgoingFrameSize);
+    quint64 outgoingFrameSize() const;
+    static quint64 maxOutgoingFrameSize();
+
 private:
     QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version);
     void setVersion(QWebSocketProtocol::Version version);
@@ -249,6 +260,8 @@ private:
     int m_httpMajorVersion, m_httpMinorVersion;
     QString m_httpStatusMessage;
     QMultiMap<QString, QString> m_headers;
+
+    quint64 m_outgoingFrameSize;
 
     friend class QWebSocketServerPrivate;
 #ifdef Q_OS_WASM
