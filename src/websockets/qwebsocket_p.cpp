@@ -1103,9 +1103,6 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
     Q_ASSERT(m_pSocket);
     Q_Q(QWebSocket);
     QAbstractSocket::SocketState webSocketState = this->state();
-    int port = 80;
-    if (m_request.url().scheme() == QStringLiteral("wss"))
-        port = 443;
 
     switch (socketState) {
     case QAbstractSocket::ConnectedState:
@@ -1124,11 +1121,10 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
 
             const auto format = QUrl::RemoveScheme | QUrl::RemoveUserInfo
                                 | QUrl::RemovePath | QUrl::RemoveQuery
-                                | QUrl::RemoveFragment | QUrl::RemovePort;
+                                | QUrl::RemoveFragment;
             const QString host = m_request.url().toString(format).mid(2);
             const QString handshake = createHandShakeRequest(m_resourceName,
-                                                             host % QStringLiteral(":")
-                                                                  % QString::number(m_request.url().port(port)),
+                                                             host,
                                                              origin(),
                                                              QString(),
                                                              QString(),
