@@ -198,7 +198,7 @@ QAbstractSocket::SocketError QWebSocketPrivate::error() const
 {
     QAbstractSocket::SocketError err = QAbstractSocket::UnknownSocketError;
     if (Q_LIKELY(m_pSocket))
-        err = m_pSocket->error();
+        err = m_pSocket->socketError();
     return err;
 }
 
