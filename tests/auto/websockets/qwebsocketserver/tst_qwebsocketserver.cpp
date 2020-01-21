@@ -604,7 +604,6 @@ static void setupSecureServer(QWebSocketServer *secureServer)
     sslConfiguration.setPeerVerifyMode(QSslSocket::VerifyNone);
     sslConfiguration.setLocalCertificate(certificate);
     sslConfiguration.setPrivateKey(sslKey);
-    sslConfiguration.setProtocol(QSsl::TlsV1SslV3);
     secureServer->setSslConfiguration(sslConfiguration);
 }
 #endif
