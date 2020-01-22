@@ -248,7 +248,7 @@ private:
     int m_httpStatusCode;
     int m_httpMajorVersion, m_httpMinorVersion;
     QString m_httpStatusMessage;
-    QMap<QString, QString> m_headers;
+    QMultiMap<QString, QString> m_headers;
 
     friend class QWebSocketServerPrivate;
 #ifdef Q_OS_WASM

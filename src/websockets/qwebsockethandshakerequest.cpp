@@ -268,8 +268,8 @@ void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream, int maxH
                clear();
                return;
             }
-            lastHeader = m_headers.insertMulti(headerLine.left(colonPos).trimmed().toLower(),
-                                               headerLine.mid(colonPos + 1).trimmed());
+            lastHeader = m_headers.insert(headerLine.left(colonPos).trimmed().toLower(),
+                                          headerLine.mid(colonPos + 1).trimmed());
         }
         if (m_headers.size() > maxHeaders) {
             clear();
