@@ -1024,8 +1024,8 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
                     errorDescription = QWebSocket::tr("Malformed header in response: %1.").arg(headerLine);
                     break;
                 }
-                lastHeader = m_headers.insertMulti(headerLine.left(colonPos).trimmed().toLower(),
-                                                   headerLine.mid(colonPos + 1).trimmed());
+                lastHeader = m_headers.insert(headerLine.left(colonPos).trimmed().toLower(),
+                                              headerLine.mid(colonPos + 1).trimmed());
             }
         }
 
