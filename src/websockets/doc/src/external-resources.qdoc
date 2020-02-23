@@ -103,6 +103,7 @@
 /*!
     \externalpage https://bugzilla.mozilla.org/show_bug.cgi?id=594502
     \title Firefox bug 594502
+*/
 
 /*
     This prevents autolinking of each occurrence of 'WebSocket'
