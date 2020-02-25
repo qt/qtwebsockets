@@ -1052,8 +1052,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
         } else if (m_httpStatusCode == 400) {
             //HTTP/1.1 400 Bad Request
             if (!version.isEmpty()) {
-                const QStringList versions = version.split(QStringLiteral(", "),
-                                                           QString::SkipEmptyParts);
+                const QStringList versions = version.split(QStringLiteral(", "), Qt::SkipEmptyParts);
                 if (!versions.contains(QString::number(QWebSocketProtocol::currentVersion()))) {
                     //if needed to switch protocol version, then we are finished here
                     //because we cannot handle other protocols than the RFC one (v13)
