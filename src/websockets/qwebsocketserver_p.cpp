@@ -445,7 +445,7 @@ void QWebSocketServerPrivate::handshakeReceived()
         //then we don't have our header complete yet
         //check that no one is trying to exhaust our virtual memory
         const qint64 maxHeaderLength = MAX_HEADERLINE_LENGTH * MAX_HEADERLINES + endOfHeaderMarker.size();
-        if (byteAvailable > maxHeaderLength) {
+        if (Q_UNLIKELY(byteAvailable > maxHeaderLength)) {
             pTcpSocket->close();
             setError(QWebSocketProtocol::CloseCodeTooMuchData,
                  QWebSocketServer::tr("Header is too large."));
@@ -459,7 +459,7 @@ void QWebSocketServerPrivate::handshakeReceived()
     bool success = false;
     bool isSecure = (m_secureMode == SecureMode);
 
-    if (m_pendingConnections.length() >= maxPendingConnections()) {
+    if (Q_UNLIKELY(m_pendingConnections.length() >= maxPendingConnections())) {
         pTcpSocket->close();
         setError(QWebSocketProtocol::CloseCodeAbnormalDisconnection,
                  QWebSocketServer::tr("Too many pending connections."));
@@ -471,7 +471,7 @@ void QWebSocketServerPrivate::handshakeReceived()
     //remove our header from the tcpSocket
     qint64 skippedSize = pTcpSocket->skip(headerSize);
 
-    if (skippedSize != headerSize) {
+    if (Q_UNLIKELY(skippedSize != headerSize)) {
         pTcpSocket->close();
         setError(QWebSocketProtocol::CloseCodeProtocolError,
                  QWebSocketServer::tr("Read handshake request header failed."));
@@ -493,16 +493,16 @@ void QWebSocketServerPrivate::handshakeReceived()
                                              supportedProtocols(),
                                              supportedExtensions());
 
-        if (response.isValid()) {
+        if (Q_LIKELY(response.isValid())) {
             QTextStream httpStream(pTcpSocket);
             httpStream << response;
             httpStream.flush();
 
-            if (response.canUpgrade()) {
+            if (Q_LIKELY(response.canUpgrade())) {
                 QWebSocket *pWebSocket = QWebSocketPrivate::upgradeFrom(pTcpSocket,
                                                                         request,
                                                                         response);
-                if (pWebSocket) {
+                if (Q_LIKELY(pWebSocket)) {
                     finishHandshakeTimeout(pTcpSocket);
                     addPendingConnection(pWebSocket);
                     Q_EMIT q->newConnection();
