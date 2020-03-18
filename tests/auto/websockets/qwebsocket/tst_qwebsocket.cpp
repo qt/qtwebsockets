@@ -439,7 +439,7 @@ void tst_QWebSocket::tst_sendTextMessage()
     socket.sendTextMessage(QStringLiteral("Hello world!"));
     QVERIFY(socket.bytesToWrite() > 12); // 12 + a few extra bytes for header
 
-    QVERIFY(textMessageReceived.wait(1500));
+    QVERIFY(textMessageReceived.wait(500));
     QCOMPARE(socket.bytesToWrite(), 0);
 
     QCOMPARE(textMessageReceived.count(), 1);
@@ -505,7 +505,7 @@ void tst_QWebSocket::tst_sendTextMessage()
 
     socket.sendTextMessage(QStringLiteral("Hello world!"));
 
-    QVERIFY(textMessageReceived.wait(1500));
+    QVERIFY(textMessageReceived.wait(500));
     QCOMPARE(textMessageReceived.count(), 1);
     QCOMPARE(binaryMessageReceived.count(), 0);
     QCOMPARE(binaryFrameReceived.count(), 0);
@@ -551,7 +551,7 @@ void tst_QWebSocket::tst_sendBinaryMessage()
     socket.sendBinaryMessage(QByteArrayLiteral("Hello world!"));
     QVERIFY(socket.bytesToWrite() > 12); // 12 + a few extra bytes for header
 
-    QVERIFY(binaryMessageReceived.wait(1500));
+    QVERIFY(binaryMessageReceived.wait(500));
     QCOMPARE(socket.bytesToWrite(), 0);
 
     QCOMPARE(textMessageReceived.count(), 0);
@@ -583,7 +583,7 @@ void tst_QWebSocket::tst_sendBinaryMessage()
 
     socket.sendBinaryMessage(QByteArrayLiteral("Hello world!"));
 
-    QVERIFY(binaryMessageReceived.wait(1500));
+    QVERIFY(binaryMessageReceived.wait(500));
     QCOMPARE(textMessageReceived.count(), 0);
     QCOMPARE(textFrameReceived.count(), 0);
     QCOMPARE(binaryMessageReceived.count(), 1);
@@ -719,7 +719,7 @@ void tst_QWebSocket::tst_moveToThread()
 
     socket->asyncOpen(url);
     if (socketConnectedSpy.count() == 0)
-        QVERIFY(socketConnectedSpy.wait(1500));
+        QVERIFY(socketConnectedSpy.wait(500));
 
     socket->asyncSendTextMessage(textMessage);
 
