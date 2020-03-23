@@ -579,8 +579,7 @@ void QWebSocketPrivate::makeConnections(QTcpSocket *pTcpSocket)
 
     if (Q_LIKELY(pTcpSocket)) {
         //pass through signals
-        QObject::connect(pTcpSocket,
-                         QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
+        QObject::connect(pTcpSocket, &QAbstractSocket::errorOccurred,
                          q, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error));
 #ifndef QT_NO_NETWORKPROXY
         QObject::connect(pTcpSocket, &QAbstractSocket::proxyAuthenticationRequired, q,
