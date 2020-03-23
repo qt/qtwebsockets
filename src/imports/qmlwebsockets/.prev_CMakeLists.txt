@@ -13,12 +13,9 @@ qt_add_qml_module(qmlwebsockets
         qmlwebsockets_plugin.cpp qmlwebsockets_plugin.h
         qqmlwebsocket.cpp qqmlwebsocket.h
         qqmlwebsocketserver.cpp qqmlwebsocketserver.h
-    LIBRARIES
+    PUBLIC_LIBRARIES
         Qt::CorePrivate
         Qt::QmlPrivate
-    PUBLIC_LIBRARIES
-        Qt::Core
-        Qt::Qml
         Qt::WebSockets
 )
 

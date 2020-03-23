@@ -1,6 +1,6 @@
 # Generated from qml.pro.
 
-if(NOT APPLE_UIKIT)
+if(NOT UIKIT)
     add_subdirectory(qmlwebsockets)
     add_subdirectory(qmlwebsockets_compat)
 endif()

@@ -11,10 +11,8 @@ endif()
 qt_add_test(tst_defaultmaskgenerator
     SOURCES
         tst_defaultmaskgenerator.cpp
-    LIBRARIES
-        Qt::WebSocketsPrivate
     PUBLIC_LIBRARIES
-        Qt::WebSockets
+        Qt::WebSocketsPrivate
 )
 
 #### Keys ignored in scope 1:.:.:qdefaultmaskgenerator.pro:<TRUE>:

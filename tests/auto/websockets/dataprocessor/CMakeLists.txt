@@ -11,10 +11,8 @@ endif()
 qt_add_test(tst_dataprocessor
     SOURCES
         tst_dataprocessor.cpp
-    LIBRARIES
-        Qt::WebSocketsPrivate
     PUBLIC_LIBRARIES
-        Qt::WebSockets
+        Qt::WebSocketsPrivate
 )
 
 #### Keys ignored in scope 1:.:.:dataprocessor.pro:<TRUE>:

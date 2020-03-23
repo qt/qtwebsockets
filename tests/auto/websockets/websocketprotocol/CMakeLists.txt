@@ -11,10 +11,8 @@ endif()
 qt_add_test(tst_websocketprotocol
     SOURCES
         tst_websocketprotocol.cpp
-    LIBRARIES
-        Qt::WebSocketsPrivate
     PUBLIC_LIBRARIES
-        Qt::WebSockets
+        Qt::WebSocketsPrivate
 )
 
 #### Keys ignored in scope 1:.:.:websocketprotocol.pro:<TRUE>:

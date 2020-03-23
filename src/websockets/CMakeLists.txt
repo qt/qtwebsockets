@@ -22,6 +22,8 @@ qt_add_module(WebSockets
     PUBLIC_LIBRARIES
         Qt::Core
         Qt::Network
+    PRIVATE_MODULE_INTERFACE
+        Qt::CorePrivate
 )
 
 #### Keys ignored in scope 1:.:.:websockets.pro:<TRUE>:
