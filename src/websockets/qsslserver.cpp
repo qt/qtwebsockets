@@ -121,6 +121,12 @@ void QSslServer::incomingConnection(qintptr socket)
                     this, &QSslServer::socketEncrypted);
             connect(pSslSocket, &QSslSocket::preSharedKeyAuthenticationRequired,
                     this, &QSslServer::preSharedKeyAuthenticationRequired);
+            connect(pSslSocket, &QSslSocket::alertSent,
+                    this, &QSslServer::alertSent);
+            connect(pSslSocket, &QSslSocket::alertReceived,
+                    this, &QSslServer::alertReceived);
+            connect(pSslSocket, &QSslSocket::handshakeInterruptedOnError,
+                    this, &QSslServer::handshakeInterruptedOnError);
 
             Q_EMIT startedEncryptionHandshake(pSslSocket);
 

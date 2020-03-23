@@ -158,6 +158,9 @@ Q_SIGNALS:
     void peerVerifyError(const QSslError &error);
     void sslErrors(const QList<QSslError> &errors);
     void preSharedKeyAuthenticationRequired(QSslPreSharedKeyAuthenticator *authenticator);
+    void alertSent(QAlertLevel level, QAlertType type, const QString &description);
+    void alertReceived(QAlertLevel level, QAlertType type, const QString &description);
+    void handshakeInterruptedOnError(const QSslError &error);
 #endif
     void closed();
 };

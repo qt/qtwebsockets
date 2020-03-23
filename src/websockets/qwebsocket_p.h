@@ -149,6 +149,7 @@ public:
 #ifndef QT_NO_SSL
     void ignoreSslErrors(const QList<QSslError> &errors);
     void ignoreSslErrors();
+    void continueInterruptedHandshake();
     void setSslConfiguration(const QSslConfiguration &sslConfiguration);
     QSslConfiguration sslConfiguration() const;
     void _q_updateSslConfiguration();
@@ -182,7 +183,7 @@ private:
 
     Q_REQUIRED_RESULT qint64 doWriteFrames(const QByteArray &data, bool isBinary);
 
-    void makeConnections(const QTcpSocket *pTcpSocket);
+    void makeConnections(QTcpSocket *pTcpSocket);
     void releaseConnections(const QTcpSocket *pTcpSocket);
 
     QByteArray getFrameHeader(QWebSocketProtocol::OpCode opCode, quint64 payloadLength,
@@ -248,7 +249,7 @@ private:
     int m_httpStatusCode;
     int m_httpMajorVersion, m_httpMinorVersion;
     QString m_httpStatusMessage;
-    QMap<QString, QString> m_headers;
+    QMultiMap<QString, QString> m_headers;
 
     friend class QWebSocketServerPrivate;
 #ifdef Q_OS_WASM

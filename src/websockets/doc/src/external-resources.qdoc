@@ -86,12 +86,12 @@
 */
 
 /*!
-    \externalpage http://autobahn.ws/testsuite/
+    \externalpage https://github.com/crossbario/autobahn-testsuite
     \title Autobahn|Testsuite
 */
 
 /*!
-    \externalpage http://autobahn.ws/testsuite/installation.html
+    \externalpage https://github.com/crossbario/autobahn-testsuite/blob/master/README.md#installation
     \title Autobahn|Testsuite installation documentation
 */
 
@@ -103,6 +103,7 @@
 /*!
     \externalpage https://bugzilla.mozilla.org/show_bug.cgi?id=594502
     \title Firefox bug 594502
+*/
 
 /*
     This prevents autolinking of each occurrence of 'WebSocket'

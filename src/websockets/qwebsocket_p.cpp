@@ -285,6 +285,18 @@ void QWebSocketPrivate::ignoreSslErrors()
 }
 
 /*!
+ * \internal
+ */
+void QWebSocketPrivate::continueInterruptedHandshake()
+{
+    if (Q_LIKELY(m_pSocket)) {
+        QSslSocket *pSslSocket = qobject_cast<QSslSocket *>(m_pSocket);
+        if (Q_LIKELY(pSslSocket))
+            pSslSocket->continueInterruptedHandshake();
+    }
+}
+
+/*!
 * \internal
 */
 void QWebSocketPrivate::_q_updateSslConfiguration()
@@ -569,7 +581,7 @@ void QWebSocketPrivate::enableMasking(bool enable)
 /*!
  * \internal
  */
-void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
+void QWebSocketPrivate::makeConnections(QTcpSocket *pTcpSocket)
 {
     Q_ASSERT(pTcpSocket);
     Q_Q(QWebSocket);
@@ -612,6 +624,14 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
                              q, &QWebSocket::sslErrors);
             QObjectPrivate::connect(sslSocket, &QSslSocket::encrypted,
                                     this, &QWebSocketPrivate::_q_updateSslConfiguration);
+            QObject::connect(sslSocket, &QSslSocket::peerVerifyError,
+                             q, &QWebSocket::peerVerifyError);
+            QObject::connect(sslSocket, &QSslSocket::alertSent,
+                             q, &QWebSocket::alertSent);
+            QObject::connect(sslSocket, &QSslSocket::alertReceived,
+                             q, &QWebSocket::alertReceived);
+            QObject::connect(sslSocket, &QSslSocket::handshakeInterruptedOnError,
+                             q, &QWebSocket::handshakeInterruptedOnError);
         } else
 #endif // QT_NO_SSL
         {
@@ -636,6 +656,10 @@ void QWebSocketPrivate::makeConnections(const QTcpSocket *pTcpSocket)
                             &QWebSocketPrivate::processPong);
     QObjectPrivate::connect(&m_dataProcessor, &QWebSocketDataProcessor::closeReceived, this,
                             &QWebSocketPrivate::processClose);
+
+    //fire readyread, in case we already have data inside the tcpSocket
+    if (pTcpSocket->bytesAvailable())
+        Q_EMIT pTcpSocket->readyRead();
 }
 
 /*!
@@ -1000,8 +1024,8 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
                     errorDescription = QWebSocket::tr("Malformed header in response: %1.").arg(headerLine);
                     break;
                 }
-                lastHeader = m_headers.insertMulti(headerLine.left(colonPos).trimmed().toLower(),
-                                                   headerLine.mid(colonPos + 1).trimmed());
+                lastHeader = m_headers.insert(headerLine.left(colonPos).trimmed().toLower(),
+                                              headerLine.mid(colonPos + 1).trimmed());
             }
         }
 
@@ -1048,8 +1072,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
         } else if (m_httpStatusCode == 400) {
             //HTTP/1.1 400 Bad Request
             if (!version.isEmpty()) {
-                const QStringList versions = version.split(QStringLiteral(", "),
-                                                           QString::SkipEmptyParts);
+                const QStringList versions = version.split(QStringLiteral(", "), Qt::SkipEmptyParts);
                 if (!versions.contains(QString::number(QWebSocketProtocol::currentVersion()))) {
                     //if needed to switch protocol version, then we are finished here
                     //because we cannot handle other protocols than the RFC one (v13)
@@ -1099,9 +1122,6 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
     Q_ASSERT(m_pSocket);
     Q_Q(QWebSocket);
     QAbstractSocket::SocketState webSocketState = this->state();
-    int port = 80;
-    if (m_request.url().scheme() == QStringLiteral("wss"))
-        port = 443;
 
     switch (socketState) {
     case QAbstractSocket::ConnectedState:
@@ -1120,11 +1140,10 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
 
             const auto format = QUrl::RemoveScheme | QUrl::RemoveUserInfo
                                 | QUrl::RemovePath | QUrl::RemoveQuery
-                                | QUrl::RemoveFragment | QUrl::RemovePort;
+                                | QUrl::RemoveFragment;
             const QString host = m_request.url().toString(format).mid(2);
             const QString handshake = createHandShakeRequest(m_resourceName,
-                                                             host % QStringLiteral(":")
-                                                                  % QString::number(m_request.url().port(port)),
+                                                             host,
                                                              origin(),
                                                              QString(),
                                                              QString(),

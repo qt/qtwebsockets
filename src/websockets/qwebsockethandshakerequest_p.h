@@ -91,7 +91,7 @@ private:
     int m_port;
     bool m_isSecure;
     bool m_isValid;
-    QMap<QString, QString> m_headers;
+    QMultiMap<QString, QString> m_headers;
     QList<QWebSocketProtocol::Version> m_versions;
     QString m_key;
     QString m_origin;

@@ -201,8 +201,8 @@ void tst_WebSocketFrame::tst_copyConstructorAndAssignment()
     frame.readFrame(&buffer);
     buffer.close();
 
+    auto compareFrames = [](const QWebSocketFrame &other, const QWebSocketFrame &frame)
     {
-        QWebSocketFrame other(frame);
         QCOMPARE(other.closeCode(), frame.closeCode());
         QCOMPARE(other.closeReason(), frame.closeReason());
         QCOMPARE(other.hasMask(), frame.hasMask());
@@ -217,24 +217,20 @@ void tst_WebSocketFrame::tst_copyConstructorAndAssignment()
         QCOMPARE(other.rsv1(), frame.rsv1());
         QCOMPARE(other.rsv2(), frame.rsv2());
         QCOMPARE(other.rsv3(), frame.rsv3());
+    };
+
+    {
+        QWebSocketFrame other(frame);
+        compareFrames(other, frame);
     }
     {
         QWebSocketFrame other;
         other = frame;
-        QCOMPARE(other.closeCode(), frame.closeCode());
-        QCOMPARE(other.closeReason(), frame.closeReason());
-        QCOMPARE(other.hasMask(), frame.hasMask());
-        QCOMPARE(other.isContinuationFrame(), frame.isContinuationFrame());
-        QCOMPARE(other.isControlFrame(), frame.isControlFrame());
-        QCOMPARE(other.isDataFrame(), frame.isDataFrame());
-        QCOMPARE(other.isFinalFrame(), frame.isFinalFrame());
-        QCOMPARE(other.isValid(), frame.isValid());
-        QCOMPARE(other.mask(), frame.mask());
-        QCOMPARE(other.opCode(), frame.opCode());
-        QCOMPARE(other.payload(), frame.payload());
-        QCOMPARE(other.rsv1(), frame.rsv1());
-        QCOMPARE(other.rsv2(), frame.rsv2());
-        QCOMPARE(other.rsv3(), frame.rsv3());
+        compareFrames(other, frame);
+        QWebSocketFrame other2 = std::move(other);
+        compareFrames(other2, frame);
+        QWebSocketFrame other3(std::move(other2));
+        compareFrames(other3, frame);
     }
 }
 

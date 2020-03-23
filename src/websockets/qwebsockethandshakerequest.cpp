@@ -230,7 +230,7 @@ void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream, int maxH
         clear();
         return;
     }
-    const QStringList tokens = requestLine.split(' ', QString::SkipEmptyParts);
+    const QStringList tokens = requestLine.split(' ', Qt::SkipEmptyParts);
     if (Q_UNLIKELY(tokens.length() < 3)) {
         clear();
         return;
@@ -268,8 +268,8 @@ void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream, int maxH
                clear();
                return;
             }
-            lastHeader = m_headers.insertMulti(headerLine.left(colonPos).trimmed().toLower(),
-                                               headerLine.mid(colonPos + 1).trimmed());
+            lastHeader = m_headers.insert(headerLine.left(colonPos).trimmed().toLower(),
+                                          headerLine.mid(colonPos + 1).trimmed());
         }
         if (m_headers.size() > maxHeaders) {
             clear();
@@ -301,7 +301,7 @@ void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream, int maxH
 
     const QStringList versionLines = m_headers.values(QStringLiteral("sec-websocket-version"));
     for (QStringList::const_iterator v = versionLines.begin(); v != versionLines.end(); ++v) {
-        const QStringList versions = (*v).split(QStringLiteral(","), QString::SkipEmptyParts);
+        const QStringList versions = (*v).split(QStringLiteral(","), Qt::SkipEmptyParts);
         for (QStringList::const_iterator i = versions.begin(); i != versions.end(); ++i) {
             bool ok = false;
             (void)(*i).toUInt(&ok);
@@ -321,8 +321,7 @@ void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream, int maxH
     const QString upgrade = m_headers.value(QStringLiteral("upgrade"), QString());
     //must be equal to "websocket", case-insensitive
     const QString connection = m_headers.value(QStringLiteral("connection"), QString());
-    const QStringList connectionLine = connection.split(QStringLiteral(","),
-                                                        QString::SkipEmptyParts);
+    const QStringList connectionLine = connection.split(QStringLiteral(","), Qt::SkipEmptyParts);
     QStringList connectionValues;
     for (QStringList::const_iterator c = connectionLine.begin(); c != connectionLine.end(); ++c)
         connectionValues << (*c).trimmed();
@@ -331,14 +330,14 @@ void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream, int maxH
     m_origin = m_headers.value(QStringLiteral("origin"), QString());
     const QStringList protocolLines = m_headers.values(QStringLiteral("sec-websocket-protocol"));
     for (const QString& pl : protocolLines) {
-        const QStringList protocols = pl.split(QStringLiteral(","), QString::SkipEmptyParts);
+        const QStringList protocols = pl.split(QStringLiteral(","), Qt::SkipEmptyParts);
         for (const QString& p : protocols)
             m_protocols << p.trimmed();
     }
 
     const QStringList extensionLines = m_headers.values(QStringLiteral("sec-websocket-extensions"));
     for (const QString& el : extensionLines) {
-        const QStringList extensions = el.split(QStringLiteral(","), QString::SkipEmptyParts);
+        const QStringList extensions = el.split(QStringLiteral(","), Qt::SkipEmptyParts);
         for (const QString& e : extensions)
             m_extensions << e.trimmed();
     }

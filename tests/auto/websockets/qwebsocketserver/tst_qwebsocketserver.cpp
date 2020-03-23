@@ -604,7 +604,6 @@ static void setupSecureServer(QWebSocketServer *secureServer)
     sslConfiguration.setPeerVerifyMode(QSslSocket::VerifyNone);
     sslConfiguration.setLocalCertificate(certificate);
     sslConfiguration.setPrivateKey(sslKey);
-    sslConfiguration.setProtocol(QSsl::TlsV1SslV3);
     secureServer->setSslConfiguration(sslConfiguration);
 }
 #endif
@@ -782,7 +781,7 @@ void tst_QWebSocketServer::tst_handshakeTimeout()
         setupSecureServer(&secureServer);
         if (QTest::currentTestFailed())
             return;
-        secureServer.setHandshakeTimeout(500);
+        secureServer.setHandshakeTimeout(2000);
 
         QSignalSpy secureServerConnectionSpy(&secureServer, SIGNAL(newConnection()));
 
@@ -797,6 +796,11 @@ void tst_QWebSocketServer::tst_handshakeTimeout()
         QCOMPARE(secureServerConnectionSpy.count(), 0);
 
         QWebSocket secureSocket;
+        connect(&secureSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error),
+                [](QAbstractSocket::SocketError error) {
+                    // This shouldn't print but it's useful for debugging when/if it does.
+                    qDebug() << "Error occurred in the client:" << error;
+                });
         QSslConfiguration config = secureSocket.sslConfiguration();
         config.setPeerVerifyMode(QSslSocket::VerifyNone);
         secureSocket.setSslConfiguration(config);
