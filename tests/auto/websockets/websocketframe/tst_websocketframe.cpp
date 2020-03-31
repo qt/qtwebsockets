@@ -541,7 +541,7 @@ void tst_WebSocketFrame::tst_malformedFrames_data()
     //too much data
     {
         const char bigpayloadIndicator = char(127);
-        const quint64 payloadSize = MAX_FRAME_SIZE_IN_BYTES + 1;
+        const quint64 payloadSize = QWebSocketFrame::maxFrameSize() + 1;
         uchar swapped[8] = {0};
         qToBigEndian<quint64>(payloadSize, swapped);
         QTest::newRow("Frame too big")

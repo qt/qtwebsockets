@@ -39,7 +39,9 @@ class EchoServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit EchoServer(QObject *parent = nullptr);
+    explicit EchoServer(QObject *parent = nullptr,
+        quint64 maxAllowedIncomingMessageSize = QWebSocket::maxIncomingMessageSize(),
+        quint64 maxAllowedIncomingFrameSize = QWebSocket::maxIncomingFrameSize());
     ~EchoServer();
 
     QHostAddress hostAddress() const { return m_pWebSocketServer->serverAddress(); }
@@ -57,13 +59,17 @@ private Q_SLOTS:
 
 private:
     QWebSocketServer *m_pWebSocketServer;
+    quint64 m_maxAllowedIncomingMessageSize;
+    quint64 m_maxAllowedIncomingFrameSize;
     QList<QWebSocket *> m_clients;
 };
 
-EchoServer::EchoServer(QObject *parent) :
+EchoServer::EchoServer(QObject *parent, quint64 maxAllowedIncomingMessageSize, quint64 maxAllowedIncomingFrameSize) :
     QObject(parent),
     m_pWebSocketServer(new QWebSocketServer(QStringLiteral("Echo Server"),
                                             QWebSocketServer::NonSecureMode, this)),
+    m_maxAllowedIncomingMessageSize(maxAllowedIncomingMessageSize),
+    m_maxAllowedIncomingFrameSize(maxAllowedIncomingFrameSize),
     m_clients()
 {
     if (m_pWebSocketServer->listen(QHostAddress(QStringLiteral("127.0.0.1")))) {
@@ -81,6 +87,9 @@ EchoServer::~EchoServer()
 void EchoServer::onNewConnection()
 {
     QWebSocket *pSocket = m_pWebSocketServer->nextPendingConnection();
+
+    pSocket->setMaxAllowedIncomingFrameSize(m_maxAllowedIncomingFrameSize);
+    pSocket->setMaxAllowedIncomingMessageSize(m_maxAllowedIncomingMessageSize);
 
     Q_EMIT newConnection(pSocket->requestUrl());
     Q_EMIT newConnection(pSocket->request());
@@ -144,6 +153,9 @@ private Q_SLOTS:
     void tst_setProxy();
 #endif
     void overlongCloseReason();
+    void incomingMessageTooLong();
+    void incomingFrameTooLong();
+    void testingFrameAndMessageSizeApi();
 };
 
 tst_QWebSocket::tst_QWebSocket()
@@ -795,6 +807,80 @@ void tst_QWebSocket::overlongCloseReason()
     QCOMPARE(socket.closeReason(), reason.leftRef(123));
     QTRY_COMPARE(socketDisconnectedSpy.count(), 1);
 }
+
+void tst_QWebSocket::incomingMessageTooLong()
+{
+//QTBUG-70693
+    quint64 maxAllowedIncomingMessageSize = 1024;
+    quint64 maxAllowedIncomingFrameSize = QWebSocket::maxIncomingFrameSize();
+
+    EchoServer echoServer(nullptr, maxAllowedIncomingMessageSize, maxAllowedIncomingFrameSize);
+
+    QWebSocket socket;
+
+    QSignalSpy socketConnectedSpy(&socket, &QWebSocket::connected);
+    QSignalSpy serverConnectedSpy(&echoServer, QOverload<QUrl>::of(&EchoServer::newConnection));
+    QSignalSpy socketDisconnectedSpy(&socket, &QWebSocket::disconnected);
+
+    QUrl url = QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
+                    QStringLiteral(":") + QString::number(echoServer.port()));
+    socket.open(url);
+    QTRY_COMPARE(socketConnectedSpy.count(), 1);
+    QTRY_COMPARE(serverConnectedSpy.count(), 1);
+
+    QString payload(maxAllowedIncomingMessageSize+1, 'a');
+    QCOMPARE(socket.sendTextMessage(payload), payload.size());
+
+    QTRY_COMPARE(socketDisconnectedSpy.count(), 1);
+    QCOMPARE(socket.closeCode(), QWebSocketProtocol::CloseCodeTooMuchData);
+}
+
+void tst_QWebSocket::incomingFrameTooLong()
+{
+//QTBUG-70693
+    quint64 maxAllowedIncomingMessageSize = QWebSocket::maxIncomingMessageSize();
+    quint64 maxAllowedIncomingFrameSize = 1024;
+
+    EchoServer echoServer(nullptr, maxAllowedIncomingMessageSize, maxAllowedIncomingFrameSize);
+
+    QWebSocket socket;
+    socket.setOutgoingFrameSize(maxAllowedIncomingFrameSize+1);
+
+    QSignalSpy socketConnectedSpy(&socket, &QWebSocket::connected);
+    QSignalSpy serverConnectedSpy(&echoServer, QOverload<QUrl>::of(&EchoServer::newConnection));
+    QSignalSpy socketDisconnectedSpy(&socket, &QWebSocket::disconnected);
+
+    QUrl url = QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
+                    QStringLiteral(":") + QString::number(echoServer.port()));
+    socket.open(url);
+    QTRY_COMPARE(socketConnectedSpy.count(), 1);
+    QTRY_COMPARE(serverConnectedSpy.count(), 1);
+
+    QString payload(maxAllowedIncomingFrameSize+1, 'a');
+    QCOMPARE(socket.sendTextMessage(payload), payload.size());
+
+    QTRY_COMPARE(socketDisconnectedSpy.count(), 1);
+    QCOMPARE(socket.closeCode(), QWebSocketProtocol::CloseCodeTooMuchData);
+}
+
+void tst_QWebSocket::testingFrameAndMessageSizeApi()
+{
+//requested by André Hartmann, QTBUG-70693
+    QWebSocket socket;
+
+    const quint64 outgoingFrameSize = 5;
+    socket.setOutgoingFrameSize(outgoingFrameSize);
+    QTRY_COMPARE(outgoingFrameSize, socket.outgoingFrameSize());
+
+    const quint64 maxAllowedIncomingFrameSize = 9;
+    socket.setMaxAllowedIncomingFrameSize(maxAllowedIncomingFrameSize);
+    QTRY_COMPARE(maxAllowedIncomingFrameSize, socket.maxAllowedIncomingFrameSize());
+
+    const quint64 maxAllowedIncomingMessageSize = 889;
+    socket.setMaxAllowedIncomingMessageSize(maxAllowedIncomingMessageSize);
+    QTRY_COMPARE(maxAllowedIncomingMessageSize, socket.maxAllowedIncomingMessageSize());
+}
+
 #endif // QT_NO_NETWORKPROXY
 
 QTEST_MAIN(tst_QWebSocket)

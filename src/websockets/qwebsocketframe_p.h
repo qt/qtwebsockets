@@ -65,7 +65,6 @@ QT_BEGIN_NAMESPACE
 class QIODevice;
 
 const quint64 MAX_FRAME_SIZE_IN_BYTES = std::numeric_limits<int>::max() - 1;
-const quint64 MAX_MESSAGE_SIZE_IN_BYTES = std::numeric_limits<int>::max() - 1;
 
 class Q_AUTOTEST_EXPORT QWebSocketFrame
 {
@@ -73,6 +72,10 @@ class Q_AUTOTEST_EXPORT QWebSocketFrame
 
 public:
     QWebSocketFrame() = default;
+
+    void setMaxAllowedFrameSize(quint64 maxAllowedFrameSize);
+    quint64 maxAllowedFrameSize() const;
+    static quint64 maxFrameSize();
 
     QWebSocketProtocol::CloseCode closeCode() const;
     QString closeReason() const;
@@ -118,6 +121,7 @@ private:
     bool m_rsv2 = false;
     bool m_rsv3 = false;
     bool m_isValid = false;
+    quint64 m_maxAllowedFrameSize = MAX_FRAME_SIZE_IN_BYTES;
 
     ProcessingState readFrameHeader(QIODevice *pIoDevice);
     ProcessingState readFramePayloadLength(QIODevice *pIoDevice);

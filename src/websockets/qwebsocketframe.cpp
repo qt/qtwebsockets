@@ -64,6 +64,31 @@ QT_BEGIN_NAMESPACE
 /*!
     \internal
  */
+void QWebSocketFrame::setMaxAllowedFrameSize(quint64 maxAllowedFrameSize)
+{
+    if (maxAllowedFrameSize <= maxFrameSize())
+        m_maxAllowedFrameSize = maxAllowedFrameSize;
+}
+
+/*!
+    \internal
+ */
+quint64 QWebSocketFrame::maxAllowedFrameSize() const
+{
+    return m_maxAllowedFrameSize;
+}
+
+/*!
+    \internal
+ */
+quint64 QWebSocketFrame::maxFrameSize()
+{
+    return MAX_FRAME_SIZE_IN_BYTES;
+}
+
+/*!
+    \internal
+ */
 QWebSocketProtocol::CloseCode QWebSocketFrame::closeCode() const
 {
     return isDone() ? m_closeCode : QWebSocketProtocol::CloseCodeGoingAway;
@@ -354,7 +379,7 @@ QWebSocketFrame::ProcessingState QWebSocketFrame::readFramePayload(QIODevice *pI
     if (!m_length)
         return PS_DISPATCH_RESULT;
 
-    if (Q_UNLIKELY(m_length > MAX_FRAME_SIZE_IN_BYTES)) {
+    if (Q_UNLIKELY(m_length > maxAllowedFrameSize())) {
         setError(QWebSocketProtocol::CloseCodeTooMuchData, tr("Maximum framesize exceeded."));
         return PS_DISPATCH_RESULT;
     }
