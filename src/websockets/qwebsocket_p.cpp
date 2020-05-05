@@ -108,7 +108,6 @@ QWebSocketPrivate::QWebSocketPrivate(const QString &origin, QWebSocketProtocol::
     m_closeCode(QWebSocketProtocol::CloseCodeNormal),
     m_closeReason(),
     m_pingTimer(),
-    m_dataProcessor(),
     m_configuration(),
     m_pMaskGenerator(&m_defaultMaskGenerator),
     m_defaultMaskGenerator(),
@@ -141,7 +140,6 @@ QWebSocketPrivate::QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol:
     m_closeCode(QWebSocketProtocol::CloseCodeNormal),
     m_closeReason(),
     m_pingTimer(),
-    m_dataProcessor(),
     m_configuration(),
     m_pMaskGenerator(&m_defaultMaskGenerator),
     m_defaultMaskGenerator(),
@@ -159,6 +157,7 @@ void QWebSocketPrivate::init()
     Q_ASSERT(q_ptr);
     Q_ASSERT(m_pMaskGenerator);
 
+    m_dataProcessor->setParent(q_ptr);
     m_pMaskGenerator->seed();
 
     if (m_pSocket) {
@@ -391,7 +390,7 @@ void QWebSocketPrivate::open(const QNetworkRequest &request, bool mask)
     }
     //if (m_url != url)
     if (Q_LIKELY(!m_pSocket)) {
-        m_dataProcessor.clear();
+        m_dataProcessor->clear();
         m_isClosingHandshakeReceived = false;
         m_isClosingHandshakeSent = false;
 
@@ -622,21 +621,21 @@ void QWebSocketPrivate::makeConnections(QTcpSocket *pTcpSocket)
         }
     }
 
-    QObject::connect(&m_dataProcessor, &QWebSocketDataProcessor::textFrameReceived, q,
+    QObject::connect(m_dataProcessor, &QWebSocketDataProcessor::textFrameReceived, q,
                      &QWebSocket::textFrameReceived);
-    QObject::connect(&m_dataProcessor, &QWebSocketDataProcessor::binaryFrameReceived, q,
+    QObject::connect(m_dataProcessor, &QWebSocketDataProcessor::binaryFrameReceived, q,
                      &QWebSocket::binaryFrameReceived);
-    QObject::connect(&m_dataProcessor, &QWebSocketDataProcessor::binaryMessageReceived, q,
+    QObject::connect(m_dataProcessor, &QWebSocketDataProcessor::binaryMessageReceived, q,
                      &QWebSocket::binaryMessageReceived);
-    QObject::connect(&m_dataProcessor, &QWebSocketDataProcessor::textMessageReceived, q,
+    QObject::connect(m_dataProcessor, &QWebSocketDataProcessor::textMessageReceived, q,
                      &QWebSocket::textMessageReceived);
-    QObjectPrivate::connect(&m_dataProcessor, &QWebSocketDataProcessor::errorEncountered, this,
+    QObjectPrivate::connect(m_dataProcessor, &QWebSocketDataProcessor::errorEncountered, this,
                             &QWebSocketPrivate::close);
-    QObjectPrivate::connect(&m_dataProcessor, &QWebSocketDataProcessor::pingReceived, this,
+    QObjectPrivate::connect(m_dataProcessor, &QWebSocketDataProcessor::pingReceived, this,
                             &QWebSocketPrivate::processPing);
-    QObjectPrivate::connect(&m_dataProcessor, &QWebSocketDataProcessor::pongReceived, this,
+    QObjectPrivate::connect(m_dataProcessor, &QWebSocketDataProcessor::pongReceived, this,
                             &QWebSocketPrivate::processPong);
-    QObjectPrivate::connect(&m_dataProcessor, &QWebSocketDataProcessor::closeReceived, this,
+    QObjectPrivate::connect(m_dataProcessor, &QWebSocketDataProcessor::closeReceived, this,
                             &QWebSocketPrivate::processClose);
 
     //fire readyread, in case we already have data inside the tcpSocket
@@ -651,7 +650,7 @@ void QWebSocketPrivate::releaseConnections(const QTcpSocket *pTcpSocket)
 {
     if (Q_LIKELY(pTcpSocket))
         pTcpSocket->disconnect();
-    m_dataProcessor.disconnect();
+    m_dataProcessor->disconnect();
 }
 
 /*!
@@ -1181,7 +1180,7 @@ void QWebSocketPrivate::processData()
             if (!m_pSocket->canReadLine())
                 return;
             processHandshake(m_pSocket);
-        } else if (!m_dataProcessor.process(m_pSocket)) {
+        } else if (!m_dataProcessor->process(m_pSocket)) {
             return;
         }
     }
@@ -1311,7 +1310,7 @@ void QWebSocketPrivate::setSocketState(QAbstractSocket::SocketState state)
  */
 void QWebSocketPrivate::setMaxAllowedIncomingFrameSize(quint64 maxAllowedIncomingFrameSize)
 {
-    m_dataProcessor.setMaxAllowedFrameSize(maxAllowedIncomingFrameSize);
+    m_dataProcessor->setMaxAllowedFrameSize(maxAllowedIncomingFrameSize);
 }
 
 /*!
@@ -1319,7 +1318,7 @@ void QWebSocketPrivate::setMaxAllowedIncomingFrameSize(quint64 maxAllowedIncomin
  */
 quint64 QWebSocketPrivate::maxAllowedIncomingFrameSize() const
 {
-    return m_dataProcessor.maxAllowedFrameSize();
+    return m_dataProcessor->maxAllowedFrameSize();
 }
 
 /*!
@@ -1327,7 +1326,7 @@ quint64 QWebSocketPrivate::maxAllowedIncomingFrameSize() const
  */
 void QWebSocketPrivate::setMaxAllowedIncomingMessageSize(quint64 maxAllowedIncomingMessageSize)
 {
-    m_dataProcessor.setMaxAllowedMessageSize(maxAllowedIncomingMessageSize);
+    m_dataProcessor->setMaxAllowedMessageSize(maxAllowedIncomingMessageSize);
 }
 
 /*!
@@ -1335,7 +1334,7 @@ void QWebSocketPrivate::setMaxAllowedIncomingMessageSize(quint64 maxAllowedIncom
  */
 quint64 QWebSocketPrivate::maxAllowedIncomingMessageSize() const
 {
-    return m_dataProcessor.maxAllowedMessageSize();
+    return m_dataProcessor->maxAllowedMessageSize();
 }
 
 /*!

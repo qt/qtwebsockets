@@ -242,7 +242,7 @@ private:
 
     QElapsedTimer m_pingTimer;
 
-    QWebSocketDataProcessor m_dataProcessor;
+    QWebSocketDataProcessor *m_dataProcessor = new QWebSocketDataProcessor();
     QWebSocketConfiguration m_configuration;
 
     QMaskGenerator *m_pMaskGenerator;
