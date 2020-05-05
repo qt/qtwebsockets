@@ -120,7 +120,7 @@ private:
     QTextCodec::ConverterState *m_pConverterState;
     QTextCodec *m_pTextCodec;
     QWebSocketFrame frame;
-    QTimer waitTimer;
+    QTimer *m_waitTimer;
     quint64 m_maxAllowedMessageSize = MAX_MESSAGE_SIZE_IN_BYTES;
 
     bool processControlFrame(const QWebSocketFrame &frame);
