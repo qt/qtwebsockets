@@ -623,7 +623,7 @@ void tst_QWebSocket::tst_errorString()
 
     socket.open(QUrl(QStringLiteral("ws://someserver.on.mars:9999")));
 
-    QTRY_COMPARE(errorSpy.count(), 1);
+    QTRY_COMPARE_WITH_TIMEOUT(errorSpy.count(), 1, 10000);
     QList<QVariant> arguments = errorSpy.takeFirst();
     QAbstractSocket::SocketError socketError =
             qvariant_cast<QAbstractSocket::SocketError>(arguments.at(0));
