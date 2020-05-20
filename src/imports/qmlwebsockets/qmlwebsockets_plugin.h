@@ -51,7 +51,7 @@ class QtWebSocketsDeclarativeModule : public QQmlExtensionPlugin
 
 public:
     QtWebSocketsDeclarativeModule(QObject *parent = 0) : QQmlExtensionPlugin(parent) { }
-    void registerTypes(const char *uri);
+    void registerTypes(const char *uri) override;
 };
 
 QT_END_NAMESPACE
