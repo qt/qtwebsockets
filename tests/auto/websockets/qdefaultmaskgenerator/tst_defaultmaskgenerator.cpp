@@ -83,7 +83,7 @@ void tst_QDefaultMaskGenerator::tst_randomnessWithoutSeed()
     {
         QDefaultMaskGenerator generator;
 
-        QVector<quint32> series1, series2;
+        QList<quint32> series1, series2;
         for (int i = 0; i < 1000; ++i)
             series1 << generator.nextMask();
         for (int i = 0; i < 1000; ++i)
@@ -101,7 +101,7 @@ void tst_QDefaultMaskGenerator::tst_randomnessWithSeed()
         QDefaultMaskGenerator generator;
         generator.seed();
 
-        QVector<quint32> series1, series2;
+        QList<quint32> series1, series2;
         for (int i = 0; i < 1000; ++i)
             series1 << generator.nextMask();
         for (int i = 0; i < 1000; ++i)
@@ -116,7 +116,7 @@ void tst_QDefaultMaskGenerator::tst_randomnessWithSeed()
         generator1.seed();
         generator2.seed();
 
-        QVector<quint32> series1, series2;
+        QList<quint32> series1, series2;
         for (int i = 0; i < 1000; ++i) {
             series1 << generator1.nextMask();
             series2 << generator2.nextMask();
@@ -130,7 +130,7 @@ void tst_QDefaultMaskGenerator::tst_randomnessWithSeed()
         QDefaultMaskGenerator generator1, generator2;
         generator1.seed();
 
-        QVector<quint32> series1, series2;
+        QList<quint32> series1, series2;
         for (int i = 0; i < 1000; ++i) {
             series1 << generator1.nextMask();
             series2 << generator2.nextMask();
