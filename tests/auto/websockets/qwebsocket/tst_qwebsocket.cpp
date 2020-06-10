@@ -804,7 +804,7 @@ void tst_QWebSocket::overlongCloseReason()
     QCOMPARE(socket.closeCode(), QWebSocketProtocol::CloseCodeGoingAway);
     // Max length of a control frame is 125, but 2 bytes are used for the close code:
     QCOMPARE(socket.closeReason().length(), 123);
-    QCOMPARE(socket.closeReason(), reason.leftRef(123));
+    QCOMPARE(socket.closeReason(), reason.left(123));
     QTRY_COMPARE(socketDisconnectedSpy.count(), 1);
 }
 
