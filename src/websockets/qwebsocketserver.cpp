@@ -263,7 +263,7 @@ QWebSocketServer::QWebSocketServer(const QString &serverName, SslMode secureMode
                                       )), parent)
 {
 #ifdef QT_NO_SSL
-    Q_UNUSED(secureMode)
+    Q_UNUSED(secureMode);
 #endif
     Q_D(QWebSocketServer);
     d->init();

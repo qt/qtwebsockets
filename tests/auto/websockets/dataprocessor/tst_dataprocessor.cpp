@@ -1359,7 +1359,7 @@ void tst_DataProcessor::invalidPayloadInCloseFrame()
     QFETCH(bool, isContinuationFrame);
     QFETCH(QWebSocketProtocol::CloseCode, expectedCloseCode);
 
-    Q_UNUSED(isContinuationFrame)
+    Q_UNUSED(isContinuationFrame);
 
     QByteArray data;
     QBuffer buffer;
@@ -1507,7 +1507,7 @@ void tst_DataProcessor::doCloseFrameTest()
     QFETCH(bool, isContinuationFrame);
     QFETCH(QWebSocketProtocol::CloseCode, expectedCloseCode);
 
-    Q_UNUSED(isContinuationFrame)
+    Q_UNUSED(isContinuationFrame);
 
     QByteArray data;
     QBuffer buffer;

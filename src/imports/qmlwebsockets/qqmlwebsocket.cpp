@@ -232,7 +232,7 @@ void QQmlWebSocket::setSocket(QWebSocket *socket)
 
 void QQmlWebSocket::onError(QAbstractSocket::SocketError error)
 {
-    Q_UNUSED(error)
+    Q_UNUSED(error);
     setErrorString(m_webSocket->errorString());
     setStatus(Error);
 }

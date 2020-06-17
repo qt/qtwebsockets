@@ -167,7 +167,7 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
 
 void QWebSocketPrivate::open(const QNetworkRequest &request, bool mask)
 {
-    Q_UNUSED(mask)
+    Q_UNUSED(mask);
     Q_Q(QWebSocket);
     const QUrl url = request.url();
     if (!url.isValid() || url.toString().contains(QStringLiteral("\r\n"))) {
