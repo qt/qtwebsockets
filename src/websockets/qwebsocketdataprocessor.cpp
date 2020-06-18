@@ -60,9 +60,8 @@
 #include "qwebsocketframe_p.h"
 
 #include <QtCore/QtEndian>
-#include <QtCore/QTextCodec>
-#include <QtCore/QTextDecoder>
 #include <QtCore/QDebug>
+#include <QtCore/QStringDecoder>
 
 #include <limits.h>
 
@@ -83,8 +82,8 @@ QWebSocketDataProcessor::QWebSocketDataProcessor(QObject *parent) :
     m_binaryMessage(),
     m_textMessage(),
     m_payloadLength(0),
-    m_pConverterState(nullptr),
-    m_pTextCodec(QTextCodec::codecForName("UTF-8")),
+    m_decoder(QStringDecoder(QStringDecoder::Utf8, QStringDecoder::Flag::Stateless
+        | QStringDecoder::Flag::ConvertInvalidToNull)),
     m_waitTimer(new QTimer(this))
 {
     clear();
@@ -100,10 +99,6 @@ QWebSocketDataProcessor::QWebSocketDataProcessor(QObject *parent) :
 QWebSocketDataProcessor::~QWebSocketDataProcessor()
 {
     clear();
-    if (m_pConverterState) {
-        delete m_pConverterState;
-        m_pConverterState = nullptr;
-    }
 }
 
 void QWebSocketDataProcessor::setMaxAllowedFrameSize(quint64 maxAllowedFrameSize)
@@ -203,12 +198,9 @@ bool QWebSocketDataProcessor::process(QIODevice *pIoDevice)
                 }
 
                 if (m_opCode == QWebSocketProtocol::OpCodeText) {
-                    QString frameTxt = m_pTextCodec->toUnicode(frame.payload().constData(),
-                                                               frame.payload().size(),
-                                                               m_pConverterState);
-                    bool failed = (m_pConverterState->invalidChars != 0)
-                            || (frame.isFinalFrame() && (m_pConverterState->remainingChars != 0));
-                    if (Q_UNLIKELY(failed)) {
+                    QString frameTxt = m_decoder(frame.payload().constData(),
+                                                 frame.payload().size());
+                    if (Q_UNLIKELY(m_decoder.hasError())) {
                         clear();
                         Q_EMIT errorEncountered(QWebSocketProtocol::CloseCodeWrongDatatype,
                                                 tr("Invalid UTF-8 code encountered."));
@@ -259,15 +251,7 @@ void QWebSocketDataProcessor::clear()
     m_binaryMessage.clear();
     m_textMessage.clear();
     m_payloadLength = 0;
-    if (m_pConverterState) {
-        if ((m_pConverterState->remainingChars != 0) || (m_pConverterState->invalidChars != 0)) {
-            delete m_pConverterState;
-            m_pConverterState = nullptr;
-        }
-    }
-    if (!m_pConverterState)
-        m_pConverterState = new QTextCodec::ConverterState(QTextCodec::ConvertInvalidToNull |
-                                                           QTextCodec::IgnoreHeader);
+    m_decoder.resetState();
 }
 
 /*!
@@ -303,11 +287,10 @@ bool QWebSocketDataProcessor::processControlFrame(const QWebSocketFrame &frame)
                 closeReason = tr("Invalid close code %1 detected.").arg(closeCode);
             } else {
                 if (payload.size() > 2) {
-                    QTextCodec *tc = QTextCodec::codecForName(QByteArrayLiteral("UTF-8"));
-                    QTextCodec::ConverterState state(QTextCodec::ConvertInvalidToNull);
-                    closeReason = tc->toUnicode(payload.constData() + 2, payload.size() - 2, &state);
-                    const bool failed = (state.invalidChars != 0) || (state.remainingChars != 0);
-                    if (Q_UNLIKELY(failed)) {
+                    auto toUtf16 = QStringDecoder(QStringDecoder::Utf8,
+                        QStringDecoder::Flag::Stateless | QStringDecoder::Flag::ConvertInvalidToNull);
+                    closeReason = toUtf16(payload.constData() + 2, payload.size() - 2);
+                    if (Q_UNLIKELY(toUtf16.hasError())) {
                         closeCode = QWebSocketProtocol::CloseCodeWrongDatatype;
                         closeReason = tr("Invalid UTF-8 code encountered.");
                     }

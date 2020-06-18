@@ -54,8 +54,8 @@
 #include <QtCore/QObject>
 #include <QtCore/QByteArray>
 #include <QtCore/QString>
-#include <QtCore/QTextCodec>
-#include <QTimer>
+#include <QtCore/QStringDecoder>
+#include <QtCore/QTimer>
 #include "qwebsocketframe_p.h"
 #include "qwebsocketprotocol.h"
 #include "qwebsocketprotocol_p.h"
@@ -117,8 +117,7 @@ private:
     QByteArray m_binaryMessage;
     QString m_textMessage;
     quint64 m_payloadLength;
-    QTextCodec::ConverterState *m_pConverterState;
-    QTextCodec *m_pTextCodec;
+    QStringDecoder m_decoder;
     QWebSocketFrame frame;
     QTimer *m_waitTimer;
     quint64 m_maxAllowedMessageSize = MAX_MESSAGE_SIZE_IN_BYTES;
