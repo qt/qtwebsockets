@@ -28,6 +28,7 @@
     \module QtWebSockets
     \title Qt WebSockets C++ Classes
     \ingroup modules
+    \qtcmakepackage Websockets
     \qtvariable websockets
     \since 5.3
     \brief List of C++ classes that enable WebSocket-based communication.
