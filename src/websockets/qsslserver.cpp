@@ -107,7 +107,7 @@ QSslConfiguration QSslServer::sslConfiguration() const
 */
 void QSslServer::incomingConnection(qintptr socket)
 {
-    QSslSocket *pSslSocket = new QSslSocket();
+    QSslSocket *pSslSocket = new QSslSocket(this);
 
     if (Q_LIKELY(pSslSocket)) {
         pSslSocket->setSslConfiguration(m_sslConfiguration);
