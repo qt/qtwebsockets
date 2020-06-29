@@ -410,7 +410,7 @@ void tst_DataProcessor::goodControlFrame()
     QSignalSpy pongReceivedSpy(&dataProcessor, SIGNAL(pongReceived(QByteArray)));
 
     data.append(char(FIN | QWebSocketProtocol::OpCodePing));
-    data.append(QChar::fromLatin1(0));
+    data.append('\0');
     buffer.setData(data);
     buffer.open(QIODevice::ReadOnly);
     dataProcessor.process(&buffer);
@@ -428,7 +428,7 @@ void tst_DataProcessor::goodControlFrame()
     pingReceivedSpy.clear();
     pongReceivedSpy.clear();
     data.append(char(FIN | QWebSocketProtocol::OpCodePong));
-    data.append(QChar::fromLatin1(0));
+    data.append('\0');
     buffer.setData(data);
     buffer.open(QIODevice::ReadOnly);
     dataProcessor.process(&buffer);
@@ -589,11 +589,11 @@ void tst_DataProcessor::goodCloseFrame()
     data.append(char(FIN | QWebSocketProtocol::OpCodeClose));
     if (swapped != 0)
     {
-        data.append(char(payload.length() + 2)).append(wireRepresentation, 2).append(payload);
+        data.append(char(payload.length() + 2)).append(wireRepresentation, 2).append(payload.toUtf8());
     }
     else
     {
-        data.append(QChar::fromLatin1(0));  //payload length 0;
+        data.append('\0');  //payload length 0;
         //dataprocessor emits a CloseCodeNormal close code when none is present
         closeCode = QWebSocketProtocol::CloseCodeNormal;
     }
