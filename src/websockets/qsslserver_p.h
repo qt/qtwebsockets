@@ -78,8 +78,8 @@ Q_SIGNALS:
     void peerVerifyError(const QSslError &error);
     void newEncryptedConnection();
     void preSharedKeyAuthenticationRequired(QSslPreSharedKeyAuthenticator *authenticator);
-    void alertSent(QAlertLevel level, QAlertType type, const QString &description);
-    void alertReceived(QAlertLevel level, QAlertType type, const QString &description);
+    void alertSent(QSsl::AlertLevel level, QSsl::AlertType type, const QString &description);
+    void alertReceived(QSsl::AlertLevel level, QSsl::AlertType type, const QString &description);
     void handshakeInterruptedOnError(const QSslError &error);
     void startedEncryptionHandshake(QSslSocket *socket);
 

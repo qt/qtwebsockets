@@ -279,7 +279,7 @@ not been filled in with new information when the signal returns.
     \sa sslErrors()
 */
 /*!
-    \fn void QWebSocket::alertSent(QAlertLevel level, QAlertType type, const QString &description)
+    \fn void QWebSocket::alertSent(QSsl::AlertLevel level, QSsl::AlertType type, const QString &description)
     \since 6.0
 
     QWebSocket emits this signal if an alert message was sent to a peer. \a level
@@ -291,10 +291,10 @@ not been filled in with new information when the signal returns.
     purposes, normally it does not require any actions from the application.
     \note Not all backends support this functionality.
 
-    \sa alertReceived(), QSslSocket::QAlertLevel, QSslSocket::QAlertType
+    \sa alertReceived(), QSsl::AlertLevel, QSsl::AlertType
 */
 /*!
-    \fn void QWebSocket::alertReceived(QAlertLevel level, QAlertType type, const QString &description)
+    \fn void QWebSocket::alertReceived(QSsl::AlertLevel level, QSsl::AlertType type, const QString &description)
     \since 6.0
 
     QWebSocket emits this signal if an alert message was received from a peer.
@@ -307,7 +307,7 @@ not been filled in with new information when the signal returns.
     backend will handle it and close the connection.
     \note Not all backends support this functionality.
 
-    \sa alertSent(), QSslSocket::QAlertLevel, QSslSocket::QAlertType
+    \sa alertSent(), QSsl::AlertLevel, QSsl::AlertType
 */
 /*!
     \fn void QWebSocket::handshakeInterruptedOnError(const QSslError &error)
