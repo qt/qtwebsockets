@@ -104,24 +104,3 @@
     \externalpage https://bugzilla.mozilla.org/show_bug.cgi?id=594502
     \title Firefox bug 594502
 */
-
-/*
-    This prevents autolinking of each occurrence of 'WebSocket'
-    To link to the WebSocket QML type, use explicit linking:
-        \l [QML] WebSocket
-        \sa {QtWebSockets::}{WebSocket}
-*/
-/*!
-    \externalpage nolink
-    \title WebSocket
-    \internal
-*/
-
-/*
-    Prevent linking to WebSockets section in "Networking and Connectivity"
-*/
-/*!
-    \externalpage nolink
-    \title WebSockets
-    \internal
-*/
