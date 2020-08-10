@@ -119,7 +119,7 @@ bool QWebSocketHandshakeRequest::isValid() const
 /*!
     \internal
  */
-QMap<QString, QString> QWebSocketHandshakeRequest::headers() const
+QMultiMap<QString, QString> QWebSocketHandshakeRequest::headers() const
 {
     return m_headers;
 }

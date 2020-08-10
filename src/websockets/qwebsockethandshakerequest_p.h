@@ -74,7 +74,7 @@ public:
     int port() const;
     bool isSecure() const;
     bool isValid() const;
-    QMap<QString, QString> headers() const;
+    QMultiMap<QString, QString> headers() const;
     QList<QWebSocketProtocol::Version> versions() const;
     QString key() const;
     QString origin() const;
