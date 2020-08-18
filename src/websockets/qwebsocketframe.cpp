@@ -58,6 +58,7 @@
 
 #include <QtCore/QtEndian>
 #include <QtCore/QDebug>
+#include <QtCore/QIODevice>
 
 QT_BEGIN_NAMESPACE
 

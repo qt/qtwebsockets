@@ -61,6 +61,7 @@
 
 #include <QtCore/QtEndian>
 #include <QtCore/QDebug>
+#include <QtCore/QIODevice>
 #include <QtCore/QStringDecoder>
 
 #include <limits.h>
