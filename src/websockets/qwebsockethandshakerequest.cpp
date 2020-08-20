@@ -239,7 +239,7 @@ void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream, int maxH
     const QString resourceName(tokens.at(1));
     const QString httpProtocol(tokens.at(2));
     bool conversionOk = false;
-    const float httpVersion = httpProtocol.midRef(5).toFloat(&conversionOk);
+    const float httpVersion = QStringView(httpProtocol).mid(5).toFloat(&conversionOk);
 
     if (Q_UNLIKELY(!conversionOk)) {
         clear();
