@@ -230,7 +230,7 @@ void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream, int maxH
         clear();
         return;
     }
-    const QStringList tokens = requestLine.split(' ', Qt::SkipEmptyParts);
+    const QStringList tokens = requestLine.split(QLatin1Char(' '), Qt::SkipEmptyParts);
     if (Q_UNLIKELY(tokens.length() < 3)) {
         clear();
         return;
