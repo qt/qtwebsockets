@@ -17,7 +17,7 @@ set(INSTALL_EXAMPLEDIR "${INSTALL_EXAMPLESDIR}/websockets/simplechat")
 
 find_package(Qt6 COMPONENTS WebSockets)
 
-add_executable(chatserver
+qt_add_executable(chatserver
     chatserver.cpp chatserver.h
     main.cpp
 )

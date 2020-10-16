@@ -17,7 +17,7 @@ set(INSTALL_EXAMPLEDIR "${INSTALL_EXAMPLESDIR}/websockets/sslechoclient")
 
 find_package(Qt6 COMPONENTS WebSockets)
 
-add_executable(sslechoclient
+qt_add_executable(sslechoclient
     main.cpp
     sslechoclient.cpp sslechoclient.h
 )

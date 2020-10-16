@@ -17,7 +17,7 @@ set(INSTALL_EXAMPLEDIR "${INSTALL_EXAMPLESDIR}/websockets/echoserver")
 
 find_package(Qt6 COMPONENTS WebSockets)
 
-add_executable(echoserver
+qt_add_executable(echoserver
     echoserver.cpp echoserver.h
     main.cpp
 )
