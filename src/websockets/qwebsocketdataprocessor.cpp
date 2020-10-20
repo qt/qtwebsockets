@@ -199,8 +199,7 @@ bool QWebSocketDataProcessor::process(QIODevice *pIoDevice)
                 }
 
                 if (m_opCode == QWebSocketProtocol::OpCodeText) {
-                    QString frameTxt = m_decoder(frame.payload().constData(),
-                                                 frame.payload().size());
+                    QString frameTxt = m_decoder(frame.payload());
                     if (Q_UNLIKELY(m_decoder.hasError())) {
                         clear();
                         Q_EMIT errorEncountered(QWebSocketProtocol::CloseCodeWrongDatatype,
@@ -290,7 +289,7 @@ bool QWebSocketDataProcessor::processControlFrame(const QWebSocketFrame &frame)
                 if (payload.size() > 2) {
                     auto toUtf16 = QStringDecoder(QStringDecoder::Utf8,
                         QStringDecoder::Flag::Stateless | QStringDecoder::Flag::ConvertInvalidToNull);
-                    closeReason = toUtf16(payload.constData() + 2, payload.size() - 2);
+                    closeReason = toUtf16(QByteArrayView(payload).sliced(2));
                     if (Q_UNLIKELY(toUtf16.hasError())) {
                         closeCode = QWebSocketProtocol::CloseCodeWrongDatatype;
                         closeReason = tr("Invalid UTF-8 code encountered.");
