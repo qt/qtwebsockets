@@ -23,6 +23,10 @@ find_package(Qt6 COMPONENTS WebSockets)
 qt_add_executable(qmlwebsocketclient
     main.cpp
 )
+set_target_properties(qmlwebsocketclient PROPERTIES
+    WIN32_EXECUTABLE TRUE
+    MACOSX_BUNDLE FALSE
+)
 target_link_libraries(qmlwebsocketclient PUBLIC
     Qt::Core
     Qt::Gui

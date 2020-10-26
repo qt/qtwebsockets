@@ -21,6 +21,10 @@ qt_add_executable(chatserver
     chatserver.cpp chatserver.h
     main.cpp
 )
+set_target_properties(chatserver PROPERTIES
+    WIN32_EXECUTABLE FALSE
+    MACOSX_BUNDLE FALSE
+)
 target_link_libraries(chatserver PUBLIC
     Qt::WebSockets
 )

@@ -22,6 +22,10 @@ qt_add_executable(echoclient
     echoclient.cpp echoclient.h
     main.cpp
 )
+set_target_properties(echoclient PROPERTIES
+    WIN32_EXECUTABLE FALSE
+    MACOSX_BUNDLE FALSE
+)
 target_link_libraries(echoclient PUBLIC
     Qt::Core
     Qt::WebSockets

@@ -21,6 +21,10 @@ qt_add_executable(echoserver
     echoserver.cpp echoserver.h
     main.cpp
 )
+set_target_properties(echoserver PROPERTIES
+    WIN32_EXECUTABLE FALSE
+    MACOSX_BUNDLE FALSE
+)
 target_link_libraries(echoserver PUBLIC
     Qt::WebSockets
 )

@@ -21,6 +21,10 @@ qt_add_executable(sslechoserver
     main.cpp
     sslechoserver.cpp sslechoserver.h
 )
+set_target_properties(sslechoserver PROPERTIES
+    WIN32_EXECUTABLE FALSE
+    MACOSX_BUNDLE FALSE
+)
 target_link_libraries(sslechoserver PUBLIC
     Qt::WebSockets
 )
