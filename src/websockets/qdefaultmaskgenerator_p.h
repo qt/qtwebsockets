@@ -64,8 +64,8 @@ public:
     explicit QDefaultMaskGenerator(QObject *parent = nullptr);
     ~QDefaultMaskGenerator() override;
 
-    bool seed() Q_DECL_NOEXCEPT override;
-    quint32 nextMask() Q_DECL_NOEXCEPT override;
+    bool seed() noexcept override;
+    quint32 nextMask() noexcept override;
 };
 
 QT_END_NAMESPACE

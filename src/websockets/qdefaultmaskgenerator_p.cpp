@@ -84,7 +84,7 @@ QDefaultMaskGenerator::~QDefaultMaskGenerator()
 /*!
     \internal
 */
-bool QDefaultMaskGenerator::seed() Q_DECL_NOEXCEPT
+bool QDefaultMaskGenerator::seed() noexcept
 {
     return true;
 }
@@ -94,7 +94,7 @@ bool QDefaultMaskGenerator::seed() Q_DECL_NOEXCEPT
 
     \internal
 */
-quint32 QDefaultMaskGenerator::nextMask() Q_DECL_NOEXCEPT
+quint32 QDefaultMaskGenerator::nextMask() noexcept
 {
     quint32 value = QRandomGenerator::global()->generate();
     while (Q_UNLIKELY(value == 0)) {
