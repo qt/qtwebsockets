@@ -90,7 +90,24 @@ public:
 
 public:
 #ifndef QT_NO_SSL
-    QSslConfiguration m_sslConfiguration;
+    struct TlsConfigurationLazy {
+        TlsConfigurationLazy &operator = (const QSslConfiguration &rhs)
+        {
+            tlsConfiguration.reset(new QSslConfiguration(rhs));
+            return *this;
+        }
+
+        operator QSslConfiguration() const
+        {
+            if (!tlsConfiguration.get())
+                tlsConfiguration.reset(new QSslConfiguration(QSslConfiguration::defaultConfiguration()));
+            return *tlsConfiguration.get();
+        }
+
+        mutable std::unique_ptr<QSslConfiguration> tlsConfiguration;
+    };
+
+    TlsConfigurationLazy m_sslConfiguration;
     QList<QSslError> m_ignoredSslErrors;
     bool m_ignoreSslErrors;
 #endif

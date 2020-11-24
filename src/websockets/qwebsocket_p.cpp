@@ -74,7 +74,6 @@ const quint64 DEFAULT_OUTGOING_FRAME_SIZE_IN_BYTES = 512 * 512 * 2; //default si
 
 QWebSocketConfiguration::QWebSocketConfiguration() :
 #ifndef QT_NO_SSL
-    m_sslConfiguration(QSslConfiguration::defaultConfiguration()),
     m_ignoredSslErrors(),
     m_ignoreSslErrors(false),
 #endif
