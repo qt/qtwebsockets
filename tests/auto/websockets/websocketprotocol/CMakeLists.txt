@@ -8,7 +8,7 @@ endif()
 ## tst_websocketprotocol Test:
 #####################################################################
 
-qt_add_test(tst_websocketprotocol
+qt_internal_add_test(tst_websocketprotocol
     SOURCES
         tst_websocketprotocol.cpp
     PUBLIC_LIBRARIES

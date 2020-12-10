@@ -8,7 +8,7 @@ endif()
 ## tst_handshakeresponse Test:
 #####################################################################
 
-qt_add_test(tst_handshakeresponse
+qt_internal_add_test(tst_handshakeresponse
     SOURCES
         tst_handshakeresponse.cpp
     PUBLIC_LIBRARIES

@@ -8,7 +8,7 @@ endif()
 ## tst_defaultmaskgenerator Test:
 #####################################################################
 
-qt_add_test(tst_defaultmaskgenerator
+qt_internal_add_test(tst_defaultmaskgenerator
     SOURCES
         tst_defaultmaskgenerator.cpp
     PUBLIC_LIBRARIES

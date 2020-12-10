@@ -8,7 +8,7 @@ endif()
 ## tst_dataprocessor Test:
 #####################################################################
 
-qt_add_test(tst_dataprocessor
+qt_internal_add_test(tst_dataprocessor
     SOURCES
         tst_dataprocessor.cpp
     PUBLIC_LIBRARIES

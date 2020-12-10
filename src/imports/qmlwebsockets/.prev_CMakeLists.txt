@@ -4,7 +4,7 @@
 ## qmlwebsockets Plugin:
 #####################################################################
 
-qt_add_qml_module(qmlwebsockets
+qt_internal_add_qml_module(qmlwebsockets
     URI "QtWebSockets"
     VERSION "1.${CMAKE_PROJECT_VERSION_MINOR}"
     CLASSNAME QtWebSocketsDeclarativeModule
