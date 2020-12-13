@@ -447,6 +447,9 @@ void QWebSocket::open(const QNetworkRequest &request)
     The size of the \a payload cannot be bigger than 125.
     If it is larger, the \a payload is clipped to 125 bytes.
 
+    \note QWebSocket and QWebSocketServer handles ping requests internally,
+    which means they automatically send back a pong response to the peer.
+
     \sa pong()
  */
 void QWebSocket::ping(const QByteArray &payload)
