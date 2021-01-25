@@ -252,6 +252,7 @@ void QWebSocketDataProcessor::clear()
     m_textMessage.clear();
     m_payloadLength = 0;
     m_decoder.resetState();
+    frame.clear();
 }
 
 /*!
