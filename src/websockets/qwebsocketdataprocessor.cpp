@@ -259,6 +259,7 @@ void QWebSocketDataProcessor::clear()
     m_binaryMessage.clear();
     m_textMessage.clear();
     m_payloadLength = 0;
+    frame.clear();
     if (m_pConverterState) {
         if ((m_pConverterState->remainingChars != 0) || (m_pConverterState->invalidChars != 0)) {
             delete m_pConverterState;
