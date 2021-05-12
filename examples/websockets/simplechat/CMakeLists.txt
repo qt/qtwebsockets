@@ -1,7 +1,7 @@
 # Generated from simplechat.pro.
 
 cmake_minimum_required(VERSION 3.14)
-project(chatserver LANGUAGES CXX)
+project(simplechatserver LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -17,19 +17,19 @@ set(INSTALL_EXAMPLEDIR "${INSTALL_EXAMPLESDIR}/websockets/simplechat")
 
 find_package(Qt6 COMPONENTS WebSockets)
 
-qt_add_executable(chatserver
+qt_add_executable(simplechatserver
     chatserver.cpp chatserver.h
     main.cpp
 )
-set_target_properties(chatserver PROPERTIES
+set_target_properties(simplechatserver PROPERTIES
     WIN32_EXECUTABLE FALSE
     MACOSX_BUNDLE FALSE
 )
-target_link_libraries(chatserver PUBLIC
+target_link_libraries(simplechatserver PUBLIC
     Qt::WebSockets
 )
 
-install(TARGETS chatserver
+install(TARGETS simplechatserver
     RUNTIME DESTINATION "${INSTALL_EXAMPLEDIR}"
     BUNDLE DESTINATION "${INSTALL_EXAMPLEDIR}"
     LIBRARY DESTINATION "${INSTALL_EXAMPLEDIR}"

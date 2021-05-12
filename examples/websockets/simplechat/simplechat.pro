@@ -1,6 +1,6 @@
 QT = websockets
 
-TARGET = chatserver
+TARGET = simplechatserver
 CONFIG   += console
 CONFIG   -= app_bundle
 
