@@ -1,14 +1,13 @@
-# Generated from qmlwebsockets.pro.
-
-#####################################################################
-## qmlwebsockets Plugin:
-#####################################################################
-
 qt_internal_add_qml_module(qmlwebsockets
     URI "QtWebSockets"
-    VERSION "1.0" #special case
-    CLASSNAME QtWebSocketsDeclarativeModule
-    SKIP_TYPE_REGISTRATION
+    VERSION "${PROJECT_VERSION}"
+    PAST_MAJOR_VERSIONS 1
+    CLASS_NAME QtWebSocketsDeclarativeModule
+    PLUGIN_TARGET qmlwebsockets
+    NO_PLUGIN_OPTIONAL
+    NO_GENERATE_PLUGIN_SOURCE
+    NO_GENERATE_QMLTYPES
+    INSTALL_SOURCE_QMLTYPES "plugins.qmltypes"
     SOURCES
         qmlwebsockets_plugin.cpp qmlwebsockets_plugin.h
         qqmlwebsocket.cpp qqmlwebsocket.h
@@ -19,7 +18,3 @@ qt_internal_add_qml_module(qmlwebsockets
         Qt::WebSockets
 )
 
-#### Keys ignored in scope 1:.:.:qmlwebsockets.pro:<TRUE>:
-# IMPORT_VERSION = "1.$$QT_MINOR_VERSION"
-# OTHER_FILES = "qmldir"
-# TARGETPATH = "QtWebSockets"
