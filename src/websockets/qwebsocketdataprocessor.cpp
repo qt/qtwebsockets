@@ -198,6 +198,7 @@ bool QWebSocketDataProcessor::process(QIODevice *pIoDevice)
                     return true;
                 }
 
+                bool isFinalFrame = frame.isFinalFrame();
                 if (m_opCode == QWebSocketProtocol::OpCodeText) {
                     QString frameTxt = m_decoder(frame.payload());
                     if (Q_UNLIKELY(m_decoder.hasError())) {
@@ -207,14 +208,17 @@ bool QWebSocketDataProcessor::process(QIODevice *pIoDevice)
                         return true;
                     } else {
                         m_textMessage.append(frameTxt);
-                        Q_EMIT textFrameReceived(frameTxt, frame.isFinalFrame());
+                        frame.clear();
+                        Q_EMIT textFrameReceived(frameTxt, isFinalFrame);
                     }
                 } else {
                     m_binaryMessage.append(frame.payload());
-                    Q_EMIT binaryFrameReceived(frame.payload(), frame.isFinalFrame());
+                    QByteArray payload = frame.payload();
+                    frame.clear();
+                    Q_EMIT binaryFrameReceived(payload, isFinalFrame);
                 }
 
-                if (frame.isFinalFrame()) {
+                if (isFinalFrame) {
                     isDone = true;
                     if (m_opCode == QWebSocketProtocol::OpCodeText) {
                         const QString textMessage(m_textMessage);
