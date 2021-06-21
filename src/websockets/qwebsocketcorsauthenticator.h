@@ -40,7 +40,7 @@
 #define QWEBSOCKETCORSAUTHENTICATOR_H
 
 #include "QtWebSockets/qwebsockets_global.h"
-#include <QtCore/QScopedPointer>
+#include <memory>
 
 QT_BEGIN_NAMESPACE
 
@@ -55,12 +55,10 @@ public:
     ~QWebSocketCorsAuthenticator();
     explicit QWebSocketCorsAuthenticator(const QWebSocketCorsAuthenticator &other);
 
-#ifdef Q_COMPILER_RVALUE_REFS
-    QWebSocketCorsAuthenticator(QWebSocketCorsAuthenticator &&other);
-    QWebSocketCorsAuthenticator &operator =(QWebSocketCorsAuthenticator &&other);
-#endif
+    QWebSocketCorsAuthenticator(QWebSocketCorsAuthenticator &&other) noexcept;
+    QWebSocketCorsAuthenticator &operator =(QWebSocketCorsAuthenticator &&other) noexcept;
 
-    void swap(QWebSocketCorsAuthenticator &other);
+    void swap(QWebSocketCorsAuthenticator &other) noexcept;
 
     QWebSocketCorsAuthenticator &operator =(const QWebSocketCorsAuthenticator &other);
 
@@ -70,7 +68,7 @@ public:
     bool allowed() const;
 
 private:
-    QScopedPointer<QWebSocketCorsAuthenticatorPrivate> d_ptr;
+    std::unique_ptr<QWebSocketCorsAuthenticatorPrivate> d_ptr;
 };
 
 QT_END_NAMESPACE

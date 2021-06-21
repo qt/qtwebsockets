@@ -122,33 +122,30 @@ QWebSocketCorsAuthenticator::operator =(const QWebSocketCorsAuthenticator &other
     return *this;
 }
 
-#ifdef Q_COMPILER_RVALUE_REFS
 /*!
   Move-constructs a QWebSocketCorsAuthenticator, making it point at the same
   object \a other was pointing to.
  */
-QWebSocketCorsAuthenticator::QWebSocketCorsAuthenticator(QWebSocketCorsAuthenticator &&other) :
-    d_ptr(other.d_ptr.take())
+QWebSocketCorsAuthenticator::QWebSocketCorsAuthenticator(QWebSocketCorsAuthenticator &&other) noexcept :
+    d_ptr(other.d_ptr.release())
 {}
 
 /*!
   Move-assigns \a other to this instance.
  */
 QWebSocketCorsAuthenticator &
-QWebSocketCorsAuthenticator::operator =(QWebSocketCorsAuthenticator &&other)
+QWebSocketCorsAuthenticator::operator =(QWebSocketCorsAuthenticator &&other) noexcept
 {
     qSwap(d_ptr, other.d_ptr);
     return *this;
 }
-
-#endif
 
 /*!
   Swaps \a other with this authenticator.
 
   This operation is very fast and never fails.
  */
-void QWebSocketCorsAuthenticator::swap(QWebSocketCorsAuthenticator &other)
+void QWebSocketCorsAuthenticator::swap(QWebSocketCorsAuthenticator &other) noexcept
 {
     if (&other != this)
         qSwap(d_ptr, other.d_ptr);
