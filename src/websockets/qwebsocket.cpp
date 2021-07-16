@@ -262,7 +262,7 @@ not been filled in with new information when the signal returns.
 */
 /*!
     \fn void QWebSocket::peerVerifyError(const QSslError &error)
-    \since 6.0
+    \since 6.2
 
     QWebSocket can emit this signal several times during the SSL handshake,
     before encryption has been established, to indicate that an error has
@@ -280,7 +280,7 @@ not been filled in with new information when the signal returns.
 */
 /*!
     \fn void QWebSocket::alertSent(QSsl::AlertLevel level, QSsl::AlertType type, const QString &description)
-    \since 6.0
+    \since 6.2
 
     QWebSocket emits this signal if an alert message was sent to a peer. \a level
     describes if it was a warning or a fatal error. \a type gives the code
@@ -295,7 +295,7 @@ not been filled in with new information when the signal returns.
 */
 /*!
     \fn void QWebSocket::alertReceived(QSsl::AlertLevel level, QSsl::AlertType type, const QString &description)
-    \since 6.0
+    \since 6.2
 
     QWebSocket emits this signal if an alert message was received from a peer.
     \a level tells if the alert was fatal or it was a warning. \a type is the
@@ -311,7 +311,7 @@ not been filled in with new information when the signal returns.
 */
 /*!
     \fn void QWebSocket::handshakeInterruptedOnError(const QSslError &error)
-    \since 6.0
+    \since 6.2
 
     QWebSocket emits this signal if a certificate verification error was
     found and if early error reporting was enabled in QSslConfiguration.
@@ -547,7 +547,7 @@ void QWebSocket::ignoreSslErrors()
 }
 
 /*!
-    \since 6.0
+    \since 6.2
 
     If an application wants to conclude a handshake even after receiving
     handshakeInterruptedOnError() signal, it must call this function.
