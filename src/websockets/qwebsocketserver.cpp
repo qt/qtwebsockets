@@ -219,6 +219,47 @@
 */
 
 /*!
+    \fn void QWebSocketServer::alertSent(QSsl::AlertLevel level, QSsl::AlertType type, const QString &description)
+    \since 6.2
+
+    QWebSocketServer emits this signal if an alert message was sent to a peer. \a level
+    describes if it was a warning or a fatal error. \a type gives the code
+    of the alert message. When a textual description of the alert message is
+    available, it is supplied in \a description.
+
+    \note This signal is mostly informational and can be used for debugging
+    purposes, normally it does not require any actions from the application.
+    \note Not all backends support this functionality.
+
+    \sa alertReceived(), QSsl::AlertLevel, QSsl::AlertType
+*/
+/*!
+    \fn void QWebSocketServer::alertReceived(QSsl::AlertLevel level, QSsl::AlertType type, const QString &description)
+    \since 6.2
+
+    QWebSocketServer emits this signal if an alert message was received from a peer.
+    \a level tells if the alert was fatal or it was a warning. \a type is the
+    code explaining why the alert was sent. When a textual description of
+    the alert message is available, it is supplied in \a description.
+
+    \note The signal is mostly for informational and debugging purposes and does not
+    require any handling in the application. If the alert was fatal, underlying
+    backend will handle it and close the connection.
+    \note Not all backends support this functionality.
+
+    \sa alertSent(), QSsl::AlertLevel, QSsl::AlertType
+*/
+/*!
+    \fn void QWebSocketServer::handshakeInterruptedOnError(const QSslError &error)
+    \since 6.2
+
+    QWebSocketServer emits this signal if a certificate verification error was
+    found and if early error reporting was enabled in QSslConfiguration.
+
+    \sa sslErrors(), QSslConfiguration::setHandshakeMustInterruptOnError()
+*/
+
+/*!
   \enum QWebSocketServer::SslMode
   Indicates whether the server operates over wss (SecureMode) or ws (NonSecureMode)
 
