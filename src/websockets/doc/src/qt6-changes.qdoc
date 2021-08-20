@@ -41,4 +41,16 @@
     In this topic we summarize those changes in Qt WebSockets, and provide guidance
     to handle them.
 
+    \section1 Breaking public API changes
+
+    This section contains information about API changes that break source
+    compatibility.
+
+    \section2 QWebSocketServer::socketDescriptor(), QWebSocketServer::setSocketDescriptor()
+
+    In Qt 6, you should use QWebSocketServer::socketDescriptor() and QWebSocketServer::setSocketDescriptor()
+    to access the underlying socket descriptor of type \c{qintptr}. They mirror QTcpServer::socketDescriptor()
+    and QTcpServer::setSocketDescriptor(), and replace the now deprecated nativeDescriptor() and
+    setNativeDescriptor() methods.
+
 */
