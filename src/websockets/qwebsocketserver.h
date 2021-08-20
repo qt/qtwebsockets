@@ -111,6 +111,12 @@ public:
 
     bool setSocketDescriptor(qintptr socketDescriptor);
     qintptr socketDescriptor() const;
+#if QT_DEPRECATED_SINCE(6, 2)
+    QT_DEPRECATED_VERSION_X_6_2("Use setSocketDescriptor instead")
+    bool setNativeDescriptor(qintptr descriptor) { return setSocketDescriptor(descriptor); }
+    QT_DEPRECATED_VERSION_X_6_2("Use socketDescriptor instead")
+    qintptr nativeDescriptor() const { return socketDescriptor(); }
+#endif
 
     bool hasPendingConnections() const;
     virtual QWebSocket *nextPendingConnection();
