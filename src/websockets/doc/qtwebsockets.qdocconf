@@ -15,10 +15,6 @@ qhp.QtWebSockets.virtualFolder                      = qtwebsockets
 qhp.QtWebSockets.indexTitle                         = Qt WebSockets
 qhp.QtWebSockets.indexRoot                          =
 
-qhp.QtWebSockets.filterAttributes                   = qtwebsockets $QT_VERSION qtrefdoc
-qhp.QtWebSockets.customFilters.Qt.name              = QtWebSockets $QT_VERSION
-qhp.QtWebSockets.customFilters.Qt.filterAttributes  = qtwebsockets $QT_VERSION
-
 qhp.QtWebSockets.subprojects                        = classes qml examples
 qhp.QtWebSockets.subprojects.classes.title          = C++ Classes
 qhp.QtWebSockets.subprojects.classes.indexTitle     = Qt WebSockets C++ Classes
