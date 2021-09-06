@@ -285,7 +285,7 @@ void QWebSocketHandshakeRequest::readHandshake(QTextStream &textStream, int maxH
     m_requestUrl = QUrl::fromEncoded(resourceName.toLatin1());
     QString host = m_headers.value(QStringLiteral("host"), QString());
     if (m_requestUrl.isRelative()) {
-        // see http://tools.ietf.org/html/rfc6455#page-17
+        // see https://tools.ietf.org/html/rfc6455#page-17
         // No. 4 item in "The requirements for this handshake"
         m_requestUrl.setAuthority(host);
         if (!m_requestUrl.userName().isNull()) { // If the username is null, the password must be too.

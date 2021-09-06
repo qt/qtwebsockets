@@ -300,7 +300,7 @@ QWebSocketFrame::ProcessingState QWebSocketFrame::readFrameHeader(QIODevice *pIo
  */
 QWebSocketFrame::ProcessingState QWebSocketFrame::readFramePayloadLength(QIODevice *pIoDevice)
 {
-    // see http://tools.ietf.org/html/rfc6455#page-28 paragraph 5.2
+    // see https://tools.ietf.org/html/rfc6455#page-28 paragraph 5.2
     // in all cases, the minimal number of bytes MUST be used to encode the length,
     // for example, the length of a 124-byte-long string can't be encoded as the
     // sequence 126, 0, 124"
@@ -333,7 +333,7 @@ QWebSocketFrame::ProcessingState QWebSocketFrame::readFramePayloadLength(QIODevi
                 return PS_DISPATCH_RESULT;
             }
             // Most significant bit must be set to 0 as
-            // per http://tools.ietf.org/html/rfc6455#section-5.2
+            // per https://tools.ietf.org/html/rfc6455#section-5.2
             m_length = qFromBigEndian<quint64>(length);
             if (Q_UNLIKELY(m_length & (quint64(1) << 63))) {
                 setError(QWebSocketProtocol::CloseCodeProtocolError,
