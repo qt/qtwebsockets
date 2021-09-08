@@ -253,7 +253,7 @@
     \fn void QWebSocketServer::handshakeInterruptedOnError(const QSslError &error)
     \since 6.2
 
-    QWebSocketServer emits this signal if a certificate verification error was
+    QWebSocketServer emits this signal if a certificate verification \a error was
     found and if early error reporting was enabled in QSslConfiguration.
 
     \sa sslErrors(), QSslConfiguration::setHandshakeMustInterruptOnError()

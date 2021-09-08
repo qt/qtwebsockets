@@ -98,5 +98,5 @@
     \l {Autobahn|Testsuite installation documentation}
     to set up the test suite.
 
-    \include README testsuite
+    \include README.qdocinc testsuite
 */
