@@ -479,8 +479,7 @@ void QWebSocketServerPrivate::handshakeReceived()
     }
 
     QWebSocketHandshakeRequest request(pTcpSocket->peerPort(), isSecure);
-    QTextStream textStream(header, QIODevice::ReadOnly);
-    request.readHandshake(textStream, MAX_HEADERLINE_LENGTH, MAX_HEADERLINES);
+    request.readHandshake(header, MAX_HEADERLINE_LENGTH);
 
     if (request.isValid()) {
         QWebSocketCorsAuthenticator corsAuthenticator(request.origin());

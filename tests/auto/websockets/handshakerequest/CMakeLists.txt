@@ -11,6 +11,8 @@ endif()
 qt_internal_add_test(tst_handshakerequest
     SOURCES
         tst_handshakerequest.cpp
+    LIBRARIES
+        Qt::NetworkPrivate
     PUBLIC_LIBRARIES
         Qt::WebSocketsPrivate
 )

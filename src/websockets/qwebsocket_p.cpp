@@ -334,7 +334,7 @@ QWebSocket *QWebSocketPrivate::upgradeFrom(QTcpSocket *pTcpSocket,
         QNetworkRequest netRequest(request.requestUrl());
         const auto headers = request.headers();
         for (auto it = headers.begin(), end = headers.end(); it != end; ++it)
-            netRequest.setRawHeader(it.key().toLatin1(), it.value().toLatin1());
+            netRequest.setRawHeader(it->first, it->second);
 #ifndef QT_NO_SSL
         if (QSslSocket *sslSock = qobject_cast<QSslSocket *>(pTcpSocket))
             pWebSocket->setSslConfiguration(sslSock->sslConfiguration());

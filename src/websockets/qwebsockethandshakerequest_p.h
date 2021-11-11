@@ -54,6 +54,7 @@
 #include <QtCore/QMap>
 #include <QtCore/QString>
 #include <QtCore/QUrl>
+#include <QtNetwork/private/qhttpheaderparser_p.h>
 
 #include "qwebsocketprotocol.h"
 
@@ -74,7 +75,8 @@ public:
     int port() const;
     bool isSecure() const;
     bool isValid() const;
-    QMultiMap<QString, QString> headers() const;
+    QList<QPair<QByteArray, QByteArray>> headers() const;
+    bool hasHeader(const QByteArray &name) const;
     QList<QWebSocketProtocol::Version> versions() const;
     QString key() const;
     QString origin() const;
@@ -84,14 +86,14 @@ public:
     QString resourceName() const;
     QString host() const;
 
-    void readHandshake(QTextStream &textStream, int maxHeaderLineLength, int maxHeaders);
+    void readHandshake(QByteArrayView header, int maxHeaderLineLength);
 
 private:
 
     int m_port;
     bool m_isSecure;
     bool m_isValid;
-    QMultiMap<QString, QString> m_headers;
+    QHttpHeaderParser m_parser;
     QList<QWebSocketProtocol::Version> m_versions;
     QString m_key;
     QString m_origin;

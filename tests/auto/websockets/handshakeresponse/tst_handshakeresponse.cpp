@@ -81,13 +81,11 @@ void tst_HandshakeResponse::cleanup()
 void tst_HandshakeResponse::tst_date_response()
 {
     QWebSocketHandshakeRequest request(80, false);
-    QString buffer;
-    QTextStream input(&buffer);
-    input << QStringLiteral("GET / HTTP/1.1\r\nHost: example.com\r\nSec-WebSocket-Version: 13\r\n") +
-             QStringLiteral("Sec-WebSocket-Key: AVDFBDDFF\r\n") +
-             QStringLiteral("Upgrade: websocket\r\n") +
-             QStringLiteral("Connection: Upgrade\r\n\r\n");
-    request.readHandshake(input, 8 * 1024, 100);
+    QByteArray bytes = "GET / HTTP/1.1\r\nHost: example.com\r\nSec-WebSocket-Version: 13\r\n"
+                       "Sec-WebSocket-Key: AVDFBDDFF\r\n"
+                       "Upgrade: websocket\r\n"
+                       "Connection: Upgrade\r\n\r\n";
+    request.readHandshake(bytes, 8 * 1024);
 
     QWebSocketHandshakeResponse response(request, "example.com", true,
                                          QList<QWebSocketProtocol::Version>() << QWebSocketProtocol::Version13,

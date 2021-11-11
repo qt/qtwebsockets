@@ -213,12 +213,9 @@ void tst_HandshakeRequest::tst_invalidStream()
     QFETCH(QString, dataStream);
 
     QByteArray data;
-    QTextStream textStream(&data);
+    QTextStream(&data) << dataStream;
     QWebSocketHandshakeRequest request(80, true);
-
-    textStream << dataStream;
-    textStream.seek(0);
-    request.readHandshake(textStream, MAX_HEADERLINE_LENGTH, MAX_HEADERS);
+    request.readHandshake(data, MAX_HEADERLINE_LENGTH);
 
     QVERIFY(!request.isValid());
     QCOMPARE(request.port(), 80);
@@ -249,12 +246,9 @@ void tst_HandshakeRequest::tst_multipleValuesInConnectionHeader()
                      QStringLiteral("Upgrade: websocket\r\n") +
                      QStringLiteral("Connection: Upgrade,keepalive\r\n\r\n");
     QByteArray data;
-    QTextStream textStream(&data);
+    QTextStream(&data) << header;
     QWebSocketHandshakeRequest request(80, false);
-
-    textStream << header;
-    textStream.seek(0);
-    request.readHandshake(textStream, MAX_HEADERLINE_LENGTH, MAX_HEADERS);
+    request.readHandshake(data, MAX_HEADERLINE_LENGTH);
 
     QVERIFY(request.isValid());
     QCOMPARE(request.port(), 80);
@@ -286,12 +280,9 @@ void tst_HandshakeRequest::tst_parsingWhitespaceInHeaders()
                      QStringLiteral("Upgrade:websocket \r\n") +
                      QStringLiteral("Connection: Upgrade,keepalive\r\n\r\n");
     QByteArray data;
-    QTextStream textStream(&data);
+    QTextStream(&data) << header;
     QWebSocketHandshakeRequest request(80, false);
-
-    textStream << header;
-    textStream.seek(0);
-    request.readHandshake(textStream, MAX_HEADERLINE_LENGTH, MAX_HEADERS);
+    request.readHandshake(data, MAX_HEADERLINE_LENGTH);
 
     QVERIFY(request.isValid());
     QCOMPARE(request.key(), QStringLiteral("AVD FBDDFF"));
@@ -307,12 +298,9 @@ void tst_HandshakeRequest::tst_multipleVersions()
                      QStringLiteral("Upgrade: websocket\r\n") +
                      QStringLiteral("Connection: Upgrade,keepalive\r\n\r\n");
     QByteArray data;
-    QTextStream textStream(&data);
+    QTextStream(&data) << header;
     QWebSocketHandshakeRequest request(80, false);
-
-    textStream << header;
-    textStream.seek(0);
-    request.readHandshake(textStream, MAX_HEADERLINE_LENGTH, MAX_HEADERS);
+    request.readHandshake(data, MAX_HEADERLINE_LENGTH);
 
     QVERIFY(request.isValid());
     QCOMPARE(request.port(), 80);
@@ -320,11 +308,11 @@ void tst_HandshakeRequest::tst_multipleVersions()
     QCOMPARE(request.extensions().length(), 0);
     QCOMPARE(request.protocols().length(), 0);
     QCOMPARE(request.headers().size(), 5);
-    QVERIFY(request.headers().contains(QStringLiteral("host")));
-    QVERIFY(request.headers().contains(QStringLiteral("sec-websocket-version")));
-    QVERIFY(request.headers().contains(QStringLiteral("sec-websocket-key")));
-    QVERIFY(request.headers().contains(QStringLiteral("upgrade")));
-    QVERIFY(request.headers().contains(QStringLiteral("connection")));
+    QVERIFY(request.hasHeader("host"));
+    QVERIFY(request.hasHeader("sec-websocket-version"));
+    QVERIFY(request.hasHeader("sec-websocket-key"));
+    QVERIFY(request.hasHeader("upgrade"));
+    QVERIFY(request.hasHeader("connection"));
     QCOMPARE(request.key(), QStringLiteral("AVDFBDDFF"));
     QCOMPARE(request.origin().length(), 0);
     QCOMPARE(request.requestUrl(), QUrl("ws://foo.com/test"));
@@ -343,12 +331,9 @@ void tst_HandshakeRequest::tst_qtbug_39355()
                      QStringLiteral("Upgrade: websocket\r\n") +
                      QStringLiteral("Connection: Upgrade\r\n\r\n");
     QByteArray data;
-    QTextStream textStream(&data);
+    QTextStream(&data) << header;
     QWebSocketHandshakeRequest request(8080, false);
-
-    textStream << header;
-    textStream.seek(0);
-    request.readHandshake(textStream, MAX_HEADERLINE_LENGTH, MAX_HEADERS);
+    request.readHandshake(data, MAX_HEADERLINE_LENGTH);
 
     QVERIFY(request.isValid());
     QCOMPARE(request.port(), 1234);
@@ -366,12 +351,21 @@ void tst_HandshakeRequest::tst_qtbug_48123_data()
                            QStringLiteral("Connection: Upgrade\r\n");
     const int numHeaderLines = header.count(QStringLiteral("\r\n")) - 1; //-1: exclude requestline
 
-    //a headerline should not be larger than MAX_HEADERLINE_LENGTH characters (excluding CRLF)
+    // a headerline must contain colon
     QString illegalHeader = header;
-    illegalHeader.append(QString(MAX_HEADERLINE_LENGTH + 1, QLatin1Char('c')));
+    illegalHeader.append(QString(MAX_HEADERLINE_LENGTH, QLatin1Char('c')));
     illegalHeader.append(QStringLiteral("\r\n\r\n"));
 
-    QTest::newRow("headerline too long") << illegalHeader << false;
+    QTest::newRow("headerline missing colon") << illegalHeader << false;
+
+    // a headerline should not be larger than MAX_HEADERLINE_LENGTH characters (excluding CRLF)
+    QString tooLongHeader = header;
+    QString fieldName = "Too-long: ";
+    tooLongHeader.append(fieldName);
+    tooLongHeader.append(QString(MAX_HEADERLINE_LENGTH + 1 - fieldName.size(), QLatin1Char('c')));
+    tooLongHeader.append(QStringLiteral("\r\n\r\n"));
+
+    QTest::newRow("headerline too long") << tooLongHeader << false;
 
     QString legalHeader = header;
     const QString headerKey = QStringLiteral("X-CUSTOM-KEY: ");
@@ -408,12 +402,9 @@ void tst_HandshakeRequest::tst_qtbug_48123()
     QFETCH(bool, shouldBeValid);
 
     QByteArray data;
-    QTextStream textStream(&data);
+    QTextStream(&data) << header;
     QWebSocketHandshakeRequest request(8080, false);
-
-    textStream << header;
-    textStream.seek(0);
-    request.readHandshake(textStream, MAX_HEADERLINE_LENGTH, MAX_HEADERS);
+    request.readHandshake(data, MAX_HEADERLINE_LENGTH);
 
     QCOMPARE(request.isValid(), shouldBeValid);
 }
@@ -504,12 +495,9 @@ void tst_HandshakeRequest::tst_qtbug_57357()
     QFETCH(int, port);
 
     QByteArray data;
-    QTextStream textStream(&data);
+    QTextStream(&data) << header;
     QWebSocketHandshakeRequest request(8080, false);
-
-    textStream << header;
-    textStream.seek(0);
-    request.readHandshake(textStream, MAX_HEADERLINE_LENGTH, MAX_HEADERS);
+    request.readHandshake(data, MAX_HEADERLINE_LENGTH);
 
     QCOMPARE(request.isValid(), valid);
     if (valid) {
