@@ -210,7 +210,7 @@ void QWebSocketProtocol::mask(char *payload, quint64 size, quint32 maskingKey)
                             quint8((maskingKey & 0x0000FF00u) >> 8),
                             quint8((maskingKey & 0x000000FFu))
                           };
-    int i = 0;
+    quint64 i = 0;
     while (size-- > 0)
         *payload++ ^= mask[i++ % 4];
 }
