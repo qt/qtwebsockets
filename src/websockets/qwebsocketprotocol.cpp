@@ -172,7 +172,7 @@ QT_BEGIN_NAMESPACE
 
     \internal
 */
-QWebSocketProtocol::Version QWebSocketProtocol::versionFromString(const QString &versionString)
+QWebSocketProtocol::Version QWebSocketProtocol::versionFromString(QStringView versionString)
 {
     bool ok = false;
     Version version = VersionUnknown;

@@ -54,9 +54,10 @@
 #include <QtCore/qglobal.h>
 #include "QtWebSockets/qwebsocketprotocol.h"
 
+#include <QtCore/qstringview.h>
+
 QT_BEGIN_NAMESPACE
 
-class QString;
 class QByteArray;
 
 namespace QWebSocketProtocol
@@ -96,7 +97,7 @@ inline bool isCloseCodeValid(int closeCode)
 }
 
 inline Version currentVersion() { return VersionLatest; }
-Version Q_AUTOTEST_EXPORT versionFromString(const QString &versionString);
+Version Q_AUTOTEST_EXPORT versionFromString(QStringView versionString);
 
 void Q_AUTOTEST_EXPORT mask(QByteArray *payload, quint32 maskingKey);
 void Q_AUTOTEST_EXPORT mask(char *payload, quint64 size, quint32 maskingKey);
