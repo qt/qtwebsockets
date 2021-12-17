@@ -288,7 +288,7 @@ void QWebSocketHandshakeRequest::readHandshake(QByteArrayView header, int maxHea
                 return;
             }
             const QWebSocketProtocol::Version ver =
-                    QWebSocketProtocol::versionFromString(version.trimmed().toString());
+                    QWebSocketProtocol::versionFromString(version.trimmed());
             m_versions << ver;
         }
     }
