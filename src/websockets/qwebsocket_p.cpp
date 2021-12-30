@@ -442,8 +442,10 @@ void QWebSocketPrivate::open(const QNetworkRequest &request, bool mask)
                 QSslSocket *sslSocket = new QSslSocket(q);
                 m_pSocket = sslSocket;
                 if (Q_LIKELY(m_pSocket)) {
-                    m_pSocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
-                    m_pSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
+                    QObject::connect(sslSocket, &QSslSocket::connected, [sslSocket](){
+                        sslSocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
+                        sslSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
+                    });
                     m_pSocket->setReadBufferSize(m_readBufferSize);
                     m_pSocket->setPauseMode(m_pauseMode);
 
@@ -471,8 +473,10 @@ void QWebSocketPrivate::open(const QNetworkRequest &request, bool mask)
         if (url.scheme() == QStringLiteral("ws")) {
             m_pSocket = new QTcpSocket(q);
             if (Q_LIKELY(m_pSocket)) {
-                m_pSocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
-                m_pSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
+                QObject::connect(m_pSocket, &QTcpSocket::connected, [this](){
+                    m_pSocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
+                    m_pSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
+                });
                 m_pSocket->setReadBufferSize(m_readBufferSize);
                 m_pSocket->setPauseMode(m_pauseMode);
 
