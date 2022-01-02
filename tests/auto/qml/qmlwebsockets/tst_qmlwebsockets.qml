@@ -38,6 +38,8 @@ Rectangle {
         id: server
         port: 1337
 
+        supportedSubprotocols: [ "chat", "superchat" ]
+
         onClientConnected: {
             currentSocket = webSocket;
         }
@@ -48,6 +50,7 @@ Rectangle {
     WebSocket {
         id: socket
         url: server.url
+        requestedSubprotocols: [ "superchat", "chat" ]
     }
 
     TestCase {
@@ -56,6 +59,10 @@ Rectangle {
             socket.active = true;
             tryCompare(socket, 'status', WebSocket.Open);
             verify(server.currentSocket);
+
+            // Handshake should select client's first preference.
+            compare(socket.negotiatedSubprotocol, "superchat")
+            compare(server.currentSocket.negotiatedSubprotocol, "superchat")
         }
 
         function ensureDisconnected() {

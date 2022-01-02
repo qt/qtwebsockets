@@ -58,6 +58,7 @@ QT_BEGIN_NAMESPACE
 class QTcpSocket;
 class QWebSocketPrivate;
 class QMaskGenerator;
+class QWebSocketHandshakeOptions;
 
 class Q_WEBSOCKETS_EXPORT QWebSocket : public QObject
 {
@@ -100,7 +101,9 @@ public:
     QString resourceName() const;
     QUrl requestUrl() const;
     QNetworkRequest request() const;
+    QWebSocketHandshakeOptions handshakeOptions() const;
     QString origin() const;
+    QString subprotocol() const;
     QWebSocketProtocol::CloseCode closeCode() const;
     QString closeReason() const;
 
@@ -131,8 +134,13 @@ public:
 public Q_SLOTS:
     void close(QWebSocketProtocol::CloseCode closeCode = QWebSocketProtocol::CloseCodeNormal,
                const QString &reason = QString());
+
+    // ### Qt7: Merge overloads
     void open(const QUrl &url);
     void open(const QNetworkRequest &request);
+    void open(const QUrl &url, const QWebSocketHandshakeOptions &options);
+    void open(const QNetworkRequest &request, const QWebSocketHandshakeOptions &options);
+
     void ping(const QByteArray &payload = QByteArray());
 #ifndef QT_NO_SSL
     void ignoreSslErrors();

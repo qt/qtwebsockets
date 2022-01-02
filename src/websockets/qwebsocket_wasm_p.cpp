@@ -165,7 +165,8 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
                              reason.toLatin1().toStdString());
 }
 
-void QWebSocketPrivate::open(const QNetworkRequest &request, bool mask)
+void QWebSocketPrivate::open(const QNetworkRequest &request,
+                             const QWebSocketHandshakeOptions &options, bool mask)
 {
     Q_UNUSED(mask);
     Q_Q(QWebSocket);
@@ -183,11 +184,16 @@ void QWebSocketPrivate::open(const QNetworkRequest &request, bool mask)
     // do support the WebSocket protocol header. This header is
     // required for some use cases like MQTT.
     const std::string protocolHeaderValue = request.rawHeader("Sec-WebSocket-Protocol").toStdString();
-    val webSocket = val::global("WebSocket");
 
-    socketContext = !protocolHeaderValue.empty()
-            ? webSocket.new_(urlbytes, protocolHeaderValue)
-            : webSocket.new_(urlbytes);
+    val jsSubprotocols = val::array();
+    if (!protocolHeaderValue.empty())
+        jsSubprotocols.call<void>("push", protocolHeaderValue);
+    const auto requestedSubProtocols = options.subprotocols();
+    for (const auto &protocol : requestedSubProtocols)
+        jsSubprotocols.call<void>("push", protocol.toStdString());
+
+    val webSocket = val::global("WebSocket");
+    socketContext = webSocket.new_(urlbytes, jsSubprotocols);
 
     socketContext.set("onerror", val::module_property("QWebSocketPrivate_onErrorCallback"));
     socketContext.set("onclose", val::module_property("QWebSocketPrivate_onCloseCallback"));

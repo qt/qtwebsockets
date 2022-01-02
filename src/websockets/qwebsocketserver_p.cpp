@@ -320,10 +320,17 @@ QList<QWebSocketProtocol::Version> QWebSocketServerPrivate::supportedVersions() 
 /*!
     \internal
  */
-QStringList QWebSocketServerPrivate::supportedProtocols() const
+void QWebSocketServerPrivate::setSupportedSubprotocols(const QStringList &protocols)
 {
-    QStringList supportedProtocols;
-    return supportedProtocols;	//no protocols are currently supported
+    m_supportedSubprotocols = protocols;
+}
+
+/*!
+    \internal
+ */
+QStringList QWebSocketServerPrivate::supportedSubprotocols() const
+{
+    return m_supportedSubprotocols;
 }
 
 /*!
@@ -489,7 +496,7 @@ void QWebSocketServerPrivate::handshakeReceived()
                                              m_serverName,
                                              corsAuthenticator.allowed(),
                                              supportedVersions(),
-                                             supportedProtocols(),
+                                             supportedSubprotocols(),
                                              supportedExtensions());
 
         if (Q_LIKELY(response.isValid())) {

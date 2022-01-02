@@ -111,7 +111,8 @@ public:
     qintptr socketDescriptor() const;
 
     QList<QWebSocketProtocol::Version> supportedVersions() const;
-    QStringList supportedProtocols() const;
+    void setSupportedSubprotocols(const QStringList &protocols);
+    QStringList supportedSubprotocols() const;
     QStringList supportedExtensions() const;
 
     void setServerName(const QString &serverName);
@@ -135,6 +136,7 @@ private:
     QTcpServer *m_pTcpServer;
     QString m_serverName;
     SslMode m_secureMode;
+    QStringList m_supportedSubprotocols;
     QQueue<QWebSocket *> m_pendingConnections;
     QWebSocketProtocol::CloseCode m_error;
     QString m_errorString;

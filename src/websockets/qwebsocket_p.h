@@ -65,6 +65,7 @@
 #include <private/qobject_p.h>
 
 #include "qwebsocket.h"
+#include "qwebsockethandshakeoptions.h"
 #include "qwebsocketprotocol.h"
 #include "qwebsocketdataprocessor_p.h"
 #include "qdefaultmaskgenerator_p.h"
@@ -138,6 +139,7 @@ public:
     QString resourceName() const;
     QNetworkRequest request() const;
     QString origin() const;
+    QWebSocketHandshakeOptions handshakeOptions() const;
     QString protocol() const;
     QString extension() const;
     QWebSocketProtocol::CloseCode closeCode() const;
@@ -157,7 +159,7 @@ public:
 
     void closeGoingAway();
     void close(QWebSocketProtocol::CloseCode closeCode, QString reason);
-    void open(const QNetworkRequest &request, bool mask);
+    void open(const QNetworkRequest &request, const QWebSocketHandshakeOptions &options, bool mask);
     void ping(const QByteArray &payload);
     void setSocketState(QAbstractSocket::SocketState state);
 
@@ -176,7 +178,7 @@ private:
     QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version);
     void setVersion(QWebSocketProtocol::Version version);
     void setResourceName(const QString &resourceName);
-    void setRequest(const QNetworkRequest &request);
+    void setRequest(const QNetworkRequest &request, const QWebSocketHandshakeOptions &options = {});
     void setOrigin(const QString &origin);
     void setProtocol(const QString &protocol);
     void setExtension(const QString &extension);
@@ -204,7 +206,7 @@ private:
                                    QString host,
                                    QString origin,
                                    QString extensions,
-                                   QString protocols,
+                                   const QStringList &options,
                                    QByteArray key,
                                    const QList<QPair<QString, QString> > &headers);
 
@@ -225,6 +227,7 @@ private:
     QUrl m_resource;
     QString m_resourceName;
     QNetworkRequest m_request;
+    QWebSocketHandshakeOptions m_options;
     QString m_origin;
     QString m_protocol;
     QString m_extension;

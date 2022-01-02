@@ -161,9 +161,21 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(
     } else {
         if (request.isValid()) {
             const QString acceptKey = calculateAcceptKey(request.key());
-            const QList<QString> matchingProtocols =
-                listIntersection(supportedProtocols, request.protocols(),
-                                 std::less<QString>());
+
+            // Find first client protocol that is supported. Order is important!
+            const QString protocol = [&] {
+                const auto clientProtocols = request.protocols();
+
+                const auto isSupportedProtocol = [&](const QString &protocol) {
+                    return supportedProtocols.contains(protocol);
+                };
+                const auto it = std::find_if(
+                            clientProtocols.constBegin(), clientProtocols.constEnd(),
+                            isSupportedProtocol);
+
+                return it == clientProtocols.constEnd() ? QString() : *it;
+            }();
+
             //TODO: extensions must be kept in the order in which they arrive
             //cannot use set.intersect() to get the supported extensions
             const QList<QString> matchingExtensions =
@@ -182,8 +194,8 @@ QString QWebSocketHandshakeResponse::getHandshakeResponse(
                             QStringLiteral("Upgrade: websocket") <<
                             QStringLiteral("Connection: Upgrade") <<
                             QStringLiteral("Sec-WebSocket-Accept: ") % acceptKey;
-                if (!matchingProtocols.isEmpty()) {
-                    m_acceptedProtocol = matchingProtocols.first();
+                if (!protocol.isEmpty()) {
+                    m_acceptedProtocol = protocol;
                     response << QStringLiteral("Sec-WebSocket-Protocol: ") % m_acceptedProtocol;
                 }
                 if (!matchingExtensions.isEmpty()) {

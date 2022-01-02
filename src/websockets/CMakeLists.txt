@@ -12,6 +12,7 @@ qt_internal_add_module(WebSockets
         qwebsocketcorsauthenticator.cpp qwebsocketcorsauthenticator.h qwebsocketcorsauthenticator_p.h
         qwebsocketdataprocessor.cpp qwebsocketdataprocessor_p.h
         qwebsocketframe.cpp qwebsocketframe_p.h
+        qwebsockethandshakeoptions.cpp qwebsockethandshakeoptions.h qwebsockethandshakeoptions_p.h
         qwebsockethandshakerequest.cpp qwebsockethandshakerequest_p.h
         qwebsockethandshakeresponse.cpp qwebsockethandshakeresponse_p.h
         qwebsocketprotocol.cpp qwebsocketprotocol.h qwebsocketprotocol_p.h

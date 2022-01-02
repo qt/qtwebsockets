@@ -55,9 +55,13 @@ class QQmlWebSocket : public QObject, public QQmlParserStatus
     Q_INTERFACES(QQmlParserStatus)
 
     Q_PROPERTY(QUrl url READ url WRITE setUrl NOTIFY urlChanged)
+    Q_PROPERTY(QStringList requestedSubprotocols READ requestedSubprotocols
+               WRITE setRequestedSubprotocols NOTIFY requestedSubprotocolsChanged)
     Q_PROPERTY(Status status READ status NOTIFY statusChanged)
     Q_PROPERTY(QString errorString READ errorString NOTIFY errorStringChanged)
     Q_PROPERTY(bool active READ isActive WRITE setActive NOTIFY activeChanged)
+    Q_PROPERTY(QString negotiatedSubprotocol READ negotiatedSubprotocol
+               NOTIFY negotiatedSubprotocolChanged)
 
 public:
     explicit QQmlWebSocket(QObject *parent = 0);
@@ -76,6 +80,10 @@ public:
 
     QUrl url() const;
     void setUrl(const QUrl &url);
+    QStringList requestedSubprotocols() const;
+    void setRequestedSubprotocols(const QStringList &subprotocols);
+
+    QString negotiatedSubprotocol() const;
     Status status() const;
     QString errorString() const;
 
@@ -92,6 +100,8 @@ Q_SIGNALS:
     void activeChanged(bool isActive);
     void errorStringChanged(QString errorString);
     void urlChanged();
+    void requestedSubprotocolsChanged();
+    void negotiatedSubprotocolChanged();
 
 public:
     void classBegin() override;
@@ -103,8 +113,10 @@ private Q_SLOTS:
 
 private:
     QScopedPointer<QWebSocket> m_webSocket;
+    QString m_negotiatedProtocol;
     Status m_status;
     QUrl m_url;
+    QStringList m_requestedProtocols;
     bool m_isActive;
     bool m_componentCompleted;
     QString m_errorString;

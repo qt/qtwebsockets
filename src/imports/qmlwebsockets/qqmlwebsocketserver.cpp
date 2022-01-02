@@ -76,6 +76,12 @@ QT_USE_NAMESPACE
 */
 
 /*!
+  \qmlproperty QStringList WebSocketServer::supportedSubprotocols
+  \since 6.4
+  The list of protocols supported by the server.
+*/
+
+/*!
   \qmlproperty QString WebSocketServer::errorString
   The stringified error message in case an error occurred.
 */
@@ -200,6 +206,19 @@ void QQmlWebSocketServer::setName(const QString &name)
     }
 }
 
+void QQmlWebSocketServer::setSupportedSubprotocols(const QStringList &supportedSubprotocols)
+{
+    if (m_supportedSubprotocols == supportedSubprotocols)
+        return;
+
+    m_supportedSubprotocols = supportedSubprotocols;
+
+    if (m_server)
+        m_server->setSupportedSubprotocols(m_supportedSubprotocols);
+
+    emit supportedSubprotocolsChanged(m_supportedSubprotocols);
+}
+
 bool QQmlWebSocketServer::listen() const
 {
     return m_listen;
@@ -252,6 +271,8 @@ void QQmlWebSocketServer::init()
     connect(m_server.data(), &QWebSocketServer::closed,
             this, &QQmlWebSocketServer::closed);
 
+    m_server->setSupportedSubprotocols(m_supportedSubprotocols);
+
     updateListening();
 }
 
@@ -287,3 +308,7 @@ void QQmlWebSocketServer::closed()
     setListen(false);
 }
 
+QStringList QQmlWebSocketServer::supportedSubprotocols() const
+{
+    return m_supportedSubprotocols;
+}

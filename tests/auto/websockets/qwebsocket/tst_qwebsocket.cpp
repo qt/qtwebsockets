@@ -25,9 +25,11 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+#include <QRegularExpression>
 #include <QString>
 #include <QtTest>
 #include <QtWebSockets/QWebSocket>
+#include <QtWebSockets/QWebSocketHandshakeOptions>
 #include <QtWebSockets/QWebSocketServer>
 #include <QtWebSockets/qwebsocketprotocol.h>
 
@@ -72,6 +74,8 @@ EchoServer::EchoServer(QObject *parent, quint64 maxAllowedIncomingMessageSize, q
     m_maxAllowedIncomingFrameSize(maxAllowedIncomingFrameSize),
     m_clients()
 {
+    m_pWebSocketServer->setSupportedSubprotocols({ QStringLiteral("protocol1"),
+                                                QStringLiteral("protocol2") });
     if (m_pWebSocketServer->listen(QHostAddress(QStringLiteral("127.0.0.1")))) {
         connect(m_pWebSocketServer, SIGNAL(newConnection()),
                 this, SLOT(onNewConnection()));
@@ -146,7 +150,9 @@ private Q_SLOTS:
     void tst_sendTextMessage();
     void tst_sendBinaryMessage();
     void tst_errorString();
+    void tst_openRequest_data();
     void tst_openRequest();
+    void tst_protocolAccessor();
     void tst_moveToThread();
     void tst_moveToThreadNoWarning();
 #ifndef QT_NO_NETWORKPROXY
@@ -631,8 +637,35 @@ void tst_QWebSocket::tst_errorString()
     QCOMPARE(socket.errorString(), QStringLiteral("Host not found"));
 }
 
+void tst_QWebSocket::tst_openRequest_data()
+{
+    QTest::addColumn<QStringList>("subprotocols");
+    QTest::addColumn<QString>("subprotocolHeader");
+    QTest::addColumn<QRegularExpression>("warningExpression");
+
+    QTest::addRow("no subprotocols") << QStringList{} << QString{} << QRegularExpression{};
+    QTest::addRow("single subprotocol") << QStringList{"foobar"} << QStringLiteral("foobar")
+                                        << QRegularExpression{};
+    QTest::addRow("multiple subprotocols") << QStringList{"foo", "bar"}
+                                           << QStringLiteral("foo, bar")
+                                           << QRegularExpression{};
+    QTest::addRow("subprotocol with whitespace")
+            << QStringList{"chat", "foo\r\nbar with space"}
+            << QStringLiteral("chat")
+            << QRegularExpression{".*invalid.*bar with space"};
+
+    QTest::addRow("subprotocol with invalid chars")
+            << QStringList{"chat", "foo{}"}
+            << QStringLiteral("chat")
+            << QRegularExpression{".*invalid.*foo"};
+}
+
 void tst_QWebSocket::tst_openRequest()
 {
+    QFETCH(QStringList, subprotocols);
+    QFETCH(QString, subprotocolHeader);
+    QFETCH(QRegularExpression, warningExpression);
+
     EchoServer echoServer;
 
     QWebSocket socket;
@@ -647,7 +680,13 @@ void tst_QWebSocket::tst_openRequest()
     url.setQuery(query);
     QNetworkRequest req(url);
     req.setRawHeader("X-Custom-Header", "A custom header");
-    socket.open(req);
+    QWebSocketHandshakeOptions options;
+    options.setSubprotocols(subprotocols);
+
+    if (!warningExpression.pattern().isEmpty())
+        QTest::ignoreMessage(QtWarningMsg, warningExpression);
+
+    socket.open(req, options);
 
     QTRY_COMPARE(socketConnectedSpy.count(), 1);
     QTRY_COMPARE(serverRequestSpy.count(), 1);
@@ -656,6 +695,34 @@ void tst_QWebSocket::tst_openRequest()
     QNetworkRequest requestConnected = arguments.at(0).value<QNetworkRequest>();
     QCOMPARE(requestConnected.url(), req.url());
     QCOMPARE(requestConnected.rawHeader("X-Custom-Header"), req.rawHeader("X-Custom-Header"));
+
+    if (subprotocols.isEmpty())
+        QVERIFY(!requestConnected.hasRawHeader("Sec-WebSocket-Protocol"));
+    else
+        QCOMPARE(requestConnected.rawHeader("Sec-WebSocket-Protocol"), subprotocolHeader);
+
+
+    socket.close();
+}
+
+void tst_QWebSocket::tst_protocolAccessor()
+{
+    EchoServer echoServer;
+
+    QWebSocket socket;
+
+    QUrl url = QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
+                    QLatin1Char(':') + QString::number(echoServer.port()));
+
+    QWebSocketHandshakeOptions options;
+    options.setSubprotocols({ "foo", "protocol2" });
+
+    socket.open(url, options);
+
+    QTRY_COMPARE(socket.state(), QAbstractSocket::ConnectedState);
+
+    QCOMPARE(socket.subprotocol(), "protocol2");
+
     socket.close();
 }
 

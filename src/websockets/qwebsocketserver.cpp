@@ -65,9 +65,7 @@
 
     Calling close() makes QWebSocketServer stop listening for incoming connections.
 
-    QWebSocketServer currently does not support
-    \l {WebSocket Extensions} and
-    \l {WebSocket Subprotocols}.
+    QWebSocketServer currently does not support \l {WebSocket Extensions}.
 
     \note When working with self-signed certificates, \l{Firefox bug 594502} prevents \l{Firefox} to
     connect to a secure WebSocket server. To work around this problem, first browse to the
@@ -534,6 +532,26 @@ QString QWebSocketServer::serverName() const
 {
     Q_D(const QWebSocketServer);
     return d->serverName();
+}
+
+/*!
+    \brief Sets the list of protocols supported by the server to \a protocols.
+    \since 6.4
+ */
+void QWebSocketServer::setSupportedSubprotocols(const QStringList &protocols)
+{
+    Q_D(QWebSocketServer);
+    d->setSupportedSubprotocols(protocols);
+}
+
+/*!
+    \brief Returns the list of protocols supported by the server.
+    \since 6.4
+ */
+QStringList QWebSocketServer::supportedSubprotocols() const
+{
+    Q_D(const QWebSocketServer);
+    return d->supportedSubprotocols();
 }
 
 /*!

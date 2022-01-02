@@ -130,6 +130,9 @@ public:
     void setServerName(const QString &serverName);
     QString serverName() const;
 
+    void setSupportedSubprotocols(const QStringList &protocols);
+    QStringList supportedSubprotocols() const;
+
 #ifndef QT_NO_NETWORKPROXY
     void setProxy(const QNetworkProxy &networkProxy);
     QNetworkProxy proxy() const;

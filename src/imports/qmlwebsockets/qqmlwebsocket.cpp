@@ -58,6 +58,18 @@
 */
 
 /*!
+  \qmlproperty QStringList WebSocket::requestedSubprotocols
+  \since 6.4
+  The list of WebSocket subprotocols to send in the WebSocket handshake.
+*/
+
+/*!
+  \qmlproperty QString WebSocket::negotiatedSubprotocol
+  \since 6.4
+  The WebSocket subprotocol that has been negotiated with the server.
+*/
+
+/*!
   \qmlproperty Status WebSocket::status
   Status of the WebSocket.
 
@@ -118,6 +130,7 @@
 
 #include "qqmlwebsocket.h"
 #include <QtWebSockets/QWebSocket>
+#include <QtWebSockets/QWebSocketHandshakeOptions>
 
 QT_BEGIN_NAMESPACE
 
@@ -136,6 +149,7 @@ QQmlWebSocket::QQmlWebSocket(QWebSocket *socket, QObject *parent) :
     QObject(parent),
     m_status(Closed),
     m_url(socket->requestUrl()),
+    m_requestedProtocols(socket->handshakeOptions().subprotocols()),
     m_isActive(true),
     m_componentCompleted(true),
     m_errorString(socket->errorString())
@@ -168,6 +182,20 @@ qint64 QQmlWebSocket::sendBinaryMessage(const QByteArray &message)
     return m_webSocket->sendBinaryMessage(message);
 }
 
+QStringList QQmlWebSocket::requestedSubprotocols() const
+{
+    return m_requestedProtocols;
+}
+
+void QQmlWebSocket::setRequestedSubprotocols(const QStringList &requestedSubprotocols)
+{
+    if (m_requestedProtocols == requestedSubprotocols)
+        return;
+
+    m_requestedProtocols = requestedSubprotocols;
+    emit requestedSubprotocolsChanged();
+}
+
 QUrl QQmlWebSocket::url() const
 {
     return m_url;
@@ -184,6 +212,11 @@ void QQmlWebSocket::setUrl(const QUrl &url)
     m_url = url;
     Q_EMIT urlChanged();
     open();
+}
+
+QString QQmlWebSocket::negotiatedSubprotocol() const
+{
+    return m_negotiatedProtocol;
 }
 
 QQmlWebSocket::Status QQmlWebSocket::status() const
@@ -281,6 +314,12 @@ void QQmlWebSocket::setStatus(QQmlWebSocket::Status status)
         setErrorString();
     }
     Q_EMIT statusChanged(m_status);
+
+    const auto protocol = m_status == Open && m_webSocket ? m_webSocket->subprotocol() : QString();
+    if (m_negotiatedProtocol != protocol) {
+        m_negotiatedProtocol = protocol;
+        Q_EMIT negotiatedSubprotocolChanged();
+    }
 }
 
 void QQmlWebSocket::setActive(bool active)
@@ -308,7 +347,9 @@ bool QQmlWebSocket::isActive() const
 void QQmlWebSocket::open()
 {
     if (m_componentCompleted && m_isActive && m_url.isValid() && Q_LIKELY(m_webSocket)) {
-        m_webSocket->open(m_url);
+        QWebSocketHandshakeOptions opt;
+        opt.setSubprotocols(m_requestedProtocols);
+        m_webSocket->open(m_url, opt);
     }
 }
 

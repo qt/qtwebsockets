@@ -37,6 +37,7 @@
 #include <QtNetwork/qsslkey.h>
 #include <QtNetwork/qsslsocket.h>
 #endif
+#include <QtWebSockets/QWebSocketHandshakeOptions>
 #include <QtWebSockets/QWebSocketServer>
 #include <QtWebSockets/QWebSocket>
 #include <QtWebSockets/QWebSocketCorsAuthenticator>
@@ -106,6 +107,8 @@ private Q_SLOTS:
     void tst_settersAndGetters();
     void tst_listening();
     void tst_connectivity();
+    void tst_protocols_data();
+    void tst_protocols();
     void tst_preSharedKey();
     void tst_maxPendingConnections();
     void tst_serverDestroyedWhileSocketConnected();
@@ -373,6 +376,48 @@ void tst_QWebSocketServer::tst_connectivity()
     QCOMPARE(sslErrorsSpy.count(), 0);
 #endif
     QCOMPARE(serverErrorSpy.count(), 0);
+}
+
+void tst_QWebSocketServer::tst_protocols_data()
+{
+    QTest::addColumn<QStringList>("clientProtocols");
+    QTest::addColumn<QString>("expectedProtocol");
+    QTest::addRow("none") << QStringList {} << QString {};
+    QTest::addRow("same order as server")
+            << QStringList { "chat", "superchat" } << QStringLiteral("chat");
+    QTest::addRow("different order from server")
+            << QStringList { "superchat", "chat" } << QStringLiteral("superchat");
+    QTest::addRow("unsupported protocol") << QStringList { "foo" } << QString {};
+    QTest::addRow("mixed supported/unsupported protocol")
+            << QStringList { "foo", "chat" } << QStringLiteral("chat");
+}
+
+void tst_QWebSocketServer::tst_protocols()
+{
+    QFETCH(QStringList, clientProtocols);
+    QFETCH(QString, expectedProtocol);
+
+    QWebSocketServer server(QString(), QWebSocketServer::NonSecureMode);
+    server.setSupportedSubprotocols({ QStringLiteral("chat"), QStringLiteral("superchat") });
+
+    QSignalSpy newConnectionSpy(&server, &QWebSocketServer::newConnection);
+
+    QVERIFY(server.listen());
+
+    QWebSocketHandshakeOptions opt;
+    opt.setSubprotocols(clientProtocols);
+    QWebSocket client;
+    client.open(server.serverUrl(), opt);
+
+    QTRY_COMPARE(client.state(), QAbstractSocket::ConnectedState);
+    QTRY_COMPARE(newConnectionSpy.count(), 1);
+
+    auto *serverSocket = server.nextPendingConnection();
+    QVERIFY(serverSocket);
+
+    QCOMPARE(client.subprotocol(), expectedProtocol);
+    QCOMPARE(serverSocket->subprotocol(), expectedProtocol);
+    QCOMPARE(serverSocket->handshakeOptions().subprotocols(), clientProtocols);
 }
 
 void tst_QWebSocketServer::tst_preSharedKey()

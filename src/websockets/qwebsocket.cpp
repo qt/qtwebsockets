@@ -52,9 +52,7 @@
 
     This class was modeled after QAbstractSocket.
 
-    QWebSocket currently does not support
-    \l {WebSocket Extensions} and
-    \l {WebSocket Subprotocols}.
+    QWebSocket currently does not support \l {WebSocket Extensions}.
 
     QWebSocket only supports version 13 of the WebSocket protocol, as outlined in
     \l {RFC 6455}.
@@ -332,6 +330,7 @@ not been filled in with new information when the signal returns.
   */
 #include "qwebsocket.h"
 #include "qwebsocket_p.h"
+#include "qwebsockethandshakeoptions.h"
 
 #include <QtCore/QUrl>
 #include <QtNetwork/QTcpSocket>
@@ -484,7 +483,7 @@ void QWebSocket::open(const QUrl &url)
 {
     Q_D(QWebSocket);
     QNetworkRequest request(url);
-    d->open(request, true);
+    d->open(request, QWebSocketHandshakeOptions{}, true);
 }
 
 /*!
@@ -498,7 +497,41 @@ void QWebSocket::open(const QUrl &url)
 void QWebSocket::open(const QNetworkRequest &request)
 {
     Q_D(QWebSocket);
-    d->open(request, true);
+    d->open(request, QWebSocketHandshakeOptions{}, true);
+}
+
+/*!
+    \brief Opens a WebSocket connection using the given \a url and \a options.
+    \since 6.4
+
+    If the url contains newline characters (\\r\\n), then the error signal will be emitted
+    with QAbstractSocket::ConnectionRefusedError as error type.
+
+    Additional options for the WebSocket handshake such as subprotocols can be specified in
+    \a options.
+ */
+void QWebSocket::open(const QUrl &url, const QWebSocketHandshakeOptions &options)
+{
+    Q_D(QWebSocket);
+    QNetworkRequest request(url);
+    d->open(request, options, true);
+}
+
+/*!
+    \brief Opens a WebSocket connection using the given \a request and \a options.
+    \since 6.4
+
+    The \a request url will be used to open the WebSocket connection.
+    Headers present in the request will be sent to the server in the upgrade request,
+    together with the ones needed for the websocket handshake.
+
+    Additional options for the WebSocket handshake such as subprotocols can be specified in
+    \a options.
+ */
+void QWebSocket::open(const QNetworkRequest &request, const QWebSocketHandshakeOptions &options)
+{
+    Q_D(QWebSocket);
+    d->open(request, options, true);
 }
 
 /*!
@@ -654,12 +687,32 @@ QNetworkRequest QWebSocket::request() const
 }
 
 /*!
+    \brief Returns the handshake options that were used to open this socket.
+    \since 6.4
+ */
+QWebSocketHandshakeOptions QWebSocket::handshakeOptions() const
+{
+    Q_D(const QWebSocket);
+    return d->handshakeOptions();
+}
+
+/*!
     \brief Returns the current origin.
  */
 QString QWebSocket::origin() const
 {
     Q_D(const QWebSocket);
     return d->origin();
+}
+
+/*!
+    \brief Returns the used WebSocket protocol.
+    \since 6.4
+ */
+QString QWebSocket::subprotocol() const
+{
+    Q_D(const QWebSocket);
+    return d->protocol();
 }
 
 /*!

@@ -31,4 +31,4 @@ To use, add `websockets` to the QT variable.
 `QtWebSockets` is compliant with [RFC6455](http://datatracker.ietf.org/doc/rfc6455/?include_text=1) and has been tested with the [Autobahn Testsuite](http://autobahn.ws/testsuite).
 
 ### Missing Features
-* Extensions and sub-protocols
+* Extensions
