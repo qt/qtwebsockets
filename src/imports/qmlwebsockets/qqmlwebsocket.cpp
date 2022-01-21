@@ -55,7 +55,7 @@
   \qmlproperty QUrl WebSocket::url
   Server url to connect to. The url must have one of 2 schemes: \e ws:// or \e wss://.
   When not supplied, then \e ws:// is used.
-  */
+*/
 
 /*!
   \qmlproperty Status WebSocket::status
@@ -69,33 +69,33 @@
   \li WebSocket.Closed
   \li WebSocket.Error
   \endlist
-  */
+*/
 
 /*!
   \qmlproperty QString WebSocket::errorString
   Contains a description of the last error that occurred. When no error occurrred,
   this string is empty.
-  */
+*/
 
 /*!
   \qmlproperty bool WebSocket::active
   When set to true, a connection is made to the server with the given url.
   When set to false, the connection is closed.
   The default value is false.
-  */
+*/
 
 /*!
   \qmlsignal WebSocket::textMessageReceived(QString message)
   This signal is emitted when a text message is received.
   \a message contains the bytes received.
-  */
+*/
 
 /*!
   \qmlsignal WebSocket::binaryMessageReceived(QString message)
   \since 5.8
   This signal is emitted when a binary message is received.
   \a message contains the bytes received.
-  */
+*/
 
 /*!
   \qmlsignal WebSocket::statusChanged(Status status)
@@ -103,18 +103,18 @@
   The \a status argument provides the current status.
 
   \sa {QtWebSockets::}{WebSocket::status}
-  */
+*/
 
 /*!
   \qmlmethod void WebSocket::sendTextMessage(string message)
   Sends \a message to the server.
-  */
+*/
 
 /*!
   \qmlmethod void WebSocket::sendBinaryMessage(ArrayBuffer message)
   \since 5.8
   Sends the parameter \a message to the server.
-  */
+*/
 
 #include "qqmlwebsocket.h"
 #include <QtWebSockets/QWebSocket>

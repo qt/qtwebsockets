@@ -56,29 +56,29 @@ QT_USE_NAMESPACE
   \qmlproperty QUrl WebSocketServer::url
   Server url that client WebSockets can connect to. The url uses the \e ws:// scheme and includes the
   port the server listens to and the host address of the server.
-  */
+*/
 
 /*!
   \qmlproperty QString WebSocketServer::host
   The host address of the server. By default, localhost is used.
-  */
+*/
 
 /*!
   \qmlproperty int WebSocketServer::port
   The port this server is listening on. The value must be in the range 0-65535.
 
   By default, a port is chosen automatically.
-  */
+*/
 
 /*!
   \qmlproperty QString WebSocketServer::name
   The name of this server used during the http handshake phase.
-  */
+*/
 
 /*!
   \qmlproperty QString WebSocketServer::errorString
   The stringified error message in case an error occurred.
-  */
+*/
 
 /*!
   \qmlproperty bool WebSocketServer::listen
@@ -86,18 +86,18 @@ QT_USE_NAMESPACE
   When set to true, the server will listen on the specified url defined by host and port
   and, when accept is true, accepts incoming client connections. Otherwise the server is closed.
   By default, the server is not listening.
-  */
+*/
 
 /*!
   \qmlproperty bool WebSocketServer::accept
   Set to true to accept incoming client connections when the server is listening. When set to false,
   incoming connections are rejected. By default, connections are accepted.
-  */
+*/
 
 /*!
   \qmlsignal WebSocketServer::clientConnected(WebSocket webSocket)
   This signal is emitted when a client connects to this server. \a webSocket is the newly created \l [QML]{WebSocket}.
-  */
+*/
 
 QQmlWebSocketServer::QQmlWebSocketServer(QObject *parent)
     : QObject(parent)
