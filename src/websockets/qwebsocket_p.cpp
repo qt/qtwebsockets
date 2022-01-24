@@ -615,10 +615,8 @@ void QWebSocketPrivate::makeConnections(QTcpSocket *pTcpSocket)
         //catch signals
         QObjectPrivate::connect(pTcpSocket, &QAbstractSocket::stateChanged, this,
                                 &QWebSocketPrivate::processStateChanged);
-        //!!!important to use a QueuedConnection here;
-        //with QTcpSocket there is no problem, but with QSslSocket the processing hangs
         QObjectPrivate::connect(pTcpSocket, &QAbstractSocket::readyRead, this,
-                                &QWebSocketPrivate::processData, Qt::QueuedConnection);
+                                &QWebSocketPrivate::processData);
 #ifndef QT_NO_SSL
         const QSslSocket * const sslSocket = qobject_cast<const QSslSocket *>(pTcpSocket);
         if (sslSocket) {
