@@ -31,9 +31,7 @@
 #include <QTcpSocket>
 #include <QTcpServer>
 #include <QtCore/QScopedPointer>
-#ifndef QT_NO_OPENSSL
 #include <QtNetwork/qsslpresharedkeyauthenticator.h>
-#endif
 #ifndef QT_NO_SSL
 #include <QtNetwork/qsslcipher.h>
 #include <QtNetwork/qsslkey.h>
@@ -54,7 +52,6 @@ Q_DECLARE_METATYPE(QWebSocketCorsAuthenticator *)
 Q_DECLARE_METATYPE(QSslError)
 #endif
 
-#ifndef QT_NO_OPENSSL
 // Use this cipher to force PSK key sharing.
 static const QString PSK_CIPHER_WITHOUT_AUTH = QStringLiteral("PSK-AES256-CBC-SHA");
 static const QByteArray PSK_CLIENT_PRESHAREDKEY = QByteArrayLiteral("\x1a\x2b\x3c\x4d\x5e\x6f");
@@ -93,7 +90,6 @@ public slots:
         }
     }
 };
-#endif
 
 class tst_QWebSocketServer : public QObject
 {
@@ -137,9 +133,7 @@ void tst_QWebSocketServer::init()
     qRegisterMetaType<QWebSocketCorsAuthenticator *>("QWebSocketCorsAuthenticator *");
 #ifndef QT_NO_SSL
     qRegisterMetaType<QSslError>("QSslError");
-#ifndef QT_NO_OPENSSL
     qRegisterMetaType<QSslPreSharedKeyAuthenticator *>();
-#endif
 #endif
 }
 
@@ -386,7 +380,9 @@ void tst_QWebSocketServer::tst_preSharedKey()
     if (m_shouldSkipUnsupportedIpv6Test)
         QSKIP("Syscalls needed for ipv6 sockoptions missing functionality");
 
-#ifndef QT_NO_OPENSSL
+    if (QSslSocket::activeBackend() != u"openssl")
+        QSKIP("OpenSSL required");
+
     QWebSocketServer server(QString(), QWebSocketServer::SecureMode);
 
     bool cipherFound = false;
@@ -406,8 +402,7 @@ void tst_QWebSocketServer::tst_preSharedKey()
     list << cipher;
 
     QSslConfiguration config = QSslConfiguration::defaultConfiguration();
-    if (QSslSocket::sslLibraryVersionNumber() >= 0x10101000L)
-        config.setProtocol(QSsl::TlsV1_2); // With TLS 1.3 there are some issues with PSK, force 1.2
+    config.setProtocol(QSsl::TlsV1_2); // With TLS 1.3 there are some issues with PSK, force 1.2
     config.setCiphers(list);
     config.setPeerVerifyMode(QSslSocket::VerifyNone);
     config.setPreSharedKeyIdentityHint(PSK_SERVER_IDENTITY_HINT);
@@ -461,7 +456,6 @@ void tst_QWebSocketServer::tst_preSharedKey()
     QTRY_COMPARE(serverClosedSpy.count(), 1);
     QCOMPARE(sslErrorsSpy.count(), 0);
     QCOMPARE(serverErrorSpy.count(), 0);
-#endif
 }
 
 void tst_QWebSocketServer::tst_maxPendingConnections()
