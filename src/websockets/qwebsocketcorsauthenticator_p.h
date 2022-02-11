@@ -39,7 +39,7 @@
 #ifndef QWEBSOCKETCORSAUTHENTICATOR_P_H
 #define QWEBSOCKETCORSAUTHENTICATOR_P_H
 
-#include <QtCore/qglobal.h>
+#include <QtCore/private/qglobal_p.h>
 #include <QtCore/QString>
 
 //

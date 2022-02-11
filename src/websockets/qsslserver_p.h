@@ -56,6 +56,7 @@
 #include <QtNetwork/QSslConfiguration>
 #include <QtNetwork/QSslPreSharedKeyAuthenticator>
 #include <QtCore/QList>
+#include <QtCore/private/qglobal_p.h>
 
 QT_BEGIN_NAMESPACE
 
