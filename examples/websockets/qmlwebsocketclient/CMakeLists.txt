@@ -1,39 +1,31 @@
-# Generated from qmlwebsocketclient.pro.
-
 cmake_minimum_required(VERSION 3.16)
 project(qmlwebsocketclient LANGUAGES CXX)
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
 
 if(NOT DEFINED INSTALL_EXAMPLESDIR)
-  set(INSTALL_EXAMPLESDIR "examples")
+    set(INSTALL_EXAMPLESDIR "examples")
 endif()
 
 set(INSTALL_EXAMPLEDIR "${INSTALL_EXAMPLESDIR}/websockets/qmlwebsocketclient")
 
-find_package(Qt6 COMPONENTS Core)
-find_package(Qt6 COMPONENTS Gui)
-find_package(Qt6 COMPONENTS Quick)
-find_package(Qt6 COMPONENTS WebSockets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick WebSockets)
 
 qt_add_executable(qmlwebsocketclient
     main.cpp
 )
+
 set_target_properties(qmlwebsocketclient PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE FALSE
 )
+
 target_link_libraries(qmlwebsocketclient PUBLIC
     Qt::Core
     Qt::Gui
     Qt::Quick
     Qt::WebSockets
 )
-
 
 # Resources:
 set(data_resource_files
