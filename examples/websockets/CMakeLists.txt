@@ -1,5 +1,3 @@
-# Generated from websockets.pro.
-
 qt_internal_add_example(echoclient)
 qt_internal_add_example(echoserver)
 qt_internal_add_example(simplechat)
