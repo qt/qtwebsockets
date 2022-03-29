@@ -31,6 +31,8 @@
 #include <QtWebSockets/QWebSocketServer>
 #include <QtWebSockets/qwebsocketprotocol.h>
 
+#include <QtNetwork/qtcpserver.h>
+
 QT_USE_NAMESPACE
 
 Q_DECLARE_METATYPE(QWebSocketProtocol::Version)
@@ -156,6 +158,7 @@ private Q_SLOTS:
     void incomingMessageTooLong();
     void incomingFrameTooLong();
     void testingFrameAndMessageSizeApi();
+    void customHeader();
 };
 
 tst_QWebSocket::tst_QWebSocket()
@@ -882,6 +885,59 @@ void tst_QWebSocket::testingFrameAndMessageSizeApi()
 }
 
 #endif // QT_NO_NETWORKPROXY
+
+void tst_QWebSocket::customHeader()
+{
+    QTcpServer server;
+    QSignalSpy serverSpy(&server, &QTcpServer::newConnection);
+
+    server.listen();
+    QUrl url = QUrl(QStringLiteral("ws://127.0.0.1"));
+    url.setPort(server.serverPort());
+
+    QNetworkRequest request(url);
+    request.setRawHeader("CustomHeader", "Example");
+    QWebSocket socket;
+    socket.open(request);
+
+    // Custom websocket server below (needed because a QWebSocketServer on
+    // localhost doesn't show the issue):
+    QVERIFY(serverSpy.wait());
+    QTcpSocket *serverSocket = server.nextPendingConnection();
+    QSignalSpy serverSocketSpy(serverSocket, &QTcpSocket::readyRead);
+    QByteArray data;
+    while (!data.contains("\r\n\r\n")) {
+        QVERIFY(serverSocketSpy.wait());
+        data.append(serverSocket->readAll());
+    }
+    QVERIFY(data.contains("CustomHeader: Example"));
+    const auto view = QLatin1String(data);
+    const auto keyHeader = QLatin1String("Sec-WebSocket-Key:");
+    const qsizetype keyStart = view.indexOf(keyHeader, 0, Qt::CaseInsensitive) + keyHeader.size();
+    QVERIFY(keyStart != -1);
+    const qsizetype keyEnd = view.indexOf(QLatin1String("\r\n"), keyStart);
+    QVERIFY(keyEnd != -1);
+    const QLatin1String keyView = view.sliced(keyStart, keyEnd - keyStart).trimmed();
+    const QByteArray accept =
+            QByteArrayView(keyView) % QByteArrayLiteral("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
+    serverSocket->write(
+            "HTTP/1.1 101 Switching Protocols\r\n"
+            "Upgrade: websocket\r\n"
+            "Connection: Upgrade\r\n"
+            "Sec-WebSocket-Accept: "
+            % QCryptographicHash::hash(accept, QCryptographicHash::Sha1).toBase64()
+        ); // trailing \r\n\r\n intentionally left off to make the client wait for it
+    serverSocket->flush();
+    // This would freeze prior to the fix for QTBUG-102111, because the client would loop forever.
+    // We use qWait to give the OS some time to move the bytes over to the client and push the event
+    // to our eventloop.
+    QTest::qWait(100);
+    serverSocket->write("\r\n\r\n");
+
+    // And check the client properly connects:
+    QSignalSpy connectedSpy(&socket, &QWebSocket::connected);
+    QVERIFY(connectedSpy.wait());
+}
 
 QTEST_MAIN(tst_QWebSocket)
 
