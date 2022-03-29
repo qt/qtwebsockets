@@ -1191,13 +1191,16 @@ void QWebSocketPrivate::processData()
 {
     if (!m_pSocket) // disconnected with data still in-bound
         return;
-    while (m_pSocket->bytesAvailable()) {
-        if (state() == QAbstractSocket::ConnectingState) {
-            if (!m_pSocket->canReadLine())
-                return;
-            processHandshake(m_pSocket);
-        } else if (!m_dataProcessor->process(m_pSocket)) {
+    if (state() == QAbstractSocket::ConnectingState) {
+        if (!m_pSocket->canReadLine())
             return;
+        processHandshake(m_pSocket);
+       // That may have changed state(), recheck in the next 'if' below.
+    }
+    if (state() != QAbstractSocket::ConnectingState) {
+        while (m_pSocket->bytesAvailable()) {
+            if (!m_dataProcessor->process(m_pSocket))
+                return;
         }
     }
 }
