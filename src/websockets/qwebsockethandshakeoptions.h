@@ -55,7 +55,7 @@ class Q_WEBSOCKETS_EXPORT QWebSocketHandshakeOptions
 public:
     QWebSocketHandshakeOptions();
     QWebSocketHandshakeOptions(const QWebSocketHandshakeOptions &other);
-    QWebSocketHandshakeOptions(QWebSocketHandshakeOptions &&other);
+    QWebSocketHandshakeOptions(QWebSocketHandshakeOptions &&other) noexcept;
     ~QWebSocketHandshakeOptions();
 
     QT_MOVE_ASSIGNMENT_OPERATOR_IMPL_VIA_PURE_SWAP(QWebSocketHandshakeOptions)

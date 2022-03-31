@@ -76,7 +76,7 @@ QWebSocketHandshakeOptions::QWebSocketHandshakeOptions(const QWebSocketHandshake
 /*!
     \brief Constructs a QWebSocketHandshakeOptions that is moved from \a other.
 */
-QWebSocketHandshakeOptions::QWebSocketHandshakeOptions(QWebSocketHandshakeOptions &&other)
+QWebSocketHandshakeOptions::QWebSocketHandshakeOptions(QWebSocketHandshakeOptions &&other) noexcept
     : d(std::move(other.d))
 {
 }
