@@ -779,6 +779,7 @@ void tst_QWebSocket::tst_setProxy()
     socket.setProxy(proxy);
     QCOMPARE(socket.proxy(), proxy);
 }
+#endif // QT_NO_NETWORKPROXY
 
 void tst_QWebSocket::overlongCloseReason()
 {
@@ -880,8 +881,6 @@ void tst_QWebSocket::testingFrameAndMessageSizeApi()
     socket.setMaxAllowedIncomingMessageSize(maxAllowedIncomingMessageSize);
     QTRY_COMPARE(maxAllowedIncomingMessageSize, socket.maxAllowedIncomingMessageSize());
 }
-
-#endif // QT_NO_NETWORKPROXY
 
 QTEST_MAIN(tst_QWebSocket)
 
