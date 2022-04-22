@@ -89,7 +89,7 @@ QWebSocketHandshakeOptions::~QWebSocketHandshakeOptions()
 }
 
 /*!
-    \fn QWebSocketHandshakeOptions &operator=(QWebSocketHandshakeOptions &&other) noexcept
+    \fn QWebSocketHandshakeOptions &QWebSocketHandshakeOptions::operator=(QWebSocketHandshakeOptions &&other)
     \brief Moves \a other to this object.
 */
 
@@ -118,8 +118,8 @@ QStringList QWebSocketHandshakeOptions::subprotocols() const
 }
 
 /*!
-    \brief Sets the list of WebSocket subprotocols to send along with the
-           websocket handshake.
+    \brief Sets the list of WebSocket subprotocols \a protocols to send along
+           with the websocket handshake.
 
     WebSocket subprotocol names may only consist of those US-ASCII characters
     that are in the unreserved group. Invalid protocol names will not be
@@ -136,12 +136,9 @@ bool QWebSocketHandshakeOptions::equals(const QWebSocketHandshakeOptions &other)
 }
 
 /*!
-    \fn operator==(const QWebSocketHandshakeOptions &lhs, const QWebSocketHandshakeOptions &rhs)
+    //! friend
+    \fn QWebSocketHandshakeOptions::operator==(const QWebSocketHandshakeOptions &lhs, const QWebSocketHandshakeOptions &rhs)
+    \fn QWebSocketHandshakeOptions::operator!=(const QWebSocketHandshakeOptions &lhs, const QWebSocketHandshakeOptions &rhs)
     \brief Compares \a lhs for equality with \a rhs.
 */
-/*!
-    \fn operator!=(const QWebSocketHandshakeOptions &lhs, const QWebSocketHandshakeOptions &rhs)
-    \brief Compares \a lhs for inequality with \a rhs.
-*/
-
 QT_END_NAMESPACE

@@ -18,23 +18,23 @@ qhp.QtWebSockets.indexRoot                          =
 qhp.QtWebSockets.subprojects                        = classes qml examples
 qhp.QtWebSockets.subprojects.classes.title          = C++ Classes
 qhp.QtWebSockets.subprojects.classes.indexTitle     = Qt WebSockets C++ Classes
-qhp.QtWebSockets.subprojects.classes.selectors      = class fake:headerfile
+qhp.QtWebSockets.subprojects.classes.selectors      = class headerfile
 qhp.QtWebSockets.subprojects.classes.sortPages      = true
 
 qhp.QtWebSockets.subprojects.qml.title              = QML Types
 qhp.QtWebSockets.subprojects.qml.indexTitle         = Qt WebSockets QML Types
-qhp.QtWebSockets.subprojects.qml.selectors          = qmlclass
+qhp.QtWebSockets.subprojects.qml.selectors          = qmltype
 qhp.QtWebSockets.subprojects.qml.sortPages          = true
 
 qhp.QtWebSockets.subprojects.examples.title         = Examples
 qhp.QtWebSockets.subprojects.examples.indexTitle    = Qt WebSockets Examples
-qhp.QtWebSockets.subprojects.examples.selectors     = fake:example
+qhp.QtWebSockets.subprojects.examples.selectors     = doc:example
 qhp.QtWebSockets.subprojects.examples.sortPages     = true
 
 
 tagfile                                             = ../../../doc/qtwebsockets/qtwebsockets.tags
 
-depends                                             += qtcore qtnetwork qtdoc qmake
+depends                                             += qtcore qtnetwork qtdoc qmake qtcmake
 
 headerdirs                                          += .. \
                                                        ../../imports
@@ -62,3 +62,6 @@ manifestmeta.thumbnail.names                        += "QtWebSockets/Echo Client
 navigation.landingpage                              = "Qt WebSockets"
 navigation.cppclassespage                           = "Qt WebSockets C++ Classes"
 navigation.qmltypespage                             = "Qt WebSockets QML Types"
+
+# Enforce zero warnings for documentation build
+warninglimit = 0
