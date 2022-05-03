@@ -39,9 +39,6 @@
 
 #include "qwebsocketserver.h"
 #include "qwebsocketserver_p.h"
-#ifndef QT_NO_SSL
-#include "qsslserver_p.h"
-#endif
 #include "qwebsocketprotocol.h"
 #include "qwebsockethandshakerequest_p.h"
 #include "qwebsockethandshakeresponse_p.h"
@@ -49,6 +46,9 @@
 #include "qwebsocket_p.h"
 #include "qwebsocketcorsauthenticator.h"
 
+#ifndef QT_NO_SSL
+#include "QtNetwork/QSslServer"
+#endif
 #include <QtCore/QTimer>
 #include <QtNetwork/QTcpServer>
 #include <QtNetwork/QTcpSocket>
@@ -87,8 +87,8 @@ void QWebSocketServerPrivate::init()
     if (m_secureMode == NonSecureMode) {
         m_pTcpServer = new QTcpServer(q);
         if (Q_LIKELY(m_pTcpServer))
-            QObjectPrivate::connect(m_pTcpServer, &QTcpServer::newConnection,
-                                    this, &QWebSocketServerPrivate::onNewConnection);
+            QObjectPrivate::connect(m_pTcpServer, &QTcpServer::pendingConnectionAvailable, this,
+                                    &QWebSocketServerPrivate::onNewConnection);
         else
             qFatal("Could not allocate memory for tcp server.");
     } else {
@@ -96,23 +96,44 @@ void QWebSocketServerPrivate::init()
         QSslServer *pSslServer = new QSslServer(q);
         m_pTcpServer = pSslServer;
         if (Q_LIKELY(m_pTcpServer)) {
-            QObjectPrivate::connect(pSslServer, &QSslServer::newEncryptedConnection,
-                                    this, &QWebSocketServerPrivate::onNewConnection,
+            QObjectPrivate::connect(pSslServer, &QTcpServer::pendingConnectionAvailable, this,
+                                    &QWebSocketServerPrivate::onNewConnection,
                                     Qt::QueuedConnection);
             QObjectPrivate::connect(pSslServer, &QSslServer::startedEncryptionHandshake,
                                     this, &QWebSocketServerPrivate::startHandshakeTimeout);
             QObject::connect(pSslServer, &QSslServer::peerVerifyError,
-                             q, &QWebSocketServer::peerVerifyError);
+                             [q](QSslSocket *socket, const QSslError &error) {
+                                    Q_UNUSED(socket);
+                                    Q_EMIT q->peerVerifyError(error);
+                             });
             QObject::connect(pSslServer, &QSslServer::sslErrors,
-                             q, &QWebSocketServer::sslErrors);
+                             [q](QSslSocket *socket, const QList<QSslError> &errors) {
+                                    Q_UNUSED(socket);
+                                    Q_EMIT q->sslErrors(errors);
+                             });
             QObject::connect(pSslServer, &QSslServer::preSharedKeyAuthenticationRequired,
-                             q, &QWebSocketServer::preSharedKeyAuthenticationRequired);
+                             [q](QSslSocket *socket,
+                                 QSslPreSharedKeyAuthenticator *authenticator) {
+                                    Q_UNUSED(socket);
+                                    Q_EMIT q->preSharedKeyAuthenticationRequired(authenticator);
+                             });
             QObject::connect(pSslServer, &QSslServer::alertSent,
-                             q, &QWebSocketServer::alertSent);
+                             [q](QSslSocket *socket, QSsl::AlertLevel level,
+                                 QSsl::AlertType type, const QString &description) {
+                                    Q_UNUSED(socket);
+                                    Q_EMIT q->alertSent(level, type, description);
+                                 });
             QObject::connect(pSslServer, &QSslServer::alertReceived,
-                             q, &QWebSocketServer::alertReceived);
+                             [q](QSslSocket *socket, QSsl::AlertLevel level,
+                                 QSsl::AlertType type, const QString &description) {
+                                    Q_UNUSED(socket);
+                                    Q_EMIT q->alertReceived(level, type, description);
+                                 });
             QObject::connect(pSslServer, &QSslServer::handshakeInterruptedOnError,
-                             q, &QWebSocketServer::handshakeInterruptedOnError);
+                             [q](QSslSocket *socket, const QSslError &error) {
+                                    Q_UNUSED(socket);
+                                    Q_EMIT q->handshakeInterruptedOnError(error);
+                                });
         }
 #else
         qFatal("SSL not supported on this platform.");
