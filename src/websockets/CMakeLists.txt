@@ -42,13 +42,6 @@ qt_internal_extend_target(WebSockets CONDITION WASM
         websocket.js
 )
 
-qt_internal_extend_target(WebSockets CONDITION QT_FEATURE_ssl
-    SOURCES
-        qsslserver.cpp
-)
-
-#### Keys ignored in scope 3:.:.:websockets.pro:QT_FEATURE_ssl:
-# PRIVATE_HEADERS = "qsslserver_p.h"
 qt_internal_add_docs(WebSockets
     doc/qtwebsockets.qdocconf
 )
