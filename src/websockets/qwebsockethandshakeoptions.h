@@ -61,7 +61,7 @@ public:
     QT_MOVE_ASSIGNMENT_OPERATOR_IMPL_VIA_PURE_SWAP(QWebSocketHandshakeOptions)
     QWebSocketHandshakeOptions &operator=(const QWebSocketHandshakeOptions &other);
 
-    void swap(QWebSocketHandshakeOptions &other) noexcept { qSwap(d, other.d); }
+    void swap(QWebSocketHandshakeOptions &other) noexcept { d.swap(other.d); }
 
     QStringList subprotocols() const;
     void setSubprotocols(const QStringList &protocols);
