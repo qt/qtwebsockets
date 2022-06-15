@@ -38,12 +38,9 @@ QWebSocketHandshakeOptions::QWebSocketHandshakeOptions(const QWebSocketHandshake
 }
 
 /*!
+    \fn  QWebSocketHandshakeOptions::QWebSocketHandshakeOptions(QWebSocketHandshakeOptions &&other) noexcept
     \brief Constructs a QWebSocketHandshakeOptions that is moved from \a other.
 */
-QWebSocketHandshakeOptions::QWebSocketHandshakeOptions(QWebSocketHandshakeOptions &&other) noexcept
-    : d(std::move(other.d))
-{
-}
 
 /*!
     \brief Destroys this object.
@@ -53,7 +50,7 @@ QWebSocketHandshakeOptions::~QWebSocketHandshakeOptions()
 }
 
 /*!
-    \fn QWebSocketHandshakeOptions &QWebSocketHandshakeOptions::operator=(QWebSocketHandshakeOptions &&other)
+    \fn QWebSocketHandshakeOptions &QWebSocketHandshakeOptions::operator=(QWebSocketHandshakeOptions &&other) noexcept
     \brief Moves \a other to this object.
 */
 
@@ -105,4 +102,7 @@ bool QWebSocketHandshakeOptions::equals(const QWebSocketHandshakeOptions &other)
     \fn QWebSocketHandshakeOptions::operator!=(const QWebSocketHandshakeOptions &lhs, const QWebSocketHandshakeOptions &rhs)
     \brief Compares \a lhs for equality with \a rhs.
 */
+
+QT_DEFINE_QSDP_SPECIALIZATION_DTOR(QWebSocketHandshakeOptionsPrivate)
+
 QT_END_NAMESPACE

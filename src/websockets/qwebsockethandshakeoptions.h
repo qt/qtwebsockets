@@ -14,12 +14,14 @@ QT_BEGIN_NAMESPACE
 
 class QWebSocketHandshakeOptionsPrivate;
 
+QT_DECLARE_QSDP_SPECIALIZATION_DTOR_WITH_EXPORT(QWebSocketHandshakeOptionsPrivate, Q_WEBSOCKETS_EXPORT)
+
 class Q_WEBSOCKETS_EXPORT QWebSocketHandshakeOptions
 {
 public:
     QWebSocketHandshakeOptions();
     QWebSocketHandshakeOptions(const QWebSocketHandshakeOptions &other);
-    QWebSocketHandshakeOptions(QWebSocketHandshakeOptions &&other) noexcept;
+    QWebSocketHandshakeOptions(QWebSocketHandshakeOptions &&other) noexcept = default;
     ~QWebSocketHandshakeOptions();
 
     QT_MOVE_ASSIGNMENT_OPERATOR_IMPL_VIA_PURE_SWAP(QWebSocketHandshakeOptions)
