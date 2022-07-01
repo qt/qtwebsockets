@@ -197,6 +197,7 @@ static void appendCommmaSeparatedLineToList(QStringList &list, QByteArrayView li
 void QWebSocketHandshakeRequest::readHandshake(QByteArrayView header, int maxHeaderLineLength)
 {
     clear();
+    m_parser.setMaxHeaderFieldSize(maxHeaderLineLength);
     QString requestLine = QString::fromLatin1(readLine(header, maxHeaderLineLength));
     if (requestLine.isNull()) {
         clear();
