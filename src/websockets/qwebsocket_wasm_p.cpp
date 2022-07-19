@@ -80,7 +80,7 @@ qint64 QWebSocketPrivate::sendTextMessage(const QString &message)
     if (m_readyState == 1) {
         result = emscripten_websocket_send_utf8_text(m_socketContext, message.toUtf8());
         if (result < 0)
-            emit q_func()->error(QAbstractSocket::UnknownSocketError);
+            emitErrorOccurred(QAbstractSocket::UnknownSocketError);
     } else
         qWarning() << "Could not send message. Websocket is not open";
 
@@ -96,7 +96,7 @@ qint64 QWebSocketPrivate::sendBinaryMessage(const QByteArray &data)
                 m_socketContext, const_cast<void *>(reinterpret_cast<const void *>(data.constData())),
                 data.size());
         if (result < 0)
-            emit q_func()->error(QAbstractSocket::UnknownSocketError);
+            emitErrorOccurred(QAbstractSocket::UnknownSocketError);
     } else
         qWarning() << "Could not send message. Websocket is not open";
 
@@ -126,12 +126,11 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
 {
     Q_UNUSED(mask);
     Q_UNUSED(options)
-    Q_Q(QWebSocket);
 
     emscripten_websocket_get_ready_state(m_socketContext, &m_readyState);
 
     if ((m_readyState == 1 || m_readyState == 3) && m_socketContext != 0) {
-        emit q->error(QAbstractSocket::OperationError);
+        emitErrorOccurred(QAbstractSocket::OperationError);
         return;
     }
 
@@ -147,7 +146,7 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
             || url.toString().contains(QStringLiteral("\r\n"))
             || (isSecureContext && url.scheme() == QStringLiteral("ws"))) {
         setErrorString(QWebSocket::tr("Connection refused"));
-        Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
+        emitErrorOccurred(QAbstractSocket::ConnectionRefusedError);
         return;
     }
 
@@ -186,7 +185,7 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
 
     if (m_socketContext <= 0) { // m_readyState might not be changed yet
         // error
-        emit q->error(QAbstractSocket::UnknownSocketError);
+        emitErrorOccurred(QAbstractSocket::UnknownSocketError);
         return;
     }
 

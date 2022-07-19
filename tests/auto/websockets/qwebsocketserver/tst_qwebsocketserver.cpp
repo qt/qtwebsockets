@@ -797,7 +797,7 @@ void tst_QWebSocketServer::tst_handshakeTimeout()
         QCOMPARE(secureServerConnectionSpy.count(), 0);
 
         QWebSocket secureSocket;
-        connect(&secureSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error),
+        connect(&secureSocket, &QWebSocket::errorOccurred,
                 [](QAbstractSocket::SocketError error) {
                     // This shouldn't print but it's useful for debugging when/if it does.
                     qDebug() << "Error occurred in the client:" << error;

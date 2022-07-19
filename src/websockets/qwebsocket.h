@@ -123,7 +123,11 @@ Q_SIGNALS:
     void binaryFrameReceived(const QByteArray &frame, bool isLastFrame);
     void textMessageReceived(const QString &message);
     void binaryMessageReceived(const QByteArray &message);
+#if QT_DEPRECATED_SINCE(6, 5)
+    QT_DEPRECATED_VERSION_X_6_5("Use errorOccurred instead")
     void error(QAbstractSocket::SocketError error);
+#endif
+    void errorOccurred(QAbstractSocket::SocketError error);
     void pong(quint64 elapsedTime, const QByteArray &payload);
     void bytesWritten(qint64 bytes);
 

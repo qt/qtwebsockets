@@ -186,6 +186,7 @@ private:
     QByteArray generateKey() const;
     Q_REQUIRED_RESULT qint64 writeFrames(const QList<QByteArray> &frames);
     Q_REQUIRED_RESULT qint64 writeFrame(const QByteArray &frame);
+    void emitErrorOccurred(QAbstractSocket::SocketError error);
 
     QTcpSocket *m_pSocket;
     QString m_errorString;

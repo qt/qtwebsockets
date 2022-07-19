@@ -405,7 +405,7 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
     QUrl url = request.url();
     if (!url.isValid() || url.toString().contains(QStringLiteral("\r\n"))) {
         setErrorString(QWebSocket::tr("Invalid URL."));
-        Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
+        emitErrorOccurred(QAbstractSocket::ConnectionRefusedError);
         return;
     }
     if (m_pSocket) {
@@ -425,7 +425,7 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
         if (resourceName.contains(QStringLiteral("%0D%0A"))) {
             setRequest(QNetworkRequest());  //clear request
             setErrorString(QWebSocket::tr("Invalid resource name."));
-            Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
+            emitErrorOccurred(QAbstractSocket::ConnectionRefusedError);
             return;
         }
         if (!url.query().isEmpty()) {
@@ -445,7 +445,7 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
                 const QString message =
                         QWebSocket::tr("SSL Sockets are not supported on this platform.");
                 setErrorString(message);
-                Q_EMIT q->error(QAbstractSocket::UnsupportedSocketOperationError);
+                emitErrorOccurred(QAbstractSocket::UnsupportedSocketOperationError);
             } else {
                 QSslSocket *sslSocket = new QSslSocket(q);
                 m_pSocket = sslSocket;
@@ -473,7 +473,7 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
                 } else {
                     const QString message = QWebSocket::tr("Out of memory.");
                     setErrorString(message);
-                    Q_EMIT q->error(QAbstractSocket::SocketResourceError);
+                    emitErrorOccurred(QAbstractSocket::SocketResourceError);
                 }
             }
         } else
@@ -498,13 +498,13 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
             } else {
                 const QString message = QWebSocket::tr("Out of memory.");
                 setErrorString(message);
-                Q_EMIT q->error(QAbstractSocket::SocketResourceError);
+                emitErrorOccurred(QAbstractSocket::SocketResourceError);
             }
         } else {
             const QString message =
                     QWebSocket::tr("Unsupported WebSocket scheme: %1").arg(url.scheme());
             setErrorString(message);
-            Q_EMIT q->error(QAbstractSocket::UnsupportedSocketOperationError);
+            emitErrorOccurred(QAbstractSocket::UnsupportedSocketOperationError);
         }
     }
 }
@@ -610,8 +610,8 @@ void QWebSocketPrivate::makeConnections(QTcpSocket *pTcpSocket)
 
     if (Q_LIKELY(pTcpSocket)) {
         //pass through signals
-        QObject::connect(pTcpSocket, &QAbstractSocket::errorOccurred,
-                         q, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error));
+        QObjectPrivate::connect(pTcpSocket, &QAbstractSocket::errorOccurred, this,
+                                &QWebSocketPrivate::emitErrorOccurred);
 #ifndef QT_NO_NETWORKPROXY
         QObject::connect(pTcpSocket, &QAbstractSocket::proxyAuthenticationRequired, q,
                          &QWebSocket::proxyAuthenticationRequired);
@@ -770,7 +770,6 @@ QByteArray QWebSocketPrivate::getFrameHeader(QWebSocketProtocol::OpCode opCode,
                                              quint64 payloadLength, quint32 maskingKey,
                                              bool lastFrame)
 {
-    Q_Q(QWebSocket);
     QByteArray header;
     bool ok = payloadLength <= 0x7FFFFFFFFFFFFFFFULL;
 
@@ -804,7 +803,7 @@ QByteArray QWebSocketPrivate::getFrameHeader(QWebSocketProtocol::OpCode opCode,
         }
     } else {
         setErrorString(QStringLiteral("WebSocket::getHeader: payload too big!"));
-        Q_EMIT q->error(QAbstractSocket::DatagramTooLargeError);
+        emitErrorOccurred(QAbstractSocket::DatagramTooLargeError);
     }
 
     return header;
@@ -819,7 +818,6 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
     if (Q_UNLIKELY(!m_pSocket) || (state() != QAbstractSocket::ConnectedState))
         return payloadWritten;
 
-    Q_Q(QWebSocket);
     const QWebSocketProtocol::OpCode firstOpCode = isBinary ?
                 QWebSocketProtocol::OpCodeBinary : QWebSocketProtocol::OpCodeText;
 
@@ -865,7 +863,7 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
                 m_pSocket->flush();
                 setErrorString(QWebSocket::tr("Error writing bytes to socket: %1.")
                                .arg(m_pSocket->errorString()));
-                Q_EMIT q->error(QAbstractSocket::NetworkError);
+                emitErrorOccurred(QAbstractSocket::NetworkError);
                 break;
             }
         }
@@ -875,7 +873,7 @@ qint64 QWebSocketPrivate::doWriteFrames(const QByteArray &data, bool isBinary)
     if (Q_UNLIKELY(payloadWritten != data.size())) {
         setErrorString(QWebSocket::tr("Bytes written %1 != %2.")
                        .arg(payloadWritten).arg(data.size()));
-        Q_EMIT q->error(QAbstractSocket::NetworkError);
+        emitErrorOccurred(QAbstractSocket::NetworkError);
     }
     return payloadWritten;
 }
@@ -959,7 +957,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
         const qint64 maxHeaderLength = MAX_HEADERLINE_LENGTH * MAX_HEADERLINES + endOfHeaderMarker.size();
         if (Q_UNLIKELY(byteAvailable > maxHeaderLength)) {
             setErrorString(QWebSocket::tr("Header is too large"));
-            Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
+            emitErrorOccurred(QAbstractSocket::ConnectionRefusedError);
         }
         return;
     }
@@ -971,7 +969,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
 
     if (Q_UNLIKELY(skippedSize != headerSize)) {
         setErrorString(QWebSocket::tr("Read handshake request header failed"));
-        Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
+        emitErrorOccurred(QAbstractSocket::ConnectionRefusedError);
         return;
     }
 
@@ -982,13 +980,13 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
 
     if (!parser.parseStatus(status)) {
         setErrorString(QWebSocket::tr("Read handshake request status failed"));
-        Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
+        emitErrorOccurred(QAbstractSocket::ConnectionRefusedError);
         return;
     }
 
     if (!parser.parseHeaders(headers.sliced(endOfStatusIndex + endOfStatusMarker.size()))) {
         setErrorString(QWebSocket::tr("Parsing handshake request header failed"));
-        Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
+        emitErrorOccurred(QAbstractSocket::ConnectionRefusedError);
         return;
     }
 
@@ -1009,7 +1007,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
         setErrorString(QWebSocket::tr("WebSocket server has chosen protocol %1 which has not been "
                                       "requested")
                                .arg(protocol));
-        Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
+        emitErrorOccurred(QAbstractSocket::ConnectionRefusedError);
         return;
     }
 
@@ -1071,7 +1069,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
     } else {
         // handshake failed
         setErrorString(errorDescription);
-        Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
+        emitErrorOccurred(QAbstractSocket::ConnectionRefusedError);
     }
 }
 
@@ -1112,7 +1110,7 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
                                                              headers);
             if (handshake.isEmpty()) {
                 m_pSocket->abort();
-                Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
+                emitErrorOccurred(QAbstractSocket::ConnectionRefusedError);
                 return;
             }
             m_pSocket->write(handshake.toLatin1());
@@ -1519,6 +1517,18 @@ void QWebSocketPrivate::setReadBufferSize(qint64 size)
     m_readBufferSize = size;
     if (Q_LIKELY(m_pSocket))
         m_pSocket->setReadBufferSize(m_readBufferSize);
+}
+
+void QWebSocketPrivate::emitErrorOccurred(QAbstractSocket::SocketError error)
+{
+    Q_Q(QWebSocket);
+    Q_EMIT q->errorOccurred(error);
+#if QT_DEPRECATED_SINCE(6, 5)
+    QT_WARNING_PUSH
+    QT_WARNING_DISABLE_DEPRECATED
+    Q_EMIT q->error(error);
+    QT_WARNING_POP
+#endif
 }
 
 #ifndef Q_OS_WASM
