@@ -151,16 +151,16 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
         return;
     }
 
-    EmscriptenWebSocketCreateAttributes *attr = new EmscriptenWebSocketCreateAttributes;
+    EmscriptenWebSocketCreateAttributes attr;
 
-    emscripten_websocket_init_create_attributes(attr); // memset
-
-    attr->url = url.toString(QUrl::FullyEncoded).toUtf8().constData();
+    emscripten_websocket_init_create_attributes(&attr); // memset
+    QByteArray thisUrl = url.toString(QUrl::FullyEncoded).toUtf8();
+    attr.url = thisUrl.constData();
 
 #if QT_CONFIG(thread)
     // see https://github.com/emscripten-core/emscripten/blob/main/system/include/emscripten/websocket.h
     // choose a default: create websocket on calling thread
-    attr->createOnMainThread = false;
+    attr.createOnMainThread = false;
 #endif
     // HTML WebSockets do not support arbitrary request headers, but
     // do support the WebSocket protocol header. This header is
@@ -169,20 +169,22 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
     // add user subprotocol options
     QStringList protocols = handshakeOptions().subprotocols();
 
+    QByteArray secProto;
     if (request.hasRawHeader("Sec-WebSocket-Protocol")) {
-        QByteArray secProto = request.rawHeader("Sec-WebSocket-Protocol");
+        secProto = request.rawHeader("Sec-WebSocket-Protocol");
         if (!protocols.contains(secProto)) {
             protocols.append(QString::fromLatin1(secProto));
         }
     }
     if (!protocols.isEmpty()) {
         // comma-separated list of protocol strings, no spaces
-        attr->protocols = protocols.join(QStringLiteral(",")).toLatin1().constData();
+        secProto = protocols.join(QStringLiteral(",")).toLatin1();
+        attr.protocols = secProto.constData();
     }
 
     // create and connect
     setSocketState(QAbstractSocket::ConnectingState);
-    m_socketContext = emscripten_websocket_new(attr);
+    m_socketContext = emscripten_websocket_new(&attr);
 
     if (m_socketContext <= 0) { // m_readyState might not be changed yet
         // error
