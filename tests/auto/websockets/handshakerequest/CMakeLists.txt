@@ -16,7 +16,6 @@ qt_internal_add_test(tst_handshakerequest
         tst_handshakerequest.cpp
     LIBRARIES
         Qt::NetworkPrivate
-    PUBLIC_LIBRARIES
         Qt::WebSocketsPrivate
 )
 

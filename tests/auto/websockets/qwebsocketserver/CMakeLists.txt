@@ -10,7 +10,7 @@
 qt_internal_add_test(tst_qwebsocketserver
     SOURCES
         tst_qwebsocketserver.cpp
-    PUBLIC_LIBRARIES
+    LIBRARIES
         Qt::WebSockets
 )
 

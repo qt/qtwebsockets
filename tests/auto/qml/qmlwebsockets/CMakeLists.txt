@@ -15,7 +15,7 @@ qt_internal_add_test(tst_qmlwebsockets
     QMLTEST
     SOURCES
         tst_qmlwebsockets.cpp
-    PUBLIC_LIBRARIES
+    LIBRARIES
         Qt::Gui
     TESTDATA ${test_data}
 )

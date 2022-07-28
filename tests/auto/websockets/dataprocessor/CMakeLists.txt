@@ -14,7 +14,7 @@ endif()
 qt_internal_add_test(tst_dataprocessor
     SOURCES
         tst_dataprocessor.cpp
-    PUBLIC_LIBRARIES
+    LIBRARIES
         Qt::WebSocketsPrivate
 )
 

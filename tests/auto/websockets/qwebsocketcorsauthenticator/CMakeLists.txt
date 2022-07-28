@@ -10,7 +10,7 @@
 qt_internal_add_test(tst_qwebsocketcorsauthenticator
     SOURCES
         tst_qwebsocketcorsauthenticator.cpp
-    PUBLIC_LIBRARIES
+    LIBRARIES
         Qt::WebSockets
 )
 

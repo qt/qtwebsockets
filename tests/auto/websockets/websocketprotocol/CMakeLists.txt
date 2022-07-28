@@ -14,7 +14,7 @@ endif()
 qt_internal_add_test(tst_websocketprotocol
     SOURCES
         tst_websocketprotocol.cpp
-    PUBLIC_LIBRARIES
+    LIBRARIES
         Qt::WebSocketsPrivate
 )
 
