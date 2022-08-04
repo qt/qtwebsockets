@@ -144,10 +144,16 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
     bool isSecureContext = (navProtocol.as<std::string>().find("https") == 0);
 
     if (!url.isValid()
-            || url.toString().contains(QStringLiteral("\r\n"))
-            || (isSecureContext && url.scheme() == QStringLiteral("ws"))) {
+            || url.toString().contains(QStringLiteral("\r\n"))) {
         setErrorString(QWebSocket::tr("Connection refused"));
         Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
+        return;
+    }
+    if (isSecureContext && url.scheme() == QStringLiteral("ws")) {
+         const QString message =
+                    QWebSocket::tr("Unsupported WebSocket scheme: %1").arg(url.scheme());
+        setErrorString(message);
+        emit q->error(QAbstractSocket::UnsupportedSocketOperationError);
         return;
     }
 
@@ -226,8 +232,11 @@ void QWebSocketPrivate::setSocketClosed(const EmscriptenWebSocketCloseEvent *emC
 {
     Q_Q(QWebSocket);
     m_closeCode = (QWebSocketProtocol::CloseCode)emCloseEvent->code;
+
+    m_closeReason = QString::fromUtf8(emCloseEvent->reason);
+
     if (m_closeReason.isEmpty()) {
-        m_closeReason = QString::fromUtf8(emCloseEvent->reason);
+        m_closeReason = closeCodeToString(m_closeCode);
     }
 
     if (m_socketState == QAbstractSocket::ConnectedState) {
@@ -247,4 +256,24 @@ void QWebSocketPrivate::setSocketClosed(const EmscriptenWebSocketCloseEvent *emC
         emscripten_websocket_delete(emCloseEvent->socket);
         m_socketContext = 0;
     }
+}
+
+QString QWebSocketPrivate::closeCodeToString(QWebSocketProtocol::CloseCode code)
+{
+    switch (code) {
+        case QWebSocketProtocol::CloseCodeNormal: return QStringLiteral("Normal closure");
+        case QWebSocketProtocol::CloseCodeGoingAway: return QStringLiteral("Going away");
+        case QWebSocketProtocol::CloseCodeProtocolError: return QStringLiteral("Protocol error");
+        case QWebSocketProtocol::CloseCodeDatatypeNotSupported: return QStringLiteral("Unsupported data");
+        case QWebSocketProtocol::CloseCodeReserved1004: return QStringLiteral("Reserved");
+        case QWebSocketProtocol::CloseCodeMissingStatusCode: return QStringLiteral("No status received");
+        case QWebSocketProtocol::CloseCodeAbnormalDisconnection: return QStringLiteral("Abnormal closure");
+        case QWebSocketProtocol::CloseCodeWrongDatatype: return QStringLiteral("Invalid frame payload data");
+        case QWebSocketProtocol::CloseCodePolicyViolated: return QStringLiteral("Policy violation");
+        case QWebSocketProtocol::CloseCodeTooMuchData: return QStringLiteral("Message too big");
+        case QWebSocketProtocol::CloseCodeMissingExtension: return QStringLiteral("Mandatory extension missing");
+        case QWebSocketProtocol::CloseCodeBadOperation: return QStringLiteral("Internal server error");
+        case QWebSocketProtocol::CloseCodeTlsHandshakeFailed: return QStringLiteral("TLS handshake failed");
+    };
+    return QStringLiteral("");
 }

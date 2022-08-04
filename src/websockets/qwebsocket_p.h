@@ -139,6 +139,7 @@ public:
     static quint64 maxOutgoingFrameSize();
 #ifdef Q_OS_WASM
     void setSocketClosed(const EmscriptenWebSocketCloseEvent *emCloseEvent);
+    QString closeCodeToString(QWebSocketProtocol::CloseCode code);
 #endif
 private:
     QWebSocketPrivate(QTcpSocket *pTcpSocket, QWebSocketProtocol::Version version);
