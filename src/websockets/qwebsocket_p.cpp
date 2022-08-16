@@ -270,6 +270,11 @@ QSslConfiguration QWebSocketPrivate::sslConfiguration() const
 void QWebSocketPrivate::ignoreSslErrors(const QList<QSslError> &errors)
 {
     m_configuration.m_ignoredSslErrors = errors;
+    if (Q_LIKELY(m_pSocket)) {
+        QSslSocket *pSslSocket = qobject_cast<QSslSocket *>(m_pSocket);
+        if (Q_LIKELY(pSslSocket))
+            pSslSocket->ignoreSslErrors(errors);
+    }
 }
 
 /*!
