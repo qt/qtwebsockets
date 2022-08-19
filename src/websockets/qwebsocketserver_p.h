@@ -68,9 +68,7 @@ public:
     QWebSocketProtocol::CloseCode serverError() const;
     quint16 serverPort() const;
     void setMaxPendingConnections(int numConnections);
-    void setHandshakeTimeout(int msec) {
-        m_handshakeTimeout = msec;
-    }
+    void setHandshakeTimeout(int msec);
     bool setSocketDescriptor(qintptr socketDescriptor);
     qintptr socketDescriptor() const;
 

@@ -9,6 +9,7 @@
 #include "qwebsocket.h"
 #include "qwebsocket_p.h"
 #include "qwebsocketcorsauthenticator.h"
+#include <limits>
 
 #ifndef QT_NO_SSL
 #include "QtNetwork/QSslServer"
@@ -59,12 +60,12 @@ void QWebSocketServerPrivate::init()
 #ifndef QT_NO_SSL
         QSslServer *pSslServer = new QSslServer(q);
         m_pTcpServer = pSslServer;
+        // Update the QSslServer with the timeout we have:
+        setHandshakeTimeout(m_handshakeTimeout);
         if (Q_LIKELY(m_pTcpServer)) {
             QObjectPrivate::connect(pSslServer, &QTcpServer::pendingConnectionAvailable, this,
                                     &QWebSocketServerPrivate::onNewConnection,
                                     Qt::QueuedConnection);
-            QObjectPrivate::connect(pSslServer, &QSslServer::startedEncryptionHandshake,
-                                    this, &QWebSocketServerPrivate::startHandshakeTimeout);
             QObject::connect(pSslServer, &QSslServer::peerVerifyError,
                              [q](QSslSocket *socket, const QSslError &error) {
                                     Q_UNUSED(socket);
@@ -279,6 +280,24 @@ void QWebSocketServerPrivate::setMaxPendingConnections(int numConnections)
 /*!
     \internal
  */
+void QWebSocketServerPrivate::setHandshakeTimeout(int msec)
+{
+#if QT_CONFIG(ssl)
+    if (auto *server = qobject_cast<QSslServer *>(m_pTcpServer)) {
+        int timeout = msec;
+        // Since QSslServer doesn't deal with negative numbers we set a very
+        // large one instead to keep some level of compatibility:
+        if (timeout < 0)
+            timeout = std::numeric_limits<int>::max();
+        server->setHandshakeTimeout(timeout);
+    }
+#endif
+    m_handshakeTimeout = msec;
+}
+
+/*!
+    \internal
+ */
 bool QWebSocketServerPrivate::setSocketDescriptor(qintptr socketDescriptor)
 {
     return m_pTcpServer->setSocketDescriptor(socketDescriptor);
@@ -385,8 +404,8 @@ void QWebSocketServerPrivate::onNewConnection()
 {
     while (m_pTcpServer->hasPendingConnections()) {
         QTcpSocket *pTcpSocket = m_pTcpServer->nextPendingConnection();
-        if (Q_LIKELY(pTcpSocket) && m_secureMode == NonSecureMode)
-            startHandshakeTimeout(pTcpSocket);
+        Q_ASSERT(pTcpSocket);
+        startHandshakeTimeout(pTcpSocket);
         handleConnection(pTcpSocket);
     }
 }
