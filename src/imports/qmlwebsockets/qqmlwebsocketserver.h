@@ -28,7 +28,7 @@ class QQmlWebSocketServer : public QObject, public QQmlParserStatus
     Q_PROPERTY(bool accept READ accept WRITE setAccept NOTIFY acceptChanged)
 
 public:
-    explicit QQmlWebSocketServer(QObject *parent = Q_NULLPTR);
+    explicit QQmlWebSocketServer(QObject *parent = nullptr);
     ~QQmlWebSocketServer() override;
 
     void classBegin() override;

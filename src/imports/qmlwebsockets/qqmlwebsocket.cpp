@@ -214,7 +214,7 @@ void QQmlWebSocket::setSocket(QWebSocket *socket)
     m_webSocket.reset(socket);
     if (m_webSocket) {
         // explicit ownership via QScopedPointer
-        m_webSocket->setParent(Q_NULLPTR);
+        m_webSocket->setParent(nullptr);
         connect(m_webSocket.data(), &QWebSocket::textMessageReceived,
                 this, &QQmlWebSocket::textMessageReceived);
         connect(m_webSocket.data(), &QWebSocket::binaryMessageReceived,
