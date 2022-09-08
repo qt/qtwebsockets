@@ -46,7 +46,7 @@
 */
 
 /*!
-  \page echoserver.html example
+  \page echoserver.html
   \title WebSocket server example
   \brief A sample WebSocket server echoing back messages sent to it.
 

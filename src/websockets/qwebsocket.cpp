@@ -40,7 +40,7 @@
 */
 
 /*!
-    \page echoclient.html example
+    \page echoclient.html
     \title QWebSocket client example
     \brief A sample WebSocket client that sends a message and displays the message that
     it receives back.
