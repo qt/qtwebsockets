@@ -136,7 +136,7 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
 
     const QUrl url = request.url();
 
-    emscripten::val navProtocol = emscripten::val::global("window")["location"]["protocol"];
+    emscripten::val navProtocol = emscripten::val::global("self")["location"]["protocol"];
 
     //  An insecure WebSocket connection may not be initiated from a page loaded over HTTPS.
     // and causes emscripten to assert
