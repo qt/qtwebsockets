@@ -5,6 +5,7 @@
 #include <QtTest>
 #include <QtWebSockets/QWebSocket>
 #include <QtWebSockets/QWebSocketHandshakeOptions>
+#include <QtWebSockets/QWebSocketCorsAuthenticator>
 #include <QtWebSockets/QWebSocketServer>
 #include <QtWebSockets/qwebsocketprotocol.h>
 
@@ -29,6 +30,7 @@ public:
 Q_SIGNALS:
     void newConnection(QUrl requestUrl);
     void newConnection(QNetworkRequest request);
+    void originAuthenticationRequired(QWebSocketCorsAuthenticator* pAuthenticator);
 
 private Q_SLOTS:
     void onNewConnection();
@@ -56,6 +58,8 @@ EchoServer::EchoServer(QObject *parent, quint64 maxAllowedIncomingMessageSize, q
     if (m_pWebSocketServer->listen(QHostAddress(QStringLiteral("127.0.0.1")))) {
         connect(m_pWebSocketServer, SIGNAL(newConnection()),
                 this, SLOT(onNewConnection()));
+        connect(m_pWebSocketServer, &QWebSocketServer::originAuthenticationRequired,
+                this, &EchoServer::originAuthenticationRequired);
     }
 }
 
@@ -613,6 +617,26 @@ void tst_QWebSocket::tst_errorString()
             qvariant_cast<QAbstractSocket::SocketError>(arguments.at(0));
     QCOMPARE(socketError, QAbstractSocket::HostNotFoundError);
     QCOMPARE(socket.errorString(), QStringLiteral("Host not found"));
+
+    // Check that handshake status code is parsed. The error is triggered by
+    // refusing the origin authentication
+    EchoServer echoServer;
+    errorSpy.clear();
+    QSignalSpy socketConnectedSpy(&socket, SIGNAL(connected()));
+    QSignalSpy serverConnectedSpy(&echoServer, SIGNAL(newConnection(QUrl)));
+    connect(&echoServer, &EchoServer::originAuthenticationRequired,
+            &socket, [](QWebSocketCorsAuthenticator* pAuthenticator){
+        pAuthenticator->setAllowed(false);
+    });
+
+    socket.open(QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
+                     QStringLiteral(":") + QString::number(echoServer.port())));
+    QTRY_VERIFY(errorSpy.size() > 0);
+    QCOMPARE(serverConnectedSpy.size(), 0);
+    QCOMPARE(socketConnectedSpy.size(), 0);
+    QCOMPARE(socket.errorString(),
+             QStringLiteral("QWebSocketPrivate::processHandshake: Unhandled http status code: 403"
+                            " (Access Forbidden)."));
 }
 
 void tst_QWebSocket::tst_openRequest_data()
