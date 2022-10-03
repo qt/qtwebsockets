@@ -1060,7 +1060,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
     } else {
         errorDescription =
             QWebSocket::tr("QWebSocketPrivate::processHandshake: Unhandled http status code: %1 (%2).")
-                    .arg(m_httpStatusCode).arg(m_httpStatusMessage);
+                    .arg(parser.getStatusCode()).arg(parser.getReasonPhrase());
     }
 
     if (ok) {
