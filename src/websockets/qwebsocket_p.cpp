@@ -1034,9 +1034,12 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
                             .arg(acceptKey, accept);
             }
         } else {
+            const QString upgradeParms = QLatin1String(
+                    "Accept-key size: %1, version: %2.%3, upgrade: %4, connection: %5").arg(
+                    QString::number(acceptKey.size()), QString::number(parser.getMajorVersion()),
+                    QString::number(parser.getMinorVersion()), upgrade, connection);
             errorDescription = QWebSocket::tr(
-                "QWebSocketPrivate::processHandshake: Invalid status line in response: %1.")
-                    .arg(QString::fromLatin1(m_statusLine));
+                "Invalid parameter(s) presented during protocol upgrade: %1").arg(upgradeParms);
         }
     } else if (parser.getStatusCode() == 400) {
         //HTTP/1.1 400 Bad Request
