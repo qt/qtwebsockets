@@ -220,7 +220,6 @@ private:
     QMaskGenerator *m_pMaskGenerator;
     QDefaultMaskGenerator m_defaultMaskGenerator;
 
-    QByteArray m_statusLine;
     quint64 m_outgoingFrameSize;
 
     friend class QWebSocketServerPrivate;
