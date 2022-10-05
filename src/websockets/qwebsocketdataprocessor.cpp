@@ -152,9 +152,9 @@ bool QWebSocketDataProcessor::process(QIODevice *pIoDevice)
                     m_isFragmented = !frame.isFinalFrame();
                 }
                 quint64 messageLength = m_opCode == QWebSocketProtocol::OpCodeText
-                        ? quint64(m_textMessage.length())
-                        : quint64(m_binaryMessage.length());
-                if (Q_UNLIKELY((messageLength + quint64(frame.payload().length())) >
+                        ? quint64(m_textMessage.size())
+                        : quint64(m_binaryMessage.size());
+                if (Q_UNLIKELY((messageLength + quint64(frame.payload().size())) >
                                maxAllowedMessageSize())) {
                     clear();
                     Q_EMIT errorEncountered(QWebSocketProtocol::CloseCodeTooMuchData,

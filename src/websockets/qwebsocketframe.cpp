@@ -352,7 +352,7 @@ QWebSocketFrame::ProcessingState QWebSocketFrame::readFramePayload(QIODevice *pI
         m_payload = pIoDevice->read(int(m_length));
         // m_length can be safely cast to an integer,
         // because MAX_FRAME_SIZE_IN_BYTES = MAX_INT
-        if (Q_UNLIKELY(m_payload.length() != int(m_length))) {
+        if (Q_UNLIKELY(m_payload.size() != int(m_length))) {
             // some error occurred; refer to the Qt documentation of QIODevice::read()
             setError(QWebSocketProtocol::CloseCodeAbnormalDisconnection,
                      tr("Some serious error occurred while reading from the network."));

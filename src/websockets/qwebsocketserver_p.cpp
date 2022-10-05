@@ -470,7 +470,7 @@ void QWebSocketServerPrivate::handshakeReceived()
     bool success = false;
     bool isSecure = (m_secureMode == SecureMode);
 
-    if (Q_UNLIKELY(m_pendingConnections.length() >= maxPendingConnections())) {
+    if (Q_UNLIKELY(m_pendingConnections.size() >= maxPendingConnections())) {
         pTcpSocket->close();
         setError(QWebSocketProtocol::CloseCodeAbnormalDisconnection,
                  QWebSocketServer::tr("Too many pending connections."));
