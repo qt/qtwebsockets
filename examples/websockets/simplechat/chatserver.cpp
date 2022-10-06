@@ -57,7 +57,7 @@ void ChatServer::onNewConnection()
 void ChatServer::processMessage(const QString &message)
 {
     QWebSocket *pSender = qobject_cast<QWebSocket *>(sender());
-    for (QWebSocket *pClient : qAsConst(m_clients)) {
+    for (QWebSocket *pClient : std::as_const(m_clients)) {
         if (pClient != pSender) //don't echo message back to sender
             pClient->sendTextMessage(message);
     }
