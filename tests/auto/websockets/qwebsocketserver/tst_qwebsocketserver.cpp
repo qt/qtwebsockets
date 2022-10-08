@@ -718,7 +718,7 @@ static void openManyConnections(QList<SocketSpy *> *sockets, quint16 port, int n
 static int sumSocketSpyCount(const QList<SocketSpy *> &sockets)
 {
     return std::accumulate(sockets.cbegin(), sockets.cend(), 0, [](int c, SocketSpy *s) {
-        return c + s->disconnectSpy->count();
+        return c + s->disconnectSpy->size();
     });
 }
 
