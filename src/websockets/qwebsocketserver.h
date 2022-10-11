@@ -54,7 +54,7 @@ public:
     void setMaxPendingConnections(int numConnections);
     int maxPendingConnections() const;
 
-#if QT_HAS_INCLUDE(<chrono>) || defined(Q_CLANG_QDOC)
+#if QT_HAS_INCLUDE(<chrono>) || defined(Q_QDOC)
     void setHandshakeTimeout(std::chrono::milliseconds msec)
     {
         setHandshakeTimeout(int(msec.count()));
