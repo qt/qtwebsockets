@@ -212,8 +212,7 @@ void QWebSocketFrame::readFrame(QIODevice *pIoDevice)
             return;
 
         default:
-            Q_UNREACHABLE();
-            return;
+            Q_UNREACHABLE_RETURN();
         }
     }
 }
