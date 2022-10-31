@@ -391,8 +391,8 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
 {
     if (Q_UNLIKELY(!m_pSocket))
         return;
+    Q_Q(QWebSocket);
     if (!m_isClosingHandshakeSent) {
-        Q_Q(QWebSocket);
         m_closeCode = closeCode;
         // 125 is the maximum length of a control frame, and 2 bytes are used for the close code:
         const QByteArray reasonUtf8 = reason.toUtf8().left(123);
@@ -419,7 +419,24 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
 
         Q_EMIT q->aboutToClose();
     }
-    m_pSocket->close();
+    static constexpr auto closeTimerName = "_closeTimer"_L1;
+    if (!m_isClosingHandshakeReceived) {
+        QTimer *closeTimer = new QTimer(q);
+        closeTimer->setObjectName(closeTimerName);
+        closeTimer->setInterval(3000);
+        closeTimer->setSingleShot(true);
+        QObject::connect(q, &QWebSocket::disconnected, closeTimer, &QTimer::stop);
+        QObject::connect(q, &QWebSocket::disconnected, closeTimer, &QTimer::deleteLater);
+        QObject::connect(closeTimer, &QTimer::timeout, m_pSocket, &QTcpSocket::close);
+        QObject::connect(closeTimer, &QTimer::timeout, closeTimer, &QTimer::deleteLater);
+        closeTimer->start();
+    } else {
+        m_pSocket->close();
+        if (QTimer *closeTimer = q->findChild<QTimer *>(closeTimerName)) {
+            closeTimer->stop();
+            delete closeTimer;
+        }
+    }
 }
 
 /*!

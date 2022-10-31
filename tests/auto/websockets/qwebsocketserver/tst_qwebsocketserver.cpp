@@ -94,6 +94,7 @@ private Q_SLOTS:
     void tst_scheme(); // qtbug-55927
     void tst_handleConnection();
     void tst_handshakeTimeout(); // qtbug-63312, qtbug-57026
+    void gentleClose();
     void multipleFrames();
 
 private:
@@ -859,6 +860,37 @@ void tst_QWebSocketServer::tst_handshakeTimeout()
 
         QCOMPARE(socketDisconnectedSpy.size(), 0);
     }
+}
+
+void tst_QWebSocketServer::gentleClose()
+{
+    QWebSocketServer server("gentleClose", QWebSocketServer::NonSecureMode);
+    QSignalSpy serverConnectionSpy(&server, &QWebSocketServer::newConnection);
+    QVERIFY(server.listen());
+
+    QWebSocket client;
+    QSignalSpy connectedSpy(&client, &QWebSocket::connected);
+    QSignalSpy clientDisconnectedSpy(&client, &QWebSocket::disconnected);
+    QSignalSpy clientErrorSpy(&client, &QWebSocket::errorOccurred);
+    client.open(server.serverUrl());
+
+    QVERIFY(serverConnectionSpy.wait());
+    QVERIFY(connectedSpy.wait());
+    QWebSocket *serverSocket = server.nextPendingConnection();
+    QSignalSpy disconnectedSpy(serverSocket, &QWebSocket::disconnected);
+    QSignalSpy serverErrorSpy(serverSocket, &QWebSocket::errorOccurred);
+
+    client.close(QWebSocketProtocol::CloseCodeNormal);
+
+    QVERIFY(disconnectedSpy.wait());
+    QVERIFY(clientDisconnectedSpy.wait());
+
+    QVERIFY(client.closeCode() != QWebSocketProtocol::CloseCodeGoingAway);
+    QVERIFY(serverSocket->closeCode() != QWebSocketProtocol::CloseCodeGoingAway);
+    QVERIFY(client.error() != QAbstractSocket::RemoteHostClosedError);
+    QVERIFY(serverSocket->error() != QAbstractSocket::RemoteHostClosedError);
+    QCOMPARE(clientErrorSpy.count(), 0);
+    QCOMPARE(serverErrorSpy.count(), 0);
 }
 
 void tst_QWebSocketServer::multipleFrames()
