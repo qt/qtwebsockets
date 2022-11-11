@@ -55,7 +55,7 @@ QByteArray FrameHelper::wireRepresentation()
 {
     quint8 byte = 0x00;
     QByteArray wireRep;
-    quint64 payloadLength = m_payload.length();
+    quint64 payloadLength = m_payload.size();
 
     //FIN, opcode
     byte = static_cast<quint8>((m_opCode & 0x0F) | (m_isFinalFrame ? 0x80 : 0x00)); //FIN, opcode
@@ -154,7 +154,7 @@ void tst_WebSocketFrame::tst_initialization()
 {
     QWebSocketFrame frame;
     QVERIFY(!frame.isValid());
-    QCOMPARE(frame.payload().length(), 0);
+    QCOMPARE(frame.payload().size(), 0);
 }
 
 void tst_WebSocketFrame::tst_copyConstructorAndAssignment()
@@ -315,7 +315,7 @@ void tst_WebSocketFrame::tst_goodFrames()
     QCOMPARE(frame.isControlFrame(), isControlFrame);
     QCOMPARE(frame.isDataFrame(), isDataFrame);
     QCOMPARE(frame.isContinuationFrame(), isContinuationFrame);
-    QCOMPARE(frame.payload().length(), payload.length());
+    QCOMPARE(frame.payload().size(), payload.size());
     QCOMPARE(frame.payload(), payload);
 }
 

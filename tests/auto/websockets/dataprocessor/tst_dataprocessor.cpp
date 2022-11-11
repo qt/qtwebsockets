@@ -222,20 +222,20 @@ void tst_DataProcessor::goodBinaryFrame()
 
     data.append(char(FIN | QWebSocketProtocol::OpCodeBinary));
 
-    if (payload.length() < 126)
+    if (payload.size() < 126)
     {
-        data.append(char(payload.length()));
+        data.append(char(payload.size()));
     }
-    else if (payload.length() < 65536)
+    else if (payload.size() < 65536)
     {
-        quint16 swapped = qToBigEndian<quint16>(payload.length());
+        quint16 swapped = qToBigEndian<quint16>(payload.size());
         const char *wireRepresentation
                 = static_cast<const char *>(static_cast<const void *>(&swapped));
         data.append(char(126)).append(wireRepresentation, 2);
     }
     else
     {
-        quint64 swapped = qToBigEndian<quint64>(payload.length());
+        quint64 swapped = qToBigEndian<quint64>(payload.size());
         const char *wireRepresentation
                 = static_cast<const char *>(static_cast<const void *>(&swapped));
         data.append(char(127)).append(wireRepresentation, 8);
@@ -256,18 +256,18 @@ void tst_DataProcessor::goodBinaryFrame()
     QSignalSpy textFrameReceivedSpy(&dataProcessor, SIGNAL(textFrameReceived(QString,bool)));
     QSignalSpy textMessageReceivedSpy(&dataProcessor, SIGNAL(textMessageReceived(QString)));
     dataProcessor.process(&buffer);
-    QCOMPARE(errorReceivedSpy.count(), 0);
-    QCOMPARE(pingReceivedSpy.count(), 0);
-    QCOMPARE(pongReceivedSpy.count(), 0);
-    QCOMPARE(closeReceivedSpy.count(), 0);
-    QCOMPARE(binaryFrameReceivedSpy.count(), 1);
-    QCOMPARE(binaryMessageReceivedSpy.count(), 1);
-    QCOMPARE(textFrameReceivedSpy.count(), 0);
-    QCOMPARE(textMessageReceivedSpy.count(), 0);
+    QCOMPARE(errorReceivedSpy.size(), 0);
+    QCOMPARE(pingReceivedSpy.size(), 0);
+    QCOMPARE(pongReceivedSpy.size(), 0);
+    QCOMPARE(closeReceivedSpy.size(), 0);
+    QCOMPARE(binaryFrameReceivedSpy.size(), 1);
+    QCOMPARE(binaryMessageReceivedSpy.size(), 1);
+    QCOMPARE(textFrameReceivedSpy.size(), 0);
+    QCOMPARE(textMessageReceivedSpy.size(), 0);
     QList<QVariant> arguments = binaryFrameReceivedSpy.takeFirst();
-    QCOMPARE(arguments.at(0).toByteArray().length(), payload.length());
+    QCOMPARE(arguments.at(0).toByteArray().size(), payload.size());
     arguments = binaryMessageReceivedSpy.takeFirst();
-    QCOMPARE(arguments.at(0).toByteArray().length(), payload.length());
+    QCOMPARE(arguments.at(0).toByteArray().size(), payload.size());
     buffer.close();
 }
 
@@ -316,20 +316,20 @@ void tst_DataProcessor::goodTextFrame()
 
     data.append(char(FIN | QWebSocketProtocol::OpCodeText));
 
-    if (payload.length() < 126)
+    if (payload.size() < 126)
     {
-        data.append(char(payload.length()));
+        data.append(char(payload.size()));
     }
-    else if (payload.length() < 65536)
+    else if (payload.size() < 65536)
     {
-        quint16 swapped = qToBigEndian<quint16>(payload.length());
+        quint16 swapped = qToBigEndian<quint16>(payload.size());
         const char *wireRepresentation
                 = static_cast<const char *>(static_cast<const void *>(&swapped));
         data.append(char(126)).append(wireRepresentation, 2);
     }
     else
     {
-        quint64 swapped = qToBigEndian<quint64>(payload.length());
+        quint64 swapped = qToBigEndian<quint64>(payload.size());
         const char *wireRepresentation
                 = static_cast<const char *>(static_cast<const void *>(&swapped));
         data.append(char(127)).append(wireRepresentation, 8);
@@ -352,18 +352,18 @@ void tst_DataProcessor::goodTextFrame()
 
     dataProcessor.process(&buffer);
 
-    QCOMPARE(errorReceivedSpy.count(), 0);
-    QCOMPARE(pingReceivedSpy.count(), 0);
-    QCOMPARE(pongReceivedSpy.count(), 0);
-    QCOMPARE(closeReceivedSpy.count(), 0);
-    QCOMPARE(textFrameReceivedSpy.count(), 1);
-    QCOMPARE(textMessageReceivedSpy.count(), 1);
-    QCOMPARE(binaryFrameReceivedSpy.count(), 0);
-    QCOMPARE(binaryMessageReceivedSpy.count(), 0);
+    QCOMPARE(errorReceivedSpy.size(), 0);
+    QCOMPARE(pingReceivedSpy.size(), 0);
+    QCOMPARE(pongReceivedSpy.size(), 0);
+    QCOMPARE(closeReceivedSpy.size(), 0);
+    QCOMPARE(textFrameReceivedSpy.size(), 1);
+    QCOMPARE(textMessageReceivedSpy.size(), 1);
+    QCOMPARE(binaryFrameReceivedSpy.size(), 0);
+    QCOMPARE(binaryMessageReceivedSpy.size(), 0);
     QList<QVariant> arguments = textFrameReceivedSpy.takeFirst();
-    QCOMPARE(arguments.at(0).toString().length(), size);
+    QCOMPARE(arguments.at(0).toString().size(), size);
     arguments = textMessageReceivedSpy.takeFirst();
-    QCOMPARE(arguments.at(0).toString().length(), size);
+    QCOMPARE(arguments.at(0).toString().size(), size);
     buffer.close();
 }
 
@@ -389,14 +389,14 @@ void tst_DataProcessor::goodControlFrame()
     buffer.setData(data);
     buffer.open(QIODevice::ReadOnly);
     dataProcessor.process(&buffer);
-    QCOMPARE(errorReceivedSpy.count(), 0);
-    QCOMPARE(textFrameReceivedSpy.count(), 0);
-    QCOMPARE(textMessageReceivedSpy.count(), 0);
-    QCOMPARE(binaryFrameReceivedSpy.count(), 0);
-    QCOMPARE(binaryMessageReceivedSpy.count(), 0);
-    QCOMPARE(closeFrameReceivedSpy.count(), 0);
-    QCOMPARE(pongReceivedSpy.count(), 0);
-    QCOMPARE(pingReceivedSpy.count(), 1);
+    QCOMPARE(errorReceivedSpy.size(), 0);
+    QCOMPARE(textFrameReceivedSpy.size(), 0);
+    QCOMPARE(textMessageReceivedSpy.size(), 0);
+    QCOMPARE(binaryFrameReceivedSpy.size(), 0);
+    QCOMPARE(binaryMessageReceivedSpy.size(), 0);
+    QCOMPARE(closeFrameReceivedSpy.size(), 0);
+    QCOMPARE(pongReceivedSpy.size(), 0);
+    QCOMPARE(pingReceivedSpy.size(), 1);
     buffer.close();
 
     data.clear();
@@ -407,14 +407,14 @@ void tst_DataProcessor::goodControlFrame()
     buffer.setData(data);
     buffer.open(QIODevice::ReadOnly);
     dataProcessor.process(&buffer);
-    QCOMPARE(errorReceivedSpy.count(), 0);
-    QCOMPARE(textFrameReceivedSpy.count(), 0);
-    QCOMPARE(textMessageReceivedSpy.count(), 0);
-    QCOMPARE(binaryFrameReceivedSpy.count(), 0);
-    QCOMPARE(binaryMessageReceivedSpy.count(), 0);
-    QCOMPARE(closeFrameReceivedSpy.count(), 0);
-    QCOMPARE(pingReceivedSpy.count(), 0);
-    QCOMPARE(pongReceivedSpy.count(), 1);
+    QCOMPARE(errorReceivedSpy.size(), 0);
+    QCOMPARE(textFrameReceivedSpy.size(), 0);
+    QCOMPARE(textMessageReceivedSpy.size(), 0);
+    QCOMPARE(binaryFrameReceivedSpy.size(), 0);
+    QCOMPARE(binaryMessageReceivedSpy.size(), 0);
+    QCOMPARE(closeFrameReceivedSpy.size(), 0);
+    QCOMPARE(pingReceivedSpy.size(), 0);
+    QCOMPARE(pongReceivedSpy.size(), 1);
     buffer.close();
 }
 
@@ -539,14 +539,14 @@ void tst_DataProcessor::goodOpcodes()
 
     dataProcessor.process(&buffer);
 
-    QCOMPARE(errorReceivedSpy.count(), 0);
-    QCOMPARE(pingReceivedSpy.count(), opCode == QWebSocketProtocol::OpCodePing ? 1 : 0);
-    QCOMPARE(pongReceivedSpy.count(), opCode == QWebSocketProtocol::OpCodePong ? 1 : 0);
-    QCOMPARE(closeReceivedSpy.count(), opCode == QWebSocketProtocol::OpCodeClose ? 1 : 0);
-    QCOMPARE(textFrameReceivedSpy.count(), opCode == QWebSocketProtocol::OpCodeText ? 1 : 0);
-    QCOMPARE(textMessageReceivedSpy.count(), opCode == QWebSocketProtocol::OpCodeText ? 1 : 0);
-    QCOMPARE(binaryFrameReceivedSpy.count(), opCode == QWebSocketProtocol::OpCodeBinary ? 1 : 0);
-    QCOMPARE(binaryMessageReceivedSpy.count(), opCode == QWebSocketProtocol::OpCodeBinary ? 1 : 0);
+    QCOMPARE(errorReceivedSpy.size(), 0);
+    QCOMPARE(pingReceivedSpy.size(), opCode == QWebSocketProtocol::OpCodePing ? 1 : 0);
+    QCOMPARE(pongReceivedSpy.size(), opCode == QWebSocketProtocol::OpCodePong ? 1 : 0);
+    QCOMPARE(closeReceivedSpy.size(), opCode == QWebSocketProtocol::OpCodeClose ? 1 : 0);
+    QCOMPARE(textFrameReceivedSpy.size(), opCode == QWebSocketProtocol::OpCodeText ? 1 : 0);
+    QCOMPARE(textMessageReceivedSpy.size(), opCode == QWebSocketProtocol::OpCodeText ? 1 : 0);
+    QCOMPARE(binaryFrameReceivedSpy.size(), opCode == QWebSocketProtocol::OpCodeBinary ? 1 : 0);
+    QCOMPARE(binaryMessageReceivedSpy.size(), opCode == QWebSocketProtocol::OpCodeBinary ? 1 : 0);
 
     buffer.close();
 }
@@ -564,7 +564,7 @@ void tst_DataProcessor::goodCloseFrame()
     data.append(char(FIN | QWebSocketProtocol::OpCodeClose));
     if (swapped != 0)
     {
-        data.append(char(payload.length() + 2)).append(wireRepresentation, 2).append(payload.toUtf8());
+        data.append(char(payload.size() + 2)).append(wireRepresentation, 2).append(payload.toUtf8());
     }
     else
     {
@@ -588,17 +588,17 @@ void tst_DataProcessor::goodCloseFrame()
 
     dataProcessor.process(&buffer);
 
-    QCOMPARE(errorReceivedSpy.count(), 0);
-    QCOMPARE(pingReceivedSpy.count(), 0);
-    QCOMPARE(pongReceivedSpy.count(), 0);
-    QCOMPARE(closeFrameReceivedSpy.count(), 1);
-    QCOMPARE(textFrameReceivedSpy.count(), 0);
-    QCOMPARE(textMessageReceivedSpy.count(), 0);
-    QCOMPARE(binaryFrameReceivedSpy.count(), 0);
-    QCOMPARE(binaryMessageReceivedSpy.count(), 0);
+    QCOMPARE(errorReceivedSpy.size(), 0);
+    QCOMPARE(pingReceivedSpy.size(), 0);
+    QCOMPARE(pongReceivedSpy.size(), 0);
+    QCOMPARE(closeFrameReceivedSpy.size(), 1);
+    QCOMPARE(textFrameReceivedSpy.size(), 0);
+    QCOMPARE(textMessageReceivedSpy.size(), 0);
+    QCOMPARE(binaryFrameReceivedSpy.size(), 0);
+    QCOMPARE(binaryMessageReceivedSpy.size(), 0);
     QList<QVariant> arguments = closeFrameReceivedSpy.takeFirst();
     QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(), closeCode);
-    QCOMPARE(arguments.at(1).toString().length(), payload.length());
+    QCOMPARE(arguments.at(1).toString().size(), payload.size());
     buffer.close();
 }
 
@@ -674,14 +674,14 @@ void tst_DataProcessor::nonCharacterCodes()
         buffer.open(QIODevice::ReadOnly);
         dataProcessor.process(&buffer);
 
-        QCOMPARE(errorSpy.count(), 0);
-        QCOMPARE(closeSpy.count(), 0);
-        QCOMPARE(pingFrameSpy.count(), 0);
-        QCOMPARE(pongFrameSpy.count(), 0);
-        QCOMPARE(textFrameSpy.count(), 1);
-        QCOMPARE(textMessageSpy.count(), 1);
-        QCOMPARE(binaryFrameSpy.count(), 0);
-        QCOMPARE(binaryMessageSpy.count(), 0);
+        QCOMPARE(errorSpy.size(), 0);
+        QCOMPARE(closeSpy.size(), 0);
+        QCOMPARE(pingFrameSpy.size(), 0);
+        QCOMPARE(pongFrameSpy.size(), 0);
+        QCOMPARE(textFrameSpy.size(), 1);
+        QCOMPARE(textMessageSpy.size(), 1);
+        QCOMPARE(binaryFrameSpy.size(), 0);
+        QCOMPARE(binaryMessageSpy.size(), 0);
 
         QVariantList arguments = textFrameSpy.takeFirst();
         QCOMPARE(arguments.at(0).value<QString>().toUtf8(), payload);
@@ -719,15 +719,15 @@ void tst_DataProcessor::frameTooSmall()
 
     dataProcessor.process(&buffer);
 
-    QTRY_VERIFY_WITH_TIMEOUT(errorSpy.count(), 7000);
-    QCOMPARE(errorSpy.count(), 1);
-    QCOMPARE(closeSpy.count(), 0);
-    QCOMPARE(pingMessageSpy.count(), 0);
-    QCOMPARE(pongMessageSpy.count(), 0);
-    QCOMPARE(textMessageSpy.count(), 0);
-    QCOMPARE(binaryMessageSpy.count(), 0);
-    QCOMPARE(textFrameSpy.count(), 0);
-    QCOMPARE(binaryFrameSpy.count(), 0);
+    QTRY_VERIFY_WITH_TIMEOUT(errorSpy.size(), 7000);
+    QCOMPARE(errorSpy.size(), 1);
+    QCOMPARE(closeSpy.size(), 0);
+    QCOMPARE(pingMessageSpy.size(), 0);
+    QCOMPARE(pongMessageSpy.size(), 0);
+    QCOMPARE(textMessageSpy.size(), 0);
+    QCOMPARE(binaryMessageSpy.size(), 0);
+    QCOMPARE(textFrameSpy.size(), 0);
+    QCOMPARE(binaryFrameSpy.size(), 0);
 
     QList<QVariant> arguments = errorSpy.takeFirst();
     QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(),
@@ -752,15 +752,15 @@ void tst_DataProcessor::frameTooSmall()
 
     dataProcessor.process(&buffer);
 
-    QTRY_VERIFY_WITH_TIMEOUT(errorSpy.count(), 7000);
-    QCOMPARE(errorSpy.count(), 1);
-    QCOMPARE(closeSpy.count(), 0);
-    QCOMPARE(pingMessageSpy.count(), 0);
-    QCOMPARE(pongMessageSpy.count(), 0);
-    QCOMPARE(textMessageSpy.count(), 0);
-    QCOMPARE(binaryMessageSpy.count(), 0);
-    QCOMPARE(textFrameSpy.count(), 0);
-    QCOMPARE(binaryFrameSpy.count(), 0);
+    QTRY_VERIFY_WITH_TIMEOUT(errorSpy.size(), 7000);
+    QCOMPARE(errorSpy.size(), 1);
+    QCOMPARE(closeSpy.size(), 0);
+    QCOMPARE(pingMessageSpy.size(), 0);
+    QCOMPARE(pongMessageSpy.size(), 0);
+    QCOMPARE(textMessageSpy.size(), 0);
+    QCOMPARE(binaryMessageSpy.size(), 0);
+    QCOMPARE(textFrameSpy.size(), 0);
+    QCOMPARE(binaryFrameSpy.size(), 0);
 
     arguments = errorSpy.takeFirst();
     QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(),
@@ -785,15 +785,15 @@ void tst_DataProcessor::frameTooSmall()
 
         dataProcessor.process(&buffer);
 
-        QTRY_VERIFY_WITH_TIMEOUT(errorSpy.count(), 7000);
-        QCOMPARE(errorSpy.count(), 1);
-        QCOMPARE(closeSpy.count(), 0);
-        QCOMPARE(pingMessageSpy.count(), 0);
-        QCOMPARE(pongMessageSpy.count(), 0);
-        QCOMPARE(textMessageSpy.count(), 0);
-        QCOMPARE(binaryMessageSpy.count(), 0);
-        QCOMPARE(textFrameSpy.count(), 1);
-        QCOMPARE(binaryFrameSpy.count(), 0);
+        QTRY_VERIFY_WITH_TIMEOUT(errorSpy.size(), 7000);
+        QCOMPARE(errorSpy.size(), 1);
+        QCOMPARE(closeSpy.size(), 0);
+        QCOMPARE(pingMessageSpy.size(), 0);
+        QCOMPARE(pongMessageSpy.size(), 0);
+        QCOMPARE(textMessageSpy.size(), 0);
+        QCOMPARE(binaryMessageSpy.size(), 0);
+        QCOMPARE(textFrameSpy.size(), 1);
+        QCOMPARE(binaryFrameSpy.size(), 0);
 
         errorSpy.clear();
         closeSpy.clear();
@@ -813,15 +813,15 @@ void tst_DataProcessor::frameTooSmall()
         buffer.open(QIODevice::ReadOnly);
         dataProcessor.process(&buffer);
 
-        QTRY_VERIFY_WITH_TIMEOUT(errorSpy.count(), 7000);
-        QCOMPARE(errorSpy.count(), 1);
-        QCOMPARE(closeSpy.count(), 0);
-        QCOMPARE(pingMessageSpy.count(), 0);
-        QCOMPARE(pongMessageSpy.count(), 0);
-        QCOMPARE(textMessageSpy.count(), 0);
-        QCOMPARE(binaryMessageSpy.count(), 0);
-        QCOMPARE(textFrameSpy.count(), 0);
-        QCOMPARE(binaryFrameSpy.count(), 0);
+        QTRY_VERIFY_WITH_TIMEOUT(errorSpy.size(), 7000);
+        QCOMPARE(errorSpy.size(), 1);
+        QCOMPARE(closeSpy.size(), 0);
+        QCOMPARE(pingMessageSpy.size(), 0);
+        QCOMPARE(pongMessageSpy.size(), 0);
+        QCOMPARE(textMessageSpy.size(), 0);
+        QCOMPARE(binaryMessageSpy.size(), 0);
+        QCOMPARE(textFrameSpy.size(), 0);
+        QCOMPARE(binaryFrameSpy.size(), 0);
 
         QList<QVariant> arguments = errorSpy.takeFirst();
         QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(),
@@ -843,15 +843,15 @@ void tst_DataProcessor::frameTooSmall()
         buffer.open(QIODevice::ReadOnly);
         dataProcessor.process(&buffer);
 
-        QTRY_VERIFY_WITH_TIMEOUT(errorSpy.count(), 7000);
-        QCOMPARE(errorSpy.count(), 1);
-        QCOMPARE(closeSpy.count(), 0);
-        QCOMPARE(pingMessageSpy.count(), 0);
-        QCOMPARE(pongMessageSpy.count(), 0);
-        QCOMPARE(textMessageSpy.count(), 0);
-        QCOMPARE(binaryMessageSpy.count(), 0);
-        QCOMPARE(textFrameSpy.count(), 1);
-        QCOMPARE(binaryFrameSpy.count(), 0);
+        QTRY_VERIFY_WITH_TIMEOUT(errorSpy.size(), 7000);
+        QCOMPARE(errorSpy.size(), 1);
+        QCOMPARE(closeSpy.size(), 0);
+        QCOMPARE(pingMessageSpy.size(), 0);
+        QCOMPARE(pongMessageSpy.size(), 0);
+        QCOMPARE(textMessageSpy.size(), 0);
+        QCOMPARE(binaryMessageSpy.size(), 0);
+        QCOMPARE(textFrameSpy.size(), 1);
+        QCOMPARE(binaryFrameSpy.size(), 0);
 
         buffer.close();
         data.clear();
@@ -872,15 +872,15 @@ void tst_DataProcessor::frameTooSmall()
         buffer.open(QIODevice::ReadOnly);
 
         dataProcessor.process(&buffer);
-        QTRY_VERIFY_WITH_TIMEOUT(errorSpy.count(), 7000);
-        QCOMPARE(errorSpy.count(), 1);
-        QCOMPARE(closeSpy.count(), 0);
-        QCOMPARE(pingMessageSpy.count(), 0);
-        QCOMPARE(pongMessageSpy.count(), 0);
-        QCOMPARE(textMessageSpy.count(), 0);
-        QCOMPARE(binaryMessageSpy.count(), 0);
-        QCOMPARE(textFrameSpy.count(), 0);
-        QCOMPARE(binaryFrameSpy.count(), 0);
+        QTRY_VERIFY_WITH_TIMEOUT(errorSpy.size(), 7000);
+        QCOMPARE(errorSpy.size(), 1);
+        QCOMPARE(closeSpy.size(), 0);
+        QCOMPARE(pingMessageSpy.size(), 0);
+        QCOMPARE(pongMessageSpy.size(), 0);
+        QCOMPARE(textMessageSpy.size(), 0);
+        QCOMPARE(binaryMessageSpy.size(), 0);
+        QCOMPARE(textFrameSpy.size(), 0);
+        QCOMPARE(binaryFrameSpy.size(), 0);
         arguments = errorSpy.takeFirst();
         QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(),
                  QWebSocketProtocol::CloseCodeGoingAway);
@@ -1355,14 +1355,14 @@ void tst_DataProcessor::invalidPayloadInCloseFrame()
     buffer.setData(data);
     buffer.open(QIODevice::ReadOnly);
     dataProcessor.process(&buffer);
-    QCOMPARE(closeSpy.count(), 1);
-    QCOMPARE(errorSpy.count(), 0);
-    QCOMPARE(pingMessageSpy.count(), 0);
-    QCOMPARE(pongMessageSpy.count(), 0);
-    QCOMPARE(textMessageSpy.count(), 0);
-    QCOMPARE(binaryMessageSpy.count(), 0);
-    QCOMPARE(textFrameSpy.count(), 0);
-    QCOMPARE(binaryFrameSpy.count(), 0);
+    QCOMPARE(closeSpy.size(), 1);
+    QCOMPARE(errorSpy.size(), 0);
+    QCOMPARE(pingMessageSpy.size(), 0);
+    QCOMPARE(pongMessageSpy.size(), 0);
+    QCOMPARE(textMessageSpy.size(), 0);
+    QCOMPARE(binaryMessageSpy.size(), 0);
+    QCOMPARE(textFrameSpy.size(), 0);
+    QCOMPARE(binaryFrameSpy.size(), 0);
     QVariantList arguments = closeSpy.takeFirst();
     QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(), expectedCloseCode);
     buffer.close();
@@ -1461,12 +1461,12 @@ void tst_DataProcessor::doTest(int timeout)
     buffer.setData(data);
     buffer.open(QIODevice::ReadOnly);
     dataProcessor.process(&buffer);
-    QTRY_VERIFY_WITH_TIMEOUT(errorSpy.count(), timeout);
-    QCOMPARE(errorSpy.count(), 1);
-    QCOMPARE(textMessageSpy.count(), 0);
-    QCOMPARE(binaryMessageSpy.count(), 0);
-    QCOMPARE(textFrameSpy.count(), isContinuationFrame ? 1 : 0);
-    QCOMPARE(binaryFrameSpy.count(), 0);
+    QTRY_VERIFY_WITH_TIMEOUT(errorSpy.size(), timeout);
+    QCOMPARE(errorSpy.size(), 1);
+    QCOMPARE(textMessageSpy.size(), 0);
+    QCOMPARE(binaryMessageSpy.size(), 0);
+    QCOMPARE(textFrameSpy.size(), isContinuationFrame ? 1 : 0);
+    QCOMPARE(binaryFrameSpy.size(), 0);
     QVariantList arguments = errorSpy.takeFirst();
     QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(), expectedCloseCode);
     buffer.close();
@@ -1501,12 +1501,12 @@ void tst_DataProcessor::doCloseFrameTest()
     buffer.setData(data);
     buffer.open(QIODevice::ReadOnly);
     dataProcessor.process(&buffer);
-    QCOMPARE(closeSpy.count(), 1);
-    QCOMPARE(errorSpy.count(), 0);
-    QCOMPARE(textMessageSpy.count(), 0);
-    QCOMPARE(binaryMessageSpy.count(), 0);
-    QCOMPARE(textFrameSpy.count(), 0);
-    QCOMPARE(binaryFrameSpy.count(), 0);
+    QCOMPARE(closeSpy.size(), 1);
+    QCOMPARE(errorSpy.size(), 0);
+    QCOMPARE(textMessageSpy.size(), 0);
+    QCOMPARE(binaryMessageSpy.size(), 0);
+    QCOMPARE(textFrameSpy.size(), 0);
+    QCOMPARE(binaryFrameSpy.size(), 0);
     QVariantList arguments = closeSpy.takeFirst();
     QCOMPARE(arguments.at(0).value<QWebSocketProtocol::CloseCode>(), expectedCloseCode);
     buffer.close();
@@ -1678,7 +1678,7 @@ void tst_DataProcessor::invalidUTF8(const char *dataTag, const char *utf8Sequenc
         QTest::newRow(QStringLiteral("Close frame with invalid UTF8-sequence: %1")
                       .arg(dataTag).toLatin1().constData())
                 << quint8(FIN | QWebSocketProtocol::OpCodeClose)
-                << quint8(payload.length() + 2)
+                << quint8(payload.size() + 2)
                 << QByteArray(wireRepresentation, 2).append(payload)
                 << false
                 << QWebSocketProtocol::CloseCodeWrongDatatype;
@@ -1688,7 +1688,7 @@ void tst_DataProcessor::invalidUTF8(const char *dataTag, const char *utf8Sequenc
         QTest::newRow(QStringLiteral("Text frame with invalid UTF8-sequence: %1")
                       .arg(dataTag).toLatin1().constData())
                 << quint8(FIN | QWebSocketProtocol::OpCodeText)
-                << quint8(payload.length())
+                << quint8(payload.size())
                 << payload
                 << false
                 << QWebSocketProtocol::CloseCodeWrongDatatype;
@@ -1696,7 +1696,7 @@ void tst_DataProcessor::invalidUTF8(const char *dataTag, const char *utf8Sequenc
         QTest::newRow(QStringLiteral("Continuation text frame with invalid UTF8-sequence: %1")
                       .arg(dataTag).toLatin1().constData())
                 << quint8(FIN | QWebSocketProtocol::OpCodeContinue)
-                << quint8(payload.length())
+                << quint8(payload.size())
                 << payload
                 << true
                 << QWebSocketProtocol::CloseCodeWrongDatatype;
@@ -1836,7 +1836,7 @@ void tst_DataProcessor::clearDataBuffers()
     const QByteArray binaryData("Hello!");
     QByteArray data;
     data.append(char(FIN | QWebSocketProtocol::OpCodeBinary));
-    data.append(char(binaryData.length()));
+    data.append(char(binaryData.size()));
     data.append(binaryData);
 
     QWebSocketDataProcessor dataProcessor;

@@ -312,17 +312,17 @@ void tst_QWebSocket::tst_invalidOpen()
     QCOMPARE(socket.sendTextMessage(QStringLiteral("A text message")), 0);
     QCOMPARE(socket.sendBinaryMessage(QByteArrayLiteral("A text message")), 0);
 
-    if (errorSpy.count() == 0)
+    if (errorSpy.size() == 0)
         QVERIFY(errorSpy.wait());
-    QCOMPARE(errorSpy.count(), 1);
+    QCOMPARE(errorSpy.size(), 1);
     QList<QVariant> arguments = errorSpy.takeFirst();
     QAbstractSocket::SocketError socketError =
             qvariant_cast<QAbstractSocket::SocketError>(arguments.at(0));
     QCOMPARE(socketError, QAbstractSocket::ConnectionRefusedError);
-    QCOMPARE(aboutToCloseSpy.count(), 0);
-    QCOMPARE(connectedSpy.count(), 0);
-    QCOMPARE(disconnectedSpy.count(), disconnectedCount);
-    QCOMPARE(stateChangedSpy.count(), stateChangedCount);
+    QCOMPARE(aboutToCloseSpy.size(), 0);
+    QCOMPARE(connectedSpy.size(), 0);
+    QCOMPARE(disconnectedSpy.size(), disconnectedCount);
+    QCOMPARE(stateChangedSpy.size(), stateChangedCount);
     if (stateChangedCount == 2) {
         arguments = stateChangedSpy.takeFirst();
         QAbstractSocket::SocketState socketState =
@@ -331,13 +331,13 @@ void tst_QWebSocket::tst_invalidOpen()
         socketState = qvariant_cast<QAbstractSocket::SocketState>(arguments.at(0));
         QCOMPARE(socketState, QAbstractSocket::UnconnectedState);
     }
-    QCOMPARE(readChannelFinishedSpy.count(), 0);
-    QCOMPARE(textFrameReceivedSpy.count(), 0);
-    QCOMPARE(binaryFrameReceivedSpy.count(), 0);
-    QCOMPARE(textMessageReceivedSpy.count(), 0);
-    QCOMPARE(binaryMessageReceivedSpy.count(), 0);
-    QCOMPARE(pongSpy.count(), 0);
-    QCOMPARE(bytesWrittenSpy.count(), 0);
+    QCOMPARE(readChannelFinishedSpy.size(), 0);
+    QCOMPARE(textFrameReceivedSpy.size(), 0);
+    QCOMPARE(binaryFrameReceivedSpy.size(), 0);
+    QCOMPARE(textMessageReceivedSpy.size(), 0);
+    QCOMPARE(binaryMessageReceivedSpy.size(), 0);
+    QCOMPARE(pongSpy.size(), 0);
+    QCOMPARE(bytesWrittenSpy.size(), 0);
 }
 
 void tst_QWebSocket::tst_invalidOrigin()
@@ -378,28 +378,28 @@ void tst_QWebSocket::tst_invalidOrigin()
 
     QVERIFY(errorSpy.wait());
 
-    QCOMPARE(errorSpy.count(), 1);
+    QCOMPARE(errorSpy.size(), 1);
     QList<QVariant> arguments = errorSpy.takeFirst();
     QAbstractSocket::SocketError socketError =
             qvariant_cast<QAbstractSocket::SocketError>(arguments.at(0));
     QCOMPARE(socketError, QAbstractSocket::ConnectionRefusedError);
-    QCOMPARE(aboutToCloseSpy.count(), 0);
-    QCOMPARE(connectedSpy.count(), 0);
-    QCOMPARE(disconnectedSpy.count(), 1);
-    QCOMPARE(stateChangedSpy.count(), 2);   //connectingstate, unconnectedstate
+    QCOMPARE(aboutToCloseSpy.size(), 0);
+    QCOMPARE(connectedSpy.size(), 0);
+    QCOMPARE(disconnectedSpy.size(), 1);
+    QCOMPARE(stateChangedSpy.size(), 2);   //connectingstate, unconnectedstate
     arguments = stateChangedSpy.takeFirst();
     QAbstractSocket::SocketState socketState =
             qvariant_cast<QAbstractSocket::SocketState>(arguments.at(0));
     arguments = stateChangedSpy.takeFirst();
     socketState = qvariant_cast<QAbstractSocket::SocketState>(arguments.at(0));
     QCOMPARE(socketState, QAbstractSocket::UnconnectedState);
-    QCOMPARE(readChannelFinishedSpy.count(), 0);
-    QCOMPARE(textFrameReceivedSpy.count(), 0);
-    QCOMPARE(binaryFrameReceivedSpy.count(), 0);
-    QCOMPARE(textMessageReceivedSpy.count(), 0);
-    QCOMPARE(binaryMessageReceivedSpy.count(), 0);
-    QCOMPARE(pongSpy.count(), 0);
-    QCOMPARE(bytesWrittenSpy.count(), 0);
+    QCOMPARE(readChannelFinishedSpy.size(), 0);
+    QCOMPARE(textFrameReceivedSpy.size(), 0);
+    QCOMPARE(binaryFrameReceivedSpy.size(), 0);
+    QCOMPARE(textMessageReceivedSpy.size(), 0);
+    QCOMPARE(binaryMessageReceivedSpy.size(), 0);
+    QCOMPARE(pongSpy.size(), 0);
+    QCOMPARE(bytesWrittenSpy.size(), 0);
 }
 
 void tst_QWebSocket::tst_sendTextMessage()
@@ -428,8 +428,8 @@ void tst_QWebSocket::tst_sendTextMessage()
 
     socket.open(url);
 
-    QTRY_COMPARE(socketConnectedSpy.count(), 1);
-    QCOMPARE(socketError.count(), 0);
+    QTRY_COMPARE(socketConnectedSpy.size(), 1);
+    QCOMPARE(socketError.size(), 0);
     QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
     QList<QVariant> arguments = serverConnectedSpy.takeFirst();
     QUrl urlConnected = arguments.at(0).toUrl();
@@ -442,14 +442,14 @@ void tst_QWebSocket::tst_sendTextMessage()
     QVERIFY(textMessageReceived.wait(500));
     QCOMPARE(socket.bytesToWrite(), 0);
 
-    QCOMPARE(textMessageReceived.count(), 1);
-    QCOMPARE(binaryMessageReceived.count(), 0);
-    QCOMPARE(binaryFrameReceived.count(), 0);
+    QCOMPARE(textMessageReceived.size(), 1);
+    QCOMPARE(binaryMessageReceived.size(), 0);
+    QCOMPARE(binaryFrameReceived.size(), 0);
     arguments = textMessageReceived.takeFirst();
     QString messageReceived = arguments.at(0).toString();
     QCOMPARE(messageReceived, QStringLiteral("Hello world!"));
 
-    QCOMPARE(textFrameReceived.count(), 1);
+    QCOMPARE(textFrameReceived.size(), 1);
     arguments = textFrameReceived.takeFirst();
     QString frameReceived = arguments.at(0).toString();
     bool isLastFrame = arguments.at(1).toBool();
@@ -464,8 +464,8 @@ void tst_QWebSocket::tst_sendTextMessage()
     // QTBUG-74464 QWebsocket doesn't receive text (binary) message with size > 32 kb
     socket.open(url);
 
-    QTRY_COMPARE(socketConnectedSpy.count(), 1);
-    QCOMPARE(socketError.count(), 0);
+    QTRY_COMPARE(socketConnectedSpy.size(), 1);
+    QCOMPARE(socketError.size(), 0);
     QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
     arguments = serverConnectedSpy.takeFirst();
     urlConnected = arguments.at(0).toUrl();
@@ -475,16 +475,16 @@ void tst_QWebSocket::tst_sendTextMessage()
     // transmit a long text message with 1 MB
     QString longString(0x100000, 'a');
     socket.sendTextMessage(longString);
-    QVERIFY(socket.bytesToWrite() > longString.length());
+    QVERIFY(socket.bytesToWrite() > longString.size());
     QVERIFY(textMessageReceived.wait());
     QCOMPARE(socket.bytesToWrite(), 0);
 
-    QCOMPARE(textMessageReceived.count(), 1);
-    QCOMPARE(binaryMessageReceived.count(), 0);
-    QCOMPARE(binaryFrameReceived.count(), 0);
+    QCOMPARE(textMessageReceived.size(), 1);
+    QCOMPARE(binaryMessageReceived.size(), 0);
+    QCOMPARE(binaryFrameReceived.size(), 0);
     arguments = textMessageReceived.takeFirst();
     messageReceived = arguments.at(0).toString();
-    QCOMPARE(messageReceived.length(), longString.length());
+    QCOMPARE(messageReceived.size(), longString.size());
     QCOMPARE(messageReceived, longString);
 
     arguments = textFrameReceived.takeLast();
@@ -500,20 +500,20 @@ void tst_QWebSocket::tst_sendTextMessage()
     socket.open(QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
                      QStringLiteral(":") + QString::number(echoServer.port())));
 
-    QTRY_COMPARE(socketConnectedSpy.count(), 1);
+    QTRY_COMPARE(socketConnectedSpy.size(), 1);
     QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
 
     socket.sendTextMessage(QStringLiteral("Hello world!"));
 
     QVERIFY(textMessageReceived.wait(500));
-    QCOMPARE(textMessageReceived.count(), 1);
-    QCOMPARE(binaryMessageReceived.count(), 0);
-    QCOMPARE(binaryFrameReceived.count(), 0);
+    QCOMPARE(textMessageReceived.size(), 1);
+    QCOMPARE(binaryMessageReceived.size(), 0);
+    QCOMPARE(binaryFrameReceived.size(), 0);
     arguments = textMessageReceived.takeFirst();
     messageReceived = arguments.at(0).toString();
     QCOMPARE(messageReceived, QStringLiteral("Hello world!"));
 
-    QCOMPARE(textFrameReceived.count(), 1);
+    QCOMPARE(textFrameReceived.size(), 1);
     arguments = textFrameReceived.takeFirst();
     frameReceived = arguments.at(0).toString();
     isLastFrame = arguments.at(1).toBool();
@@ -544,7 +544,7 @@ void tst_QWebSocket::tst_sendBinaryMessage()
     socket.open(QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
                      QStringLiteral(":") + QString::number(echoServer.port())));
 
-    QTRY_COMPARE(socketConnectedSpy.count(), 1);
+    QTRY_COMPARE(socketConnectedSpy.size(), 1);
     QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
 
     QCOMPARE(socket.bytesToWrite(), 0);
@@ -554,14 +554,14 @@ void tst_QWebSocket::tst_sendBinaryMessage()
     QVERIFY(binaryMessageReceived.wait(500));
     QCOMPARE(socket.bytesToWrite(), 0);
 
-    QCOMPARE(textMessageReceived.count(), 0);
-    QCOMPARE(textFrameReceived.count(), 0);
-    QCOMPARE(binaryMessageReceived.count(), 1);
+    QCOMPARE(textMessageReceived.size(), 0);
+    QCOMPARE(textFrameReceived.size(), 0);
+    QCOMPARE(binaryMessageReceived.size(), 1);
     QList<QVariant> arguments = binaryMessageReceived.takeFirst();
     QByteArray messageReceived = arguments.at(0).toByteArray();
     QCOMPARE(messageReceived, QByteArrayLiteral("Hello world!"));
 
-    QCOMPARE(binaryFrameReceived.count(), 1);
+    QCOMPARE(binaryFrameReceived.size(), 1);
     arguments = binaryFrameReceived.takeFirst();
     QByteArray frameReceived = arguments.at(0).toByteArray();
     bool isLastFrame = arguments.at(1).toBool();
@@ -578,20 +578,20 @@ void tst_QWebSocket::tst_sendBinaryMessage()
     socket.open(QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
                      QStringLiteral(":") + QString::number(echoServer.port())));
 
-    QTRY_COMPARE(socketConnectedSpy.count(), 1);
+    QTRY_COMPARE(socketConnectedSpy.size(), 1);
     QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
 
     socket.sendBinaryMessage(QByteArrayLiteral("Hello world!"));
 
     QVERIFY(binaryMessageReceived.wait(500));
-    QCOMPARE(textMessageReceived.count(), 0);
-    QCOMPARE(textFrameReceived.count(), 0);
-    QCOMPARE(binaryMessageReceived.count(), 1);
+    QCOMPARE(textMessageReceived.size(), 0);
+    QCOMPARE(textFrameReceived.size(), 0);
+    QCOMPARE(binaryMessageReceived.size(), 1);
     arguments = binaryMessageReceived.takeFirst();
     messageReceived = arguments.at(0).toByteArray();
     QCOMPARE(messageReceived, QByteArrayLiteral("Hello world!"));
 
-    QCOMPARE(binaryFrameReceived.count(), 1);
+    QCOMPARE(binaryFrameReceived.size(), 1);
     arguments = binaryFrameReceived.takeFirst();
     frameReceived = arguments.at(0).toByteArray();
     isLastFrame = arguments.at(1).toBool();
@@ -611,7 +611,7 @@ void tst_QWebSocket::tst_errorString()
 
     socket.open(QUrl(QStringLiteral("ws://someserver.on.mars:9999")));
 
-    QTRY_COMPARE_WITH_TIMEOUT(errorSpy.count(), 1, 10000);
+    QTRY_COMPARE_WITH_TIMEOUT(errorSpy.size(), 1, 10000);
     QList<QVariant> arguments = errorSpy.takeFirst();
     QAbstractSocket::SocketError socketError =
             qvariant_cast<QAbstractSocket::SocketError>(arguments.at(0));
@@ -690,8 +690,8 @@ void tst_QWebSocket::tst_openRequest()
 
     socket.open(req, options);
 
-    QTRY_COMPARE(socketConnectedSpy.count(), 1);
-    QTRY_COMPARE(serverRequestSpy.count(), 1);
+    QTRY_COMPARE(socketConnectedSpy.size(), 1);
+    QTRY_COMPARE(serverRequestSpy.size(), 1);
     QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
     QList<QVariant> arguments = serverRequestSpy.takeFirst();
     QNetworkRequest requestConnected = arguments.at(0).value<QNetworkRequest>();
@@ -799,7 +799,7 @@ void tst_QWebSocket::tst_moveToThread()
     url.setQuery(query);
 
     socket->asyncOpen(url);
-    if (socketConnectedSpy.count() == 0)
+    if (socketConnectedSpy.size() == 0)
         QVERIFY(socketConnectedSpy.wait(500));
 
     socket->asyncSendTextMessage(textMessage);
@@ -866,16 +866,16 @@ void tst_QWebSocket::overlongCloseReason()
     QUrl url = QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
                     QStringLiteral(":") + QString::number(echoServer.port()));
     socket.open(url);
-    QTRY_COMPARE(socketConnectedSpy.count(), 1);
-    QTRY_COMPARE(serverConnectedSpy.count(), 1);
+    QTRY_COMPARE(socketConnectedSpy.size(), 1);
+    QTRY_COMPARE(serverConnectedSpy.size(), 1);
 
     const QString reason(200, QChar::fromLatin1('a'));
     socket.close(QWebSocketProtocol::CloseCodeGoingAway, reason);
     QCOMPARE(socket.closeCode(), QWebSocketProtocol::CloseCodeGoingAway);
     // Max length of a control frame is 125, but 2 bytes are used for the close code:
-    QCOMPARE(socket.closeReason().length(), 123);
+    QCOMPARE(socket.closeReason().size(), 123);
     QCOMPARE(socket.closeReason(), reason.left(123));
-    QTRY_COMPARE(socketDisconnectedSpy.count(), 1);
+    QTRY_COMPARE(socketDisconnectedSpy.size(), 1);
 }
 
 void tst_QWebSocket::incomingMessageTooLong()
@@ -895,13 +895,13 @@ void tst_QWebSocket::incomingMessageTooLong()
     QUrl url = QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
                     QStringLiteral(":") + QString::number(echoServer.port()));
     socket.open(url);
-    QTRY_COMPARE(socketConnectedSpy.count(), 1);
-    QTRY_COMPARE(serverConnectedSpy.count(), 1);
+    QTRY_COMPARE(socketConnectedSpy.size(), 1);
+    QTRY_COMPARE(serverConnectedSpy.size(), 1);
 
     QString payload(maxAllowedIncomingMessageSize+1, 'a');
     QCOMPARE(socket.sendTextMessage(payload), payload.size());
 
-    QTRY_COMPARE(socketDisconnectedSpy.count(), 1);
+    QTRY_COMPARE(socketDisconnectedSpy.size(), 1);
     QCOMPARE(socket.closeCode(), QWebSocketProtocol::CloseCodeTooMuchData);
 }
 
@@ -923,13 +923,13 @@ void tst_QWebSocket::incomingFrameTooLong()
     QUrl url = QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
                     QStringLiteral(":") + QString::number(echoServer.port()));
     socket.open(url);
-    QTRY_COMPARE(socketConnectedSpy.count(), 1);
-    QTRY_COMPARE(serverConnectedSpy.count(), 1);
+    QTRY_COMPARE(socketConnectedSpy.size(), 1);
+    QTRY_COMPARE(serverConnectedSpy.size(), 1);
 
     QString payload(maxAllowedIncomingFrameSize+1, 'a');
     QCOMPARE(socket.sendTextMessage(payload), payload.size());
 
-    QTRY_COMPARE(socketDisconnectedSpy.count(), 1);
+    QTRY_COMPARE(socketDisconnectedSpy.size(), 1);
     QCOMPARE(socket.closeCode(), QWebSocketProtocol::CloseCodeTooMuchData);
 }
 
@@ -978,7 +978,7 @@ void tst_QWebSocket::customHeader()
     QVERIFY(data.contains("CustomHeader: Example"));
     const auto view = QLatin1String(data);
     const auto keyHeader = QLatin1String("Sec-WebSocket-Key:");
-    const qsizetype keyStart = view.indexOf(keyHeader, 0, Qt::CaseInsensitive) + keyHeader.length();
+    const qsizetype keyStart = view.indexOf(keyHeader, 0, Qt::CaseInsensitive) + keyHeader.size();
     QVERIFY(keyStart != -1);
     const qsizetype keyEnd = view.indexOf(QLatin1String("\r\n"), keyStart);
     QVERIFY(keyEnd != -1);

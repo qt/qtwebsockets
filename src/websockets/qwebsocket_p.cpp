@@ -380,7 +380,7 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
         QByteArray frame = getFrameHeader(QWebSocketProtocol::OpCodeClose,
                                           quint64(payload.size()), maskingKey, true);
 
-        Q_ASSERT(payload.length() <= 125);
+        Q_ASSERT(payload.size() <= 125);
         frame.append(payload);
         m_pSocket->write(frame);
         m_pSocket->flush();
@@ -1253,7 +1253,7 @@ QString QWebSocketPrivate::createHandShakeRequest(QString resourceName,
         handshakeRequest << QStringLiteral("Origin: ") % origin;
     handshakeRequest << QStringLiteral("Sec-WebSocket-Version: ")
                             % QString::number(QWebSocketProtocol::currentVersion());
-    if (extensions.length() > 0)
+    if (extensions.size() > 0)
         handshakeRequest << QStringLiteral("Sec-WebSocket-Extensions: ") % extensions;
 
     const QStringList validProtocols = [&] {
