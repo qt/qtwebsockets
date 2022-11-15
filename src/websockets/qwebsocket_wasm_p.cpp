@@ -173,15 +173,8 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
     // required for some use cases like MQTT.
 
     // add user subprotocol options
-    QStringList protocols = handshakeOptions().subprotocols();
-
+    QStringList protocols = requestedSubProtocols();
     QByteArray secProto;
-    if (request.hasRawHeader("Sec-WebSocket-Protocol")) {
-        secProto = request.rawHeader("Sec-WebSocket-Protocol");
-        if (!protocols.contains(secProto)) {
-            protocols.append(QString::fromLatin1(secProto));
-        }
-    }
     if (!protocols.isEmpty()) {
         // comma-separated list of protocol strings, no spaces
         secProto = protocols.join(QStringLiteral(",")).toLatin1();

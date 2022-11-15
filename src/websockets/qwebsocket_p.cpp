@@ -318,6 +318,24 @@ void QWebSocketPrivate::_q_updateSslConfiguration()
 
 #endif
 
+QStringList QWebSocketPrivate::requestedSubProtocols() const
+{
+    auto subprotocolsRequestedInRawHeader = [this]() {
+        QStringList protocols;
+        QByteArray rawProtocols = m_request.rawHeader("Sec-WebSocket-Protocol");
+        QLatin1StringView rawProtocolsView(rawProtocols);
+        const QStringList &optionsProtocols = m_options.subprotocols();
+        for (auto &&entry : rawProtocolsView.tokenize(u',', Qt::SkipEmptyParts)) {
+            if (QLatin1StringView trimmed = entry.trimmed(); !trimmed.isEmpty()) {
+                if (!optionsProtocols.contains(trimmed))
+                    protocols << trimmed;
+            }
+        }
+        return protocols;
+    };
+    return m_options.subprotocols() + subprotocolsRequestedInRawHeader();
+}
+
 /*!
   Called from QWebSocketServer
   \internal
@@ -1004,8 +1022,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
 #endif
     const QString protocol = QString::fromLatin1(parser.combinedHeaderValue(
                                 QByteArrayLiteral("sec-websocket-protocol")));
-
-    if (!protocol.isEmpty() && !handshakeOptions().subprotocols().contains(protocol)) {
+    if (!protocol.isEmpty() && !requestedSubProtocols().contains(protocol)) {
         setErrorString(QWebSocket::tr("WebSocket server has chosen protocol %1 which has not been "
                                       "requested")
                                .arg(protocol));
@@ -1098,9 +1115,14 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
 
             QList<QPair<QString, QString> > headers;
             const auto headerList = m_request.rawHeaderList();
-            for (const QByteArray &key : headerList)
+            for (const QByteArray &key : headerList) {
+                // protocols handled separately below
+                if (key.compare("Sec-WebSocket-Protocol", Qt::CaseInsensitive) == 0)
+                    continue;
                 headers << qMakePair(QString::fromLatin1(key),
                                      QString::fromLatin1(m_request.rawHeader(key)));
+            }
+            const QStringList subProtocols = requestedSubProtocols();
 
             const auto format = QUrl::RemoveScheme | QUrl::RemoveUserInfo
                                 | QUrl::RemovePath | QUrl::RemoveQuery
@@ -1110,7 +1132,7 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
                                                              host,
                                                              origin(),
                                                              QString(),
-                                                             m_options.subprotocols(),
+                                                             subProtocols,
                                                              m_key,
                                                              headers);
             if (handshake.isEmpty()) {
