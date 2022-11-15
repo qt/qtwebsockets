@@ -1267,7 +1267,7 @@ QString QWebSocketPrivate::createHandShakeRequest(QString resourceName,
         return validProtocols;
     }();
 
-    if (!protocols.isEmpty()) {
+    if (!validProtocols.isEmpty()) {
         handshakeRequest << QStringLiteral("Sec-WebSocket-Protocol: ")
                                 % validProtocols.join(QLatin1String(", "));
     }
