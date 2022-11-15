@@ -152,6 +152,8 @@ private:
     void enableMasking(bool enable);
     void setErrorString(const QString &errorString);
 
+    QStringList requestedSubProtocols() const;
+
     void socketDestroyed(QObject *socket);
 
     void processData();
