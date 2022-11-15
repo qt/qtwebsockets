@@ -15,6 +15,8 @@ QT_USE_NAMESPACE
 
 Q_DECLARE_METATYPE(QWebSocketProtocol::Version)
 
+using namespace Qt::StringLiterals;
+
 class EchoServer : public QObject
 {
     Q_OBJECT
@@ -134,6 +136,8 @@ private Q_SLOTS:
     void tst_openRequest_data();
     void tst_openRequest();
     void tst_protocolAccessor();
+    void protocolsHeaderGeneration_data();
+    void protocolsHeaderGeneration();
     void tst_moveToThread();
     void tst_moveToThreadNoWarning();
 #ifndef QT_NO_NETWORKPROXY
@@ -726,6 +730,73 @@ void tst_QWebSocket::tst_protocolAccessor()
     QCOMPARE(socket.subprotocol(), "protocol2");
 
     socket.close();
+}
+
+void tst_QWebSocket::protocolsHeaderGeneration_data()
+{
+    QTest::addColumn<QStringList>("subprotocols");
+    QTest::addColumn<int>("numInvalidEntries");
+
+    using QSL = QStringList;
+    QTest::addRow("all-invalid") << QSL{ "hello?", "------,,,,------" } << 2;
+    QTest::addRow("one-valid") << QSL{ "hello?", "ImValid" } << 1;
+    QTest::addRow("all-valid") << QSL{ "hello", "ImValid" } << 0;
+}
+
+// We test that the Sec-WebSocket-Protocol header is generated normally in presence
+// of one or more invalid entries. That is, it should not be included at all
+// if there are no valid entries, and there should be no separators with only
+// one valid entry.
+void tst_QWebSocket::protocolsHeaderGeneration()
+{
+    QFETCH(const QStringList, subprotocols);
+    QFETCH(const int, numInvalidEntries);
+    const bool containsValidEntry = numInvalidEntries != subprotocols.size();
+
+    QTcpServer tcpServer;
+    QVERIFY(tcpServer.listen());
+
+    QWebSocket socket;
+
+    QUrl url = QUrl("ws://127.0.0.1:%1"_L1.arg(QString::number(tcpServer.serverPort())));
+
+    QWebSocketHandshakeOptions options;
+    options.setSubprotocols(subprotocols);
+
+    QCOMPARE(options.subprotocols().size(), subprotocols.size());
+    for (int i = 0; i < numInvalidEntries; ++i) {
+        QTest::ignoreMessage(QtMsgType::QtWarningMsg,
+                QRegularExpression("Ignoring invalid WebSocket subprotocol name \".*\""));
+    }
+    socket.open(url, options);
+
+    QTRY_VERIFY(tcpServer.hasPendingConnections());
+    QTcpSocket *serverSocket = tcpServer.nextPendingConnection();
+    QVERIFY(serverSocket);
+
+    bool hasSeenHeader = false;
+    while (serverSocket->state() == QAbstractSocket::ConnectedState) {
+        if (!serverSocket->canReadLine()) {
+            QTRY_VERIFY2(serverSocket->canReadLine(),
+                    "Reached end-of-data without seeing end-of-header!");
+        }
+        const QByteArray fullLine = serverSocket->readLine();
+        QByteArrayView line = fullLine;
+        if (line == "\r\n") // End-of-Header
+            break;
+        QByteArrayView headerPrefix = "Sec-WebSocket-Protocol:";
+        if (line.size() < headerPrefix.size())
+            continue;
+        if (line.first(headerPrefix.size()).compare(headerPrefix, Qt::CaseInsensitive) != 0)
+            continue;
+        hasSeenHeader = true;
+        QByteArrayView protocols = line.sliced(headerPrefix.size()).trimmed();
+        QVERIFY(!protocols.empty());
+        QCOMPARE(protocols.count(','), subprotocols.size() - numInvalidEntries - 1);
+        // Keep going in case we encounter the header again
+    }
+    QCOMPARE(hasSeenHeader, containsValidEntry);
+    serverSocket->disconnectFromHost();
 }
 
 class WebSocket : public QWebSocket
