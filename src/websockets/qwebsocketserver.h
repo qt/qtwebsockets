@@ -16,7 +16,7 @@
 #include <QtNetwork/QSslError>
 #endif
 
-#if QT_HAS_INCLUDE(<chrono>)
+#if __has_include(<chrono>)
 #include <chrono>
 #endif
 
@@ -54,7 +54,7 @@ public:
     void setMaxPendingConnections(int numConnections);
     int maxPendingConnections() const;
 
-#if QT_HAS_INCLUDE(<chrono>) || defined(Q_QDOC)
+#if __has_include(<chrono>) || defined(Q_QDOC)
     void setHandshakeTimeout(std::chrono::milliseconds msec)
     {
         setHandshakeTimeout(int(msec.count()));

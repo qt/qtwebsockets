@@ -256,7 +256,7 @@ void tst_QWebSocketServer::tst_settersAndGetters()
 
     server.setHandshakeTimeout(64);
     QCOMPARE(server.handshakeTimeoutMS(), 64);
-#if QT_HAS_INCLUDE(<chrono>)
+#if __has_include(<chrono>)
     auto expected = std::chrono::milliseconds(64);
     QCOMPARE(server.handshakeTimeout(), expected);
 
