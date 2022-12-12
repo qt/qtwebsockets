@@ -118,6 +118,7 @@ Q_SIGNALS:
 #ifndef QT_NO_NETWORKPROXY
     void proxyAuthenticationRequired(const QNetworkProxy &proxy, QAuthenticator *pAuthenticator);
 #endif
+    void authenticationRequired(QAuthenticator *authenticator);
     void readChannelFinished();
     void textFrameReceived(const QString &frame, bool isLastFrame);
     void binaryFrameReceived(const QByteArray &frame, bool isLastFrame);

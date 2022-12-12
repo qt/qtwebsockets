@@ -14,5 +14,18 @@ qt_internal_add_test(tst_qwebsocket
         Qt::WebSockets
 )
 
+set(qwebsocketshared_resource_files
+    "../shared/localhost.cert"
+    "../shared/localhost.key"
+)
+qt_internal_add_resource(tst_qwebsocket "qwebsocketshared"
+    PREFIX
+        "/"
+    BASE
+        "../shared"
+    FILES
+        ${qwebsocketshared_resource_files}
+)
+
 #### Keys ignored in scope 1:.:.:qwebsocket.pro:<TRUE>:
 # TEMPLATE = "app"

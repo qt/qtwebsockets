@@ -10,6 +10,16 @@
 #include <QtWebSockets/qwebsocketprotocol.h>
 
 #include <QtNetwork/qtcpserver.h>
+#include <QtNetwork/qauthenticator.h>
+#include <QtNetwork/qtcpsocket.h>
+
+#if QT_CONFIG(ssl)
+#include <QtNetwork/qsslserver.h>
+#include <QtNetwork/qsslcertificate.h>
+#include <QtNetwork/qsslkey.h>
+#endif
+
+#include <utility>
 
 QT_USE_NAMESPACE
 
@@ -143,6 +153,8 @@ private Q_SLOTS:
 #ifndef QT_NO_NETWORKPROXY
     void tst_setProxy();
 #endif
+    void authenticationRequired_data();
+    void authenticationRequired();
     void overlongCloseReason();
     void incomingMessageTooLong();
     void incomingFrameTooLong();
@@ -920,6 +932,304 @@ void tst_QWebSocket::tst_setProxy()
     QCOMPARE(socket.proxy(), proxy);
 }
 #endif // QT_NO_NETWORKPROXY
+
+class AuthServer : public QTcpServer
+{
+    Q_OBJECT
+public:
+    AuthServer()
+    {
+        connect(this, &QTcpServer::pendingConnectionAvailable, this, &AuthServer::handleConnection);
+    }
+
+    void incomingConnection(qintptr sockfd) override
+    {
+        if (withEncryption) {
+#if QT_CONFIG(ssl)
+            auto *sslSocket = new QSslSocket(this);
+            connect(sslSocket, &QSslSocket::encrypted, this,
+                [this, sslSocket]() {
+                    addPendingConnection(sslSocket);
+                });
+            sslSocket->setSslConfiguration(configuration);
+            sslSocket->setSocketDescriptor(sockfd);
+            sslSocket->startServerEncryption();
+#else
+            QFAIL("withEncryption should not be 'true' if we don't have TLS");
+#endif
+        } else {
+            QTcpSocket *socket = new QTcpSocket(this);
+            socket->setSocketDescriptor(sockfd);
+            addPendingConnection(socket);
+        }
+    }
+
+    void handleConnection()
+    {
+        QTcpSocket *serverSocket = nextPendingConnection();
+        connect(serverSocket, &QTcpSocket::readyRead, this, &AuthServer::handleReadyRead);
+    }
+
+    void handleReadyRead()
+    {
+        auto *serverSocket = qobject_cast<QTcpSocket *>(sender());
+        incomingData.append(serverSocket->readAll());
+        if (finished) {
+            qWarning() << "Unexpected trailing data..." << incomingData;
+            return;
+        }
+        if (!incomingData.contains("\r\n\r\n")) {
+            qDebug("Not all of the data arrived at once, waiting for more...");
+            return;
+        }
+        // Move incomingData into local variable and reset it since we received it all:
+        const QByteArray fullHeader = std::exchange(incomingData, {});
+
+        QLatin1StringView authView = getHeaderValue("Authorization"_L1, fullHeader);
+        if (authView.isEmpty())
+            return writeAuthRequired(serverSocket);
+        qsizetype sep = authView.indexOf(' ');
+        if (sep == -1)
+            return writeAuthRequired(serverSocket);
+        QLatin1StringView authenticateMethod = authView.first(sep);
+        QLatin1StringView authenticateAttempt = authView.sliced(sep + 1);
+        if (authenticateMethod != "Basic" || authenticateAttempt != expectedBasicPayload())
+            return writeAuthRequired(serverSocket);
+
+        QLatin1StringView keyView = getHeaderValue("Sec-WebSocket-Key"_L1, fullHeader);
+        QVERIFY(!keyView.isEmpty());
+
+        const QByteArray accept =
+                QByteArrayView(keyView) % QByteArrayLiteral("258EAFA5-E914-47DA-95CA-C5AB0DC85B11");
+        auto generatedKey = QCryptographicHash::hash(accept, QCryptographicHash::Sha1).toBase64();
+        serverSocket->write("HTTP/1.1 101 Switching Protocols\r\n"
+                            "Upgrade: websocket\r\n"
+                            "Connection: Upgrade\r\n"
+                            "Sec-WebSocket-Accept: " % generatedKey % "\r\n"
+                            "\r\n");
+        finished = true;
+    }
+
+    void writeAuthRequired(QTcpSocket *socket) const
+    {
+        QByteArray payload = "HTTP/1.1 401 UNAUTHORIZED\r\n"
+            "WWW-Authenticate: Basic realm=shadow\r\n";
+        const bool connectionClose = withBody && !withContentLength;
+        if (connectionClose)
+            payload.append("Connection: Close\r\n");
+        else if (withContentLength)
+            payload.append("Content-Length: " % QByteArray::number(body.size()) % "\r\n");
+        payload.append("\r\n");
+
+        if (withBody)
+            payload.append(body);
+
+        socket->write(payload);
+        if (connectionClose)
+            socket->disconnectFromHost();
+    }
+
+    static QLatin1StringView getHeaderValue(const QLatin1StringView keyHeader,
+                                            const QByteArrayView fullHeader)
+    {
+        const auto fullHeaderView = QLatin1StringView(fullHeader);
+        const qsizetype headerStart = fullHeaderView.indexOf(keyHeader, 0, Qt::CaseInsensitive);
+        if (headerStart == -1)
+            return {};
+        qsizetype valueStart = headerStart + keyHeader.size();
+        Q_ASSERT(fullHeaderView.size() > valueStart);
+        Q_ASSERT(fullHeaderView[valueStart] == ':');
+        ++valueStart;
+        const qsizetype valueEnd = fullHeaderView.indexOf(QLatin1StringView("\r\n"), valueStart);
+        if (valueEnd == -1)
+            return {};
+        return fullHeaderView.sliced(valueStart, valueEnd - valueStart).trimmed();
+    }
+
+    static QByteArray expectedBasicPayload()
+    {
+        return QByteArray(user % ':' % password).toBase64();
+    }
+
+    static constexpr QByteArrayView user = "user";
+    static constexpr QByteArrayView password = "password";
+    static constexpr QUtf8StringView body = "Authorization required";
+
+    bool withBody = false;
+    bool withContentLength = true;
+    bool withEncryption = false;
+#if QT_CONFIG(ssl)
+    QSslConfiguration configuration;
+#endif
+
+private:
+    QByteArray incomingData;
+    bool finished = false;
+};
+
+struct ServerScenario {
+    QByteArrayView label;
+    bool withContentLength = false;
+    bool withBody = false;
+    bool withEncryption = false;
+};
+struct Credentials { QString username , password; };
+struct ClientScenario {
+    QByteArrayView label;
+    Credentials urlCredentials;
+    QVector<Credentials> callbackCredentials;
+    bool expectSuccess = true;
+};
+
+void tst_QWebSocket::authenticationRequired_data()
+{
+    const QString correctUser = QString::fromUtf8(AuthServer::user.toByteArray());
+    const QString correctPassword = QString::fromUtf8(AuthServer::password.toByteArray());
+
+    QTest::addColumn<ServerScenario>("serverScenario");
+    QTest::addColumn<ClientScenario>("clientScenario");
+
+    // Need to test multiple server scenarios:
+    // (note: Connection: Close is modelled as 'no Content-Length, with body')
+    // 1. Normal server (connection: keep-alive, Content-Length)
+    // 2. Older server (connection: close, Content-Length)
+    // 3. Even older server (connection: close, no Content-Length)
+    // 4. Strange server (connection: close, no Content-Length, no body)
+    // 5. Quiet server (connection: keep-alive, no Content-Length, no body)
+    ServerScenario serverScenarios[] = {
+        { "normal-server", true, true, false },
+        { "connection-close", true, true, false },
+        { "connection-close-no-content-length", false, true, false },
+        { "connection-close-no-content-length-no-body", false, false, false },
+        { "keep-alive-no-content-length-no-body", false, false, false },
+    };
+
+    // And some client scenarios
+    // 1. User/pass supplied in url
+    // 2. User/pass supplied in callback
+    // 3. _Wrong_ user/pass supplied in URL, correct in callback
+    // 4. _Wrong_ user/pass supplied in URL, _wrong_ supplied in callback
+    // 5. No user/pass supplied in URL, nothing supplied in callback
+    // 5. No user/pass supplied in URL, wrong, then correct, supplied in callback
+    ClientScenario clientScenarios[]{
+        { "url-ok", {correctUser, correctPassword}, {} },
+        { "callback-ok", {}, { {correctUser, correctPassword } } },
+        { "url-wrong-callback-ok", {u"admin"_s, u"admin"_s}, { {correctUser, correctPassword} } },
+        { "url-wrong-callback-wrong", {u"admin"_s, u"admin"_s}, { {u"test"_s, u"test"_s} }, false },
+        { "no-creds", {{}, {}}, {}, false },
+        { "url-wrong-callback-2-ok", {u"admin"_s, u"admin"_s}, { {u"test"_s, u"test"_s}, {correctUser , correctPassword} } },
+    };
+
+    for (auto &server : serverScenarios) {
+        for (auto &client : clientScenarios) {
+            QTest::addRow("Server:%s,Client:%s", server.label.data(), client.label.data())
+                    << server << client;
+        }
+    }
+#if 0 //QT_CONFIG(ssl)
+    // FIXME: Consider TLS-shutdown different from Schannel.
+    // And double that, but now with TLS
+    for (auto &server : serverScenarios) {
+        server.withEncryption = true;
+        for (auto &client : clientScenarios) {
+            QTest::addRow("SslServer:%s,Client:%s", server.label.data(), client.label.data())
+                    << server << client;
+        }
+    }
+#endif
+}
+
+void tst_QWebSocket::authenticationRequired()
+{
+    QFETCH(const ServerScenario, serverScenario);
+    QFETCH(const ClientScenario, clientScenario);
+
+    int credentialIndex = 0;
+    auto handleAuthenticationRequired = [&clientScenario,
+                                         &credentialIndex](QAuthenticator *authenticator) {
+        if (credentialIndex == clientScenario.callbackCredentials.size()) {
+            if (clientScenario.expectSuccess)
+                QFAIL("Ran out of credentials to try, but failed to authorize!");
+            if (clientScenario.callbackCredentials.isEmpty())
+                return;
+            // If we don't expect to succeed, retry the last returned credentials.
+            // QAuthenticator should notice there is no change in user/pass and
+            // ignore it, leading to authentication failure.
+            --credentialIndex;
+        }
+        // Verify that realm parsing works:
+        QCOMPARE_EQ(authenticator->realm(), u"shadow"_s);
+
+        Credentials credentials = clientScenario.callbackCredentials[credentialIndex++];
+        authenticator->setUser(credentials.username);
+        authenticator->setPassword(credentials.password);
+    };
+
+    AuthServer server;
+    server.withBody = serverScenario.withBody;
+    server.withContentLength = serverScenario.withContentLength;
+    server.withEncryption = serverScenario.withEncryption;
+#if QT_CONFIG(ssl)
+    if (serverScenario.withEncryption) {
+        QSslConfiguration config = QSslConfiguration::defaultConfiguration();
+        QList<QSslCertificate> certificates = QSslCertificate::fromPath(u":/localhost.cert"_s);
+        QVERIFY(!certificates.isEmpty());
+        config.setLocalCertificateChain(certificates);
+        QFile keyFile(u":/localhost.key"_s);
+        QVERIFY(keyFile.open(QIODevice::ReadOnly));
+        config.setPrivateKey(QSslKey(keyFile.readAll(), QSsl::Rsa));
+        server.configuration = config;
+    }
+#endif
+
+    QVERIFY(server.listen());
+    QUrl url = QUrl(u"ws://127.0.0.1"_s);
+    if (serverScenario.withEncryption)
+        url.setScheme(u"wss"_s);
+    url.setPort(server.serverPort());
+    url.setUserName(clientScenario.urlCredentials.username);
+    url.setPassword(clientScenario.urlCredentials.password);
+
+    QWebSocket socket;
+    QSignalSpy connectedSpy(&socket, &QWebSocket::connected);
+    QSignalSpy errorSpy(&socket, &QWebSocket::errorOccurred);
+    QSignalSpy stateChangedSpy(&socket, &QWebSocket::stateChanged);
+    connect(&socket, &QWebSocket::authenticationRequired, &socket, handleAuthenticationRequired);
+#if QT_CONFIG(ssl)
+    if (serverScenario.withEncryption) {
+        auto config = socket.sslConfiguration();
+        config.setPeerVerifyMode(QSslSocket::VerifyNone);
+        socket.setSslConfiguration(config);
+        QObject::connect(&socket, &QWebSocket::sslErrors, &socket,
+                qOverload<>(&QWebSocket::ignoreSslErrors));
+    }
+#endif
+    socket.open(url);
+
+    if (clientScenario.expectSuccess) {
+        // Wait for connected!
+        QTRY_COMPARE_EQ(connectedSpy.size(), 1);
+        QCOMPARE_EQ(errorSpy.size(), 0);
+        // connecting->connected
+        const int ExpectedStateChanges = 2;
+        QTRY_COMPARE_EQ(stateChangedSpy.size(), ExpectedStateChanges);
+        auto firstState = stateChangedSpy.at(0).front().value<QAbstractSocket::SocketState>();
+        QCOMPARE_EQ(firstState, QAbstractSocket::ConnectingState);
+        auto secondState = stateChangedSpy.at(1).front().value<QAbstractSocket::SocketState>();
+        QCOMPARE_EQ(secondState, QAbstractSocket::ConnectedState);
+    } else {
+        // Wait for error!
+        QTRY_COMPARE_EQ(errorSpy.size(), 1);
+        QCOMPARE_EQ(connectedSpy.size(), 0);
+        // connecting->unconnected
+        const int ExpectedStateChanges = 2;
+        QTRY_COMPARE_EQ(stateChangedSpy.size(), ExpectedStateChanges);
+        auto firstState = stateChangedSpy.at(0).front().value<QAbstractSocket::SocketState>();
+        QCOMPARE_EQ(firstState, QAbstractSocket::ConnectingState);
+        auto secondState = stateChangedSpy.at(1).front().value<QAbstractSocket::SocketState>();
+        QCOMPARE_EQ(secondState, QAbstractSocket::UnconnectedState);
+    }
+}
 
 void tst_QWebSocket::overlongCloseReason()
 {

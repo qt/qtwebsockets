@@ -20,6 +20,7 @@
 #ifndef QT_NO_NETWORKPROXY
 #include <QtNetwork/QNetworkProxy>
 #endif
+#include <QtNetwork/QAuthenticator>
 #ifndef QT_NO_SSL
 #include <QtNetwork/QSslConfiguration>
 #include <QtNetwork/QSslError>
@@ -205,12 +206,21 @@ private:
     QAbstractSocket::PauseModes m_pauseMode;
     qint64 m_readBufferSize;
 
+    // For WWW-Authenticate handling
+    QAuthenticator m_authenticator;
+    qint64 m_bytesToSkipBeforeNewResponse = 0;
+
     QByteArray m_key;	//identification key used in handshake requests
 
     bool m_mustMask;	//a server must not mask the frames it sends
 
     bool m_isClosingHandshakeSent;
     bool m_isClosingHandshakeReceived;
+
+    // For WWW-Authenticate handling
+    bool m_needsResendWithCredentials = false;
+    bool m_needsReconnect = false;
+
     QWebSocketProtocol::CloseCode m_closeCode;
     QString m_closeReason;
 

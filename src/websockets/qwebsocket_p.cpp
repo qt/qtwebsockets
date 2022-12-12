@@ -28,12 +28,16 @@
 #endif
 
 #include <QtNetwork/private/qhttpheaderparser_p.h>
+#include <QtNetwork/private/qauthenticator_p.h>
 
 #include <QtCore/QDebug>
 
 #include <limits>
+#include <memory>
 
 QT_BEGIN_NAMESPACE
+
+using namespace Qt::StringLiterals;
 
 namespace {
 
@@ -1080,6 +1084,51 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
         }
         break;
     }
+    case 401: {
+        // HTTP/1.1 401 UNAUTHORIZED
+        if (m_authenticator.isNull())
+            m_authenticator.detach();
+        auto *priv = QAuthenticatorPrivate::getPrivate(m_authenticator);
+        const QList<QByteArray> challenges = parser.headerFieldValues("WWW-Authenticate");
+        const bool isSupported = std::any_of(challenges.begin(), challenges.end(),
+                                             QAuthenticatorPrivate::isMethodSupported);
+        if (isSupported)
+            priv->parseHttpResponse(parser.headers(), /*isProxy=*/false, m_request.url().host());
+        if (!isSupported || priv->method == QAuthenticatorPrivate::None) {
+            // Keep the error on a single line so it can easily be searched for:
+            errorDescription =
+                    QWebSocket::tr("QWebSocketPrivate::processHandshake: "
+                                   "Unsupported WWW-Authenticate challenge(s) encountered!");
+            break;
+        }
+
+        const QUrl url = m_request.url();
+        const bool hasCredentials = !url.userName().isEmpty() || !url.password().isEmpty();
+        if (hasCredentials) {
+            m_authenticator.setUser(url.userName());
+            m_authenticator.setPassword(url.password());
+            // Unset username and password so we don't try it again
+            QUrl copy = url;
+            copy.setUserName({});
+            copy.setPassword({});
+            m_request.setUrl(copy);
+        }
+        if (priv->phase == QAuthenticatorPrivate::Done) { // No user/pass from URL:
+            emit q->authenticationRequired(&m_authenticator);
+            if (priv->phase == QAuthenticatorPrivate::Done) {
+                // user/pass was not updated:
+                errorDescription = QWebSocket::tr(
+                        "QWebSocket::processHandshake: Host requires authentication");
+                break;
+            }
+        }
+        m_needsResendWithCredentials = true;
+        if (parser.firstHeaderField("Connection").compare("close", Qt::CaseInsensitive) == 0)
+            m_needsReconnect = true;
+        else
+            m_bytesToSkipBeforeNewResponse = parser.firstHeaderField("Content-Length").toInt();
+        break;
+    }
     default: {
         errorDescription =
             QWebSocket::tr("QWebSocketPrivate::processHandshake: Unhandled http status code: %1 (%2).")
@@ -1092,6 +1141,16 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
         setProtocol(protocol);
         setSocketState(QAbstractSocket::ConnectedState);
         Q_EMIT q->connected();
+    } else if (m_needsResendWithCredentials) {
+        if (m_needsReconnect && m_pSocket->state() != QAbstractSocket::UnconnectedState) {
+            // Disconnect here, then in processStateChanged() we reconnect when
+            // we are unconnected.
+            m_pSocket->disconnectFromHost();
+        } else {
+            // I'm cheating, this is how a handshake starts:
+            processStateChanged(QAbstractSocket::ConnectedState);
+        }
+        return;
     } else {
         // handshake failed
         setErrorString(errorDescription);
@@ -1130,6 +1189,27 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
             }
             const QStringList subProtocols = requestedSubProtocols();
 
+            // Perform authorization if needed:
+            if (m_needsResendWithCredentials) {
+                m_needsResendWithCredentials = false;
+                // Based on QHttpNetworkRequest::uri:
+                auto uri = [](QUrl url) -> QByteArray {
+                    QUrl::FormattingOptions format(QUrl::RemoveFragment | QUrl::RemoveUserInfo
+                                                   | QUrl::FullyEncoded);
+                    if (url.path().isEmpty())
+                        url.setPath(QStringLiteral("/"));
+                    else
+                        format |= QUrl::NormalizePathSegments;
+                    return url.toEncoded(format);
+                };
+                auto *priv = QAuthenticatorPrivate::getPrivate(m_authenticator);
+                Q_ASSERT(priv);
+                QByteArray response = priv->calculateResponse("GET", uri(m_request.url()),
+                                                              m_request.url().host());
+                if (!response.isEmpty())
+                    headers << qMakePair(u"Authorization"_s, QString::fromLatin1(response));
+            }
+
             const auto format = QUrl::RemoveScheme | QUrl::RemoveUserInfo
                                 | QUrl::RemovePath | QUrl::RemoveQuery
                                 | QUrl::RemoveFragment;
@@ -1156,7 +1236,28 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
         break;
 
     case QAbstractSocket::UnconnectedState:
-        if (webSocketState != QAbstractSocket::UnconnectedState) {
+        if (m_needsReconnect) {
+            // Need to reinvoke the lambda queued because the underlying socket
+            // isn't done cleaning up yet...
+            auto reconnect = [this]() {
+                m_needsReconnect = false;
+                const QUrl url = m_request.url();
+#if QT_CONFIG(ssl)
+                const bool isEncrypted = url.scheme().compare(u"wss", Qt::CaseInsensitive) == 0;
+                if (isEncrypted) {
+                    // This has to work because we did it earlier; this is just us
+                    // reconnecting!
+                    auto *sslSocket = qobject_cast<QSslSocket *>(m_pSocket);
+                    Q_ASSERT(sslSocket);
+                    sslSocket->connectToHostEncrypted(url.host(), quint16(url.port(443)));
+                } else
+#endif
+                {
+                    m_pSocket->connectToHost(url.host(), quint16(url.port(80)));
+                }
+            };
+            QMetaObject::invokeMethod(q, reconnect, Qt::QueuedConnection);
+        } else if (webSocketState != QAbstractSocket::UnconnectedState) {
             setSocketState(QAbstractSocket::UnconnectedState);
             Q_EMIT q->disconnected();
         }
@@ -1187,7 +1288,9 @@ void QWebSocketPrivate::processData()
     if (!m_pSocket) // disconnected with data still in-bound
         return;
     if (state() == QAbstractSocket::ConnectingState) {
-        if (!m_pSocket->canReadLine())
+        if (m_bytesToSkipBeforeNewResponse > 0)
+            m_bytesToSkipBeforeNewResponse -= m_pSocket->skip(m_bytesToSkipBeforeNewResponse);
+        if (m_bytesToSkipBeforeNewResponse > 0 || !m_pSocket->canReadLine())
             return;
         processHandshake(m_pSocket);
        // That may have changed state(), recheck in the next 'if' below.
