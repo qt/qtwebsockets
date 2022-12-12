@@ -1032,7 +1032,8 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
                                 QByteArrayLiteral("sec-websocket-version")));
     bool ok = false;
     QString errorDescription;
-    if (Q_LIKELY(parser.getStatusCode() == 101)) {
+    switch (parser.getStatusCode()) {
+    case 101: {
         //HTTP/x.y 101 Switching Protocols
         //TODO: do not check the httpStatusText right now
         ok = (acceptKey.size() > 0
@@ -1056,7 +1057,9 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
             errorDescription = QWebSocket::tr(
                 "Invalid parameter(s) presented during protocol upgrade: %1").arg(upgradeParms);
         }
-    } else if (parser.getStatusCode() == 400) {
+        break;
+    }
+    case 400: {
         //HTTP/1.1 400 Bad Request
         if (!version.isEmpty()) {
             const QStringList versions = version.split(QStringLiteral(", "), Qt::SkipEmptyParts);
@@ -1075,10 +1078,13 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
             errorDescription =
                 QWebSocket::tr("QWebSocketPrivate::processHandshake: Unknown error condition encountered. Aborting connection.");
         }
-    } else {
+        break;
+    }
+    default: {
         errorDescription =
             QWebSocket::tr("QWebSocketPrivate::processHandshake: Unhandled http status code: %1 (%2).")
                     .arg(parser.getStatusCode()).arg(parser.getReasonPhrase());
+    }
     }
 
     if (ok) {
