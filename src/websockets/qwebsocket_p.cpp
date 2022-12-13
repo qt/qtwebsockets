@@ -1092,6 +1092,8 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
         // handshake failed
         setErrorString(errorDescription);
         Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
+        if (m_pSocket->state() != QAbstractSocket::UnconnectedState)
+            m_pSocket->disconnectFromHost();
     }
 }
 
