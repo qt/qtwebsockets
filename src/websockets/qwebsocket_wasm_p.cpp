@@ -111,14 +111,14 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
     Q_EMIT q->aboutToClose();
     setSocketState(QAbstractSocket::ClosingState);
 
-
     emscripten_websocket_get_ready_state(m_socketContext, &m_readyState);
 
     if (m_readyState == 1) {
         emscripten_websocket_close(m_socketContext, (int)closeCode, reason.toUtf8());
     }
+    setSocketState(QAbstractSocket::UnconnectedState);
+    emit q->disconnected();
     emscripten_websocket_get_ready_state(m_socketContext, &m_readyState);
-
 }
 
 void QWebSocketPrivate::open(const QNetworkRequest &request,
@@ -241,8 +241,7 @@ void QWebSocketPrivate::setSocketClosed(const EmscriptenWebSocketCloseEvent *emC
         m_errorString = QStringLiteral("The remote host closed the connection");
         emit q->error(error());
     }
-    setSocketState(QAbstractSocket::UnconnectedState);
-    emit q->disconnected();
+
     emscripten_websocket_get_ready_state(m_socketContext, &m_readyState);
 
     if (m_readyState == 3) { // closed
