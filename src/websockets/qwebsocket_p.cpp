@@ -178,6 +178,10 @@ void QWebSocketPrivate::init()
 */
 QWebSocketPrivate::~QWebSocketPrivate()
 {
+#ifdef Q_OS_WASM
+    if (m_socketContext)
+        emscripten_websocket_delete(m_socketContext);
+#endif
 }
 
 /*!
