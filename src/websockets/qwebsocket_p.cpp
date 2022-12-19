@@ -1055,7 +1055,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
                     QString::number(acceptKey.size()), QString::number(parser.getMajorVersion()),
                     QString::number(parser.getMinorVersion()), upgrade, connection);
             errorDescription = QWebSocket::tr(
-                "Invalid parameter(s) presented during protocol upgrade: %1").arg(upgradeParms);
+                "Invalid parameter encountered during protocol upgrade: %1").arg(upgradeParms);
         }
         break;
     }
