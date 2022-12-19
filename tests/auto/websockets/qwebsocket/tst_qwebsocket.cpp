@@ -1073,7 +1073,7 @@ struct ServerScenario {
     bool withBody = false;
     bool withEncryption = false;
 };
-struct Credentials { QString username , password; };
+struct Credentials { QString username, password; };
 struct ClientScenario {
     QByteArrayView label;
     Credentials urlCredentials;
