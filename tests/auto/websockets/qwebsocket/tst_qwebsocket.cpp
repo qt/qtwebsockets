@@ -1014,8 +1014,7 @@ public:
     {
         QByteArray payload = "HTTP/1.1 401 UNAUTHORIZED\r\n"
             "WWW-Authenticate: Basic realm=shadow\r\n";
-        const bool connectionClose = withBody && !withContentLength;
-        if (connectionClose)
+        if (withConnectionClose)
             payload.append("Connection: Close\r\n");
         else if (withContentLength)
             payload.append("Content-Length: " % QByteArray::number(body.size()) % "\r\n");
@@ -1025,7 +1024,7 @@ public:
             payload.append(body);
 
         socket->write(payload);
-        if (connectionClose)
+        if (withConnectionClose)
             socket->disconnectFromHost();
     }
 
@@ -1057,6 +1056,7 @@ public:
 
     bool withBody = false;
     bool withContentLength = true;
+    bool withConnectionClose = false;
     bool withEncryption = false;
 #if QT_CONFIG(ssl)
     QSslConfiguration configuration;
@@ -1071,6 +1071,7 @@ struct ServerScenario {
     QByteArrayView label;
     bool withContentLength = false;
     bool withBody = false;
+    bool withConnectionClose = false;
     bool withEncryption = false;
 };
 struct Credentials { QString username, password; };
@@ -1090,18 +1091,17 @@ void tst_QWebSocket::authenticationRequired_data()
     QTest::addColumn<ClientScenario>("clientScenario");
 
     // Need to test multiple server scenarios:
-    // (note: Connection: Close is modelled as 'no Content-Length, with body')
     // 1. Normal server (connection: keep-alive, Content-Length)
     // 2. Older server (connection: close, Content-Length)
     // 3. Even older server (connection: close, no Content-Length)
     // 4. Strange server (connection: close, no Content-Length, no body)
     // 5. Quiet server (connection: keep-alive, no Content-Length, no body)
     ServerScenario serverScenarios[] = {
-        { "normal-server", true, true, false },
-        { "connection-close", true, true, false },
-        { "connection-close-no-content-length", false, true, false },
-        { "connection-close-no-content-length-no-body", false, false, false },
-        { "keep-alive-no-content-length-no-body", false, false, false },
+        { "normal-server", true, true, false, false },
+        { "connection-close", true, true, true, false },
+        { "connection-close-no-content-length", false, true, true, false },
+        { "connection-close-no-content-length-no-body", false, false, true, false },
+        { "keep-alive-no-content-length-no-body", false, false, false, false },
     };
 
     // And some client scenarios
@@ -1126,8 +1126,11 @@ void tst_QWebSocket::authenticationRequired_data()
                     << server << client;
         }
     }
-#if 0 //QT_CONFIG(ssl)
-    // FIXME: Consider TLS-shutdown different from Schannel.
+#if QT_CONFIG(ssl)
+    if (!QSslSocket::supportsSsl()) {
+        qDebug("Skipping the SslServer part of this test because proper TLS is not supported.");
+        return;
+    }
     // And double that, but now with TLS
     for (auto &server : serverScenarios) {
         server.withEncryption = true;
@@ -1168,6 +1171,7 @@ void tst_QWebSocket::authenticationRequired()
     AuthServer server;
     server.withBody = serverScenario.withBody;
     server.withContentLength = serverScenario.withContentLength;
+    server.withConnectionClose = serverScenario.withConnectionClose;
     server.withEncryption = serverScenario.withEncryption;
 #if QT_CONFIG(ssl)
     if (serverScenario.withEncryption) {
