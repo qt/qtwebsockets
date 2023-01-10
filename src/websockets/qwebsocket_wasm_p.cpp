@@ -12,6 +12,8 @@
 #include <emscripten/websocket.h>
 #include <emscripten/val.h>
 
+#include <QHostAddress>
+
 static EM_BOOL q_onWebSocketErrorCallback(int eventType,
                                           const EmscriptenWebSocketErrorEvent *e,
                                           void *userData)
@@ -149,12 +151,22 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
         Q_EMIT q->error(QAbstractSocket::ConnectionRefusedError);
         return;
     }
-    if (isSecureContext && url.scheme() == QStringLiteral("ws")) {
-         const QString message =
+    // exception for localhost/127.0.0.1/[::1]
+    // localhost has special privledges
+
+    QHostAddress hostAddress(url.host());
+
+    bool hostAddressIsLocal = (hostAddress == QHostAddress::LocalHost
+            || hostAddress == QHostAddress::LocalHostIPv6);
+
+    if (url.host() != QStringLiteral("localhost") && !hostAddressIsLocal) {
+        if (isSecureContext && url.scheme() == QStringLiteral("ws")) {
+            const QString message =
                     QWebSocket::tr("Unsupported WebSocket scheme: %1").arg(url.scheme());
         setErrorString(message);
         emit q->error(QAbstractSocket::UnsupportedSocketOperationError);
         return;
+        }
     }
 
     EmscriptenWebSocketCreateAttributes attr;
