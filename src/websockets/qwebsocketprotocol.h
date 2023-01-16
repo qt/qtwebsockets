@@ -4,6 +4,10 @@
 #ifndef QWEBSOCKETPROTOCOL_H
 #define QWEBSOCKETPROTOCOL_H
 
+#if 0
+#  pragma qt_class(QWebSocketProtocol)
+#endif
+
 #include <QtCore/qglobal.h>
 #include "QtWebSockets/qwebsockets_global.h"
 
