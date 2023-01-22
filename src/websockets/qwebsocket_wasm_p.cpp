@@ -22,7 +22,7 @@ static EM_BOOL q_onWebSocketErrorCallback(int eventType,
     QWebSocketPrivate *wsp = reinterpret_cast<QWebSocketPrivate *>(userData);
     Q_ASSERT (wsp);
 
-    emit wsp->q_func()->error(wsp->error());
+    emit wsp->q_func()->errorOccurred(wsp->error());
     return EM_FALSE;
 }
 
@@ -240,7 +240,7 @@ void QWebSocketPrivate::setSocketClosed(const EmscriptenWebSocketCloseEvent *emC
 
     if (!emCloseEvent->wasClean) {
         m_errorString = QStringLiteral("The remote host closed the connection");
-        emit q->error(error());
+        emit q->errorOccurred(error());
     }
 
     emscripten_websocket_get_ready_state(m_socketContext, &m_readyState);
