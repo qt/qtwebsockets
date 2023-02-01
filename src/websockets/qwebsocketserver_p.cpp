@@ -21,12 +21,6 @@
 
 QT_BEGIN_NAMESPACE
 
-//both constants are taken from the default settings of Apache
-//see: http://httpd.apache.org/docs/2.2/mod/core.html#limitrequestfieldsize and
-//http://httpd.apache.org/docs/2.2/mod/core.html#limitrequestfields
-const int MAX_HEADERLINE_LENGTH = 8 * 1024; //maximum length of a http request header line
-const int MAX_HEADERLINES = 100;            //maximum number of http request header lines
-
 /*!
     \internal
  */
@@ -455,7 +449,8 @@ void QWebSocketServerPrivate::handshakeReceived()
     if (endOfHeaderIndex < 0) {
         //then we don't have our header complete yet
         //check that no one is trying to exhaust our virtual memory
-        const qint64 maxHeaderLength = MAX_HEADERLINE_LENGTH * MAX_HEADERLINES + endOfHeaderMarker.size();
+        const qint64 maxHeaderLength = QWebSocketPrivate::MAX_HEADERLINE_LENGTH
+            * QWebSocketPrivate::MAX_HEADERLINES + endOfHeaderMarker.size();
         if (Q_UNLIKELY(byteAvailable > maxHeaderLength)) {
             pTcpSocket->close();
             setError(QWebSocketProtocol::CloseCodeTooMuchData,
@@ -490,7 +485,7 @@ void QWebSocketServerPrivate::handshakeReceived()
     }
 
     QWebSocketHandshakeRequest request(pTcpSocket->peerPort(), isSecure);
-    request.readHandshake(header, MAX_HEADERLINE_LENGTH);
+    request.readHandshake(header, QWebSocketPrivate::MAX_HEADERLINE_LENGTH);
 
     if (request.isValid()) {
         QWebSocketCorsAuthenticator corsAuthenticator(request.origin());
