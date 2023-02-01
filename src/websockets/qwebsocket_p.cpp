@@ -37,8 +37,6 @@ QT_BEGIN_NAMESPACE
 
 namespace {
 
-constexpr int MAX_HEADERLINE_LENGTH = 8 * 1024; // maximum length of a http request header line
-constexpr int MAX_HEADERLINES = 100;            // maximum number of http request header lines
 constexpr quint64 MAX_OUTGOING_FRAME_SIZE_IN_BYTES = std::numeric_limits<int>::max() - 1;
 constexpr quint64 DEFAULT_OUTGOING_FRAME_SIZE_IN_BYTES = 512 * 512 * 2; // default size of a frame when sending a message
 
