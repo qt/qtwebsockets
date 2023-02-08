@@ -80,9 +80,12 @@ qint64 QWebSocketPrivate::sendTextMessage(const QString &message)
     emscripten_websocket_get_ready_state(m_socketContext, &m_readyState);
 
     if (m_readyState == 1) {
-        result = emscripten_websocket_send_utf8_text(m_socketContext, message.toUtf8());
+        QByteArray messageArray = message.toUtf8();
+        result = emscripten_websocket_send_utf8_text(m_socketContext, messageArray);
         if (result < 0)
             emitErrorOccurred(QAbstractSocket::UnknownSocketError);
+        else
+            return messageArray.length();
     } else
         qWarning() << "Could not send message. Websocket is not open";
 
@@ -99,6 +102,8 @@ qint64 QWebSocketPrivate::sendBinaryMessage(const QByteArray &data)
                 data.size());
         if (result < 0)
             emitErrorOccurred(QAbstractSocket::UnknownSocketError);
+        else
+            return data.size();
     } else
         qWarning() << "Could not send message. Websocket is not open";
 
