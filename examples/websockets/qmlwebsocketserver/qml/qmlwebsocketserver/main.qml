@@ -15,7 +15,7 @@ Rectangle {
     WebSocketServer {
         id: server
         listen: true
-        onClientConnected: {
+        onClientConnected: function(webSocket) {
             webSocket.onTextMessageReceived.connect(function(message) {
                 appendMessage(qsTr("Server received message: %1").arg(message));
                 webSocket.sendTextMessage(qsTr("Hello Client!"));
@@ -29,13 +29,23 @@ Rectangle {
     WebSocket {
         id: socket
         url: server.url
-        onTextMessageReceived: appendMessage(qsTr("Client received message: %1").arg(message))
+        onTextMessageReceived: function(message) {
+            appendMessage(qsTr("Client received message: %1").arg(message));
+        }
         onStatusChanged: {
             if (socket.status == WebSocket.Error) {
                 appendMessage(qsTr("Client error: %1").arg(socket.errorString));
             } else if (socket.status == WebSocket.Closed) {
                 appendMessage(qsTr("Client socket closed."));
             }
+        }
+    }
+
+    Timer {
+        interval: 100
+        running: true
+        onTriggered: {
+            socket.active = true;
         }
     }
 
