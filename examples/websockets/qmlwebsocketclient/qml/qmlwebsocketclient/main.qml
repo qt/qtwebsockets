@@ -4,13 +4,13 @@ import QtQuick 2.0
 import QtWebSockets 1.0
 
 Rectangle {
-    width: 360
+    width: 640
     height: 360
 
     WebSocket {
         id: socket
-        url: "ws://echo.websocket.org"
-        onTextMessageReceived: {
+        url: "ws://ws.ifelse.io"
+        onTextMessageReceived: function(message) {
             messageBox.text = messageBox.text + "\nReceived message: " + message
         }
         onStatusChanged: if (socket.status == WebSocket.Error) {
@@ -25,8 +25,8 @@ Rectangle {
 
     WebSocket {
         id: secureWebSocket
-        url: "wss://echo.websocket.org"
-        onTextMessageReceived: {
+        url: "wss://ws.ifelse.io"
+        onTextMessageReceived: function(message) {
             messageBox.text = messageBox.text + "\nReceived secure message: " + message
         }
         onStatusChanged: if (secureWebSocket.status == WebSocket.Error) {
