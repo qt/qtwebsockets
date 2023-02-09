@@ -15,7 +15,7 @@ Rectangle {
 
         supportedSubprotocols: [ "chat", "superchat" ]
 
-        onClientConnected: {
+        onClientConnected: (webSocket) => {
             currentSocket = webSocket;
         }
 
@@ -88,6 +88,87 @@ Rectangle {
             ensureDisconnected();
             socket.sendBinaryMessage('hello');
             tryCompare(socket, 'status', WebSocket.Error);
+        }
+
+        function test_send_ping_from_client() {
+            ensureConnected();
+
+            var o = {};
+            var sending = new Uint8Array([42, 43]);
+            var callback = function(elapsedTime, payload) {
+                var view = new DataView(payload);
+                compare(payload.byteLength, sending.length);
+                compare(view.getUInt8(0), sending[0]);
+                compare(view.getUInt8(1), sending[1]);
+                o.called = true;
+            };
+            socket.pong.connect(callback);
+
+            socket.ping(sending.buffer);
+            tryCompare(o, 'called', true);
+            socket.pong.disconnect(callback);
+        }
+
+        function test_send_ping_from_server() {
+            ensureConnected();
+
+            var o = {};
+            var sending = new Uint8Array([42, 43]);
+            var callback = function(elapsedTime, payload) {
+                var view = new DataView(payload);
+                compare(payload.byteLength, sending.length);
+                compare(view.getUInt8(0), sending[0]);
+                compare(view.getUInt8(1), sending[1]);
+                o.called = true;
+            };
+            server.currentSocket.pong.connect(callback);
+
+            server.currentSocket.ping(sending.buffer);
+            tryCompare(o, 'called', true);
+            server.currentSocket.pong.disconnect(callback)
+        }
+
+        function test_send_ping_no_data_from_client() {
+            ensureConnected();
+
+            var o = {};
+            var callback = function(elapsedTime, payload) {
+                compare(payload.byteLength, 0);
+                o.called = true;
+            };
+            socket.pong.connect(callback);
+
+            socket.ping();
+            tryCompare(o, 'called', true);
+            socket.pong.disconnect(callback)
+        }
+
+        function test_send_ping_no_data_from_server() {
+            ensureConnected();
+
+            var o = {};
+            var callback = function(elapsedTime, payload) {
+                compare(payload.byteLength, 0);
+                o.called = true;
+            };
+            server.currentSocket.pong.connect(callback);
+
+            server.currentSocket.ping();
+            tryCompare(o, 'called', true);
+            server.currentSocket.pong.disconnect(callback)
+        }
+
+        function test_send_ping_error_closed() {
+
+            var o = {};
+            var callback = function(elapsedTime, payload) {
+                o.called = true;
+            };
+            socket.pong.connect(callback);
+            socket.ping('hello');
+            tryCompare(o, 'called', undefined);
+            tryCompare(socket, 'status', WebSocket.Error);
+            socket.pong.disconnect(callback);
         }
     }
 }

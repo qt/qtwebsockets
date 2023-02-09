@@ -509,9 +509,9 @@ void QWebSocket::open(const QNetworkRequest &request, const QWebSocketHandshakeO
 
 /*!
     \brief Pings the server to indicate that the connection is still alive.
-    Additional \a payload can be sent along the ping message.
+    An additional \a payload can be sent along with the ping message.
 
-    The size of the \a payload cannot be bigger than 125.
+    The size of the \a payload cannot be bigger than 125 bytes.
     If it is larger, the \a payload is clipped to 125 bytes.
 
     \note QWebSocket and QWebSocketServer handles ping requests internally,

@@ -171,6 +171,7 @@ private Q_SLOTS:
     void tst_invalidOrigin();
     void tst_sendTextMessage();
     void tst_sendBinaryMessage();
+    void tst_ping();
     void tst_errorString();
     void tst_openRequest_data();
     void tst_openRequest();
@@ -642,6 +643,88 @@ void tst_QWebSocket::tst_sendBinaryMessage()
     isLastFrame = arguments.at(1).toBool();
     QCOMPARE(frameReceived, QByteArrayLiteral("Hello world!"));
     QVERIFY(isLastFrame);
+}
+
+void tst_QWebSocket::tst_ping()
+{
+    EchoServer echoServer;
+
+    QWebSocket socket;
+
+    QSignalSpy socketConnectedSpy(&socket, &QWebSocket::connected);
+    QSignalSpy serverConnectedSpy(&echoServer, QOverload<QUrl>::of(&EchoServer::newConnection));
+    QSignalSpy pongReceived(&socket, &QWebSocket::pong);
+    QSignalSpy textMessageReceived(&socket, &QWebSocket::textMessageReceived);
+    QSignalSpy textFrameReceived(&socket, &QWebSocket::textFrameReceived);
+    QSignalSpy binaryMessageReceived(&socket, &QWebSocket::binaryMessageReceived);
+    QSignalSpy binaryFrameReceived(&socket, &QWebSocket::binaryFrameReceived);
+    QSignalSpy socketError(&socket, &QWebSocket::errorOccurred);
+
+    socket.ping(QByteArrayLiteral("Hello ping!")); // ping as no return value
+    QVERIFY(!pongReceived.wait(500));
+    QCOMPARE(pongReceived.size(), 0); // But we should have no pong result
+
+    QUrl url = QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
+                    QStringLiteral(":") + QString::number(echoServer.port()));
+    url.setPath("/segment/with spaces");
+    QUrlQuery query;
+    query.addQueryItem("queryitem", "with encoded characters");
+    url.setQuery(query);
+
+    socket.open(url);
+
+    QTRY_COMPARE(socketConnectedSpy.size(), 1);
+    QCOMPARE(socketError.size(), 0);
+    QCOMPARE(socket.state(), QAbstractSocket::ConnectedState);
+    QList<QVariant> arguments = serverConnectedSpy.takeFirst();
+    QUrl urlConnected = arguments.at(0).toUrl();
+    QCOMPARE(urlConnected, url);
+
+    QCOMPARE(socket.bytesToWrite(), 0);
+    socket.ping(QByteArrayLiteral("Hello ping!"));
+    QVERIFY(socket.bytesToWrite() > 11); // 11 + a few extra bytes for header
+
+    QVERIFY(pongReceived.wait(500));
+    QCOMPARE(socket.bytesToWrite(), 0);
+
+    QCOMPARE(pongReceived.size(), 1);
+    QCOMPARE(textMessageReceived.size(), 0);
+    QCOMPARE(textFrameReceived.size(), 0);
+    QCOMPARE(binaryMessageReceived.size(), 0);
+    QCOMPARE(binaryFrameReceived.size(), 0);
+    arguments = pongReceived.takeFirst();
+    QString messageReceived = arguments.at(1).toString();
+    bool elapsedIsInt;
+    quint64 elapsed = arguments.at(0).toUInt(&elapsedIsInt);
+    QCOMPARE(elapsedIsInt, true);
+    QCOMPARE_LT(elapsed, 1000);
+    QCOMPARE(messageReceived, QByteArrayLiteral("Hello ping!"));
+    QByteArray longByteArray(125, 'a');
+    longByteArray.append(125, 'b');
+    socket.ping(longByteArray); // ping method should send only 125 first bytes
+    QVERIFY(socket.bytesToWrite() > 125); // 125 + a few extra bytes for header
+
+    QVERIFY(pongReceived.wait(500));
+    QCOMPARE(socket.bytesToWrite(), 0);
+
+    QCOMPARE(pongReceived.size(), 1);
+    QCOMPARE(textMessageReceived.size(), 0);
+    QCOMPARE(textFrameReceived.size(), 0);
+    QCOMPARE(binaryMessageReceived.size(), 0);
+    QCOMPARE(binaryFrameReceived.size(), 0);
+    arguments = pongReceived.takeFirst();
+    messageReceived = arguments.at(1).toString();
+    elapsed = arguments.at(0).toUInt(&elapsedIsInt);
+    QCOMPARE(elapsedIsInt, true);
+    QCOMPARE_LT(elapsed, 1000);
+    QCOMPARE(messageReceived, longByteArray.left(125)); // max length is of 125 for ping
+    QCOMPARE(messageReceived[124], 'a'); // and we should still be in 'a' part
+
+    socket.close();
+    socketConnectedSpy.clear();
+    textMessageReceived.clear();
+    textFrameReceived.clear();
+    pongReceived.clear();
 }
 
 void tst_QWebSocket::tst_errorString()

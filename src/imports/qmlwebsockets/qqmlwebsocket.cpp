@@ -92,6 +92,31 @@
   Sends the parameter \a message to the server.
 */
 
+/*!
+  \qmlmethod void WebSocket::ping(ArrayBuffer payload)
+  \since 6.9
+  Pings the server to indicate that the connection is still alive.
+  An additional \a payload can be sent along with the ping message.
+
+  The size of the \a payload cannot be bigger than 125 bytes.
+  If it is larger, the \a payload is clipped to 125 bytes.
+
+  \note QWebSocket and QWebSocketServer handles ping requests internally,
+  which means they automatically send back a pong response to the peer.
+
+  \sa pong()
+*/
+
+/*!
+  \qmlsignal WebSocket::pong(quint64 elapsedTime, const QByteArray &payload)
+  \since 6.9
+  Emitted when a pong message is received in reply to a previous ping.
+  \a elapsedTime contains the roundtrip time in milliseconds and \a payload contains an optional
+  payload that was sent with the ping.
+
+  \sa ping()
+*/
+
 #include "qqmlwebsocket.h"
 #include <QtWebSockets/QWebSocket>
 #include <QtWebSockets/QWebSocketHandshakeOptions>
@@ -146,6 +171,15 @@ qint64 QQmlWebSocket::sendBinaryMessage(const QByteArray &message)
         return 0;
     }
     return m_webSocket->sendBinaryMessage(message);
+}
+
+void QQmlWebSocket::ping(const QByteArray &payload)
+{
+    if (m_status != Open) {
+        setErrorString(tr("Messages can only be sent when the socket is open."));
+        setStatus(Error);
+    }
+    m_webSocket->ping(payload);
 }
 
 QStringList QQmlWebSocket::requestedSubprotocols() const
@@ -221,6 +255,8 @@ void QQmlWebSocket::setSocket(QWebSocket *socket)
                 this, &QQmlWebSocket::textMessageReceived);
         connect(m_webSocket.data(), &QWebSocket::binaryMessageReceived,
                 this, &QQmlWebSocket::binaryMessageReceived);
+        connect(m_webSocket.data(), &QWebSocket::pong,
+                this, &QQmlWebSocket::pong);
         connect(m_webSocket.data(), &QWebSocket::errorOccurred,
                 this, &QQmlWebSocket::onError);
         connect(m_webSocket.data(), &QWebSocket::stateChanged,

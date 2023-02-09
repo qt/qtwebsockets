@@ -56,6 +56,7 @@ public:
 
     Q_INVOKABLE qint64 sendTextMessage(const QString &message);
     Q_REVISION(1) Q_INVOKABLE qint64 sendBinaryMessage(const QByteArray &message);
+    Q_REVISION(6, 9) Q_INVOKABLE void ping(const QByteArray &payload = QByteArray());
 
 Q_SIGNALS:
     void textMessageReceived(QString message);
@@ -66,6 +67,7 @@ Q_SIGNALS:
     void urlChanged();
     void requestedSubprotocolsChanged();
     void negotiatedSubprotocolChanged();
+    Q_REVISION(6, 9) void pong(quint64 elapsedTime, QByteArray payload);
 
 public:
     void classBegin() override;
