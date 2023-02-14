@@ -5,6 +5,7 @@
 /*!
     \group qtwebsockets-examples
     \title Qt WebSockets Examples
+    \meta category {Networking}
     \brief List of Qt WebSocket examples
 
     The examples below can be used as a guide to using the \l{Qt WebSockets} API.
