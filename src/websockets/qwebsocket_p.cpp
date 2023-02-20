@@ -177,8 +177,14 @@ void QWebSocketPrivate::init()
 QWebSocketPrivate::~QWebSocketPrivate()
 {
 #ifdef Q_OS_WASM
-    if (m_socketContext)
+    if (m_socketContext) {
+        uint16_t m_readyState;
+        emscripten_websocket_get_ready_state(m_socketContext, &m_readyState);
+        if (m_readyState == 1 || m_readyState == 0) {
+            emscripten_websocket_close(m_socketContext, 1000,"");
+        }
         emscripten_websocket_delete(m_socketContext);
+    }
 #endif
 }
 

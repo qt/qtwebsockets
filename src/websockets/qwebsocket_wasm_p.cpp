@@ -120,7 +120,7 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
 
     emscripten_websocket_get_ready_state(m_socketContext, &m_readyState);
 
-    if (m_readyState == 1) {
+    if (m_readyState == 1 || m_readyState == 0) {
         emscripten_websocket_close(m_socketContext, (int)closeCode, reason.toUtf8());
     }
     setSocketState(QAbstractSocket::UnconnectedState);
