@@ -12,10 +12,10 @@
     API to send a message to a server and process whatever response the
     server returns - in this case, simply reporting the response.
 
-    The client opens a WebSocket connection to a server listening on local
-    port 1234. When the connection attempt is successful, the client will
-    send a message to the server and print out whatever response the server
-    sends. The client then closes the connection.
+    The client by default opens a WebSocket connection to a server listening
+    on local port 1234. When the connection attempt is successful, the client
+    will send a message to the server and print out whatever response the
+    server sends. The client then closes the connection.
 
     \image echoclient-console-example.webp WebSocket Echo Console Client
 
