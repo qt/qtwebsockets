@@ -15,11 +15,10 @@
     For the sake of illustration, its response is simply a copy of the message
     it was sent.
 
-    The server is configured with a self-signed certificate and key.
-    Unless the client is configured to ignore certificate verification errors,
-    which is not recommenced on production systems, the certificate used by the
-    server must be signed by a custom CA certificate that the client explicitly
-    trusts.
+    This server is configured with a self-signed certificate and key.
+    Unless the clients contacting this server is configured to trust that
+    certificate, which \l {Secure WebSocket Echo Client} does, they will reject
+    this server.
 
     \image sslechoclient-html-example.webp Secure WebSocket Echo HTML Client
 

@@ -14,12 +14,10 @@
     and when it receives a message back, it prints it out and exits. SSL
     support is required for this example to work.
 
-    This example connects to localhost at port 1234 using a secure connection.
-    Though SSL errors are ignored in this example, this should never be done
-    in production code, because that would leave the client vulnerable to
-    man-in-the-middle attacks. To use a certificates not signed by an existing
-    CA, add a custom self-signed root CA certificate, trust it in your
-    application or system, and sign the server certificate with that.
+    This example connects by default to localhost at port 1234 using a secure
+    connection. It trusts the certificates signed by the CA certificates
+    configured in the SSL backend, and in addition trusts the certificate
+    used by \l {Secure WebSocket Echo Server}.
 
     \image echoclient-console-example.webp Secure WebSocket Echo Console Client
 
