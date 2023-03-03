@@ -263,6 +263,8 @@ void QWebSocketPrivate::setSocketClosed(const EmscriptenWebSocketCloseEvent *emC
     emscripten_websocket_get_ready_state(m_socketContext, &m_readyState);
 
     if (m_readyState == 3) { // closed
+        setSocketState(QAbstractSocket::UnconnectedState);
+        emit q->disconnected();
         emscripten_websocket_delete(emCloseEvent->socket);
         m_socketContext = 0;
     }
