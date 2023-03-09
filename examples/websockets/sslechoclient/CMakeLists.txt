@@ -19,6 +19,11 @@ qt_add_executable(sslechoclient
     sslechoclient.cpp sslechoclient.h
 )
 
+qt_add_resources(sslechoclient "cert"
+    BASE ../sslechoserver
+    FILES ../sslechoserver/localhost.cert
+)
+
 set_target_properties(sslechoclient PROPERTIES
     WIN32_EXECUTABLE FALSE
     MACOSX_BUNDLE FALSE

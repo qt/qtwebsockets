@@ -1,9 +1,10 @@
 // Copyright (C) 2016 Kurt Pattyn <pattyn.kurt@gmail.com>.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 #include "sslechoclient.h"
+#include <QtCore/QCoreApplication>
 #include <QtCore/QDebug>
+#include <QtCore/QFile>
 #include <QtWebSockets/QWebSocket>
-#include <QCoreApplication>
 
 QT_USE_NAMESPACE
 
@@ -14,6 +15,15 @@ SslEchoClient::SslEchoClient(const QUrl &url, QObject *parent) :
     connect(&m_webSocket, &QWebSocket::connected, this, &SslEchoClient::onConnected);
     connect(&m_webSocket, QOverload<const QList<QSslError>&>::of(&QWebSocket::sslErrors),
             this, &SslEchoClient::onSslErrors);
+
+    QSslConfiguration sslConfiguration;
+    QFile certFile(QStringLiteral(":/localhost.cert"));
+    certFile.open(QIODevice::ReadOnly);
+    QSslCertificate certificate(&certFile, QSsl::Pem);
+    certFile.close();
+    sslConfiguration.addCaCertificate(certificate);
+    m_webSocket.setSslConfiguration(sslConfiguration);
+
     m_webSocket.open(QUrl(url));
 }
 //! [constructor]
@@ -37,12 +47,8 @@ void SslEchoClient::onTextMessageReceived(QString message)
 
 void SslEchoClient::onSslErrors(const QList<QSslError> &errors)
 {
-    Q_UNUSED(errors);
+    qWarning() << "SSL errors:" << errors;
 
-    // WARNING: Never ignore SSL errors in production code.
-    // The proper way to handle self-signed certificates is to add a custom root
-    // to the CA store.
-
-    m_webSocket.ignoreSslErrors();
+    qApp->quit();
 }
 //! [onTextMessageReceived]
