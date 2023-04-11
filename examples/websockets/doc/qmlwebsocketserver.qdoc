@@ -4,7 +4,7 @@
 /*!
     \example qmlwebsocketserver
     \title QML WebSocket Server
-    \meta category {Networking}
+    \examplecategory {Networking}
     \ingroup qtwebsockets-examples
     \brief A simple example that shows how to use a QML WebSocketServer.
 

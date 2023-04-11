@@ -4,7 +4,7 @@
 /*!
     \example simplechat
     \title Simple WebSocket Chat
-    \meta category {Networking}
+    \examplecategory {Networking}
     \ingroup qtwebsockets-examples
     \brief A minimal chat application using the WebSocket protocol.
 

@@ -4,7 +4,7 @@
 /*!
     \example echoserver
     \title WebSocket Echo Server
-    \meta category {Networking}
+    \examplecategory {Networking}
     \ingroup qtwebsockets-examples
     \brief Show how to write a simple WebSocket server application.
 

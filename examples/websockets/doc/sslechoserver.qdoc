@@ -4,7 +4,7 @@
 /*!
     \example sslechoserver
     \title Secure WebSocket Echo Server
-    \meta category {Networking}
+    \examplecategory {Networking}
     \ingroup qtwebsockets-examples
     \brief A simple server to respond to clients over secure WebSockets (wss).
 
