@@ -132,7 +132,6 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
                              const QWebSocketHandshakeOptions &options, bool mask)
 {
     Q_UNUSED(mask);
-    Q_UNUSED(options)
 
     emscripten_websocket_get_ready_state(m_socketContext, &m_readyState);
 
@@ -174,6 +173,8 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
             return;
         }
     }
+
+    setRequest(request, options);
 
     EmscriptenWebSocketCreateAttributes attr;
 
