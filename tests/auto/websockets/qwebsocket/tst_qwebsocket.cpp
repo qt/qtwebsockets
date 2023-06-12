@@ -1025,7 +1025,7 @@ public:
 
         socket->write(payload);
         if (withConnectionClose)
-            socket->disconnectFromHost();
+            socket->close();
     }
 
     static QLatin1StringView getHeaderValue(const QLatin1StringView keyHeader,
