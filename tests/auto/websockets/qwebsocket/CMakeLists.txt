@@ -12,6 +12,7 @@ qt_internal_add_test(tst_qwebsocket
         tst_qwebsocket.cpp
     LIBRARIES
         Qt::WebSockets
+    BUNDLE_ANDROID_OPENSSL_LIBS
 )
 
 set(qwebsocketshared_resource_files
