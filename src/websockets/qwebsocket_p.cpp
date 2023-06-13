@@ -1106,7 +1106,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
             // Keep the error on a single line so it can easily be searched for:
             errorDescription = QWebSocket::tr(
                     "QWebSocketPrivate::processHandshake: "
-                    "Unsupported WWW-Authenticate challenge(s) encountered!",
+                    "Unsupported WWW-Authenticate challenge(s) encountered.",
                     "'WWW-Authenticate' is the HTTP header.", int(challenges.size()));
             break;
         }
