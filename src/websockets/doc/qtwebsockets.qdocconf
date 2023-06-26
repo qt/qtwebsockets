@@ -62,6 +62,3 @@ manifestmeta.thumbnail.names                        += "QtWebSockets/Echo Client
 navigation.landingpage                              = "Qt WebSockets"
 navigation.cppclassespage                           = "Qt WebSockets C++ Classes"
 navigation.qmltypespage                             = "Qt WebSockets QML Types"
-
-# Enforce zero warnings for documentation build
-warninglimit = 0
