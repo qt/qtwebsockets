@@ -480,7 +480,7 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
                 QSslSocket *sslSocket = new QSslSocket(q);
                 m_pSocket = sslSocket;
                 if (Q_LIKELY(m_pSocket)) {
-                    QObject::connect(sslSocket, &QSslSocket::connected, [sslSocket](){
+                    QObject::connect(sslSocket, &QSslSocket::connected, sslSocket, [sslSocket]() {
                         sslSocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
                         sslSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
                     });
@@ -511,7 +511,7 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
         if (url.scheme() == QStringLiteral("ws")) {
             m_pSocket = new QTcpSocket(q);
             if (Q_LIKELY(m_pSocket)) {
-                QObject::connect(m_pSocket, &QTcpSocket::connected, [this](){
+                QObject::connect(m_pSocket, &QTcpSocket::connected, m_pSocket, [this](){
                     m_pSocket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
                     m_pSocket->setSocketOption(QAbstractSocket::KeepAliveOption, 1);
                 });
