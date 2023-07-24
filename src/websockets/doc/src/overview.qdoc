@@ -5,6 +5,7 @@
 \page websockets-overview.html
 \title Qt WebSockets Overview
 \brief Provides insight into the WebSocket protocol and the Qt WebSockets module.
+\ingroup explanation
 
 Qt WebSockets enables you to build WebSocket-aware applications. It
 provides an implementation for the WebSocket protocol, which is offered by IETF
