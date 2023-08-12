@@ -17,8 +17,11 @@
 #include "QtWebSockets/qwebsockets_global.h"
 #include "QtWebSockets/qwebsocketprotocol.h"
 
+#include <QtCore/qobject.h>
+
 QT_BEGIN_NAMESPACE
 
+class QAuthenticator;
 class QTcpSocket;
 class QWebSocketPrivate;
 class QMaskGenerator;
