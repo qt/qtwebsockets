@@ -967,6 +967,17 @@ qint64 QWebSocketPrivate::writeFrame(const QByteArray &frame)
     return written;
 }
 
+static QString msgUnsupportedAuthenticateChallenges(qsizetype count)
+{
+    // Keep the error on a single line so it can easily be searched for:
+    //: 'WWW-Authenticate' is the HTTP header.
+    return count == 1
+        ? QWebSocket::tr("QWebSocketPrivate::processHandshake: "
+                         "Unsupported WWW-Authenticate challenge encountered.")
+        : QWebSocket::tr("QWebSocketPrivate::processHandshake: "
+                         "Unsupported WWW-Authenticate challenges encountered.");
+}
+
 //called on the client for a server handshake response
 /*!
     \internal
@@ -1103,11 +1114,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
         if (isSupported)
             priv->parseHttpResponse(parser.headers(), /*isProxy=*/false, m_request.url().host());
         if (!isSupported || priv->method == QAuthenticatorPrivate::None) {
-            // Keep the error on a single line so it can easily be searched for:
-            errorDescription = QWebSocket::tr(
-                    "QWebSocketPrivate::processHandshake: "
-                    "Unsupported WWW-Authenticate challenge(s) encountered.",
-                    "'WWW-Authenticate' is the HTTP header.", int(challenges.size()));
+            errorDescription = msgUnsupportedAuthenticateChallenges(challenges.size());
             break;
         }
 
