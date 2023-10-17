@@ -59,6 +59,8 @@ manifestmeta.thumbnail.names                        += "QtWebSockets/Echo Client
                                                        "QtWebSockets/SSL*" \
                                                        "QtWebSockets/Simple*"
 
+manifestmeta.highlighted.names = "QtWebSockets/Simple WebSocket Chat"
+
 navigation.landingpage                              = "Qt WebSockets"
 navigation.cppclassespage                           = "Qt WebSockets C++ Classes"
 navigation.qmltypespage                             = "Qt WebSockets QML Types"
