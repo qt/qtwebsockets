@@ -9,6 +9,7 @@
 #include <QtWebSockets/QWebSocketServer>
 #include <QtWebSockets/qwebsocketprotocol.h>
 
+#include <QtNetwork/qtcpsocket.h>
 #include <QtNetwork/qtcpserver.h>
 
 QT_USE_NAMESPACE
