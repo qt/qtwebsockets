@@ -21,4 +21,5 @@ qt_internal_add_qml_module(qmlwebsockets
         Qt::CorePrivate
         Qt::QmlPrivate
         Qt::WebSockets
+    NO_GENERATE_CPP_EXPORTS
 )
