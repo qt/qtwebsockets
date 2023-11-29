@@ -31,7 +31,6 @@ qt_internal_add_module(WebSockets
         Qt::Network
     PRIVATE_MODULE_INTERFACE
         Qt::CorePrivate
-    GENERATE_CPP_EXPORTS
 )
 
 #### Keys ignored in scope 1:.:.:websockets.pro:<TRUE>:
