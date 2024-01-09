@@ -19,6 +19,7 @@
 #include <QtCore/QString>
 #include <QtCore/QUrl>
 #include <QtNetwork/private/qhttpheaderparser_p.h>
+#include <QtNetwork/qhttpheaders.h>
 
 #include "qwebsocketprotocol.h"
 
@@ -39,7 +40,7 @@ public:
     int port() const;
     bool isSecure() const;
     bool isValid() const;
-    QList<QPair<QByteArray, QByteArray>> headers() const;
+    QHttpHeaders headers() const;
     bool hasHeader(const QByteArray &name) const;
     QList<QWebSocketProtocol::Version> versions() const;
     QString key() const;

@@ -83,7 +83,7 @@ bool QWebSocketHandshakeRequest::isValid() const
 /*!
     \internal
  */
-QList<QPair<QByteArray, QByteArray>> QWebSocketHandshakeRequest::headers() const
+QHttpHeaders QWebSocketHandshakeRequest::headers() const
 {
     return m_parser.headers();
 }

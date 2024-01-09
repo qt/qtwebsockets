@@ -360,9 +360,9 @@ QWebSocket *QWebSocketPrivate::upgradeFrom(QTcpSocket *pTcpSocket,
     QWebSocket *pWebSocket = new QWebSocket(pTcpSocket, response.acceptedVersion(), parent);
     if (Q_LIKELY(pWebSocket)) {
         QNetworkRequest netRequest(request.requestUrl());
-        const auto headers = request.headers();
-        for (auto it = headers.begin(), end = headers.end(); it != end; ++it)
-            netRequest.setRawHeader(it->first, it->second);
+        const auto headers = request.headers().toListOfPairs();
+        for (const auto &field : headers)
+            netRequest.setRawHeader(field.first, field.second);
 #ifndef QT_NO_SSL
         if (QSslSocket *sslSock = qobject_cast<QSslSocket *>(pTcpSocket))
             pWebSocket->setSslConfiguration(sslSock->sslConfiguration());
