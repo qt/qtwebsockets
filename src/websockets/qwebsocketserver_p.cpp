@@ -101,6 +101,8 @@ void QWebSocketServerPrivate::init()
                                     Qt::QueuedConnection);
             QObjectPrivate::connect(pSslServer, &QSslServer::startedEncryptionHandshake,
                                     this, &QWebSocketServerPrivate::startHandshakeTimeout);
+            QObject::connect(pSslServer, &QSslServer::startedEncryptionHandshake,
+                             q, &QWebSocketServer::preStartedEncryptionHandshake);
             QObject::connect(pSslServer, &QSslServer::peerVerifyError,
                              q, &QWebSocketServer::peerVerifyError);
             QObject::connect(pSslServer, &QSslServer::sslErrors,

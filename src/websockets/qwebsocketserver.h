@@ -159,6 +159,7 @@ Q_SIGNALS:
     void sslErrors(const QList<QSslError> &errors);
     void preSharedKeyAuthenticationRequired(QSslPreSharedKeyAuthenticator *authenticator);
 #endif
+    void preStartedEncryptionHandshake(QSslSocket *pTcpSocket);
     void closed();
 };
 
