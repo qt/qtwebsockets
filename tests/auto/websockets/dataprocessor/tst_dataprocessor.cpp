@@ -1,5 +1,5 @@
 // Copyright (C) 2016 Kurt Pattyn <pattyn.kurt@gmail.com>.
-// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only
 #include <QtTest/QtTest>
 #include <QtTest/qtestcase.h>
 #include <QtTest/QSignalSpy>
