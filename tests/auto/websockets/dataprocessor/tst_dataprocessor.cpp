@@ -18,6 +18,9 @@ const quint8 RSV3 = 0x10;
 
 QT_USE_NAMESPACE
 
+using namespace std::chrono_literals;
+constexpr std::chrono::milliseconds DefaultIdleTimeout = 500ms;
+
 Q_DECLARE_METATYPE(QWebSocketProtocol::CloseCode)
 Q_DECLARE_METATYPE(QWebSocketProtocol::OpCode)
 
@@ -699,6 +702,8 @@ void tst_DataProcessor::frameTooSmall()
     QWebSocketDataProcessor dataProcessor;
     QByteArray firstFrame;
 
+    dataProcessor.setIdleTimeout(DefaultIdleTimeout);
+
     firstFrame.append(quint8(QWebSocketProtocol::OpCodeText)).append(char(1))
             .append(QByteArray(1, 'a'));
 
@@ -1350,6 +1355,8 @@ void tst_DataProcessor::invalidPayloadInCloseFrame()
     QSignalSpy textFrameSpy(&dataProcessor, SIGNAL(textFrameReceived(QString,bool)));
     QSignalSpy binaryFrameSpy(&dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)));
 
+    dataProcessor.setIdleTimeout(DefaultIdleTimeout);
+
     data.append(firstByte).append(secondByte);
     data.append(payload);
     buffer.setData(data);
@@ -1450,6 +1457,8 @@ void tst_DataProcessor::doTest(int timeout)
     QSignalSpy textFrameSpy(&dataProcessor, SIGNAL(textFrameReceived(QString,bool)));
     QSignalSpy binaryFrameSpy(&dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)));
 
+    dataProcessor.setIdleTimeout(DefaultIdleTimeout);
+
     if (isContinuationFrame)
     {
         data.append(quint8(QWebSocketProtocol::OpCodeText))
@@ -1495,6 +1504,8 @@ void tst_DataProcessor::doCloseFrameTest()
     QSignalSpy binaryMessageSpy(&dataProcessor, SIGNAL(binaryMessageReceived(QByteArray)));
     QSignalSpy textFrameSpy(&dataProcessor, SIGNAL(textFrameReceived(QString,bool)));
     QSignalSpy binaryFrameSpy(&dataProcessor, SIGNAL(binaryFrameReceived(QByteArray,bool)));
+
+    dataProcessor.setIdleTimeout(DefaultIdleTimeout);
 
     data.append(firstByte).append(secondByte);
     data.append(payload);
@@ -1840,6 +1851,7 @@ void tst_DataProcessor::clearDataBuffers()
     data.append(binaryData);
 
     QWebSocketDataProcessor dataProcessor;
+    dataProcessor.setIdleTimeout(DefaultIdleTimeout);
     connect(&dataProcessor, &QWebSocketDataProcessor::binaryMessageReceived,
             [&binaryData](const QByteArray &message)
     {

@@ -19,7 +19,7 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QString>
 #include <QtCore/QStringDecoder>
-#include <QtCore/QTimer>
+#include <QtCore/QChronoTimer>
 #include "qwebsocketframe_p.h"
 #include "qwebsocketprotocol.h"
 #include "qwebsocketprotocol_p.h"
@@ -46,6 +46,9 @@ public:
     quint64 maxAllowedMessageSize() const;
     static quint64 maxMessageSize();
     static quint64 maxFrameSize();
+
+    void setIdleTimeout(std::chrono::milliseconds timeout);
+    std::chrono::milliseconds idleTimeout() const;
 
 Q_SIGNALS:
     void pingReceived(const QByteArray &data);
@@ -83,7 +86,7 @@ private:
     quint64 m_payloadLength;
     QStringDecoder m_decoder;
     QWebSocketFrame frame;
-    QTimer *m_waitTimer;
+    QChronoTimer *m_waitTimer;
     quint64 m_maxAllowedMessageSize = MAX_MESSAGE_SIZE_IN_BYTES;
 
     bool processControlFrame(const QWebSocketFrame &frame);

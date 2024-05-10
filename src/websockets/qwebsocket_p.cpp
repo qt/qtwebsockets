@@ -31,6 +31,7 @@
 #include <QtNetwork/private/qauthenticator_p.h>
 
 #include <QtCore/QDebug>
+#include <QtCore/QTimer>
 
 #include <limits>
 #include <memory>

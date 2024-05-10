@@ -49,11 +49,12 @@ QWebSocketDataProcessor::QWebSocketDataProcessor(QObject *parent) :
     m_payloadLength(0),
     m_decoder(QStringDecoder(QStringDecoder::Utf8, QStringDecoder::Flag::Stateless
         | QStringDecoder::Flag::ConvertInvalidToNull)),
-    m_waitTimer(new QTimer(this))
+    m_waitTimer(new QChronoTimer(this))
 {
     clear();
     // initialize the internal timeout timer
-    m_waitTimer->setInterval(5000);
+    using namespace std::chrono_literals;
+    m_waitTimer->setInterval(5s);
     m_waitTimer->setSingleShot(true);
     m_waitTimer->callOnTimeout(this, &QWebSocketDataProcessor::timeout);
 }
@@ -111,6 +112,24 @@ quint64 QWebSocketDataProcessor::maxFrameSize()
 
 /*!
     \internal
+*/
+void QWebSocketDataProcessor::setIdleTimeout(std::chrono::milliseconds timeout)
+{
+    Q_ASSERT(!m_waitTimer->isActive());
+    m_waitTimer->setInterval(timeout);
+}
+
+/*!
+    \internal
+*/
+std::chrono::milliseconds QWebSocketDataProcessor::idleTimeout() const
+{
+    using namespace std::chrono;
+    return duration_cast<milliseconds>(m_waitTimer->interval());
+}
+
+/*!
+    \internal
 
     Returns \c true if a complete websocket frame has been processed;
     otherwise returns \c false.
@@ -124,7 +143,7 @@ bool QWebSocketDataProcessor::process(QIODevice *pIoDevice)
         if (!frame.isDone()) {
             // waiting for more data available
             QObject::connect(pIoDevice, &QIODevice::readyRead,
-                             m_waitTimer, &QTimer::stop, Qt::UniqueConnection);
+                             m_waitTimer, &QChronoTimer::stop, Qt::UniqueConnection);
             m_waitTimer->start();
             return false;
         } else if (Q_LIKELY(frame.isValid())) {
