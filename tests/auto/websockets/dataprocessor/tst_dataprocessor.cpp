@@ -995,7 +995,7 @@ void tst_DataProcessor::invalidControlFrame_data()
             << QByteArray()
             << false
             << QWebSocketProtocol::CloseCodeProtocolError;
-    QTest::newRow("Close control frame with payload size 126")
+    QTest::newRow("Pong control frame with payload size 126")
             << quint8(FIN | QWebSocketProtocol::OpCodePong)
             << quint8(126)
             << QByteArray()
