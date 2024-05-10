@@ -1360,7 +1360,7 @@ void tst_QWebSocket::customHeader()
         QVERIFY(serverSocketSpy.wait());
         data.append(serverSocket->readAll());
     }
-    QVERIFY(data.contains("CustomHeader: Example"));
+    QVERIFY(QLatin1StringView(data).contains("CustomHeader: Example"_L1, Qt::CaseInsensitive));
     const auto view = QLatin1String(data);
     const auto keyHeader = QLatin1String("Sec-WebSocket-Key:");
     const qsizetype keyStart = view.indexOf(keyHeader, 0, Qt::CaseInsensitive) + keyHeader.size();
