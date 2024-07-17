@@ -15,7 +15,8 @@ qhp.QtWebSockets.virtualFolder                      = qtwebsockets
 qhp.QtWebSockets.indexTitle                         = Qt WebSockets
 qhp.QtWebSockets.indexRoot                          =
 
-qhp.QtWebSockets.subprojects                        = classes qml examples
+qhp.QtWebSockets.subprojects = manual examples classes qml
+
 qhp.QtWebSockets.subprojects.classes.title          = C++ Classes
 qhp.QtWebSockets.subprojects.classes.indexTitle     = Qt WebSockets C++ Classes
 qhp.QtWebSockets.subprojects.classes.selectors      = class headerfile
@@ -28,9 +29,12 @@ qhp.QtWebSockets.subprojects.qml.sortPages          = true
 
 qhp.QtWebSockets.subprojects.examples.title         = Examples
 qhp.QtWebSockets.subprojects.examples.indexTitle    = Qt WebSockets Examples
-qhp.QtWebSockets.subprojects.examples.selectors     = doc:example
+qhp.QtWebSockets.subprojects.examples.selectors     = example
 qhp.QtWebSockets.subprojects.examples.sortPages     = true
 
+qhp.QtWebSockets.subprojects.manual.title = Qt WebSockets
+qhp.QtWebSockets.subprojects.manual.indexTitle = Qt WebSockets module topics
+qhp.QtWebSockets.subprojects.manual.type = manual
 
 tagfile                                             = ../../../doc/qtwebsockets/qtwebsockets.tags
 
@@ -64,3 +68,6 @@ manifestmeta.highlighted.names = "QtWebSockets/Simple WebSocket Chat"
 navigation.landingpage                              = "Qt WebSockets"
 navigation.cppclassespage                           = "Qt WebSockets C++ Classes"
 navigation.qmltypespage                             = "Qt WebSockets QML Types"
+# Auto-generate navigation linking based on "Qt WebSockets module topics":
+navigation.toctitles = "Qt WebSockets module topics"
+navigation.toctitles.inclusive = false
