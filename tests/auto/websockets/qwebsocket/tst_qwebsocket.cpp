@@ -693,6 +693,7 @@ void tst_QWebSocket::tst_openRequest()
 
     QUrl url = QUrl(QStringLiteral("ws://") + echoServer.hostAddress().toString() +
                     QLatin1Char(':') + QString::number(echoServer.port()));
+    url.setPath(QLatin1String("/"));
     QUrlQuery query;
     query.addQueryItem("queryitem", "with encoded characters");
     url.setQuery(query);

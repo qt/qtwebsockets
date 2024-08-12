@@ -450,6 +450,8 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
         m_isClosingHandshakeSent = false;
 
         setRequest(request, options);
+        if (url.path().isEmpty())
+            url.setPath(QStringLiteral("/"));
         QString resourceName = url.path(QUrl::FullyEncoded);
         // Check for encoded \r\n
         if (resourceName.contains(QStringLiteral("%0D%0A"))) {
