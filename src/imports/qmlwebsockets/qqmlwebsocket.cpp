@@ -3,7 +3,7 @@
 
 /*!
     \qmltype WebSocket
-    \instantiates QQmlWebSocket
+    \nativetype QQmlWebSocket
     \since 5.3
 
     \inqmlmodule QtWebSockets
