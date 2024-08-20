@@ -43,6 +43,11 @@ QWebSocketServerPrivate::QWebSocketServerPrivate(const QString &serverName,
 void QWebSocketServerPrivate::init()
 {
     Q_Q(QWebSocketServer);
+
+#ifdef Q_OS_WASM
+    qWarning("QWebSocketServer: WebSocket servers are not supported by Qt for WebAssembly");
+#endif
+
     if (m_secureMode == NonSecureMode) {
         m_pTcpServer = new QTcpServer(q);
         if (Q_LIKELY(m_pTcpServer))
