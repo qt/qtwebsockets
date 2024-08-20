@@ -8,7 +8,7 @@ QT_USE_NAMESPACE
 
 /*!
     \qmltype WebSocketServer
-    \instantiates QQmlWebSocketServer
+    \nativetype QQmlWebSocketServer
     \since 5.3
 
     \inqmlmodule QtWebSockets
