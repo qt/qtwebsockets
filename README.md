@@ -9,6 +9,18 @@ It is implemented as a Qt add-on module, that can easily be embedded into existi
 * Strict Unicode checking
 * WSS and proxy support
 
+### Update Notice
+In this update, we have added a pre-shared encryption handshake feature to QWebSocketServer, enhancing the security of communication between the server and clients.
+#### New Feature
+- Pre-Shared Encryption Handshake
+    - Files: `QWebSocketServer.h` and `QWebSocketServer.cpp`
+    - Added the `preSharedEncryptionHandshake` function to handle encryption handshakes using pre-shared keys.
+
+```c++
+void preStartedEncryptionHandshake(QSslSocket *pTcpSocket);
+```
+This modification is based on the Qt source code. For more information, please visit the [Qt website](https://qt.io).
+
 ### Requirements
 Qt 5.x
 
