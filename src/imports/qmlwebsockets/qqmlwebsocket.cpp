@@ -124,6 +124,8 @@ QQmlWebSocket::QQmlWebSocket(QWebSocket *socket, QObject *parent) :
 
 QQmlWebSocket::~QQmlWebSocket()
 {
+    if (m_webSocket)
+        m_webSocket->disconnect();
 }
 
 qint64 QQmlWebSocket::sendTextMessage(const QString &message)
