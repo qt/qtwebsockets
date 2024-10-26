@@ -9,6 +9,7 @@
 #include <QtWebSockets/QWebSocketServer>
 #include <QtWebSockets/qwebsocketprotocol.h>
 
+#include <QtCore/qoperatingsystemversion.h>
 #include <QtCore/qsystemdetection.h>
 
 #include <QtNetwork/qtcpserver.h>
