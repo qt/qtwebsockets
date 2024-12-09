@@ -17,13 +17,13 @@ QT_USE_NAMESPACE
 */
 
 /*!
-  \qmlproperty QUrl WebSocketServer::url
+  \qmlproperty url WebSocketServer::url
   Server url that client WebSockets can connect to. The url uses the \e ws:// scheme and includes the
   port the server listens to and the host address of the server.
 */
 
 /*!
-  \qmlproperty QString WebSocketServer::host
+  \qmlproperty string WebSocketServer::host
   The host address of the server. By default, localhost is used.
 */
 
@@ -35,18 +35,18 @@ QT_USE_NAMESPACE
 */
 
 /*!
-  \qmlproperty QString WebSocketServer::name
+  \qmlproperty string WebSocketServer::name
   The name of this server used during the http handshake phase.
 */
 
 /*!
-  \qmlproperty QStringList WebSocketServer::supportedSubprotocols
+  \qmlproperty list<string> WebSocketServer::supportedSubprotocols
   \since 6.4
   The list of protocols supported by the server.
 */
 
 /*!
-  \qmlproperty QString WebSocketServer::errorString
+  \qmlproperty string WebSocketServer::errorString
   The stringified error message in case an error occurred.
 */
 
