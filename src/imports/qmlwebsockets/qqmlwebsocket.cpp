@@ -16,19 +16,19 @@
 */
 
 /*!
-  \qmlproperty QUrl WebSocket::url
+  \qmlproperty url WebSocket::url
   Server url to connect to. The url must have one of 2 schemes: \e ws:// or \e wss://.
   When not supplied, then \e ws:// is used.
 */
 
 /*!
-  \qmlproperty QStringList WebSocket::requestedSubprotocols
+  \qmlproperty list<string> WebSocket::requestedSubprotocols
   \since 6.4
   The list of WebSocket subprotocols to send in the WebSocket handshake.
 */
 
 /*!
-  \qmlproperty QString WebSocket::negotiatedSubprotocol
+  \qmlproperty string WebSocket::negotiatedSubprotocol
   \since 6.4
   The WebSocket subprotocol that has been negotiated with the server.
 */
@@ -48,7 +48,7 @@
 */
 
 /*!
-  \qmlproperty QString WebSocket::errorString
+  \qmlproperty string WebSocket::errorString
   Contains a description of the last error that occurred. When no error occurrred,
   this string is empty.
 */
