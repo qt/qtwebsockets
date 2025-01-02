@@ -1,5 +1,5 @@
 // Copyright (C) 2022 Menlo Systems GmbH, author Arno Rehn <a.rehn@menlosystems.com>.
-// SPDX-License-Identifier: LicenseRef-Qt-Commercial
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 
 #ifndef QWEBSOCKETHANDSHAKEOPTIONS_P_H
 #define QWEBSOCKETHANDSHAKEOPTIONS_P_H
