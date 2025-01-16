@@ -1,8 +1,7 @@
 version = 1
 
 [[annotations]]
-path = ["src/imports/qmlwebsockets/plugins.qmltypes",
-        "src/websockets/doc/images/websockets-pictorial-representation.jpg"]
+path = ["src/imports/qmlwebsockets/plugins.qmltypes"]
 precedence = "closest"
 comment = "source and plugins"
 SPDX-FileCopyrightText = "Copyright (C) 2024 The Qt Company Ltd."
@@ -37,7 +36,7 @@ SPDX-FileCopyrightText = "Copyright (C) 2024 The Qt Company Ltd."
 SPDX-License-Identifier = "LicenseRef-Qt-Commercial OR BSD-3-Clause"
 
 [[annotations]]
-path = ["**/README*", "**.qdocconf"]
+path = ["**/doc/images/**", "**/README*", "**.qdocconf"]
 comment = "documentation"
 precedence = "closest"
 SPDX-FileCopyrightText = "Copyright (C) 2024 The Qt Company Ltd."
