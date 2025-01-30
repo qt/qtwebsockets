@@ -24,7 +24,7 @@ SslEchoClient::SslEchoClient(const QUrl &url, QObject *parent) :
     sslConfiguration.addCaCertificate(certificate);
     m_webSocket.setSslConfiguration(sslConfiguration);
 
-    m_webSocket.open(QUrl(url));
+    m_webSocket.open(url);
 }
 //! [constructor]
 
