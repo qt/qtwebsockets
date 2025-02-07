@@ -94,7 +94,7 @@
 
 /*!
   \qmlmethod void WebSocket::ping(ArrayBuffer payload)
-  \since 6.9
+  \since 6.10
   Pings the server to indicate that the connection is still alive.
   An additional \a payload can be sent along with the ping message.
 
@@ -109,7 +109,7 @@
 
 /*!
   \qmlsignal WebSocket::pong(quint64 elapsedTime, const QByteArray &payload)
-  \since 6.9
+  \since 6.10
   Emitted when a pong message is received in reply to a previous ping.
   \a elapsedTime contains the roundtrip time in milliseconds and \a payload contains an optional
   payload that was sent with the ping.
