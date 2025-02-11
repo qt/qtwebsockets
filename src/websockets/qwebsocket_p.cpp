@@ -1179,6 +1179,24 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
 
 /*!
     \internal
+*/
+static QString removeZoneId(const QString& hostPort)
+{
+    const auto closeBracketIndex = hostPort.indexOf(u']');
+    const auto percentIndex = hostPort.indexOf(u'%');
+    // Only perform a minimal sanity check, as at this point the
+    // URI parts host and port were already used successfully to
+    // connect to the host.
+    if (!hostPort.startsWith(u'[') || closeBracketIndex == -1
+        || percentIndex == -1 || percentIndex > closeBracketIndex) {
+        return hostPort;
+    }
+
+    return hostPort.left(percentIndex) + hostPort.mid(closeBracketIndex);
+}
+
+/*!
+    \internal
  */
 void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketState)
 {
@@ -1233,7 +1251,8 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
             const auto format = QUrl::RemoveScheme | QUrl::RemoveUserInfo
                                 | QUrl::RemovePath | QUrl::RemoveQuery
                                 | QUrl::RemoveFragment;
-            const QString host = m_request.url().toString(format).mid(2);
+            // mid(2) removes the prefix "//" from the remaining url
+            const QString host = removeZoneId(m_request.url().toString(format).mid(2));
             const QString handshake = createHandShakeRequest(m_resourceName,
                                                              host,
                                                              origin(),
