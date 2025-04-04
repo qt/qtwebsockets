@@ -548,7 +548,7 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
 void QWebSocketPrivate::ping(const QByteArray &payload)
 {
     QByteArray payloadTruncated = payload.left(125);
-    m_pingTimer.restart();
+    m_pingTimer.start();
     quint32 maskingKey = 0;
     if (m_mustMask)
         maskingKey = generateMaskingKey();
