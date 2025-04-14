@@ -717,8 +717,12 @@ void QWebSocketPrivate::makeConnections(QTcpSocket *pTcpSocket)
  */
 void QWebSocketPrivate::releaseConnections(const QTcpSocket *pTcpSocket)
 {
-    if (Q_LIKELY(pTcpSocket))
+    if (Q_LIKELY(pTcpSocket)) {
+        // Explicitly disconnect this signal to avoid warning being printed about a destroyed-signal
+        // being disconnected with the wildcard disconnect below
+        disconnect(pTcpSocket, &QObject::destroyed, this, &QWebSocketPrivate::socketDestroyed);
         pTcpSocket->disconnect();
+    }
     m_dataProcessor->disconnect();
 }
 
