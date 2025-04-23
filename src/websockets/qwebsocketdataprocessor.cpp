@@ -44,11 +44,8 @@ QWebSocketDataProcessor::QWebSocketDataProcessor(QObject *parent) :
     m_isControlFrame(false),
     m_hasMask(false),
     m_mask(0),
-    m_binaryMessage(),
-    m_textMessage(),
     m_payloadLength(0),
-    m_decoder(QStringDecoder(QStringDecoder::Utf8, QStringDecoder::Flag::Stateless
-        | QStringDecoder::Flag::ConvertInvalidToNull)),
+    m_decoder(QStringDecoder(QStringDecoder::Utf8, QStringDecoder::Flag::ConvertInvalidToNull)),
     m_waitTimer(new QChronoTimer(this))
 {
     clear();
@@ -184,6 +181,18 @@ bool QWebSocketDataProcessor::process(QIODevice *pIoDevice)
                 bool isFinalFrame = frame.isFinalFrame();
                 if (m_opCode == QWebSocketProtocol::OpCodeText) {
                     QString frameTxt = m_decoder(frame.payload());
+                    if (frame.isFinalFrame()) {
+                        // ### We lack API on the QStringDecoder to check if there is an incomplete
+                        // sequence inside its state object. But we need to make sure we are not
+                        // passing on an empty, or potentially corrupted message to our users.
+                        // By forcing the decoder to process a 0-byte we force it to evaluate the
+                        // current state as the full sequence, making it process it as an error if
+                        // it's not complete.
+                        frameTxt += m_decoder(QByteArrayView("\0", 1));
+                        // As a downside, we then always have to remove the 0-byte that we just
+                        // added:
+                        frameTxt.chop(1);
+                    }
                     if (Q_UNLIKELY(m_decoder.hasError())) {
                         clear();
                         Q_EMIT errorEncountered(QWebSocketProtocol::CloseCodeWrongDatatype,
