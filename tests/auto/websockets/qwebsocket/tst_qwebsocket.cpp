@@ -163,6 +163,7 @@ private Q_SLOTS:
     void incomingFrameTooLong();
     void testingFrameAndMessageSizeApi();
     void customHeader();
+    void splitUtf8Sequence();
 };
 
 tst_QWebSocket::tst_QWebSocket()
@@ -1396,6 +1397,33 @@ void tst_QWebSocket::customHeader()
     // And check the client properly connects:
     QSignalSpy connectedSpy(&socket, &QWebSocket::connected);
     QVERIFY(connectedSpy.wait());
+}
+
+void tst_QWebSocket::splitUtf8Sequence()
+{
+    EchoServer echoServer;
+    QWebSocket socket;
+    socket.setOutgoingFrameSize(10ull);
+    // prepare payload, just a bunch of bytes and a sequence at the end that will be split across
+    // two frames
+    QString payload;
+    constexpr qsizetype Overhead = 2; // overhead for this message
+    payload.reserve(qsizetype(socket.outgoingFrameSize() - Overhead) + 2);
+    payload.assign(qsizetype(socket.outgoingFrameSize() - Overhead) - 1, u'a');
+    payload += u"🙂";
+    QSignalSpy socketConnectedSpy(&socket, &QWebSocket::connected);
+    QSignalSpy serverConnectedSpy(&echoServer, qOverload<QUrl>(&EchoServer::newConnection));
+    QSignalSpy messageReceivedSpy(&socket, &QWebSocket::textMessageReceived);
+    QSignalSpy errorOccurredSpy(&socket, &QWebSocket::errorOccurred);
+    const QUrl url = QUrl(u"ws://127.0.0.1:"_s + QString::number(echoServer.port()));
+    socket.open(url);
+    QTRY_COMPARE(socketConnectedSpy.size(), 1);
+    QTRY_COMPARE(serverConnectedSpy.size(), 1);
+    qint64 bytesWritten = socket.sendTextMessage(payload);
+    QCOMPARE(bytesWritten, payload.size() + Overhead);
+    QTRY_COMPARE(messageReceivedSpy.size(), 1);
+    QTRY_COMPARE(errorOccurredSpy.size(), 0);
+    QCOMPARE(messageReceivedSpy.at(0).at(0).toString(), payload);
 }
 
 QTEST_MAIN(tst_QWebSocket)
