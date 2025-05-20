@@ -7,6 +7,9 @@ version                                             = $QT_VERSION
 
 examplesinstallpath                                 = websockets
 
+# Path to the root of qtwebsockets (for automatic linking to source code)
+url.sources.rootdir                                 = ../../..
+
 qhp.projects                                        = QtWebSockets
 
 qhp.QtWebSockets.file                               = qtwebsockets.qhp
