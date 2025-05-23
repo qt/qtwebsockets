@@ -740,6 +740,9 @@ void QWebSocketPrivate::releaseConnections(const QTcpSocket *pTcpSocket)
         // being disconnected with the wildcard disconnect below
         disconnect(pTcpSocket, &QObject::destroyed, this, &QWebSocketPrivate::socketDestroyed);
         pTcpSocket->disconnect();
+        // Re-connect, we need 'socketDestroyed' slot executed
+        QObjectPrivate::connect(pTcpSocket, &QObject::destroyed,
+                                this, &QWebSocketPrivate::socketDestroyed);
     }
     m_dataProcessor->disconnect();
 }
