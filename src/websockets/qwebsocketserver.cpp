@@ -146,16 +146,45 @@
 /*!
     \fn void QWebSocketServer::sslErrors(const QList<QSslError> &errors)
 
+//! [ssl-errors-1]
     QWebSocketServer emits this signal after the SSL handshake to indicate that one
     or more errors have occurred while establishing the identity of the
-    peer. The errors are usually an indication that QWebSocketServer is unable to
+    peer.
+//! [ssl-errors-1]
+
+    The errors are usually an indication that QWebSocketServer is unable to
     securely identify the peer. Unless any action is taken, the connection
     will be dropped after this signal has been emitted.
 
+//! [ssl-errors-2]
     \a errors contains one or more errors that prevent QSslSocket from
     verifying the identity of the peer.
+//! [ssl-errors-2]
 
-    \sa peerVerifyError()
+    \sa peerVerifyError(), sslErrorsOccurred()
+*/
+
+/*!
+    \fn void QWebSocketServer::sslErrorsOccurred(QSslSocket *socket, const QList<QSslError> &errors);
+    \since 6.11
+
+    \include qwebsocketserver.cpp ssl-errors-1
+
+    The errors are usually an indication that \a socket is unable to
+    securely identify the peer. Unless any action is taken, the connection
+    will be dropped after this signal has been emitted.
+
+    \include qwebsocketserver.cpp ssl-errors-2
+
+    If you want to continue connecting despite the errors that have occurred,
+    you must call QSslSocket::ignoreSslErrors() from inside a slot connected to
+    this signal. If you need to access the error list at a later point, you
+    can call QSslSocket::sslHandshakeErrors().
+
+    \note You cannot use Qt::QueuedConnection when connecting to this signal,
+    or calling QSslSocket::ignoreSslErrors() will have no effect.
+
+    \sa peerVerifyError(), sslErrors()
 */
 
 /*!

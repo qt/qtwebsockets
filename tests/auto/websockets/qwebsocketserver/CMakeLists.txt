@@ -19,6 +19,8 @@ qt_internal_add_test(tst_qwebsocketserver
 set(qwebsocketshared_resource_files
     "../shared/localhost.cert"
     "../shared/localhost.key"
+    "../shared/selfsigned.cert"
+    "../shared/selfsigned.key"
 )
 
 qt_internal_add_resource(tst_qwebsocketserver "qwebsocketshared"

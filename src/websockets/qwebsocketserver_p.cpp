@@ -73,8 +73,8 @@ void QWebSocketServerPrivate::init()
                              });
             QObject::connect(pSslServer, &QSslServer::sslErrors, q,
                              [q](QSslSocket *socket, const QList<QSslError> &errors) {
-                                    Q_UNUSED(socket);
                                     Q_EMIT q->sslErrors(errors);
+                                    Q_EMIT q->sslErrorsOccurred(socket, errors);
                              });
             QObject::connect(pSslServer, &QSslServer::preSharedKeyAuthenticationRequired, q,
                              [q](QSslSocket *socket,
