@@ -22,7 +22,7 @@ overcome these problems to a large extent.
 
 \section1 How does it Work?
 
-\image websockets-pictorial-representation.jpg
+\image websockets-pictorial-representation.jpg WebSocket protocal flow diagram
 
 As you can see in the pictorial representation, WebSocket-based solution
 consists of a client-side and server-side. The native client-side support for
