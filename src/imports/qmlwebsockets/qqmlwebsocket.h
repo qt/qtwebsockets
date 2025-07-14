@@ -67,7 +67,7 @@ Q_SIGNALS:
     void urlChanged();
     void requestedSubprotocolsChanged();
     void negotiatedSubprotocolChanged();
-    Q_REVISION(6, 10) void pong(quint64 elapsedTime, QByteArray payload);
+    Q_REVISION(6, 10) void pong(quint64 elapsedTime, const QByteArray &payload);
 
 public:
     void classBegin() override;

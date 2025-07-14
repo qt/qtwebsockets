@@ -108,7 +108,7 @@
 */
 
 /*!
-  \qmlsignal WebSocket::pong(quint64 elapsedTime, const QByteArray &payload)
+  \qmlsignal WebSocket::pong(quint64 elapsedTime, ArrayBuffer payload)
   \since 6.10
   Emitted when a pong message is received in reply to a previous ping.
   \a elapsedTime contains the roundtrip time in milliseconds and \a payload contains an optional
