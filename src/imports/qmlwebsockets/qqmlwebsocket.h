@@ -57,7 +57,8 @@ public:
 
     Q_INVOKABLE qint64 sendTextMessage(const QString &message);
     Q_REVISION(1) Q_INVOKABLE qint64 sendBinaryMessage(const QByteArray &message);
-    Q_REVISION(6, 10) Q_INVOKABLE void ping(const QByteArray &payload = QByteArray());
+    Q_REVISION(6, 10) Q_INVOKABLE void ping();
+    Q_REVISION(6, 10) Q_INVOKABLE void ping(const QByteArray &payload);
 
 Q_SIGNALS:
     void textMessageReceived(QString message);
