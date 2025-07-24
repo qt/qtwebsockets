@@ -94,6 +94,7 @@
 */
 
 /*!
+  \qmlmethod void WebSocket::ping()
   \qmlmethod void WebSocket::ping(ArrayBuffer payload)
   \since 6.10
   Pings the server to indicate that the connection is still alive.
@@ -172,6 +173,11 @@ qint64 QQmlWebSocket::sendBinaryMessage(const QByteArray &message)
         return 0;
     }
     return m_webSocket->sendBinaryMessage(message);
+}
+
+void QQmlWebSocket::ping()
+{
+    ping({});
 }
 
 void QQmlWebSocket::ping(const QByteArray &payload)
