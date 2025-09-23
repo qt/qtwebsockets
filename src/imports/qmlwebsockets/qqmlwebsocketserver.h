@@ -7,6 +7,7 @@
 
 #include <QUrl>
 #include <QQmlParserStatus>
+#include <QtQml/qqmlregistration.h>
 #include <QtWebSockets/QWebSocketServer>
 
 QT_BEGIN_NAMESPACE
@@ -27,6 +28,9 @@ class QQmlWebSocketServer : public QObject, public QQmlParserStatus
     Q_PROPERTY(QString errorString READ errorString NOTIFY errorStringChanged)
     Q_PROPERTY(bool listen READ listen WRITE setListen NOTIFY listenChanged)
     Q_PROPERTY(bool accept READ accept WRITE setAccept NOTIFY acceptChanged)
+
+    QML_NAMED_ELEMENT(WebSocketServer)
+    QML_ADDED_IN_VERSION(1, 0)
 
 public:
     explicit QQmlWebSocketServer(QObject *parent = nullptr);

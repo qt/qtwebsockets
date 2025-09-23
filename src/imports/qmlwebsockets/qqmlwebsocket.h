@@ -25,8 +25,11 @@ class QQmlWebSocket : public QObject, public QQmlParserStatus
     Q_PROPERTY(Status status READ status NOTIFY statusChanged)
     Q_PROPERTY(QString errorString READ errorString NOTIFY errorStringChanged)
     Q_PROPERTY(bool active READ isActive WRITE setActive NOTIFY activeChanged)
-    Q_PROPERTY(QString negotiatedSubprotocol READ negotiatedSubprotocol
-               NOTIFY negotiatedSubprotocolChanged)
+    Q_PROPERTY(QString negotiatedSubprotocol READ negotiatedSubprotocol NOTIFY
+                       negotiatedSubprotocolChanged)
+
+    QML_NAMED_ELEMENT(WebSocket)
+    QML_ADDED_IN_VERSION(1, 0)
 
 public:
     explicit QQmlWebSocket(QObject *parent = 0);
