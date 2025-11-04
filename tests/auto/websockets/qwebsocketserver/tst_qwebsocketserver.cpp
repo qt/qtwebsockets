@@ -722,7 +722,7 @@ void tst_QWebSocketServer::tst_handleConnection()
 
     QTcpServer tcpServer;
     connect(&tcpServer, &QTcpServer::newConnection,
-            [&tcpServer, &wsServer]() {
+            &wsServer, [&tcpServer, &wsServer]() {
         wsServer.handleConnection(tcpServer.nextPendingConnection());
     });
     QVERIFY(tcpServer.listen());
@@ -858,7 +858,7 @@ void tst_QWebSocketServer::tst_handshakeTimeout()
 
         QWebSocket secureSocket;
         connect(&secureSocket, &QWebSocket::errorOccurred,
-                [](QAbstractSocket::SocketError error) {
+                this, [](QAbstractSocket::SocketError error) {
                     // This shouldn't print but it's useful for debugging when/if it does.
                     qDebug() << "Error occurred in the client:" << error;
                 });
