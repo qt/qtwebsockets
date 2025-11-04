@@ -1853,7 +1853,7 @@ void tst_DataProcessor::clearDataBuffers()
     QWebSocketDataProcessor dataProcessor;
     dataProcessor.setIdleTimeout(DefaultIdleTimeout);
     connect(&dataProcessor, &QWebSocketDataProcessor::binaryMessageReceived,
-            [&binaryData](const QByteArray &message)
+            this, [&binaryData](const QByteArray &message)
     {
         QCOMPARE(message, binaryData);
         QEventLoop loop;
@@ -1872,7 +1872,7 @@ void tst_DataProcessor::clearDataBuffers()
 
     QTimer timer;
     timer.setSingleShot(true);
-    connect(&timer, &QTimer::timeout, processData);
+    connect(&timer, &QTimer::timeout, this, processData);
 
     timer.start(1000);
     processData();
