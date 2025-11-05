@@ -24,8 +24,23 @@ QT_USE_NAMESPACE
 */
 
 /*!
+  \property QQmlWebSocketServer::url
+  \brief the server URL that client WebSockets can connect to.
+
+  The URL uses the \c{ws://} scheme and includes the port the server listens to
+  and the host address of the server.
+*/
+
+/*!
   \qmlproperty string WebSocketServer::host
   The host address of the server. By default, localhost is used.
+*/
+
+/*!
+  \property QQmlWebSocketServer::host
+  \brief the host address of the server.
+
+  By default, localhost is used.
 */
 
 /*!
@@ -36,8 +51,21 @@ QT_USE_NAMESPACE
 */
 
 /*!
+  \property QQmlWebSocketServer::port
+  \brief the port this server is listening on.
+
+  The value must be in the range 0-65535.
+  By default, a port is chosen automatically.
+*/
+
+/*!
   \qmlproperty string WebSocketServer::name
   The name of this server used during the http handshake phase.
+*/
+
+/*!
+  \property QQmlWebSocketServer::name
+  \brief the name of this server used during the HTTP handshake phase.
 */
 
 /*!
@@ -47,8 +75,19 @@ QT_USE_NAMESPACE
 */
 
 /*!
+  \property QQmlWebSocketServer::supportedSubprotocols
+  \since 6.4
+  \brief the list of protocols supported by the server.
+*/
+
+/*!
   \qmlproperty string WebSocketServer::errorString
   The stringified error message in case an error occurred.
+*/
+
+/*!
+  \property QQmlWebSocketServer::errorString
+  \brief the error message string in case an error occurred.
 */
 
 /*!
@@ -60,9 +99,28 @@ QT_USE_NAMESPACE
 */
 
 /*!
+  \property QQmlWebSocketServer::listen
+  \brief whether the server should listen to client connections.
+
+  Set to \c true when the server should listen to client connections or \c false otherwise.
+  When set to \c true, the server will listen on the specified URL defined by host and port
+  and, when accept is \c true, accepts incoming client connections. Otherwise the server is closed.
+  By default, the server is not listening.
+*/
+
+/*!
   \qmlproperty bool WebSocketServer::accept
   Set to true to accept incoming client connections when the server is listening. When set to false,
   incoming connections are rejected. By default, connections are accepted.
+*/
+
+/*!
+  \property QQmlWebSocketServer::accept
+  \brief whether to accept incoming client connections.
+
+  Set to \c true to accept incoming client connections when the server is listening.
+  When set to \c false, incoming connections are rejected.
+  By default, connections are accepted.
 */
 
 /*!

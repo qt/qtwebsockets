@@ -23,15 +23,35 @@
 */
 
 /*!
+  \property QQmlWebSocket::url
+  \brief the server URL to connect to.
+
+  The URL must have one of 2 schemes: \c{ws://} or \c{wss://}.
+  When not supplied, \c{ws://} is used.
+*/
+
+/*!
   \qmlproperty list<string> WebSocket::requestedSubprotocols
   \since 6.4
   The list of WebSocket subprotocols to send in the WebSocket handshake.
 */
 
 /*!
+  \property QQmlWebSocket::requestedSubprotocols
+  \since 6.4
+  \brief the list of WebSocket subprotocols to send in the WebSocket handshake.
+*/
+
+/*!
   \qmlproperty string WebSocket::negotiatedSubprotocol
   \since 6.4
   The WebSocket subprotocol that has been negotiated with the server.
+*/
+
+/*!
+  \property QQmlWebSocket::negotiatedSubprotocol
+  \since 6.4
+  \brief the WebSocket subprotocol that has been negotiated with the server.
 */
 
 /*!
@@ -49,9 +69,21 @@
 */
 
 /*!
+  \property QQmlWebSocket::status
+  \brief the status of the WebSocket.
+*/
+
+/*!
   \qmlproperty string WebSocket::errorString
   Contains a description of the last error that occurred. When no error occurrred,
   this string is empty.
+*/
+
+/*!
+  \property QQmlWebSocket::errorString
+  \brief a description of the last error that occurred.
+
+  When no error occurred, this string is empty.
 */
 
 /*!
@@ -59,6 +91,15 @@
   When set to true, a connection is made to the server with the given url.
   When set to false, the connection is closed.
   The default value is false.
+*/
+
+/*!
+  \property QQmlWebSocket::active
+  \brief whether the WebSocket connection is active.
+
+  When set to \c true, a connection is made to the server with the given URL.
+  When set to \c false, the connection is closed.
+  The default value is \c false.
 */
 
 /*!
