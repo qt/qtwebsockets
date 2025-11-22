@@ -18,6 +18,8 @@
 #include <QtWebSockets/QWebSocketCorsAuthenticator>
 #include <QtWebSockets/qwebsocketprotocol.h>
 
+using namespace Qt::StringLiterals;
+
 QT_USE_NAMESPACE
 
 Q_DECLARE_METATYPE(QWebSocketProtocol::Version)
@@ -727,7 +729,7 @@ void tst_QWebSocketServer::tst_handleConnection()
 
     QWebSocket webSocket;
     QSignalSpy wsConnectedSpy(&webSocket, &QWebSocket::connected);
-    webSocket.open(QStringLiteral("ws://localhost:%1").arg(tcpServer.serverPort()));
+    webSocket.open(QUrl{u"ws://localhost:%1"_s.arg(tcpServer.serverPort())});
     QTRY_COMPARE(wsConnectedSpy.size(), 1);
 
     QTRY_COMPARE(wsServerConnectionSpy.size(), 1);
