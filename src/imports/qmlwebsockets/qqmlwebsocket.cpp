@@ -166,6 +166,11 @@
 
 QT_BEGIN_NAMESPACE
 
+/*!
+    \class QQmlWebSocket
+    \inmodule QtWebSockets
+    \internal
+*/
 QQmlWebSocket::QQmlWebSocket(QObject *parent) :
     QObject(parent),
     m_webSocket(),

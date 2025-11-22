@@ -35,6 +35,12 @@
 QT_BEGIN_NAMESPACE
 
 /*!
+    \class QWebSocketCorsAuthenticatorPrivate
+    \inmodule QtWebSockets
+    \internal
+*/
+
+/*!
   \internal
  */
 QWebSocketCorsAuthenticatorPrivate::QWebSocketCorsAuthenticatorPrivate(const QString &origin,
