@@ -3,6 +3,6 @@
 
 add_subdirectory(cmake)
 add_subdirectory(websockets)
-if(TARGET Qt::Quick)
+if(TARGET Qt::Quick AND TARGET Qt::QuickTest)
     add_subdirectory(qml)
 endif()
