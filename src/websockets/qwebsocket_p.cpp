@@ -510,6 +510,10 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
                     setSocketState(QAbstractSocket::ConnectingState);
 
                     sslSocket->setSslConfiguration(m_configuration.m_sslConfiguration);
+
+                    if (!request.peerVerifyName().isEmpty())
+                        sslSocket->setPeerVerifyName(request.peerVerifyName());
+
                     if (Q_UNLIKELY(m_configuration.m_ignoreSslErrors))
                         sslSocket->ignoreSslErrors();
                     else
@@ -1239,11 +1243,16 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
             m_key = generateKey();
 
             QList<QPair<QString, QString> > headers;
+            QString hostHeaderOverride;
             const auto h = m_request.headers();
             for (qsizetype i = 0; i < h.size(); ++i) {
                 const auto name = h.nameAt(i);
                 const auto value = h.valueAt(i);
 
+                if (name.compare("Host", Qt::CaseInsensitive) == 0) {
+                    hostHeaderOverride = QString::fromLatin1(value);
+                    continue;
+                }
                 // protocols handled separately below
                 if (name.compare("Sec-WebSocket-Protocol", Qt::CaseInsensitive) == 0)
                     continue;
@@ -1277,7 +1286,9 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
                                 | QUrl::RemovePath | QUrl::RemoveQuery
                                 | QUrl::RemoveFragment;
             // mid(2) removes the prefix "//" from the remaining url
-            const QString host = removeZoneId(m_request.url().toString(format).mid(2));
+            const QString host = hostHeaderOverride.isEmpty()
+                    ? removeZoneId(m_request.url().toString(format).mid(2))
+                    : hostHeaderOverride;
             const QString handshake = createHandShakeRequest(m_resourceName,
                                                              host,
                                                              origin(),

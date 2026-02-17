@@ -163,6 +163,7 @@ private Q_SLOTS:
     void incomingMessageTooLong();
     void incomingFrameTooLong();
     void testingFrameAndMessageSizeApi();
+    void hostHeaderFromNetworkRequest();
     void customHeader();
     void splitUtf8Sequence();
 };
@@ -1427,6 +1428,54 @@ void tst_QWebSocket::testingFrameAndMessageSizeApi()
     const quint64 maxAllowedIncomingMessageSize = 889;
     socket.setMaxAllowedIncomingMessageSize(maxAllowedIncomingMessageSize);
     QTRY_COMPARE(maxAllowedIncomingMessageSize, socket.maxAllowedIncomingMessageSize());
+}
+
+void tst_QWebSocket::hostHeaderFromNetworkRequest()
+{
+    QTcpServer server;
+    QSignalSpy serverSpy(&server, &QTcpServer::newConnection);
+
+    QVERIFY(server.listen(QHostAddress(u"127.0.0.1"_s)));
+
+    QUrl url = QUrl(u"ws://127.0.0.1"_s);
+    url.setPort(server.serverPort());
+    QNetworkRequest request(url);
+    request.setRawHeader("Host", "localhost");
+
+    QWebSocket socket;
+    socket.open(request);
+
+    QVERIFY(serverSpy.wait());
+    std::unique_ptr<QTcpSocket> serverSocket;
+    serverSocket.reset(server.nextPendingConnection());
+    QSignalSpy serverSocketSpy(serverSocket.get(), &QIODevice::readyRead);
+    QByteArray data;
+    while (!data.contains("\r\n\r\n")) {
+        QVERIFY(serverSocketSpy.wait());
+        data.append(serverSocket->readAll());
+    }
+
+    const auto headerEndIndex = data.indexOf("\r\n\r\n");
+    QCOMPARE_NE(headerEndIndex, -1);
+    const auto headerView = QLatin1StringView(QByteArrayView(data).first(headerEndIndex + 2));
+    QCOMPARE(headerView.count("Host: "_L1, Qt::CaseInsensitive), 1);
+    QVERIFY(headerView.contains("\r\nHost: localhost\r\n"_L1, Qt::CaseInsensitive));
+
+    const QLatin1StringView keyView =
+            AuthServer::getHeaderValue("Sec-WebSocket-Key"_L1, QByteArrayView(data));
+    QVERIFY(!keyView.isEmpty());
+    const QByteArray accept =
+            QByteArrayView(keyView) % "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"_ba;
+    serverSocket->write(
+            "HTTP/1.1 101 Switching Protocols\r\n"
+            "Upgrade: websocket\r\n"
+            "Connection: Upgrade\r\n"
+            "Sec-WebSocket-Accept: "
+            % QCryptographicHash::hash(accept, QCryptographicHash::Sha1).toBase64()
+            % "\r\n\r\n");
+
+    QSignalSpy connectedSpy(&socket, &QWebSocket::connected);
+    QVERIFY(connectedSpy.wait());
 }
 
 void tst_QWebSocket::customHeader()
