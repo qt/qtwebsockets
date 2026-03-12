@@ -93,7 +93,7 @@ public:
     void handleConnection(QTcpSocket *pTcpSocket) const;
 
 private slots:
-    void startHandshakeTimeout(QTcpSocket *pTcpSocket);
+    void startHandshakeTimeout(QTcpSocket *pTcpSocket) const;
 
 private:
     QTcpServer *m_pTcpServer;
