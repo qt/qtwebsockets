@@ -296,6 +296,12 @@ void tst_QWebSocket::tst_invalidOpen()
     QFETCH(QAbstractSocket::SocketState, stateAfterOpenCall);
     QFETCH(int, disconnectedCount);
     QFETCH(int, stateChangedCount);
+#if defined(__QNX__) && __QNX__ >= 800
+    if (url == QStringLiteral("ws://127.0.0.1:1/"))
+        QSKIP("QNX 8.0 rejects loopback connects to non-listening ports "
+              "synchronously, bypassing the ConnectingState transient the "
+              "test expects to observe.");
+#endif
     QWebSocket socket;
     QSignalSpy errorSpy(&socket, SIGNAL(error(QAbstractSocket::SocketError)));
     QSignalSpy aboutToCloseSpy(&socket, SIGNAL(aboutToClose()));
@@ -364,6 +370,11 @@ void tst_QWebSocket::tst_invalidOpen()
 
 void tst_QWebSocket::tst_invalidOrigin()
 {
+#if defined(__QNX__) && __QNX__ >= 800
+    QSKIP("QNX 8.0 rejects loopback connects to non-listening ports "
+          "synchronously, bypassing the ConnectingState transient the "
+          "test expects to observe.");
+#endif
     QWebSocket socket(QStringLiteral("My server\r\nin the wild."));
 
     QSignalSpy errorSpy(&socket, SIGNAL(error(QAbstractSocket::SocketError)));
