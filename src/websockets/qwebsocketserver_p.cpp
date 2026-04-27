@@ -418,8 +418,11 @@ void QWebSocketServerPrivate::onSocketDisconnected()
     QObject *sender = q->sender();
     if (Q_LIKELY(sender)) {
         QTcpSocket *pTcpSocket = qobject_cast<QTcpSocket*>(sender);
-        if (Q_LIKELY(pTcpSocket))
+        if (Q_LIKELY(pTcpSocket)) {
             pTcpSocket->deleteLater();
+            m_error = QWebSocketProtocol::CloseCode::CloseCodeNormal;
+            m_errorString = QString();
+        }
     }
 }
 
@@ -529,6 +532,9 @@ void QWebSocketServerPrivate::handshakeReceived()
             setError(QWebSocketProtocol::CloseCodeProtocolError,
                      QWebSocketServer::tr("Invalid response received."));
         }
+    } else {
+        setError(QWebSocketProtocol::CloseCodeProtocolError,
+                 QWebSocketServer::tr("Invalid handshake request."));
     }
     if (!success) {
         pTcpSocket->close();
