@@ -13,7 +13,7 @@ SOURCES += \
 HEADERS += \
     sslechoclient.h
 
-resources.files = ../sslechoserver/localhost.cert
+resources.files = localhost.cert
 resources.prefix = /
 
 RESOURCES += resources
