@@ -3,3 +3,6 @@
 # SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 openssl req -x509 -nodes -newkey rsa:4096 -keyout localhost.key -out localhost.cert -sha512 -days 365 -subj "/C=NO/ST=Oslo/L=Oslo/O=The Qt Project/OU=WebSockets/CN=localhost"
+
+# The sslechoclient example ships its own copy of the certificate; keep it in sync.
+cp localhost.cert ../sslechoclient/localhost.cert

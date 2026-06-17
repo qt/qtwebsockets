@@ -24,8 +24,7 @@ qt_add_executable(sslechoclient
 )
 
 qt_add_resources(sslechoclient "cert"
-    BASE ../sslechoserver
-    FILES ../sslechoserver/localhost.cert
+    FILES localhost.cert
 )
 
 set_target_properties(sslechoclient PROPERTIES
