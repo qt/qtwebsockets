@@ -1142,7 +1142,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
         const bool isSupported = std::any_of(challenges.begin(), challenges.end(),
                                              QAuthenticatorPrivate::isMethodSupported);
         if (isSupported)
-            priv->parseHttpResponse(parser.headers(), /*isProxy=*/false, m_request.url().host());
+            priv->parseHttpResponse(parser.headers(), /*isProxy=*/false);
         if (!isSupported || priv->method == QAuthenticatorPrivate::None) {
             errorDescription = msgUnsupportedAuthenticateChallenges(challenges.size());
             break;
