@@ -783,4 +783,132 @@ void QWebSocketServer::handleConnection(QTcpSocket *socket) const
     d->handleConnection(socket);
 }
 
+/*!
+    \since 6.13
+    Sets the maximum allowed size of an incoming websocket frame to
+    \a maxAllowedIncomingFrameSize for all connections accepted from now on.
+    If an incoming frame exceeds this limit, the peer gets disconnected.
+    The accepted range is between 0 and maxIncomingFrameSize(), default is
+    maxIncomingFrameSize(). The purpose of this function is to avoid exhausting
+    virtual memory.
+
+    \note Connections that were already accepted are not affected.
+
+    \sa maxAllowedIncomingFrameSize(), QWebSocket::setMaxAllowedIncomingFrameSize()
+ */
+void QWebSocketServer::setMaxAllowedIncomingFrameSize(quint64 maxAllowedIncomingFrameSize)
+{
+    Q_D(QWebSocketServer);
+    d->setMaxAllowedIncomingFrameSize(maxAllowedIncomingFrameSize);
+}
+
+/*!
+    \since 6.13
+    Returns the maximum allowed size of an incoming websocket frame.
+
+    \sa setMaxAllowedIncomingFrameSize()
+ */
+quint64 QWebSocketServer::maxAllowedIncomingFrameSize() const
+{
+    Q_D(const QWebSocketServer);
+    return d->maxAllowedIncomingFrameSize();
+}
+
+/*!
+    \since 6.13
+    Sets the maximum allowed size of an incoming websocket message to
+    \a maxAllowedIncomingMessageSize for all connections accepted from now on.
+    If an incoming message exceeds this limit, the peer gets disconnected.
+    The accepted range is between 0 and maxIncomingMessageSize(), default is
+    maxIncomingMessageSize(). The purpose of this function is to avoid exhausting
+    virtual memory.
+
+    \note Connections that were already accepted are not affected.
+
+    \sa maxAllowedIncomingMessageSize(), QWebSocket::setMaxAllowedIncomingMessageSize()
+ */
+void QWebSocketServer::setMaxAllowedIncomingMessageSize(quint64 maxAllowedIncomingMessageSize)
+{
+    Q_D(QWebSocketServer);
+    d->setMaxAllowedIncomingMessageSize(maxAllowedIncomingMessageSize);
+}
+
+/*!
+    \since 6.13
+    Returns the maximum allowed size of an incoming websocket message.
+
+    \sa setMaxAllowedIncomingMessageSize()
+ */
+quint64 QWebSocketServer::maxAllowedIncomingMessageSize() const
+{
+    Q_D(const QWebSocketServer);
+    return d->maxAllowedIncomingMessageSize();
+}
+
+/*!
+    \since 6.13
+    Returns the maximum supported size of an incoming websocket message for this
+    websocket implementation.
+
+    \sa QWebSocket::maxIncomingMessageSize()
+ */
+quint64 QWebSocketServer::maxIncomingMessageSize()
+{
+    return QWebSocket::maxIncomingMessageSize();
+}
+
+/*!
+    \since 6.13
+    Returns the maximum supported size of an incoming websocket frame for this
+    websocket implementation.
+
+    \sa QWebSocket::maxIncomingFrameSize()
+ */
+quint64 QWebSocketServer::maxIncomingFrameSize()
+{
+    return QWebSocket::maxIncomingFrameSize();
+}
+
+/*!
+    \since 6.13
+    Sets the maximum size of an outgoing websocket frame to \a outgoingFrameSize
+    for all connections accepted from now on.
+    The accepted range is between 0 and maxOutgoingFrameSize(), default is 512kB.
+    The purpose of this function is to adapt to the maximum allowed frame size
+    of the receiver.
+
+    \note Connections that were already accepted are not affected.
+
+    \sa outgoingFrameSize(), QWebSocket::setOutgoingFrameSize()
+ */
+void QWebSocketServer::setOutgoingFrameSize(quint64 outgoingFrameSize)
+{
+    Q_D(QWebSocketServer);
+    d->setOutgoingFrameSize(outgoingFrameSize);
+}
+
+/*!
+    \since 6.13
+    Returns the maximum size of an outgoing websocket frame.
+
+    \sa setOutgoingFrameSize()
+ */
+quint64 QWebSocketServer::outgoingFrameSize() const
+{
+    Q_D(const QWebSocketServer);
+    return d->outgoingFrameSize();
+}
+
+/*!
+    \since 6.13
+    Returns the maximum supported size of an outgoing websocket frame for this
+    websocket implementation.
+
+    \sa QWebSocket::maxOutgoingFrameSize()
+ */
+quint64 QWebSocketServer::maxOutgoingFrameSize()
+{
+    return QWebSocket::maxOutgoingFrameSize();
+}
+
 QT_END_NAMESPACE

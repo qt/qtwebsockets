@@ -387,6 +387,61 @@ QSslConfiguration QWebSocketServerPrivate::sslConfiguration() const
 }
 #endif
 
+/*!
+    \internal
+ */
+void QWebSocketServerPrivate::setMaxAllowedIncomingFrameSize(quint64 maxAllowedIncomingFrameSize)
+{
+    if (maxAllowedIncomingFrameSize <= QWebSocket::maxIncomingFrameSize())
+        m_maxAllowedIncomingFrameSize = maxAllowedIncomingFrameSize;
+}
+
+/*!
+    \internal
+ */
+quint64 QWebSocketServerPrivate::maxAllowedIncomingFrameSize() const
+{
+    return m_maxAllowedIncomingFrameSize;
+}
+
+/*!
+    \internal
+ */
+void QWebSocketServerPrivate::setMaxAllowedIncomingMessageSize(
+        quint64 maxAllowedIncomingMessageSize)
+{
+    if (maxAllowedIncomingMessageSize <= QWebSocket::maxIncomingMessageSize())
+        m_maxAllowedIncomingMessageSize = maxAllowedIncomingMessageSize;
+}
+
+/*!
+    \internal
+ */
+quint64 QWebSocketServerPrivate::maxAllowedIncomingMessageSize() const
+{
+    return m_maxAllowedIncomingMessageSize;
+}
+
+/*!
+    \internal
+ */
+void QWebSocketServerPrivate::setOutgoingFrameSize(quint64 outgoingFrameSize)
+{
+    if (outgoingFrameSize <= QWebSocket::maxOutgoingFrameSize())
+        m_outgoingFrameSize = outgoingFrameSize;
+}
+
+/*!
+    \internal
+ */
+quint64 QWebSocketServerPrivate::outgoingFrameSize() const
+{
+    return m_outgoingFrameSize;
+}
+
+/*!
+    \internal
+ */
 void QWebSocketServerPrivate::setError(QWebSocketProtocol::CloseCode code, const QString &errorString)
 {
     if ((m_error != code) || (m_errorString != errorString)) {
@@ -528,6 +583,9 @@ void QWebSocketServerPrivate::handshakeReceived()
                                                                         response,
                                                                         q);
                 if (Q_LIKELY(pWebSocket)) {
+                    pWebSocket->setMaxAllowedIncomingFrameSize(m_maxAllowedIncomingFrameSize);
+                    pWebSocket->setMaxAllowedIncomingMessageSize(m_maxAllowedIncomingMessageSize);
+                    pWebSocket->setOutgoingFrameSize(m_outgoingFrameSize);
                     finishHandshakeTimeout(pTcpSocket);
                     addPendingConnection(pWebSocket);
                     Q_EMIT q->newConnection();

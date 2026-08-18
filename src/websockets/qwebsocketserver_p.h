@@ -22,6 +22,7 @@
 #include <private/qobject_p.h>
 #include "qwebsocketserver.h"
 #include "qwebsocket.h"
+#include "qwebsocket_p.h"
 
 #ifndef QT_NO_SSL
 #include <QtNetwork/QSslConfiguration>
@@ -88,6 +89,14 @@ public:
     QSslConfiguration sslConfiguration() const;
 #endif
 
+    void setMaxAllowedIncomingFrameSize(quint64 maxAllowedIncomingFrameSize);
+    quint64 maxAllowedIncomingFrameSize() const;
+    void setMaxAllowedIncomingMessageSize(quint64 maxAllowedIncomingMessageSize);
+    quint64 maxAllowedIncomingMessageSize() const;
+
+    void setOutgoingFrameSize(quint64 outgoingFrameSize);
+    quint64 outgoingFrameSize() const;
+
     void setError(QWebSocketProtocol::CloseCode code, const QString &errorString);
 
     void handleConnection(QTcpSocket *pTcpSocket) const;
@@ -105,6 +114,9 @@ private:
     QString m_errorString;
     int m_maxPendingConnections;
     int m_handshakeTimeout;
+    quint64 m_maxAllowedIncomingFrameSize = QWebSocket::maxIncomingFrameSize();
+    quint64 m_maxAllowedIncomingMessageSize = QWebSocket::maxIncomingMessageSize();
+    quint64 m_outgoingFrameSize = QWebSocketPrivate::defaultOutgoingFrameSize();
 
     QHash<QTcpSocket *, QByteArray> m_preHandshakeHeaders;
 

@@ -111,6 +111,17 @@ public:
 
     void handleConnection(QTcpSocket *socket) const;
 
+    void setMaxAllowedIncomingFrameSize(quint64 maxAllowedIncomingFrameSize);
+    quint64 maxAllowedIncomingFrameSize() const;
+    void setMaxAllowedIncomingMessageSize(quint64 maxAllowedIncomingMessageSize);
+    quint64 maxAllowedIncomingMessageSize() const;
+    static quint64 maxIncomingMessageSize();
+    static quint64 maxIncomingFrameSize();
+
+    void setOutgoingFrameSize(quint64 outgoingFrameSize);
+    quint64 outgoingFrameSize() const;
+    static quint64 maxOutgoingFrameSize();
+
 Q_SIGNALS:
     void acceptError(QAbstractSocket::SocketError socketError);
     void serverError(QWebSocketProtocol::CloseCode closeCode);

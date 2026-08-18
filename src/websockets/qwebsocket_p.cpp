@@ -1641,6 +1641,13 @@ quint64 QWebSocketPrivate::maxOutgoingFrameSize()
     return MAX_OUTGOING_FRAME_SIZE_IN_BYTES;
 }
 
+/*!
+    \internal
+ */
+quint64 QWebSocketPrivate::defaultOutgoingFrameSize()
+{
+    return DEFAULT_OUTGOING_FRAME_SIZE_IN_BYTES;
+}
 
 /*!
     \internal

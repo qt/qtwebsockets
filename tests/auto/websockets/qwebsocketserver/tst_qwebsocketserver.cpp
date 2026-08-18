@@ -109,6 +109,8 @@ private Q_SLOTS:
     void handshakeFollowedByFrame();
     void gentleClose();
     void multipleFrames();
+    void frameAndMessageSizeApi();
+    void frameAndMessageSizePropagation();
 
 private:
     bool m_shouldSkipUnsupportedIpv6Test;
@@ -1280,6 +1282,79 @@ void tst_QWebSocketServer::multipleFrames()
     // Since there's no guarantee the operating system will fit all 10 websocket frames into 1 tcp
     // frame, let's just assume it will do at least 2. EXCEPT_FAIL any which doesn't merge any.
     QVERIFY2(messageReceivedSpy.size() > 1, "Received only 1 message in the TCP frame!");
+}
+
+void tst_QWebSocketServer::frameAndMessageSizeApi()
+{
+    QWebSocketServer server(QString(), QWebSocketServer::NonSecureMode);
+
+    // The limits are the same as the ones the client side imposes.
+    QCOMPARE(QWebSocketServer::maxIncomingFrameSize(), QWebSocket::maxIncomingFrameSize());
+    QCOMPARE(QWebSocketServer::maxIncomingMessageSize(), QWebSocket::maxIncomingMessageSize());
+    QCOMPARE(QWebSocketServer::maxOutgoingFrameSize(), QWebSocket::maxOutgoingFrameSize());
+
+    // ...and so are the defaults.
+    QCOMPARE(server.maxAllowedIncomingFrameSize(), QWebSocketServer::maxIncomingFrameSize());
+    QCOMPARE(server.maxAllowedIncomingMessageSize(), QWebSocketServer::maxIncomingMessageSize());
+    QCOMPARE(server.outgoingFrameSize(), QWebSocket().outgoingFrameSize());
+
+    server.setMaxAllowedIncomingFrameSize(9);
+    QCOMPARE(server.maxAllowedIncomingFrameSize(), 9u);
+    server.setMaxAllowedIncomingMessageSize(889);
+    QCOMPARE(server.maxAllowedIncomingMessageSize(), 889u);
+    server.setOutgoingFrameSize(5);
+    QCOMPARE(server.outgoingFrameSize(), 5u);
+
+    // Values beyond the supported maximum are ignored.
+    server.setMaxAllowedIncomingFrameSize(QWebSocketServer::maxIncomingFrameSize() + 1);
+    QCOMPARE(server.maxAllowedIncomingFrameSize(), 9u);
+    server.setMaxAllowedIncomingMessageSize(QWebSocketServer::maxIncomingMessageSize() + 1);
+    QCOMPARE(server.maxAllowedIncomingMessageSize(), 889u);
+    server.setOutgoingFrameSize(QWebSocketServer::maxOutgoingFrameSize() + 1);
+    QCOMPARE(server.outgoingFrameSize(), 5u);
+}
+
+void tst_QWebSocketServer::frameAndMessageSizePropagation()
+{
+    const quint64 maxAllowedIncomingMessageSize = 1024;
+    const quint64 maxAllowedIncomingFrameSize = 512;
+    const quint64 outgoingFrameSize = 256;
+
+    QWebSocketServer server(QString(), QWebSocketServer::NonSecureMode);
+    server.setMaxAllowedIncomingMessageSize(maxAllowedIncomingMessageSize);
+    server.setMaxAllowedIncomingFrameSize(maxAllowedIncomingFrameSize);
+    server.setOutgoingFrameSize(outgoingFrameSize);
+
+    QSignalSpy serverConnectionSpy(&server, &QWebSocketServer::newConnection);
+    QVERIFY(server.listen());
+
+    QWebSocket socket;
+    QSignalSpy socketConnectedSpy(&socket, &QWebSocket::connected);
+    QSignalSpy socketDisconnectedSpy(&socket, &QWebSocket::disconnected);
+    socket.open(server.serverUrl());
+
+    QTRY_COMPARE(serverConnectionSpy.size(), 1);
+    QTRY_COMPARE(socketConnectedSpy.size(), 1);
+
+    auto serverSocket = std::unique_ptr<QWebSocket>(server.nextPendingConnection());
+    QVERIFY(serverSocket);
+    QCOMPARE(serverSocket->maxAllowedIncomingMessageSize(), maxAllowedIncomingMessageSize);
+    QCOMPARE(serverSocket->maxAllowedIncomingFrameSize(), maxAllowedIncomingFrameSize);
+    QCOMPARE(serverSocket->outgoingFrameSize(), outgoingFrameSize);
+
+    // Changing the server settings does not affect an already accepted connection.
+    server.setMaxAllowedIncomingMessageSize(maxAllowedIncomingMessageSize * 2);
+    QCOMPARE(serverSocket->maxAllowedIncomingMessageSize(), maxAllowedIncomingMessageSize);
+
+    // The limit is enforced: an oversized message makes the server close the connection.
+    // Set outgoingFrameSize on the client here to not send too large frames:
+    socket.setOutgoingFrameSize(maxAllowedIncomingFrameSize);
+    // But then send a message too large for the max message size:
+    const QString payload(maxAllowedIncomingMessageSize + 1, u'a');
+    QCOMPARE(socket.sendTextMessage(payload), payload.size());
+
+    QTRY_COMPARE(socketDisconnectedSpy.size(), 1);
+    QCOMPARE(socket.closeCode(), QWebSocketProtocol::CloseCodeTooMuchData);
 }
 
 QTEST_MAIN(tst_QWebSocketServer)
