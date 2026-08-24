@@ -5,8 +5,8 @@
 #ifndef QWEBSOCKETSERVER_H
 #define QWEBSOCKETSERVER_H
 
-#include "QtWebSockets/qwebsockets_global.h"
-#include "QtWebSockets/qwebsocketprotocol.h"
+#include <QtWebSockets/qwebsockets_global.h>
+#include <QtWebSockets/qwebsocketprotocol.h>
 
 #include <QtCore/QObject>
 #include <QtCore/QString>

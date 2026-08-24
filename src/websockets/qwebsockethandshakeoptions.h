@@ -8,7 +8,7 @@
 #include <QtCore/QSharedDataPointer>
 #include <QtCore/QStringList>
 
-#include "QtWebSockets/qwebsockets_global.h"
+#include <QtWebSockets/qwebsockets_global.h>
 
 QT_BEGIN_NAMESPACE
 
