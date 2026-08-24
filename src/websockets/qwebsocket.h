@@ -15,8 +15,8 @@
 #include <QtNetwork/QSslError>
 #include <QtNetwork/QSslConfiguration>
 #endif
-#include "QtWebSockets/qwebsockets_global.h"
-#include "QtWebSockets/qwebsocketprotocol.h"
+#include <QtWebSockets/qwebsockets_global.h>
+#include <QtWebSockets/qwebsocketprotocol.h>
 
 #include <QtCore/qobject.h>
 
