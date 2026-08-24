@@ -4,7 +4,7 @@
 #ifndef QWEBSOCKETCORSAUTHENTICATOR_H
 #define QWEBSOCKETCORSAUTHENTICATOR_H
 
-#include "QtWebSockets/qwebsockets_global.h"
+#include <QtWebSockets/qwebsockets_global.h>
 #include <memory>
 
 QT_BEGIN_NAMESPACE

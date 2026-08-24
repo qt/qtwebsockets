@@ -10,7 +10,7 @@
 #endif
 
 #include <QtCore/qglobal.h>
-#include "QtWebSockets/qwebsockets_global.h"
+#include <QtWebSockets/qwebsockets_global.h>
 
 QT_BEGIN_NAMESPACE
 
