@@ -5,6 +5,7 @@
 #include <QNetworkProxy>
 #include <QTcpSocket>
 #include <QTcpServer>
+#include <QtCore/QPointer>
 #include <QtCore/QScopedPointer>
 #ifndef QT_NO_SSL
 #include <QtNetwork/qsslpresharedkeyauthenticator.h>
@@ -97,6 +98,7 @@ private Q_SLOTS:
     void tst_serverDestroyedWhileSocketConnected();
     void tst_scheme(); // qtbug-55927
     void tst_handleConnection();
+    void tst_handleConnectionTakesOwnership();
     void tst_handshakeTimeout(); // qtbug-63312, qtbug-57026
     void fragmentedHandshakeOnHandedOverSocket_data();
     void fragmentedHandshakeOnHandedOverSocket();
@@ -760,6 +762,42 @@ void tst_QWebSocketServer::tst_handleConnection()
     QTRY_COMPARE(clientMessageReceivedSpy.size(), 1);
     arguments = clientMessageReceivedSpy.takeFirst();
     QCOMPARE(arguments.first().toString(), QString("hello"));
+}
+
+void tst_QWebSocketServer::tst_handleConnectionTakesOwnership()
+{
+    QWebSocketServer wsServer(QString(), QWebSocketServer::NonSecureMode);
+    QSignalSpy wsServerConnectionSpy(&wsServer, &QWebSocketServer::newConnection);
+
+    QPointer<QTcpSocket> handedOverSocket;
+    QTcpServer tcpServer;
+    connect(&tcpServer, &QTcpServer::newConnection,
+            &wsServer, [&tcpServer, &wsServer, &handedOverSocket]() {
+        QTcpSocket *tcpSocket = tcpServer.nextPendingConnection();
+        // Hand the socket over the way QHttpServer does: drop our own parent and rely
+        // on the documented ownership transfer.
+        tcpSocket->setParent(nullptr);
+        handedOverSocket = tcpSocket;
+        wsServer.handleConnection(tcpSocket);
+    });
+    QVERIFY(tcpServer.listen());
+
+    QWebSocket webSocket;
+    QSignalSpy wsConnectedSpy(&webSocket, &QWebSocket::connected);
+    webSocket.open(QUrl{u"ws://localhost:%1"_s.arg(tcpServer.serverPort())});
+    QTRY_COMPARE(wsConnectedSpy.size(), 1);
+    QTRY_COMPARE(wsServerConnectionSpy.size(), 1);
+
+    QWebSocket *webServerSocket = wsServer.nextPendingConnection();
+    QVERIFY(webServerSocket);
+    QVERIFY(!handedOverSocket.isNull());
+    QCOMPARE(handedOverSocket->parent(), webServerSocket);
+    QCOMPARE(webServerSocket->parent(), &wsServer);
+
+    // Destroying the QWebSocket while it is still connected must take the transport with
+    // it, instead of leaving it open, unread and unowned.
+    delete webServerSocket;
+    QVERIFY(handedOverSocket.isNull());
 }
 
 struct SocketSpy {

@@ -366,6 +366,9 @@ QWebSocket *QWebSocketPrivate::upgradeFrom(QTcpSocket *pTcpSocket,
 {
     QWebSocket *pWebSocket = new QWebSocket(pTcpSocket, response.acceptedVersion(), parent);
     if (Q_LIKELY(pWebSocket)) {
+        // Take ownership of the transport, so destroying the QWebSocket closes and destroys
+        // the socket it was upgraded from instead of leaving it open and unread.
+        pTcpSocket->setParent(pWebSocket);
         QNetworkRequest netRequest(request.requestUrl());
         netRequest.setHeaders(request.headers());
 #ifndef QT_NO_SSL

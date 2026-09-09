@@ -525,7 +525,8 @@ void QWebSocketServerPrivate::handshakeReceived()
             if (Q_LIKELY(response.canUpgrade())) {
                 QWebSocket *pWebSocket = QWebSocketPrivate::upgradeFrom(pTcpSocket,
                                                                         request,
-                                                                        response);
+                                                                        response,
+                                                                        q);
                 if (Q_LIKELY(pWebSocket)) {
                     finishHandshakeTimeout(pTcpSocket);
                     addPendingConnection(pWebSocket);

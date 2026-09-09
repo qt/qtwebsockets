@@ -427,12 +427,15 @@ int QWebSocketServer::handshakeTimeoutMS() const
 
 /*!
     Returns the next pending connection as a connected QWebSocket object.
-    QWebSocketServer does not take ownership of the returned QWebSocket object.
-    It is up to the caller to delete the object explicitly when it will no longer be used,
-    otherwise a memory leak will occur.
+    The returned QWebSocket object is a child of this server, and is deleted
+    when the server is destroyed. It is still a good idea to delete the object
+    explicitly when it will no longer be used, to avoid wasting memory.
     nullptr is returned if this function is called when there are no pending connections.
 
     Note: The returned QWebSocket object cannot be used from another thread.
+
+    \note Before Qt 6.13 the returned object had no parent and the server
+    never deleted it.
 
     \sa hasPendingConnections()
 */
@@ -765,6 +768,12 @@ QList<QWebSocketProtocol::Version> QWebSocketServer::supportedVersions() const
 
     The QWebSocketServer object will take ownership of the socket
     object and delete it when appropriate.
+
+    \note Before Qt 6.13 ownership was documented but not implemented: the
+    socket was never reparented, and the server's only deletion path was
+    severed when the QWebSocket it had been upgraded into was destroyed. A
+    \a socket handed over without a parent was therefore leaked, along with
+    its file descriptor and anything the peer sent afterwards.
 
     \since 5.9
 */
