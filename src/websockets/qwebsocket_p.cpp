@@ -1034,7 +1034,7 @@ void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
         //then we don't have our header complete yet
         //check that no one is trying to exhaust our virtual memory
         const qint64 maxHeaderLength = MAX_HEADERLINE_LENGTH * MAX_HEADERLINES + endOfHeaderMarker.size();
-        if (Q_UNLIKELY(byteAvailable > maxHeaderLength)) {
+        if (Q_UNLIKELY(byteAvailable >= maxHeaderLength)) {
             setErrorString(QWebSocket::tr("Header is too large"));
             emitErrorOccurred(QAbstractSocket::ConnectionRefusedError);
         }
