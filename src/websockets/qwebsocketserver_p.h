@@ -106,6 +106,8 @@ private:
     int m_maxPendingConnections;
     int m_handshakeTimeout;
 
+    QHash<QTcpSocket *, QByteArray> m_preHandshakeHeaders;
+
     void addPendingConnection(QWebSocket *pWebSocket);
     void setErrorFromSocketError(QAbstractSocket::SocketError error,
                                  const QString &errorDescription);
