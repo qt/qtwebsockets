@@ -18,6 +18,8 @@
 #include <QtWebSockets/QWebSocketCorsAuthenticator>
 #include <QtWebSockets/qwebsocketprotocol.h>
 
+#include <memory>
+
 using namespace Qt::StringLiterals;
 
 QT_USE_NAMESPACE
@@ -96,6 +98,13 @@ private Q_SLOTS:
     void tst_scheme(); // qtbug-55927
     void tst_handleConnection();
     void tst_handshakeTimeout(); // qtbug-63312, qtbug-57026
+    void fragmentedHandshakeOnHandedOverSocket_data();
+    void fragmentedHandshakeOnHandedOverSocket();
+    void oversizedHandshakeOnHandedOverSocket_data();
+    void oversizedHandshakeOnHandedOverSocket();
+    void disconnectDuringHandshakeOnHandedOverSocket_data();
+    void disconnectDuringHandshakeOnHandedOverSocket();
+    void handshakeFollowedByFrame();
     void gentleClose();
     void multipleFrames();
 
@@ -899,6 +908,282 @@ void tst_QWebSocketServer::tst_handshakeTimeout()
 
         QCOMPARE(socketDisconnectedSpy.size(), 0);
     }
+}
+
+static QByteArray handshakeRequest()
+{
+    return "GET / HTTP/1.1\r\n"
+           "Host: localhost\r\n"
+           "Upgrade: websocket\r\n"
+           "Connection: Upgrade\r\n"
+           "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n"
+           "Sec-WebSocket-Version: 13\r\n\r\n"_ba;
+}
+
+// A server and its signal spies, which is used in handshake tests below.
+class HandshakeTestServer
+{
+public:
+    HandshakeTestServer()
+        : connectionSpy(&server, &QWebSocketServer::newConnection),
+          errorSpy(&server, &QWebSocketServer::serverError)
+    {
+        server.setHandshakeTimeout(-1);
+    }
+
+    // Let the server accept the client itself.
+    std::unique_ptr<QTcpSocket> acceptedByServer()
+    {
+        if (!server.listen(QHostAddress::LocalHost))
+            return {};
+
+        auto client = std::make_unique<QTcpSocket>();
+        client->connectToHost(QHostAddress::LocalHost, server.serverPort());
+        if (!client->waitForConnected())
+            return {};
+
+        return client;
+    }
+
+    // Accepts the client here and hands it over with handleConnection(). Keeping the
+    // accepted socket is what lets a test deliver one readyRead at a time.
+    std::unique_ptr<QTcpSocket> handedOverToServer()
+    {
+        if (!tcpServer.listen(QHostAddress::LocalHost))
+            return {};
+
+        auto client = std::make_unique<QTcpSocket>();
+        client->connectToHost(QHostAddress::LocalHost, tcpServer.serverPort());
+        if (!client->waitForConnected() || !tcpServer.waitForNewConnection(5000))
+            return {};
+
+        handedOverSocket = tcpServer.nextPendingConnection();
+        if (!handedOverSocket)
+            return {};
+
+        server.handleConnection(handedOverSocket);
+        return client;
+    }
+
+    // Writes one fragment and lets the server run its queued reader exactly once, so
+    // the test can check what the server did with that fragment alone.
+    bool writeFragment(QTcpSocket *client, QByteArrayView fragment)
+    {
+        if (client->write(fragment.data(), fragment.size()) != fragment.size())
+            return false;
+        qint64 previouslyReceived = handedOverSocket->bytesAvailable();
+        while (client->bytesToWrite() != 0) {
+            if (!client->waitForBytesWritten() || !handedOverSocket->waitForReadyRead())
+                return false;
+        }
+        while (handedOverSocket->bytesAvailable() != fragment.size() + previouslyReceived) {
+            if (!handedOverSocket->waitForReadyRead())
+                return false;
+        }
+
+        deliverQueuedReads();
+        return true;
+    }
+
+    void deliverQueuedReads()
+    {
+        QCoreApplication::processEvents();
+    }
+
+    QWebSocketServer server{ QString(), QWebSocketServer::NonSecureMode };
+    QSignalSpy connectionSpy;
+    QSignalSpy errorSpy;
+    // handedOverToServer() accepts the client here rather than in the QWebSocketServer,
+    // so that the test owns the connection it then hands over.
+    QTcpServer tcpServer;
+    QPointer<QTcpSocket> handedOverSocket;
+};
+
+void tst_QWebSocketServer::fragmentedHandshakeOnHandedOverSocket_data()
+{
+    QTest::addColumn<int>("splitPosition");
+
+    QTest::newRow("one-byte-at-a-time") << 0;
+    for (int i = 1; i < 4; ++i)
+        QTest::addRow("terminator-split-%d", i) << int(handshakeRequest().size() - 4 + i);
+}
+
+void tst_QWebSocketServer::fragmentedHandshakeOnHandedOverSocket()
+{
+    QFETCH(const int, splitPosition);
+
+    HandshakeTestServer test;
+    const std::unique_ptr<QTcpSocket> client = test.handedOverToServer();
+    QVERIFY(client);
+
+    const QByteArray request = handshakeRequest();
+
+    QList<qsizetype> fragmentSizes;
+    // Send one byte at a time
+    if (splitPosition == 0)
+        fragmentSizes.resize(request.size(), 1);
+    else
+        fragmentSizes = { splitPosition, request.size() - splitPosition };
+
+    // Nothing may be upgraded or rejected before the terminator arrives, wherever
+    // the fragment boundaries happen to fall.
+    qsizetype sent = 0;
+    for (qsizetype size : fragmentSizes) {
+        QVERIFY(test.writeFragment(client.get(), QByteArrayView(request).sliced(sent, size)));
+        sent += size;
+
+        QCOMPARE(test.connectionSpy.size(), sent == request.size() ? 1 : 0);
+        QCOMPARE(test.errorSpy.size(), 0);
+    }
+
+    const std::unique_ptr<QWebSocket> socket(test.server.nextPendingConnection());
+    QVERIFY(socket);
+    QCOMPARE(socket->requestUrl().path(), "/"_L1);
+}
+
+void tst_QWebSocketServer::oversizedHandshakeOnHandedOverSocket_data()
+{
+    QTest::addColumn<bool>("complete");
+    QTest::addColumn<bool>("fragmented");
+
+    QTest::newRow("incomplete-at-limit") << false << false;
+    QTest::newRow("complete-at-limit") << true << false;
+    QTest::newRow("incomplete-crossing-limit") << false << true;
+    QTest::newRow("complete-crossing-limit") << true << true;
+}
+
+void tst_QWebSocketServer::oversizedHandshakeOnHandedOverSocket()
+{
+    QFETCH(const bool, complete);
+    QFETCH(const bool, fragmented);
+
+    HandshakeTestServer test;
+    const std::unique_ptr<QTcpSocket> client = test.handedOverToServer();
+    QVERIFY(client);
+
+    // Pad the request out to exactly the header ceiling: 100 lines of 8 KiB plus the
+    // terminator. The limit itself has to be rejected, not just sizes past it.
+    constexpr qsizetype limit = 100 * 8 * 1024 + 4;
+    constexpr qsizetype terminatorSize = 4;
+
+    QByteArray request = handshakeRequest();
+    request.chop(2);
+    request += "X-Padding: ";
+
+    const qsizetype paddingSize = limit - request.size() - (complete ? terminatorSize : 0);
+    request += QByteArray(paddingSize, 'x');
+    if (complete)
+        request += "\r\n\r\n";
+    QCOMPARE(request.size(), limit);
+
+    if (fragmented) {
+        // Everything except the final byte stays one below the ceiling, so it must
+        // all be accepted.
+        constexpr qsizetype fragmentSize = 4096;
+        qsizetype sent = 0;
+        while (sent < limit - 1) {
+            const qsizetype remainingBelowLimit = limit - 1 - sent;
+            const qsizetype size = qMin(fragmentSize, remainingBelowLimit);
+
+            QVERIFY(test.writeFragment(client.get(),
+                                       QByteArrayView(request).sliced(sent, size)));
+            sent += size;
+
+            QCOMPARE(test.errorSpy.size(), 0);
+            QCOMPARE(test.connectionSpy.size(), 0);
+        }
+
+        // The byte that reaches the ceiling is the one that must be refused.
+        QCOMPARE(client->write(request.last(1)), 1);
+        client->flush();
+    } else {
+        QCOMPARE(client->write(request), limit);
+    }
+
+    QTRY_COMPARE(test.errorSpy.size(), 1);
+    QCOMPARE(test.errorSpy.first().first().value<QWebSocketProtocol::CloseCode>(),
+             QWebSocketProtocol::CloseCodeTooMuchData);
+    QTRY_COMPARE(client->state(), QAbstractSocket::UnconnectedState);
+    QCOMPARE(test.connectionSpy.size(), 0);
+}
+
+void tst_QWebSocketServer::disconnectDuringHandshakeOnHandedOverSocket_data()
+{
+    QTest::addColumn<bool>("completeRequest");
+    QTest::addColumn<bool>("queuedRead");
+
+    QTest::newRow("partial, after read") << false << false;
+    QTest::newRow("partial, before queued read") << false << true;
+    // A request that is complete has to be dropped just the same: the peer is gone,
+    // so there is nobody left to send the response to.
+    QTest::newRow("complete, before queued read") << true << true;
+}
+
+void tst_QWebSocketServer::disconnectDuringHandshakeOnHandedOverSocket()
+{
+    // queuedRead leaves a readyRead queued when the peer goes away, so the server
+    // reads the request only after it has handled disconnected(). Which of the two
+    // orders occurs is platform dependent, so both are exercised everywhere.
+    QFETCH(const bool, completeRequest);
+    QFETCH(const bool, queuedRead);
+
+    HandshakeTestServer test;
+    const std::unique_ptr<QTcpSocket> client = test.handedOverToServer();
+    QVERIFY(client);
+
+    // Send the request, optionally without letting the server read it yet.
+    const QByteArray request = completeRequest ? handshakeRequest()
+                                               : handshakeRequest().first(40);
+    QCOMPARE(client->write(request), request.size());
+    while (client->bytesToWrite())
+        QVERIFY(client->waitForBytesWritten());
+    while (test.handedOverSocket->bytesAvailable() < request.size())
+        QVERIFY(test.handedOverSocket->waitForReadyRead());
+    if (!queuedRead)
+        test.deliverQueuedReads();
+
+    // Drop the peer mid-handshake and let anything still queued be delivered.
+    test.handedOverSocket->disconnectFromHost();
+    QCOMPARE(test.handedOverSocket->state(), QAbstractSocket::UnconnectedState);
+    test.deliverQueuedReads();
+
+    QTRY_VERIFY(test.handedOverSocket.isNull());
+    QCOMPARE(test.connectionSpy.size(), 0);
+    QCOMPARE(test.errorSpy.size(), 0);
+
+    // The abandoned handshake must not affect the next one.
+    QVERIFY(test.server.listen(QHostAddress::LocalHost));
+    QWebSocket nextClient;
+    nextClient.open(test.server.serverUrl());
+
+    QTRY_COMPARE(test.connectionSpy.size(), 1);
+    const std::unique_ptr<QWebSocket> socket(test.server.nextPendingConnection());
+    QVERIFY(socket);
+    QCOMPARE(test.errorSpy.size(), 0);
+}
+
+void tst_QWebSocketServer::handshakeFollowedByFrame()
+{
+    HandshakeTestServer test;
+    const std::unique_ptr<QTcpSocket> client = test.acceptedByServer();
+    QVERIFY(client);
+
+    // Start a masked text frame in the same write as the handshake, so reading the
+    // request must not consume the frame bytes that follow the terminator. The frame
+    // is left one byte short until the message spy exists, so it cannot be missed.
+    const QByteArray request = handshakeRequest() + QByteArray::fromHex("81820000000068");
+    QCOMPARE(client->write(request), request.size());
+
+    QTRY_COMPARE(test.connectionSpy.size(), 1);
+    const std::unique_ptr<QWebSocket> socket(test.server.nextPendingConnection());
+    QVERIFY(socket);
+
+    QSignalSpy messageSpy(socket.get(), &QWebSocket::textMessageReceived);
+    QCOMPARE(client->write("i", 1), 1);
+
+    QTRY_COMPARE(messageSpy.size(), 1);
+    QCOMPARE(messageSpy.first().first().toString(), "hi"_L1);
+    QCOMPARE(test.errorSpy.size(), 0);
 }
 
 void tst_QWebSocketServer::gentleClose()
