@@ -421,6 +421,8 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
     }
     static constexpr auto closeTimerName = "_closeTimer"_L1;
     if (!m_isClosingHandshakeReceived) {
+        if (q->findChild<QTimer *>(closeTimerName))
+            return;
         QTimer *closeTimer = new QTimer(q);
         closeTimer->setObjectName(closeTimerName);
         closeTimer->setInterval(3000);
