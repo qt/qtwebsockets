@@ -199,6 +199,7 @@ private:
     void emitErrorOccurred(QAbstractSocket::SocketError error);
 
     QTcpSocket *m_pSocket;
+    QByteArray m_preHandshakeHeaders;
     QString m_errorString;
     QWebSocketProtocol::Version m_version;
     QUrl m_resource;
