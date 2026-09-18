@@ -175,6 +175,8 @@ private Q_SLOTS:
     void handshakeAbortedThenReopened_data();
     void handshakeAbortedThenReopened();
     void handshakeFollowedByFrame();
+    void reopenDoesNotReuseAuthenticator();
+    void reopenDoesNotSkipResponseBytes();
 };
 
 tst_QWebSocket::tst_QWebSocket()
@@ -1578,8 +1580,8 @@ void tst_QWebSocket::splitUtf8Sequence()
     QCOMPARE(messageReceivedSpy.at(0).at(0).toString(), payload);
 }
 
-// Reads the client's request off the socket and returns the matching 101 response.
-static QByteArray upgradeResponseFor(QTcpSocket *serverSocket)
+// Reads one complete request header off the socket and returns it.
+static QByteArray readRequestHeader(QTcpSocket *serverSocket)
 {
     // Spin the event loop rather than blocking on the socket: the client lives in this
     // same thread, and would never get to send its request.
@@ -1590,6 +1592,15 @@ static QByteArray upgradeResponseFor(QTcpSocket *serverSocket)
             return {};
         data.append(serverSocket->readAll());
     }
+    return data;
+}
+
+// Reads the client's request off the socket and returns the matching 101 response.
+static QByteArray upgradeResponseFor(QTcpSocket *serverSocket)
+{
+    const QByteArray data = readRequestHeader(serverSocket);
+    if (data.isEmpty())
+        return {};
 
     const auto view = QLatin1String(data);
     const auto keyHeader = QLatin1String("Sec-WebSocket-Key:");
@@ -1794,6 +1805,150 @@ void tst_QWebSocket::handshakeFollowedByFrame()
 
     QTRY_COMPARE(messageSpy.size(), 1);
     QCOMPARE(messageSpy.first().first().toString(), "hi"_L1);
+    QCOMPARE(errorSpy.size(), 0);
+}
+
+// Answers a handshake request with a 401 Basic challenge under the given realm, and
+// returns the request that was answered.
+static QByteArray answerWithAuthChallenge(QTcpSocket *serverSocket, QByteArrayView realm,
+                                          QByteArrayView extraHeaders = {})
+{
+    const QByteArray request = readRequestHeader(serverSocket);
+    if (request.isEmpty())
+        return {};
+
+    QByteArray response = "HTTP/1.1 401 Unauthorized\r\nWWW-Authenticate: Basic realm=";
+    response.append(realm);
+    response.append("\r\n");
+    response.append(extraHeaders);
+    response.append("\r\n");
+    if (serverSocket->write(response) != response.size())
+        return {};
+    return request;
+}
+
+// The decoded "user:password" a request offers, so a failure names the credential that
+// was actually sent rather than its base64.
+static QByteArray basicCredentialIn(QByteArrayView request)
+{
+    const QLatin1StringView value = AuthServer::getHeaderValue("Authorization"_L1, request);
+    if (!value.startsWith("Basic "_L1))
+        return {};
+    return QByteArray::fromBase64(QByteArrayView(value.sliced(6)).toByteArray());
+}
+
+// A QWebSocket reused for a second connection must not carry the first connection's
+// QAuthenticator with it: the credential the application produced for one host is not
+// the credential it would produce for another, and it must be asked again.
+void tst_QWebSocket::reopenDoesNotReuseAuthenticator()
+{
+    QTcpServer hostA;
+    QVERIFY(hostA.listen(QHostAddress::LocalHost));
+    QTcpServer hostB;
+    QVERIFY(hostB.listen(QHostAddress::LocalHost));
+
+    const QUrl urlA("ws://127.0.0.1:%1"_L1.arg(QString::number(hostA.serverPort())));
+    const QUrl urlB("ws://127.0.0.1:%1"_L1.arg(QString::number(hostB.serverPort())));
+
+    // A per-host secret, as any real credential store would return.
+    const QStringList secrets = { u"secret-for-host-a"_s, u"secret-for-host-b"_s };
+    int authRequests = 0;
+
+    QWebSocket socket;
+    connect(&socket, &QWebSocket::authenticationRequired, &socket,
+            [&](QAuthenticator *authenticator) {
+                authenticator->setUser(u"user"_s);
+                authenticator->setPassword(secrets.value(authRequests, u"unexpected"_s));
+                ++authRequests;
+            });
+
+    // First connection: host A challenges, the application supplies host A's secret,
+    // and the client resends authenticated. All of this is correct.
+    socket.open(urlA);
+    QTRY_VERIFY(hostA.hasPendingConnections());
+    {
+        const std::unique_ptr<QTcpSocket> serverSocket(hostA.nextPendingConnection());
+        QVERIFY(serverSocket);
+        QVERIFY(!answerWithAuthChallenge(serverSocket.get(), "host-a").isEmpty());
+
+        const QByteArray authenticated = readRequestHeader(serverSocket.get());
+        QVERIFY(!authenticated.isEmpty());
+        QCOMPARE(authRequests, 1);
+        QCOMPARE(basicCredentialIn(authenticated), "user:secret-for-host-a");
+
+        // Host A goes away before the exchange completes, leaving the authenticator
+        // holding host A's credentials.
+        serverSocket->disconnectFromHost();
+    }
+    QTRY_COMPARE(socket.state(), QAbstractSocket::UnconnectedState);
+
+    // Second connection, same QWebSocket, different host and different realm.
+    socket.open(urlB);
+    QTRY_VERIFY(hostB.hasPendingConnections());
+    const std::unique_ptr<QTcpSocket> serverSocket(hostB.nextPendingConnection());
+    QVERIFY(serverSocket);
+
+    const QByteArray opening = answerWithAuthChallenge(serverSocket.get(), "host-b");
+    QVERIFY(!opening.isEmpty());
+    // Nothing has challenged us yet, so the opening request carries no credential.
+    QCOMPARE(basicCredentialIn(opening), QByteArray());
+
+    // Host B's challenge must reach the application before any credential reaches
+    // host B. Without that, the carried-over authenticator answers on its own and
+    // host B is handed the secret that was only ever meant for host A.
+    const QByteArray answered = readRequestHeader(serverSocket.get());
+    QVERIFY(!answered.isEmpty());
+    QCOMPARE(basicCredentialIn(answered), "user:secret-for-host-b");
+    QCOMPARE(authRequests, 2);
+}
+
+// A QWebSocket reused for a second connection must not carry the first connection's
+// pending body-skip count with it, or it eats the front of the next server's response.
+void tst_QWebSocket::reopenDoesNotSkipResponseBytes()
+{
+    QTcpServer hostA;
+    QVERIFY(hostA.listen(QHostAddress::LocalHost));
+    QTcpServer hostB;
+    QVERIFY(hostB.listen(QHostAddress::LocalHost));
+
+    const QUrl urlA("ws://127.0.0.1:%1"_L1.arg(QString::number(hostA.serverPort())));
+    const QUrl urlB("ws://127.0.0.1:%1"_L1.arg(QString::number(hostB.serverPort())));
+
+    QWebSocket socket;
+    connect(&socket, &QWebSocket::authenticationRequired, &socket,
+            [](QAuthenticator *authenticator) {
+                authenticator->setUser(u"user"_s);
+                authenticator->setPassword(u"password"_s);
+            });
+
+    // First connection: host A announces a 4 KiB error body with its challenge but
+    // never sends it, so the client is still waiting to skip those bytes.
+    socket.open(urlA);
+    QTRY_VERIFY(hostA.hasPendingConnections());
+    {
+        const std::unique_ptr<QTcpSocket> serverSocket(hostA.nextPendingConnection());
+        QVERIFY(serverSocket);
+        QVERIFY(!answerWithAuthChallenge(serverSocket.get(), "host-a",
+                                         "Content-Length: 4096\r\n").isEmpty());
+        QVERIFY(!readRequestHeader(serverSocket.get()).isEmpty()); // the resend
+        serverSocket->disconnectFromHost();
+    }
+    QTRY_COMPARE(socket.state(), QAbstractSocket::UnconnectedState);
+
+    // Second connection, same QWebSocket: a well-behaved server completes a clean
+    // handshake, which has to be parsed from its very first byte.
+    QSignalSpy connectedSpy(&socket, &QWebSocket::connected);
+    QSignalSpy errorSpy(&socket, &QWebSocket::errorOccurred);
+    socket.open(urlB);
+    QTRY_VERIFY(hostB.hasPendingConnections());
+    const std::unique_ptr<QTcpSocket> serverSocket(hostB.nextPendingConnection());
+    QVERIFY(serverSocket);
+
+    const QByteArray response = upgradeResponseFor(serverSocket.get());
+    QVERIFY(!response.isEmpty());
+    QCOMPARE(serverSocket->write(response), response.size());
+
+    QTRY_COMPARE(connectedSpy.size(), 1);
     QCOMPARE(errorSpy.size(), 0);
 }
 

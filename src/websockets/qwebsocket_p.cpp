@@ -473,6 +473,11 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
         m_isClosingHandshakeReceived = false;
         m_isClosingHandshakeSent = false;
 
+        m_authenticator = QAuthenticator();
+        m_bytesToSkipBeforeNewResponse = 0;
+        m_needsResendWithCredentials = false;
+        m_needsReconnect = false;
+
         setRequest(request, options);
         if (url.path().isEmpty())
             url.setPath(QStringLiteral("/"));
