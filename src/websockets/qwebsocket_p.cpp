@@ -9,6 +9,7 @@
 #include "qwebsockethandshakeresponse_p.h"
 #include "qdefaultmaskgenerator_p.h"
 
+#include <QtCore/QCoreApplication>
 #include <QtCore/QUrl>
 #include <QtNetwork/QAuthenticator>
 #include <QtNetwork/QTcpSocket>
@@ -1023,34 +1024,46 @@ static QString msgUnsupportedAuthenticateChallenges(qsizetype count)
 void QWebSocketPrivate::processHandshake(QTcpSocket *pSocket)
 {
     Q_Q(QWebSocket);
-    if (Q_UNLIKELY(!pSocket))
+    if (Q_UNLIKELY(!pSocket || pSocket->state() != QAbstractSocket::ConnectedState))
         return;
 
-    static const QByteArray endOfHeaderMarker = QByteArrayLiteral("\r\n\r\n");
-    const qint64 byteAvailable = pSocket->bytesAvailable();
-    QByteArray available = pSocket->peek(byteAvailable);
-    const int endOfHeaderIndex = available.indexOf(endOfHeaderMarker);
-    if (endOfHeaderIndex < 0) {
-        //then we don't have our header complete yet
+    // According to RFC822 the body is separated from the headers by a null line (CRLF)
+    constexpr QByteArrayView endOfHeaderMarker = "\r\n\r\n";
+
+    const qint64 maxHeaderLength = QWebSocketPrivate::MAX_HEADERLINE_LENGTH
+        * QWebSocketPrivate::MAX_HEADERLINES + endOfHeaderMarker.size();
+
+    // Reused by every iteration below, so a request arriving as many lines at once does
+    // not need a fresh buffer for each of them.
+    QByteArray chunk;
+
+    while (!m_preHandshakeHeaders.endsWith(endOfHeaderMarker) && pSocket->bytesAvailable() > 0) {
+        // readLine() writes up to maxSize - 1 bytes plus a '\0'
+        const qint64 maxSize = qMin(pSocket->bytesAvailable() + 1,
+                                    qint64(QWebSocketPrivate::MAX_HEADERLINE_LENGTH) + 1);
+        chunk.resize(maxSize);
+        const qint64 lineLength = pSocket->readLine(chunk.data(), maxSize);
+        if (Q_UNLIKELY(lineLength <= 0))
+            break;
+
         //check that no one is trying to exhaust our virtual memory
-        const qint64 maxHeaderLength = MAX_HEADERLINE_LENGTH * MAX_HEADERLINES + endOfHeaderMarker.size();
-        if (Q_UNLIKELY(byteAvailable >= maxHeaderLength)) {
-            setErrorString(QWebSocket::tr("Header is too large"));
+        if (Q_UNLIKELY(m_preHandshakeHeaders.size() + lineLength >= maxHeaderLength)) {
+            m_preHandshakeHeaders = {};
+            m_closeCode = QWebSocketProtocol::CloseCodeTooMuchData;
+            pSocket->close();
+            setErrorString(QCoreApplication::translate("QWebSocketServer", "Header is too large."));
             emitErrorOccurred(QAbstractSocket::ConnectionRefusedError);
+            return;
         }
-        return;
+        m_preHandshakeHeaders.append(chunk.constData(), lineLength);
     }
-    const int headerSize = endOfHeaderIndex + endOfHeaderMarker.size();
-    //don't read past the header
-    QByteArrayView headers = QByteArrayView(available).first(headerSize);
-    //remove our header from the tcpSocket
-    qint64 skippedSize = pSocket->skip(headerSize);
 
-    if (Q_UNLIKELY(skippedSize != headerSize)) {
-        setErrorString(QWebSocket::tr("Read handshake request header failed"));
-        emitErrorOccurred(QAbstractSocket::ConnectionRefusedError);
+    if (!m_preHandshakeHeaders.endsWith(endOfHeaderMarker)) {
+        // The header isn't complete yet
         return;
     }
+    const QByteArray headerBuffer = std::exchange(m_preHandshakeHeaders, {});
+    const QByteArrayView headers = headerBuffer;
 
     QHttpHeaderParser parser;
     static const QByteArray endOfStatusMarker = QByteArrayLiteral("\r\n");
@@ -1248,6 +1261,8 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
             m_configuration.m_sslConfiguration = sslSock->sslConfiguration();
 #endif
         if (webSocketState == QAbstractSocket::ConnectingState) {
+            // Nothing from an earlier connection may be left to prepend to this one
+            m_preHandshakeHeaders = {};
             m_key = generateKey();
 
             QList<QPair<QString, QString> > headers;
@@ -1319,6 +1334,7 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
         break;
 
     case QAbstractSocket::UnconnectedState:
+        m_preHandshakeHeaders = {};
         if (m_needsReconnect) {
             // Need to reinvoke the lambda queued because the underlying socket
             // isn't done cleaning up yet...
@@ -1373,7 +1389,7 @@ void QWebSocketPrivate::processData()
     if (state() == QAbstractSocket::ConnectingState) {
         if (m_bytesToSkipBeforeNewResponse > 0)
             m_bytesToSkipBeforeNewResponse -= m_pSocket->skip(m_bytesToSkipBeforeNewResponse);
-        if (m_bytesToSkipBeforeNewResponse > 0 || !m_pSocket->canReadLine())
+        if (m_bytesToSkipBeforeNewResponse > 0)
             return;
         processHandshake(m_pSocket);
        // That may have changed state(), recheck in the next 'if' below.
