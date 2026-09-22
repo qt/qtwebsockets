@@ -291,8 +291,10 @@ void QWebSocketPrivate::ignoreSslErrors(const QList<QSslError> &errors)
     m_configuration.m_ignoredSslErrors = errors;
     if (Q_LIKELY(m_pSocket)) {
         QSslSocket *pSslSocket = qobject_cast<QSslSocket *>(m_pSocket);
+        // AXIVION DISABLE Qt-Security-QSslSocketIgnoreSslErrors: intentional behavior
         if (Q_LIKELY(pSslSocket))
             pSslSocket->ignoreSslErrors(errors);
+        // AXIVION ENABLE Qt-Security-QSslSocketIgnoreSslErrors
     }
 }
 
@@ -304,8 +306,10 @@ void QWebSocketPrivate::ignoreSslErrors()
     m_configuration.m_ignoreSslErrors = true;
     if (Q_LIKELY(m_pSocket)) {
         QSslSocket *pSslSocket = qobject_cast<QSslSocket *>(m_pSocket);
+        // AXIVION DISABLE Qt-Security-QSslSocketIgnoreSslErrors: intentional behavior
         if (Q_LIKELY(pSslSocket))
             pSslSocket->ignoreSslErrors();
+        // AXIVION ENABLE Qt-Security-QSslSocketIgnoreSslErrors
     }
 }
 
@@ -516,10 +520,12 @@ void QWebSocketPrivate::open(const QNetworkRequest &request,
                     if (!request.peerVerifyName().isEmpty())
                         sslSocket->setPeerVerifyName(request.peerVerifyName());
 
+                    // AXIVION DISABLE Qt-Security-QSslSocketIgnoreSslErrors: intentional behavior
                     if (Q_UNLIKELY(m_configuration.m_ignoreSslErrors))
                         sslSocket->ignoreSslErrors();
                     else
                         sslSocket->ignoreSslErrors(m_configuration.m_ignoredSslErrors);
+                    // AXIVION ENABLE Qt-Security-QSslSocketIgnoreSslErrors
     #ifndef QT_NO_NETWORKPROXY
                     sslSocket->setProxy(m_configuration.m_proxy);
                     m_pSocket->setProtocolTag(QStringLiteral("https"));
