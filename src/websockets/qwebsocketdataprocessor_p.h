@@ -91,6 +91,7 @@ private:
     quint64 m_maxAllowedMessageSize = MAX_MESSAGE_SIZE_IN_BYTES;
 
     bool processControlFrame(const QWebSocketFrame &frame);
+    void reportError(QWebSocketProtocol::CloseCode code, const QString &description);
     void timeout();
 };
 
