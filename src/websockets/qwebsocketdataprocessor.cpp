@@ -150,18 +150,16 @@ bool QWebSocketDataProcessor::process(QIODevice *pIoDevice)
             } else {
                 //we have a dataframe; opcode can be OC_CONTINUE, OC_TEXT or OC_BINARY
                 if (Q_UNLIKELY(!m_isFragmented && frame.isContinuationFrame())) {
-                    clear();
-                    Q_EMIT errorEncountered(QWebSocketProtocol::CloseCodeProtocolError,
-                                            tr("Received Continuation frame, while there is " \
-                                               "nothing to continue."));
+                    reportError(QWebSocketProtocol::CloseCodeProtocolError,
+                                tr("Received Continuation frame, while there is " \
+                                   "nothing to continue."));
                     return true;
                 }
                 if (Q_UNLIKELY(m_isFragmented && frame.isDataFrame() &&
                                !frame.isContinuationFrame())) {
-                    clear();
-                    Q_EMIT errorEncountered(QWebSocketProtocol::CloseCodeProtocolError,
-                                            tr("All data frames after the initial data frame " \
-                                               "must have opcode 0 (continuation)."));
+                    reportError(QWebSocketProtocol::CloseCodeProtocolError,
+                                tr("All data frames after the initial data frame " \
+                                   "must have opcode 0 (continuation)."));
                     return true;
                 }
                 if (!frame.isContinuationFrame()) {
@@ -173,9 +171,8 @@ bool QWebSocketDataProcessor::process(QIODevice *pIoDevice)
                         : quint64(m_binaryMessage.size());
                 if (Q_UNLIKELY((messageLength + quint64(frame.payload().size())) >
                                maxAllowedMessageSize())) {
-                    clear();
-                    Q_EMIT errorEncountered(QWebSocketProtocol::CloseCodeTooMuchData,
-                                            tr("Received message is too big."));
+                    reportError(QWebSocketProtocol::CloseCodeTooMuchData,
+                                tr("Received message is too big."));
                     return true;
                 }
 
@@ -188,9 +185,8 @@ bool QWebSocketDataProcessor::process(QIODevice *pIoDevice)
                         decoderHadError = r.error != QStringDecoder::FinalizeResult::Error::NoError;
                     }
                     if (Q_UNLIKELY(decoderHadError)) {
-                        clear();
-                        Q_EMIT errorEncountered(QWebSocketProtocol::CloseCodeWrongDatatype,
-                                                tr("Invalid UTF-8 code encountered."));
+                        reportError(QWebSocketProtocol::CloseCodeWrongDatatype,
+                                    tr("Invalid UTF-8 code encountered."));
                         return true;
                     } else {
                         m_textMessage.append(frameTxt);
@@ -218,8 +214,7 @@ bool QWebSocketDataProcessor::process(QIODevice *pIoDevice)
                 }
             }
         } else {
-            Q_EMIT errorEncountered(frame.closeCode(), frame.closeReason());
-            clear();
+            reportError(frame.closeCode(), frame.closeReason());
             isDone = true;
         }
         frame.clear();
@@ -243,6 +238,18 @@ void QWebSocketDataProcessor::clear()
     m_payloadLength = 0;
     m_decoder.resetState();
     frame.clear();
+}
+
+/*!
+    \internal
+
+    Reports a protocol violation and clears the connection.
+ */
+void QWebSocketDataProcessor::reportError(QWebSocketProtocol::CloseCode code,
+                                          const QString &description)
+{
+    clear();
+    Q_EMIT errorEncountered(code, description);
 }
 
 /*!
@@ -323,9 +330,8 @@ bool QWebSocketDataProcessor::processControlFrame(const QWebSocketFrame &frame)
  */
 void QWebSocketDataProcessor::timeout()
 {
-    clear();
-    Q_EMIT errorEncountered(QWebSocketProtocol::CloseCodeGoingAway,
-                            tr("Timeout when reading data from socket."));
+    reportError(QWebSocketProtocol::CloseCodeGoingAway,
+                tr("Timeout when reading data from socket."));
 }
 
 QT_END_NAMESPACE
