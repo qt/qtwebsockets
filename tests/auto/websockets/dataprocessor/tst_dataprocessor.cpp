@@ -13,7 +13,7 @@
 
 const quint8 FIN = 0x80;
 const quint8 RSV1 = 0x40;
-const quint8 RSV2 = 0x30;
+const quint8 RSV2 = 0x20;
 const quint8 RSV3 = 0x10;
 
 QT_USE_NAMESPACE
@@ -152,6 +152,19 @@ private Q_SLOTS:
     void minimumSizeRequirement_data();
 
     void clearDataBuffers(); // qtbug-55506
+
+    /*!
+      Tests that QWebSocketDataProcessor stops handling a connection once it has
+      reported an error. RFC 6455 requires the connection to be failed on a
+      protocol violation (paragraphs 5.2 and 8.1) and forbids processing any
+      further data from the peer afterwards (paragraph 7.1.7), including bytes
+      already received (paragraph 7.1.1). The same handling is applied to frame
+      sequences that do not match the fragmentation rules of paragraph 5.4 and
+      to messages exceeding the configured limit.
+     */
+    void stopProcessingOnError();
+    void stopProcessingOnError_data();
+    void stopProcessingOnTimeout();
 
 private:
     //helper function that constructs a new row of test data for invalid UTF8 sequences
@@ -747,6 +760,7 @@ void tst_DataProcessor::frameTooSmall()
     binaryFrameSpy.clear();
     buffer.close();
     data.clear();
+    dataProcessor.clear();
 
     //only one byte; this is far too little;
     //should get a time out as well and the error should be CloseCodeGoingAway
@@ -780,6 +794,7 @@ void tst_DataProcessor::frameTooSmall()
     textFrameSpy.clear();
     binaryFrameSpy.clear();
     data.clear();
+    dataProcessor.clear();
 
 
     {
@@ -810,6 +825,7 @@ void tst_DataProcessor::frameTooSmall()
         binaryFrameSpy.clear();
         buffer.close();
         data.clear();
+        dataProcessor.clear();
 
         //with nothing in the buffer,
         //the dataProcessor should time out and the error should be CloseCodeGoingAway
@@ -841,6 +857,7 @@ void tst_DataProcessor::frameTooSmall()
         binaryFrameSpy.clear();
         buffer.close();
         data.clear();
+        dataProcessor.clear();
 
         //text frame with final bit not set
         data.append(char(QWebSocketProtocol::OpCodeText)).append(char(0x0));
@@ -860,6 +877,7 @@ void tst_DataProcessor::frameTooSmall()
 
         buffer.close();
         data.clear();
+        dataProcessor.clear();
 
         errorSpy.clear();
         closeSpy.clear();
@@ -1877,6 +1895,166 @@ void tst_DataProcessor::clearDataBuffers()
     timer.start(1000);
     processData();
     QTest::qWait(2000);
+}
+
+void tst_DataProcessor::stopProcessingOnError_data()
+{
+    QTest::addColumn<QByteArray>("data");
+    QTest::addColumn<QWebSocketProtocol::CloseCode>("expectedCloseCode");
+    // frames legitimately delivered before the violation is detected
+    QTest::addColumn<int>("expectedTextFrames");
+    // zero leaves the default limit in place
+    QTest::addColumn<quint64>("maxMessageSize");
+
+    // the well formed frame trailing most rows; it must never be delivered
+    QByteArray textFrame;
+    textFrame.append(char(FIN | QWebSocketProtocol::OpCodeText));
+    textFrame.append(char(5));
+    textFrame.append("hello");
+
+    // Ensure a continuation frame that has no message to continue is rejected,
+    // and that the text frame behind it is not delivered.
+    QByteArray strayContinuation;
+    strayContinuation.append(char(FIN | QWebSocketProtocol::OpCodeContinue));
+    strayContinuation.append(char(0));
+    QTest::newRow("stray continuation frame")
+            << strayContinuation + textFrame << QWebSocketProtocol::CloseCodeProtocolError
+            << 0 << quint64(0);
+
+    // Ensure a frame rejected on its header does not leak the payload it
+    // announced.
+    QByteArray rsv1Frame;
+    rsv1Frame.append(char(FIN | RSV1 | QWebSocketProtocol::OpCodeText));
+    rsv1Frame.append(char(textFrame.size()));
+    QTest::newRow("rsv1 set, announced payload is a frame")
+            << rsv1Frame + textFrame << QWebSocketProtocol::CloseCodeProtocolError
+            << 0 << quint64(0);
+
+    // Ensure a payload that fails UTF-8 validation stops processing.
+    QByteArray invalidUtf8Frame;
+    invalidUtf8Frame.append(char(FIN | QWebSocketProtocol::OpCodeText));
+    invalidUtf8Frame.append(char(1));
+    invalidUtf8Frame.append(char(0xFF));
+    QTest::newRow("invalid utf-8")
+            << invalidUtf8Frame + textFrame << QWebSocketProtocol::CloseCodeWrongDatatype
+            << 0 << quint64(0);
+
+    // Ensure a data frame arriving mid-fragmentation is rejected: once a message
+    // is fragmented, the frames that follow must use opcode 0.
+    QByteArray firstFragment;
+    firstFragment.append(char(QWebSocketProtocol::OpCodeText));
+    firstFragment.append(char(1));
+    firstFragment.append("a");
+    QByteArray secondDataFrame;
+    secondDataFrame.append(char(FIN | QWebSocketProtocol::OpCodeText));
+    secondDataFrame.append(char(1));
+    secondDataFrame.append("b");
+    QTest::newRow("data frame during a fragmented message")
+            << firstFragment + secondDataFrame + textFrame
+            << QWebSocketProtocol::CloseCodeProtocolError << 1 << quint64(0);
+
+    // Ensure even the peer's Close frame is ignored after a failure.
+    QByteArray closeFrame;
+    closeFrame.append(char(FIN | QWebSocketProtocol::OpCodeClose));
+    closeFrame.append(char(2));
+    closeFrame.append(char(0x03));
+    closeFrame.append(char(0xE8));
+    QTest::newRow("close frame after the violation")
+            << strayContinuation + closeFrame << QWebSocketProtocol::CloseCodeProtocolError
+            << 0 << quint64(0);
+
+    // Ensure exceeding the configured message limit stops processing.
+    QTest::newRow("message too big")
+            << textFrame + textFrame << QWebSocketProtocol::CloseCodeTooMuchData
+            << 0 << quint64(4);
+}
+
+void tst_DataProcessor::stopProcessingOnError()
+{
+    QFETCH(QByteArray, data);
+    QFETCH(QWebSocketProtocol::CloseCode, expectedCloseCode);
+    QFETCH(int, expectedTextFrames);
+    QFETCH(quint64, maxMessageSize);
+
+    QWebSocketDataProcessor dataProcessor;
+    dataProcessor.setIdleTimeout(DefaultIdleTimeout);
+    if (maxMessageSize)
+        dataProcessor.setMaxAllowedMessageSize(maxMessageSize);
+
+    QSignalSpy errorSpy(&dataProcessor, &QWebSocketDataProcessor::errorEncountered);
+    QSignalSpy textFrameSpy(&dataProcessor, &QWebSocketDataProcessor::textFrameReceived);
+    QSignalSpy textMessageSpy(&dataProcessor, &QWebSocketDataProcessor::textMessageReceived);
+    QSignalSpy closeSpy(&dataProcessor, &QWebSocketDataProcessor::closeReceived);
+
+    QBuffer buffer;
+    buffer.setData(data);
+    buffer.open(QIODevice::ReadOnly);
+
+    // the violating frame is followed by a well-formed text frame in the same
+    // buffer; processing must stop at the violation
+    QVERIFY(!dataProcessor.process(&buffer));
+    QCOMPARE(errorSpy.size(), 1);
+    QCOMPARE(errorSpy.first().at(0).value<QWebSocketProtocol::CloseCode>(), expectedCloseCode);
+    QCOMPARE(textFrameSpy.size(), expectedTextFrames);
+    QCOMPARE(textMessageSpy.size(), 0);
+
+    // no further data is parsed for a connection that has failed
+    QVERIFY(!dataProcessor.process(&buffer));
+    QCOMPARE(errorSpy.size(), 1);
+    QCOMPARE(textFrameSpy.size(), expectedTextFrames);
+    QCOMPARE(textMessageSpy.size(), 0);
+    QCOMPARE(closeSpy.size(), 0);
+    buffer.close();
+
+    // ensure processor is usable again after clear()
+    dataProcessor.clear();
+    QByteArray goodFrame;
+    goodFrame.append(char(FIN | QWebSocketProtocol::OpCodeText));
+    goodFrame.append(char(2));
+    goodFrame.append("ok");
+    QBuffer reopened;
+    reopened.setData(goodFrame);
+    reopened.open(QIODevice::ReadOnly);
+    QVERIFY(dataProcessor.process(&reopened));
+    QCOMPARE(textMessageSpy.size(), 1);
+    QCOMPARE(textMessageSpy.first().at(0).toString(), QStringLiteral("ok"));
+}
+
+void tst_DataProcessor::stopProcessingOnTimeout()
+{
+    QWebSocketDataProcessor dataProcessor;
+    dataProcessor.setIdleTimeout(DefaultIdleTimeout);
+
+    QSignalSpy errorSpy(&dataProcessor, &QWebSocketDataProcessor::errorEncountered);
+    QSignalSpy textMessageSpy(&dataProcessor, &QWebSocketDataProcessor::textMessageReceived);
+
+    // a header announcing a 7 byte payload, with no payload yet
+    QByteArray header;
+    header.append(char(FIN | QWebSocketProtocol::OpCodeText));
+    header.append(char(7));
+
+    QBuffer buffer;
+    buffer.setData(header);
+    buffer.open(QIODevice::ReadOnly);
+    QVERIFY(!dataProcessor.process(&buffer));
+    buffer.close();
+
+    QTRY_VERIFY_WITH_TIMEOUT(errorSpy.size(), 7000);
+    QCOMPARE(errorSpy.size(), 1);
+    QCOMPARE(errorSpy.first().at(0).value<QWebSocketProtocol::CloseCode>(),
+             QWebSocketProtocol::CloseCodeGoingAway);
+
+    // the announced payload finally arrives; it must not be parsed as a frame
+    QByteArray payload;
+    payload.append(char(FIN | QWebSocketProtocol::OpCodeText));
+    payload.append(char(5));
+    payload.append("hello");
+
+    QBuffer resumed;
+    resumed.setData(payload);
+    resumed.open(QIODevice::ReadOnly);
+    QVERIFY(!dataProcessor.process(&resumed));
+    QCOMPARE(textMessageSpy.size(), 0);
 }
 
 QTEST_MAIN(tst_DataProcessor)
