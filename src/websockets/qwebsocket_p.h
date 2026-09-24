@@ -167,8 +167,11 @@ private:
     void processPing(const QByteArray &data);
     void processPong(const QByteArray &data);
     void processClose(QWebSocketProtocol::CloseCode closeCode, QString closeReason);
+    void processError(QWebSocketProtocol::CloseCode closeCode, QString reason);
     void processHandshake(QTcpSocket *pSocket);
     void processStateChanged(QAbstractSocket::SocketState socketState);
+
+    void doClose(QWebSocketProtocol::CloseCode closeCode, QString reason, bool isFailed);
 
     Q_REQUIRED_RESULT qint64 doWriteFrames(const QByteArray &data, bool isBinary);
 

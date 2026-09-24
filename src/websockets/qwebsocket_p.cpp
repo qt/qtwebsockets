@@ -389,6 +389,20 @@ QWebSocket *QWebSocketPrivate::upgradeFrom(QTcpSocket *pTcpSocket,
  */
 void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString reason)
 {
+    doClose(closeCode, reason, false);
+}
+
+/*!
+    \internal
+
+    Sends the Close frame and then either closes the connection or waits for the
+    peer to do so. \a isFailed tells whether we are failing the connection as
+    described in RFC 6455 paragraph 7.1.7, in which case the transport is closed
+    right away instead.
+ */
+void QWebSocketPrivate::doClose(QWebSocketProtocol::CloseCode closeCode,
+                                QString reason, bool isFailed)
+{
     if (Q_UNLIKELY(!m_pSocket))
         return;
     Q_Q(QWebSocket);
@@ -419,8 +433,10 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
 
         Q_EMIT q->aboutToClose();
     }
+
     static constexpr auto closeTimerName = "_closeTimer"_L1;
-    if (!m_isClosingHandshakeReceived) {
+    const bool waitForPeer = !m_isClosingHandshakeReceived && !isFailed;
+    if (waitForPeer) {
         if (q->findChild<QTimer *>(closeTimerName))
             return;
         QTimer *closeTimer = new QTimer(q);
@@ -723,7 +739,7 @@ void QWebSocketPrivate::makeConnections(QTcpSocket *pTcpSocket)
     QObject::connect(m_dataProcessor, &QWebSocketDataProcessor::textMessageReceived, q,
                      &QWebSocket::textMessageReceived);
     QObjectPrivate::connect(m_dataProcessor, &QWebSocketDataProcessor::errorEncountered, this,
-                            &QWebSocketPrivate::close);
+                            &QWebSocketPrivate::processError);
     QObjectPrivate::connect(m_dataProcessor, &QWebSocketDataProcessor::pingReceived, this,
                             &QWebSocketPrivate::processPing);
     QObjectPrivate::connect(m_dataProcessor, &QWebSocketDataProcessor::pongReceived, this,
@@ -1417,6 +1433,18 @@ void QWebSocketPrivate::processClose(QWebSocketProtocol::CloseCode closeCode, QS
 {
     m_isClosingHandshakeReceived = true;
     close(closeCode, closeReason);
+}
+
+/*!
+    \internal
+
+    Fails the connection as described in RFC 6455 paragraph 7.1.7: send a Close
+    frame, then close the connection straight away. No reply can be processed
+    afterwards, so neither endpoint has anything to wait for.
+ */
+void QWebSocketPrivate::processError(QWebSocketProtocol::CloseCode closeCode, QString reason)
+{
+    doClose(closeCode, reason, true);
 }
 
 /*!
