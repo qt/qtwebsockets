@@ -134,6 +134,9 @@ std::chrono::milliseconds QWebSocketDataProcessor::idleTimeout() const
  */
 bool QWebSocketDataProcessor::process(QIODevice *pIoDevice)
 {
+    if (Q_UNLIKELY(m_hasFailed))
+        return false;
+
     bool isDone = false;
 
     while (!isDone) {
@@ -153,14 +156,14 @@ bool QWebSocketDataProcessor::process(QIODevice *pIoDevice)
                     reportError(QWebSocketProtocol::CloseCodeProtocolError,
                                 tr("Received Continuation frame, while there is " \
                                    "nothing to continue."));
-                    return true;
+                    return false;
                 }
                 if (Q_UNLIKELY(m_isFragmented && frame.isDataFrame() &&
                                !frame.isContinuationFrame())) {
                     reportError(QWebSocketProtocol::CloseCodeProtocolError,
                                 tr("All data frames after the initial data frame " \
                                    "must have opcode 0 (continuation)."));
-                    return true;
+                    return false;
                 }
                 if (!frame.isContinuationFrame()) {
                     m_opCode = frame.opCode();
@@ -173,7 +176,7 @@ bool QWebSocketDataProcessor::process(QIODevice *pIoDevice)
                                maxAllowedMessageSize())) {
                     reportError(QWebSocketProtocol::CloseCodeTooMuchData,
                                 tr("Received message is too big."));
-                    return true;
+                    return false;
                 }
 
                 bool isFinalFrame = frame.isFinalFrame();
@@ -187,7 +190,7 @@ bool QWebSocketDataProcessor::process(QIODevice *pIoDevice)
                     if (Q_UNLIKELY(decoderHadError)) {
                         reportError(QWebSocketProtocol::CloseCodeWrongDatatype,
                                     tr("Invalid UTF-8 code encountered."));
-                        return true;
+                        return false;
                     } else {
                         m_textMessage.append(frameTxt);
                         frame.clear();
@@ -215,7 +218,7 @@ bool QWebSocketDataProcessor::process(QIODevice *pIoDevice)
             }
         } else {
             reportError(frame.closeCode(), frame.closeReason());
-            isDone = true;
+            return false;
         }
         frame.clear();
     }
@@ -237,18 +240,21 @@ void QWebSocketDataProcessor::clear()
     m_textMessage.clear();
     m_payloadLength = 0;
     m_decoder.resetState();
+    m_hasFailed = false;
     frame.clear();
 }
 
 /*!
     \internal
 
-    Reports a protocol violation and clears the connection.
+    Reports a protocol violation and marks the connection as failed, so that no
+    further data is parsed after the error.
  */
 void QWebSocketDataProcessor::reportError(QWebSocketProtocol::CloseCode code,
                                           const QString &description)
 {
     clear();
+    m_hasFailed = true;
     Q_EMIT errorEncountered(code, description);
 }
 

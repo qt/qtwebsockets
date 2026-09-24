@@ -89,6 +89,7 @@ private:
     QWebSocketFrame frame;
     QChronoTimer *m_waitTimer;
     quint64 m_maxAllowedMessageSize = MAX_MESSAGE_SIZE_IN_BYTES;
+    bool m_hasFailed = false;
 
     bool processControlFrame(const QWebSocketFrame &frame);
     void reportError(QWebSocketProtocol::CloseCode code, const QString &description);
