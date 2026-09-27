@@ -394,71 +394,6 @@ void QWebSocketPrivate::close(QWebSocketProtocol::CloseCode closeCode, QString r
 
 /*!
     \internal
-
-    Sends the Close frame and then either closes the connection or waits for the
-    peer to do so. \a isFailed tells whether we are failing the connection as
-    described in RFC 6455 paragraph 7.1.7, in which case the transport is closed
-    right away instead.
- */
-void QWebSocketPrivate::doClose(QWebSocketProtocol::CloseCode closeCode,
-                                QString reason, bool isFailed)
-{
-    if (Q_UNLIKELY(!m_pSocket))
-        return;
-    Q_Q(QWebSocket);
-    if (!m_isClosingHandshakeSent) {
-        m_closeCode = closeCode;
-        // 125 is the maximum length of a control frame, and 2 bytes are used for the close code:
-        const QByteArray reasonUtf8 = reason.toUtf8().left(123);
-        m_closeReason = QString::fromUtf8(reasonUtf8);
-        const quint16 code = qToBigEndian<quint16>(closeCode);
-        QByteArray payload;
-        payload.append(static_cast<const char *>(static_cast<const void *>(&code)), 2);
-        if (!reasonUtf8.isEmpty())
-            payload.append(reasonUtf8);
-        quint32 maskingKey = 0;
-        if (m_mustMask) {
-            maskingKey = generateMaskingKey();
-            QWebSocketProtocol::mask(payload.data(), quint64(payload.size()), maskingKey);
-        }
-        QByteArray frame = getFrameHeader(QWebSocketProtocol::OpCodeClose,
-                                          quint64(payload.size()), maskingKey, true);
-
-        Q_ASSERT(payload.size() <= 125);
-        frame.append(payload);
-        m_pSocket->write(frame);
-        m_pSocket->flush();
-
-        m_isClosingHandshakeSent = true;
-
-        Q_EMIT q->aboutToClose();
-    }
-
-    static constexpr auto closeTimerName = "_closeTimer"_L1;
-    const bool waitForPeer = !m_isClosingHandshakeReceived && !isFailed;
-    if (waitForPeer) {
-        if (q->findChild<QTimer *>(closeTimerName))
-            return;
-        QTimer *closeTimer = new QTimer(q);
-        closeTimer->setObjectName(closeTimerName);
-        closeTimer->setInterval(3000);
-        closeTimer->setSingleShot(true);
-        QObject::connect(q, &QWebSocket::disconnected, closeTimer, &QTimer::stop);
-        QObject::connect(q, &QWebSocket::disconnected, closeTimer, &QTimer::deleteLater);
-        QObject::connect(closeTimer, &QTimer::timeout, m_pSocket, &QTcpSocket::close);
-        QObject::connect(closeTimer, &QTimer::timeout, closeTimer, &QTimer::deleteLater);
-        closeTimer->start();
-    } else {
-        m_pSocket->close();
-        if (QTimer *closeTimer = q->findChild<QTimer *>(closeTimerName)) {
-            closeTimer->stop();
-            delete closeTimer;
-        }
-    }
-}
-
-/*!
-    \internal
  */
 void QWebSocketPrivate::open(const QNetworkRequest &request,
                              const QWebSocketHandshakeOptions &options, bool mask)
@@ -1363,6 +1298,71 @@ void QWebSocketPrivate::processStateChanged(QAbstractSocket::SocketState socketS
         //do nothing
         //to make C++ compiler happy;
         break;
+    }
+}
+
+/*!
+    \internal
+
+    Sends the Close frame and then either closes the connection or waits for the
+    peer to do so. \a isFailed tells whether we are failing the connection as
+    described in RFC 6455 paragraph 7.1.7, in which case the transport is closed
+    right away instead.
+ */
+void QWebSocketPrivate::doClose(QWebSocketProtocol::CloseCode closeCode,
+                                QString reason, bool isFailed)
+{
+    if (Q_UNLIKELY(!m_pSocket))
+        return;
+    Q_Q(QWebSocket);
+    if (!m_isClosingHandshakeSent) {
+        m_closeCode = closeCode;
+        // 125 is the maximum length of a control frame, and 2 bytes are used for the close code:
+        const QByteArray reasonUtf8 = reason.toUtf8().left(123);
+        m_closeReason = QString::fromUtf8(reasonUtf8);
+        const quint16 code = qToBigEndian<quint16>(closeCode);
+        QByteArray payload;
+        payload.append(static_cast<const char *>(static_cast<const void *>(&code)), 2);
+        if (!reasonUtf8.isEmpty())
+            payload.append(reasonUtf8);
+        quint32 maskingKey = 0;
+        if (m_mustMask) {
+            maskingKey = generateMaskingKey();
+            QWebSocketProtocol::mask(payload.data(), quint64(payload.size()), maskingKey);
+        }
+        QByteArray frame = getFrameHeader(QWebSocketProtocol::OpCodeClose,
+                                          quint64(payload.size()), maskingKey, true);
+
+        Q_ASSERT(payload.size() <= 125);
+        frame.append(payload);
+        m_pSocket->write(frame);
+        m_pSocket->flush();
+
+        m_isClosingHandshakeSent = true;
+
+        Q_EMIT q->aboutToClose();
+    }
+
+    static constexpr auto closeTimerName = "_closeTimer"_L1;
+    const bool waitForPeer = !m_isClosingHandshakeReceived && !isFailed;
+    if (waitForPeer) {
+        if (q->findChild<QTimer *>(closeTimerName))
+            return;
+        QTimer *closeTimer = new QTimer(q);
+        closeTimer->setObjectName(closeTimerName);
+        closeTimer->setInterval(3000);
+        closeTimer->setSingleShot(true);
+        QObject::connect(q, &QWebSocket::disconnected, closeTimer, &QTimer::stop);
+        QObject::connect(q, &QWebSocket::disconnected, closeTimer, &QTimer::deleteLater);
+        QObject::connect(closeTimer, &QTimer::timeout, m_pSocket, &QTcpSocket::close);
+        QObject::connect(closeTimer, &QTimer::timeout, closeTimer, &QTimer::deleteLater);
+        closeTimer->start();
+    } else {
+        m_pSocket->close();
+        if (QTimer *closeTimer = q->findChild<QTimer *>(closeTimerName)) {
+            closeTimer->stop();
+            delete closeTimer;
+        }
     }
 }
 
