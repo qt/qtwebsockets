@@ -599,6 +599,15 @@ void QWebSocketServerPrivate::handshakeReceived()
     request.readHandshake(header, QWebSocketPrivate::MAX_HEADERLINE_LENGTH);
 
     if (request.isValid()) {
+        if (Q_UNLIKELY(!m_warnedNoOriginHandler && !request.origin().isEmpty()
+                       && !isSignalConnected(signalIndex("originAuthenticationRequired("
+                                                         "QWebSocketCorsAuthenticator*)")))) {
+            m_warnedNoOriginHandler = true;
+            qWarning("QWebSocketServer: a client sent an Origin header, but no handler is "
+                     "connected to originAuthenticationRequired(); every origin is accepted, "
+                     "including cross-origin requests from web pages. Connect a handler and call "
+                     "setAllowed(false) for untrusted origins.");
+        }
         QWebSocketCorsAuthenticator corsAuthenticator(request.origin());
         Q_EMIT q->originAuthenticationRequired(&corsAuthenticator);
 

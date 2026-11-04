@@ -100,6 +100,7 @@ private Q_SLOTS:
     void tst_handleConnection();
     void tst_handleConnectionTakesOwnership();
     void tst_handshakeTimeout(); // qtbug-63312, qtbug-57026
+    void originHandlerWarning();
     void tst_maxPendingCountsHandshakes();
     void fragmentedHandshakeOnHandedOverSocket_data();
     void fragmentedHandshakeOnHandedOverSocket();
@@ -832,6 +833,38 @@ static int sumSocketSpyCount(const QList<SocketSpy *> &sockets)
     return std::accumulate(sockets.cbegin(), sockets.cend(), 0, [](int c, SocketSpy *s) {
         return c + s->disconnectSpy->size();
     });
+}
+
+void tst_QWebSocketServer::originHandlerWarning()
+{
+    QWebSocketServer server(QString(), QWebSocketServer::NonSecureMode);
+    QSignalSpy connectionSpy(&server, &QWebSocketServer::newConnection);
+    QVERIFY(server.listen(QHostAddress::LocalHost));
+
+    // A client without an Origin header does not warn.
+    QWebSocket noOrigin;
+    noOrigin.open(server.serverUrl());
+    QTRY_COMPARE(connectionSpy.size(), 1);
+
+    // Only the first client sending an Origin warns.
+    QTest::ignoreMessage(QtWarningMsg,
+                         QRegularExpression("a client sent an Origin header, but no handler"));
+    QWebSocket first(u"http://example.org"_s);
+    first.open(server.serverUrl());
+    QTRY_COMPARE(connectionSpy.size(), 2);
+    QWebSocket second(u"http://example.org"_s);
+    second.open(server.serverUrl());
+    QTRY_COMPARE(connectionSpy.size(), 3);
+
+    // A connected handler suppresses it (an unexpected warning fails the test).
+    QWebSocketServer handled(QString(), QWebSocketServer::NonSecureMode);
+    connect(&handled, &QWebSocketServer::originAuthenticationRequired, &handled,
+            [](QWebSocketCorsAuthenticator *auth) { auth->setAllowed(true); });
+    QSignalSpy handledSpy(&handled, &QWebSocketServer::newConnection);
+    QVERIFY(handled.listen(QHostAddress::LocalHost));
+    QWebSocket third(u"http://example.org"_s);
+    third.open(handled.serverUrl());
+    QTRY_COMPARE(handledSpy.size(), 1);
 }
 
 void tst_QWebSocketServer::tst_maxPendingCountsHandshakes()

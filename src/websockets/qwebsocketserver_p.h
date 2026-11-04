@@ -114,6 +114,7 @@ private:
     QString m_errorString;
     int m_maxPendingConnections;
     bool m_acceptingPausedByUser = false;
+    bool m_warnedNoOriginHandler = false;
     int m_handshakeTimeout;
     quint64 m_maxAllowedIncomingFrameSize = QWebSocket::maxIncomingFrameSize();
     quint64 m_maxAllowedIncomingMessageSize = QWebSocket::maxIncomingMessageSize();
