@@ -656,14 +656,11 @@ QUrl QWebSocketServer::serverUrl() const
 
 /*!
     Sets the maximum number of pending accepted connections to \a numConnections.
-    WebSocketServer will accept no more than \a numConnections incoming connections before
-    nextPendingConnection() is called.
+    WebSocketServer will accept no more than \a numConnections incoming connections from the
+    operating system before nextPendingConnection() is called. Connections still in
+    handshake count against the limit as well. Further connections wait, unserved, in the
+    underlying QTcpServer queue and the operating system's backlog until a slot becomes free.
     By default, the limit is 30 pending connections.
-
-    QWebSocketServer will emit the error() signal with
-    the QWebSocketProtocol::CloseCodeAbnormalDisconnection close code
-    when the maximum of connections has been reached.
-    The WebSocket handshake will fail and the socket will be closed.
 
     \sa maxPendingConnections(), hasPendingConnections()
  */
@@ -787,6 +784,7 @@ void QWebSocketServer::handleConnection(QTcpSocket *socket) const
     \since 6.13
     Sets the maximum allowed size of an incoming websocket frame to
     \a maxAllowedIncomingFrameSize for all connections accepted from now on.
+
     If an incoming frame exceeds this limit, the peer gets disconnected.
     The accepted range is between 0 and maxIncomingFrameSize(), default is
     maxIncomingFrameSize(). The purpose of this function is to avoid exhausting
@@ -818,6 +816,7 @@ quint64 QWebSocketServer::maxAllowedIncomingFrameSize() const
     \since 6.13
     Sets the maximum allowed size of an incoming websocket message to
     \a maxAllowedIncomingMessageSize for all connections accepted from now on.
+
     If an incoming message exceeds this limit, the peer gets disconnected.
     The accepted range is between 0 and maxIncomingMessageSize(), default is
     maxIncomingMessageSize(). The purpose of this function is to avoid exhausting
@@ -873,6 +872,7 @@ quint64 QWebSocketServer::maxIncomingFrameSize()
     \since 6.13
     Sets the maximum size of an outgoing websocket frame to \a outgoingFrameSize
     for all connections accepted from now on.
+
     The accepted range is between 0 and maxOutgoingFrameSize(), default is 512kB.
     The purpose of this function is to adapt to the maximum allowed frame size
     of the receiver.

@@ -105,6 +105,7 @@ void QWebSocketServerPrivate::init()
 #endif
     }
     QObject::connect(m_pTcpServer, &QTcpServer::acceptError, q, &QWebSocketServer::acceptError);
+    updateTcpServerQueueLimit();
 }
 
 /*!
@@ -169,6 +170,8 @@ bool QWebSocketServerPrivate::listen(const QHostAddress &address, quint16 port)
     bool success = m_pTcpServer->listen(address, port);
     if (!success)
         setErrorFromSocketError(m_pTcpServer->serverError(), m_pTcpServer->errorString());
+    else
+        updateTcpServerQueueLimit();
     return success;
 }
 
@@ -207,6 +210,8 @@ QWebSocket *QWebSocketServerPrivate::nextPendingConnection()
     QWebSocket *pWebSocket = nullptr;
     if (Q_LIKELY(!m_pendingConnections.isEmpty()))
         pWebSocket = m_pendingConnections.dequeue();
+    // A slot has been freed for a connection waiting in QTcpServer.
+    onNewConnection();
     return pWebSocket;
 }
 
@@ -215,6 +220,7 @@ QWebSocket *QWebSocketServerPrivate::nextPendingConnection()
  */
 void QWebSocketServerPrivate::pauseAccepting()
 {
+    m_acceptingPausedByUser = true;
     m_pTcpServer->pauseAccepting();
 }
 
@@ -240,6 +246,7 @@ void QWebSocketServerPrivate::setProxy(const QNetworkProxy &networkProxy)
  */
 void QWebSocketServerPrivate::resumeAccepting()
 {
+    m_acceptingPausedByUser = false;
     m_pTcpServer->resumeAccepting();
 }
 
@@ -272,9 +279,8 @@ quint16 QWebSocketServerPrivate::serverPort() const
  */
 void QWebSocketServerPrivate::setMaxPendingConnections(int numConnections)
 {
-    if (m_pTcpServer->maxPendingConnections() <= numConnections)
-        m_pTcpServer->setMaxPendingConnections(numConnections + 1);
     m_maxPendingConnections = numConnections;
+    onNewConnection();
 }
 
 /*!
@@ -457,11 +463,41 @@ void QWebSocketServerPrivate::setError(QWebSocketProtocol::CloseCode code, const
  */
 void QWebSocketServerPrivate::onNewConnection()
 {
-    while (m_pTcpServer->hasPendingConnections()) {
+    // Sockets in handshake and upgraded ones nobody has taken yet share one budget. The excess
+    // stays in QTcpServer's own queue (and behind it the OS backlog) until a slot frees up.
+    while (hasRoomForConnection() && m_pTcpServer->hasPendingConnections()) {
         QTcpSocket *pTcpSocket = m_pTcpServer->nextPendingConnection();
         Q_ASSERT(pTcpSocket);
+        // Counted from the start, also while the peer has not sent anything yet.
+        m_preHandshakeHeaders.insert(pTcpSocket, {});
         handleConnection(pTcpSocket);
+        updateTcpServerQueueLimit();
     }
+    updateTcpServerQueueLimit();
+}
+
+/*!
+    \internal
+ */
+void QWebSocketServerPrivate::updateTcpServerQueueLimit()
+{
+    // QTcpServer keeps accept()ing until its own queue limit is reached, so let it run ahead of
+    // us by exactly as many connections as we still have room for. At zero it stops at once.
+    const qsizetype inUse = m_preHandshakeHeaders.size() + m_pendingConnections.size();
+    const int free = int(qMax(qsizetype(0), maxPendingConnections() - inUse));
+    m_pTcpServer->setMaxPendingConnections(free);
+    // The queue is drained as it fills, so nobody calls nextPendingConnection() to re-enable
+    // a notifier that QTcpServer switched off at a limit of zero.
+    if (free > 0 && !m_acceptingPausedByUser && m_pTcpServer->isListening())
+        m_pTcpServer->resumeAccepting();
+}
+
+/*!
+    \internal
+ */
+bool QWebSocketServerPrivate::hasRoomForConnection() const
+{
+    return m_preHandshakeHeaders.size() + m_pendingConnections.size() < maxPendingConnections();
 }
 
 /*!
@@ -479,6 +515,7 @@ void QWebSocketServerPrivate::onSocketDisconnected()
             pTcpSocket->deleteLater();
             m_error = QWebSocketProtocol::CloseCode::CloseCodeNormal;
             m_errorString = QString();
+            onNewConnection();
         }
     }
 }
