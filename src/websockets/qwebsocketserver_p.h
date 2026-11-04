@@ -104,6 +104,7 @@ private:
     QWebSocketProtocol::CloseCode m_error;
     QString m_errorString;
     int m_maxPendingConnections;
+    bool m_acceptingPausedByUser = false;
     int m_handshakeTimeout;
 
     QHash<QTcpSocket *, QByteArray> m_preHandshakeHeaders;
@@ -113,6 +114,8 @@ private:
                                  const QString &errorDescription);
 
     void onNewConnection();
+    bool hasRoomForConnection() const;
+    void updateTcpServerQueueLimit();
     void onSocketDisconnected();
     void handshakeReceived();
     void finishHandshakeTimeout(QTcpSocket *pTcpSocket);

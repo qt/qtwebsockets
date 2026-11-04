@@ -98,6 +98,7 @@ private Q_SLOTS:
     void tst_scheme(); // qtbug-55927
     void tst_handleConnection();
     void tst_handshakeTimeout(); // qtbug-63312, qtbug-57026
+    void tst_maxPendingCountsHandshakes();
     void fragmentedHandshakeOnHandedOverSocket_data();
     void fragmentedHandshakeOnHandedOverSocket();
     void oversizedHandshakeOnHandedOverSocket_data();
@@ -559,10 +560,11 @@ void tst_QWebSocketServer::tst_maxPendingConnections()
     QCOMPARE(socket2.state(), QAbstractSocket::ConnectedState);
     QCOMPARE(serverConnectionSpy.size(), 2);
     QCOMPARE(corsAuthenticationSpy.size(), 2);
+    // The third connection waits in QTcpServer's queue, it is neither served nor refused.
     socket3.open(server.serverUrl());
     QVERIFY(!socket3ConnectedSpy.wait(250));
     QCOMPARE(socket3ConnectedSpy.size(), 0);
-    QCOMPARE(socket3.state(), QAbstractSocket::UnconnectedState);
+    QCOMPARE(socket3.state(), QAbstractSocket::ConnectingState);
     QCOMPARE(serverConnectionSpy.size(), 2);
     QCOMPARE(corsAuthenticationSpy.size(), 2);
 
@@ -570,19 +572,20 @@ void tst_QWebSocketServer::tst_maxPendingConnections()
     QWebSocket *pSocket = server.nextPendingConnection();
     QVERIFY(pSocket);
     delete pSocket;
-    QVERIFY(server.hasPendingConnections());
-    pSocket = server.nextPendingConnection();
-    QVERIFY(pSocket);
-    delete pSocket;
+    // Taking one connection lets the waiting one through.
+    QTRY_COMPARE(socket3ConnectedSpy.size(), 1);
+    QCOMPARE(serverConnectionSpy.size(), 3);
+    QCOMPARE(corsAuthenticationSpy.size(), 3);
+    for (int i = 0; i < 2; ++i) {
+        QVERIFY(server.hasPendingConnections());
+        pSocket = server.nextPendingConnection();
+        QVERIFY(pSocket);
+        delete pSocket;
+    }
     QVERIFY(!server.hasPendingConnections());
     QVERIFY(!server.nextPendingConnection());
 
-//will resolve in another commit
-#ifndef Q_OS_WIN
-    QCOMPARE(serverErrorSpy.size(), 1);
-    QCOMPARE(serverErrorSpy.at(0).at(0).value<QWebSocketProtocol::CloseCode>(),
-             QWebSocketProtocol::CloseCodeAbnormalDisconnection);
-#endif
+    QCOMPARE(serverErrorSpy.size(), 0);
     QCOMPARE(serverClosedSpy.size(), 0);
 
     server.close();
@@ -789,6 +792,32 @@ static int sumSocketSpyCount(const QList<SocketSpy *> &sockets)
     return std::accumulate(sockets.cbegin(), sockets.cend(), 0, [](int c, SocketSpy *s) {
         return c + s->disconnectSpy->size();
     });
+}
+
+void tst_QWebSocketServer::tst_maxPendingCountsHandshakes()
+{
+    // Connections in handshake count against maxPendingConnections() like upgraded ones.
+    QWebSocketServer server(QString(), QWebSocketServer::NonSecureMode);
+    server.setMaxPendingConnections(2);
+    server.setHandshakeTimeout(-1);
+    QSignalSpy connectionSpy(&server, &QWebSocketServer::newConnection);
+    QVERIFY(server.listen());
+
+    QList<SocketSpy *> silent;
+    auto cleaner = qScopeGuard([&silent] { qDeleteAll(silent); });
+    openManyConnections(&silent, server.serverPort(), 2);
+    QTRY_COMPARE(silent.first()->socket->state(), QAbstractSocket::ConnectedState);
+    QTRY_COMPARE(silent.last()->socket->state(), QAbstractSocket::ConnectedState);
+
+    QWebSocket client;
+    client.open(server.serverUrl());
+    QTest::qWait(200);
+    QCOMPARE(connectionSpy.size(), 0);
+    QCOMPARE(client.state(), QAbstractSocket::ConnectingState);
+
+    // A handshake that goes away frees its slot.
+    delete silent.takeLast();
+    QTRY_COMPARE(connectionSpy.size(), 1);
 }
 
 void tst_QWebSocketServer::tst_handshakeTimeout()

@@ -653,14 +653,11 @@ QUrl QWebSocketServer::serverUrl() const
 
 /*!
     Sets the maximum number of pending accepted connections to \a numConnections.
-    WebSocketServer will accept no more than \a numConnections incoming connections before
-    nextPendingConnection() is called.
+    WebSocketServer will accept no more than \a numConnections incoming connections from the
+    operating system before nextPendingConnection() is called. Connections still in
+    handshake count against the limit as well. Further connections wait, unserved, in the
+    underlying QTcpServer queue and the operating system's backlog until a slot becomes free.
     By default, the limit is 30 pending connections.
-
-    QWebSocketServer will emit the error() signal with
-    the QWebSocketProtocol::CloseCodeAbnormalDisconnection close code
-    when the maximum of connections has been reached.
-    The WebSocket handshake will fail and the socket will be closed.
 
     \sa maxPendingConnections(), hasPendingConnections()
  */
