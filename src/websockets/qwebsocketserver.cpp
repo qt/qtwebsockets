@@ -121,6 +121,20 @@
 
     If no slot is connected to this signal, all origins will be accepted by default.
 
+    Web browsers do not apply the same-origin policy to WebSocket connections:
+    any web page can open a connection to any WebSocket server the browser can
+    reach, including servers on \c localhost or the local network, and the
+    browser attaches the user's cookies and other ambient credentials to the
+    request. The only thing that identifies the page making the request is the
+    \c Origin header. A server that accepts every origin can therefore be driven
+    by an arbitrary web site the user happens to visit, which can then send
+    messages as, and read messages meant for, the user (cross-site WebSocket
+    hijacking).
+
+    Servers that accept connections from web browsers should connect a slot to
+    this signal and only allow origins they trust. Clients that are not web
+    browsers, such as QWebSocket, normally do not send an \c Origin header.
+
     \note It is not possible to use a QueuedConnection to connect to
     this signal, as the connection will always succeed.
 */
