@@ -1,5 +1,0 @@
-# QTBUG-102713
-[tst_scheme]
-android
-[tst_handshakeTimeout]
-android
