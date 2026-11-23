@@ -66,7 +66,7 @@ QWebSocketHandshakeOptions &QWebSocketHandshakeOptions::operator=(
 }
 
 /*!
-    \fn void swap(QWebSocketHandshakeOptions &other) noexcept
+    \fn void QWebSocketHandshakeOptions::swap(QWebSocketHandshakeOptions &other) noexcept
     \brief Swaps this object with \a other.
 */
 
